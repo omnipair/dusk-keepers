@@ -20,6 +20,10 @@ const schemaPaths = [
   "protocol/schemas/lifecycle-fixture.schema.json",
   "protocol/schemas/health-provenance.schema.json",
   "protocol/schemas/deployment-profiles.schema.json",
+  "protocol/schemas/job-intent.schema.json",
+  "protocol/schemas/instruction-envelope.schema.json",
+  "protocol/schemas/instruction-contract.schema.json",
+  "protocol/schemas/instruction-envelope-fixture.schema.json",
 ];
 
 for (const path of schemaPaths) {
@@ -154,6 +158,37 @@ assert.match(migration, /keeper_logical_work_unique UNIQUE/);
 assert.match(migration, /CREATE TABLE keeper_signing_generations/);
 assert.match(migration, /submitted_unknown/);
 
+const instructionContract = await readJson("protocol/keeper-instructions.v1.json");
+assert.equal(instructionContract.schemaVersion, 1);
+assert.equal(instructionContract.protocolRevision, lock.revision);
+assert.equal(instructionContract.actions.length, 9);
+assert.equal(instructionContract.instructions.length, 11);
+assert.equal(
+  new Set(instructionContract.instructions.map((instruction) => instruction.key)).size,
+  instructionContract.instructions.length,
+  "instruction specification keys must be unique",
+);
+for (const program of instructionContract.programs) {
+  const pinned = lock.programs.find((candidate) => candidate.name === program.name);
+  assert.ok(pinned, `${program.name}: instruction contract program is not pinned`);
+  assert.equal(program.programId, pinned.programId);
+  assert.equal(program.idlPath, pinned.idl.path);
+  assert.equal(program.idlSha256, pinned.idl.sha256);
+}
+
+const instructionFixtures = await readJson(
+  "fixtures/conformance/v1/instruction-envelope-cases.json",
+);
+assert.equal(instructionFixtures.schemaVersion, 1);
+assert.equal(instructionFixtures.validCases.length, instructionContract.actions.length);
+assert.ok(instructionFixtures.invalidCases.length >= 10);
+for (const fixtureCase of instructionFixtures.validCases) {
+  assert.equal(fixtureCase.envelope.intent.protocolRevision, lock.revision);
+  assert.match(fixtureCase.envelope.paritySha256, /^[0-9a-f]{64}$/);
+}
+
+await import("./generate-instruction-contract.mjs");
+
 if (process.env.REQUIRE_FROZEN_PROTOCOL === "1") {
   assert.equal(lock.status, "frozen", "live deployment requires a frozen protocol lock");
   assert.ok(lock.source.worktreeFingerprintSha256, "missing worktree fingerprint");
@@ -165,5 +200,5 @@ if (process.env.REQUIRE_FROZEN_PROTOCOL === "1") {
 }
 
 console.log(
-  `validated ${schemaPaths.length} schemas, ${bundle.cases.length} scheduler cases, ${lifecycleBundle.cases.length} lifecycle cases, ${profiles.services.length} service profiles, and ${lock.revision} (${lock.status})`,
+  `validated ${schemaPaths.length} schemas, ${bundle.cases.length} scheduler cases, ${lifecycleBundle.cases.length} lifecycle cases, ${instructionFixtures.validCases.length + instructionFixtures.invalidCases.length} instruction envelopes, ${profiles.services.length} service profiles, and ${lock.revision} (${lock.status})`,
 );

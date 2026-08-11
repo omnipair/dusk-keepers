@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://omnipair.dev/schemas/dusk/instruction-envelope.schema.json",
+  "title": "Resolved keeper instruction envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "intent", "primary", "cpiHooks", "paritySha256"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "intent": { "$ref": "job-intent.schema.json" },
+    "primary": { "$ref": "#/$defs/instruction" },
+    "cpiHooks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/instruction" }
+    },
+    "paritySha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  },
+  "$defs": {
+    "accountMeta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "address", "writable", "signer"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "address": {
+          "type": "string",
+          "minLength": 32,
+          "maxLength": 44,
+          "pattern": "^[1-9A-HJ-NP-Za-km-z]+$"
+        },
+        "writable": { "type": "boolean" },
+        "signer": { "type": "boolean" }
+      }
+    },
+    "instruction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "specificationKey",
+        "program",
+        "programId",
+        "instructionName",
+        "dataHex",
+        "accounts",
+        "remainingAccounts"
+      ],
+      "properties": {
+        "specificationKey": { "type": "string", "minLength": 1 },
+        "program": { "enum": ["dusk", "leverage_delegate"] },
+        "programId": { "type": "string", "minLength": 32, "maxLength": 44 },
+        "instructionName": { "type": "string", "minLength": 1 },
+        "dataHex": {
+          "type": "string",
+          "minLength": 16,
+          "pattern": "^(?:[0-9a-f]{2})+$"
+        },
+        "accounts": { "type": "array", "items": { "$ref": "#/$defs/accountMeta" } },
+        "remainingAccounts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/accountMeta" }
+        }
+      }
+    }
+  }
+}
+

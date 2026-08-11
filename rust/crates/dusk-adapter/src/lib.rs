@@ -6,7 +6,10 @@
 
 use std::{error::Error, fmt, fs, path::Path};
 
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+
+pub mod envelope;
+pub use envelope::*;
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -203,54 +206,6 @@ impl Error for ProtocolLockError {
         }
     }
 }
-
-#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct BuildRequest {
-    pub job_kind: String,
-    pub market: String,
-    pub target: String,
-    pub expected_state_hash: String,
-    pub observed_slot: u64,
-}
-
-#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct InstructionIntent {
-    pub protocol_revision: String,
-    pub program_id: String,
-    pub accounts: Vec<AccountMeta>,
-    pub data_hex: String,
-}
-
-#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct AccountMeta {
-    pub address: String,
-    pub writable: bool,
-    pub signer: bool,
-}
-
-pub trait DuskAdapter: Send + Sync {
-    fn protocol_revision(&self) -> &str;
-    fn build_instruction(&self, request: &BuildRequest) -> Result<InstructionIntent, AdapterError>;
-}
-
-#[derive(Debug, Eq, PartialEq)]
-pub enum AdapterError {
-    RevisionMismatch,
-    StateChanged,
-    UnsupportedJob,
-    NotImplemented,
-}
-
-impl fmt::Display for AdapterError {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(formatter, "{self:?}")
-    }
-}
-
-impl Error for AdapterError {}
 
 #[cfg(test)]
 mod tests {

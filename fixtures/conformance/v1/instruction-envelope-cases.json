@@ -1,0 +1,3719 @@
+{
+  "$schema": "../../../protocol/schemas/instruction-envelope-fixture.schema.json",
+  "schemaVersion": 1,
+  "validCases": [
+    {
+      "name": "lending liquidation trigger",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-lending_liquidation_trigger",
+          "protocolRevision": "local-snapshot-0",
+          "action": "lending_liquidation_trigger",
+          "jobKind": "lending_liquidation_trigger",
+          "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
+          "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
+          "observedSlot": 1000,
+          "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
+        },
+        "primary": {
+          "specificationKey": "dusk:trigger_liquidation_auction",
+          "program": "dusk",
+          "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+          "instructionName": "trigger_liquidation_auction",
+          "dataHex": "b5ac53586537f66f",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "CGjJwzCVyDu7b4mWFmU7p5eUsT4BQ8ZotPwRkGFikB2V",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "borrow_position",
+              "address": "DcPuC3SwYXCWXTAcjDjnSbedBm55JwioXAFQD1XhWcRX",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "debt_asset_mint",
+              "address": "GVFm29Zmi8C7pv3PaewC93i2JDGxd5XFaEdE34zRWt6w",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": []
+        },
+        "cpiHooks": [],
+        "paritySha256": "708dd4b6ad5e83082ab95330bb609684af198e47d1e4d679be927309a2534d62"
+      }
+    },
+    {
+      "name": "lending liquidation bid",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-lending_liquidation_bid",
+          "protocolRevision": "local-snapshot-0",
+          "action": "lending_liquidation_bid",
+          "jobKind": "lending_liquidation_bid",
+          "market": "FyVqcLFgZPoQ827oQwvnvNLnggyWNkgZdMsrPVx5xERy",
+          "target": "27bfjCo21T9FVcWEztc7UzBTTYofz9FaKWGeSNCmMMWn",
+          "observedSlot": 1001,
+          "expectedStateHash": "429989957924ba760b86f69ccbd6edbb42ba39e80a49a07385d2b5b1302f4a7a"
+        },
+        "primary": {
+          "specificationKey": "dusk:bid_liquidation_auction",
+          "program": "dusk",
+          "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+          "instructionName": "bid_liquidation_auction",
+          "dataHex": "06df1ee493c51b31e8030000000000008403000000000000",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "8KdjMb7q7RcyDFrPibjyJWbbsompSvjow2snGr2XwTf6",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "futarchy_authority",
+              "address": "J7iCRaKdN5oAoFKxbMrV2T2WUZuDy45Z15m5fKEGxxK7",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "liquidator",
+              "address": "7Hsyrt5aenxyBi5wSteHgz6GSA9LMTH2wiy9bmh1SHM6",
+              "writable": true,
+              "signer": true
+            },
+            {
+              "name": "debt_asset_mint",
+              "address": "5rf3o8QqCGQnJ3ucXCMdbTnjNu2oC78nbPkGMWyKvvVv",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "collateral_asset_mint",
+              "address": "2cvQFMUdw4hvUCyQFaT9qv1ra5s6KcQw95cDFU4LyvrU",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "reserve_vault",
+              "address": "DUKmSN7QrW3zPLq6D6Tgm6ZTv41x5DwcVsCKXbQScDC2",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "interest_vault",
+              "address": "3eU63BB6jUTpMKCNxJh1nY2pZRh6MX873TgydxAiSmev",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "collateral_vault",
+              "address": "414kdgJ8XrFeFmMYLAiKeCwCBAhtNjSHf3ZKMZwaXFrK",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "insurance_vault",
+              "address": "8iXRo7wuRGVWZXLAnCWZrpeTrYsBxY9dum2nvZJzz1D6",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "collateral_insurance_vault",
+              "address": "qh2SnaxFFjfY7dPxagUam8xCVUhiUFLSyGvd4wxFddm",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "liquidator_debt_account",
+              "address": "9TFRosPjCQhwz8zqjLHftuB4z89QPDJRLMTCasBUCXxx",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "liquidator_collateral_account",
+              "address": "5y9YPG5ChZs3mCBrj8qWdNfCQ9yhEuwbT5iMXjUjZMyt",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "borrow_position",
+              "address": "37VmoGvCoshurDmw5vzwt1N5mnraozNrN4VqJC1oPXWZ",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "token_program",
+              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_2022_program",
+              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "5h7HcCR9X9k7pnR2gqFFnqywYENRk3rqbyJomHc5Ydj6",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": []
+        },
+        "cpiHooks": [],
+        "paritySha256": "ee73ba7804e03e9cee555387dde3fcf2117a787a9b8cfe6a73d09244e3925c6e"
+      }
+    },
+    {
+      "name": "lending liquidation floor settle",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-lending_liquidation_floor_settle",
+          "protocolRevision": "local-snapshot-0",
+          "action": "lending_liquidation_floor_settle",
+          "jobKind": "lending_liquidation_settle",
+          "market": "28NFhr44HWvSdKUAi5g7PV6VapbJuqSEUJ1Zf2NK5sEe",
+          "target": "CwHetM964UZ84do1bm3HspVMX39vxrd9YJG8kADP74V8",
+          "observedSlot": 1002,
+          "expectedStateHash": "0ffb227752af8f9fb017b1d6ff903e8a827dfa14d87442b39b65c1d4cf019093"
+        },
+        "primary": {
+          "specificationKey": "dusk:settle_liquidation_auction_floor",
+          "program": "dusk",
+          "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+          "instructionName": "settle_liquidation_auction_floor",
+          "dataHex": "2e5d574e55318979e803000000000000520300000000000064000000000000003200000000000000",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "5bXzJF9Gp9UTNXg9CmyBpF9qGDWa266tsSwJHZdeVHKf",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "futarchy_authority",
+              "address": "HJsMwYVuoZdbasEanbKNRKhfMczpfF2wqV5LPeX4pjeM",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "liquidator",
+              "address": "Eys533hf6LytRorDCpgo3JHNrfsH6zAdrV95ipYcVbaY",
+              "writable": true,
+              "signer": true
+            },
+            {
+              "name": "debt_asset_mint",
+              "address": "B9C8eJFobSoN72atwGyFQguUH5Zn2smBVNXekhxyMQYA",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "collateral_asset_mint",
+              "address": "9q7hqKGNdwAFg7U5ksRUrDsNvZzbcGHTfVZZnCDrnvAn",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "reserve_vault",
+              "address": "4aTfsfpwy5bVSzDUUYHNTa2rzAG2MZkmuD7JS5YKEDSP",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "interest_vault",
+              "address": "7JjRc2QWWC4KDK2tKBNMY8XfSVesiZZcWfHHYi2LdA2g",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "collateral_vault",
+              "address": "57uhuUCaLju5e6B13pjEwzdL4ETW7cxAdhrjdA6mCsdZ",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "insurance_vault",
+              "address": "3zm4qw4jis8vsx2xM7gpvEGuGnNUTa3orCH4PmggwJeV",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "collateral_insurance_vault",
+              "address": "Gp6n4piknD7phvt2CM19PioECrJbwtXRfrjrTxFJ8VyK",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "liquidator_debt_account",
+              "address": "AQJGXKc3ApfMMKpyFDsWbYwLJfuFSZXHuS9sUyt2w41S",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "liquidator_collateral_account",
+              "address": "8Bjmx2FmeXz51cYHqGMfZmRJ6E7U8q6i2mo968aGqjhp",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "borrow_position",
+              "address": "BEeXtL4k4JBH8epGieFgy51uT6G9eEYkLXGoW8UtewSC",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "token_program",
+              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_2022_program",
+              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "Gjc4WWyiLuS4QUEGCr4oRDhZSmZJKu2xsQ6cQ1jEJCqR",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": []
+        },
+        "cpiHooks": [],
+        "paritySha256": "81c037e4d07f68b813461c18afd7cae8baf122cbcbf34ec27f4fbf99fe5b5afd"
+      }
+    },
+    {
+      "name": "leverage liquidation",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-leverage_liquidation",
+          "protocolRevision": "local-snapshot-0",
+          "action": "leverage_liquidation",
+          "jobKind": "leverage_liquidation",
+          "market": "ETPTSwgSN95hbe3tWqw96UqbpkSZ9v2XWvfyL7vRoPTZ",
+          "target": "7gMvfBzobnEoBMLXW2q6MWY4YuG7VXV86HcZNMFgKyAS",
+          "observedSlot": 1003,
+          "expectedStateHash": "7c65dbd17f202d4af23fbbe1f5be6ff1a3d1ab4ad648e5c2e532c94d8a030f98"
+        },
+        "primary": {
+          "specificationKey": "dusk:liquidate_leverage",
+          "program": "dusk",
+          "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+          "instructionName": "liquidate_leverage",
+          "dataHex": "bc840a53ab4e742900",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "Ff1HBPyasFmoHhgQbN4NtTZBBfWj5WY1cwDYZo4UbcCV",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "futarchy_authority",
+              "address": "DK3qxYTaEHyYxiLrfF19sdySVdXDeuBTxeV37VJtKBBj",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "position_owner",
+              "address": "5rhy5WM71G1PDUckW5ijxdFF8LzSkyQtFjwCPrqFwjHA",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_position",
+              "address": "FfWwWQvzB9QViZbQ55FtQQHSXo9EdygHejFn2924GWJx",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "debt_mint",
+              "address": "6HSDWtxNvCGPKYhiHFVbF9NXHpA15WokLQjwQzQkat16",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "collateral_mint",
+              "address": "8waa55PTPFerXKjuZfpqHMQmwzxkw4x9JZXt1vvmaUen",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "debt_reserve_vault",
+              "address": "q2yYzvb1m34hRXmbnvRfNFD2mR7qGwUBpwQQyHTBS7m",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "collateral_reserve_vault",
+              "address": "Af3MfGHVFQ2pAtuDsYgoSqQCw4iqPuGTCDF2GSn62pSM",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "debt_interest_vault",
+              "address": "CnCTuSa7CNkQWGHdaY9MA6DDLEoM7p3X1FPPCjkBEbt7",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_collateral_vault",
+              "address": "GzHXTTnMTgo9WmJhT23NfGi1P39bRgVaT5CDrSqFP5ft",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "liquidator_debt_account",
+              "address": "ESBvcUgZkiXTAvhELa4MFUMtCJZifqUzyJ8zp9YwXsSG",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "owner_debt_account",
+              "address": "4NvK4TELhsh7ibhNHoNXWeATGn6kWjQSNPhG4LQeSPR4",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "liquidator",
+              "address": "3bQbrS2ibudrxcUbp9b2fv4xjSAhWXxZwx5m2CmADZLM",
+              "writable": true,
+              "signer": true
+            },
+            {
+              "name": "token_program",
+              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_2022_program",
+              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "HNkmpRGz1WGu5xVij9gMnZpSYBNVMDAKwv2vYiyr4FB1",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": []
+        },
+        "cpiHooks": [],
+        "paritySha256": "88d433967c8e6bcb2e23c358ead6cdb069dfba821096a0e7fbc60a9d3756d528"
+      }
+    },
+    {
+      "name": "delegated close take profit",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-delegated_close_take_profit",
+          "protocolRevision": "local-snapshot-0",
+          "action": "delegated_close_take_profit",
+          "jobKind": "take_profit",
+          "market": "3JSi3jkznPd3X6fCfd62EceVZmTkatZnCsxvmJYTgiwh",
+          "target": "ueKqkxyA2nLLjeC5CJ4DYWDmRJLaLtC1YEBvusAg5Qp",
+          "observedSlot": 1004,
+          "expectedStateHash": "c5ec654bd0f8f5e73267fa823d0005ec18978d781c14a0786704a800ba2c436f"
+        },
+        "primary": {
+          "specificationKey": "dusk:delegated_close_leverage",
+          "program": "dusk",
+          "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+          "instructionName": "delegated_close_leverage",
+          "dataHex": "0eda6299a413308b0020030000000000001000000005236f00df83c11f0700000000000000100000009ce0eefa5fe5eb3b07000000000000000800",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "D9dUWBBPvPpPzM15d2DfUx5yZYcyDNwKSds3ej9xy5Ph",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "futarchy_authority",
+              "address": "Fhyz3U2Vva1Fm91eKUsCBpg7FoqTLETwYrNUyomgzF9g",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "position_owner",
+              "address": "4WXeCgXAqmgnmo2g8hj3Hz2cKtoP4z8rxWkNV5AFCLgD",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_position",
+              "address": "4PpxiUAJ18Db7MvyRzQ24YVunCjPsF2oeXXcD5xrSRZa",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "debt_mint",
+              "address": "3UxoqkcmnHRCj1GLNge86g5WKKk1iuyFht4S3hVkAmGF",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "collateral_mint",
+              "address": "3EBnRyGUaUiMJLTNY67A7c4XNUNQhA3c7FNtVTpuq9TL",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "debt_reserve_vault",
+              "address": "4N9U1AmwUVu9zmGsXWjWnw3Jm2jyRSRq5T3TAKBuYdFB",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "collateral_reserve_vault",
+              "address": "7GsdN1UsFn2AyztoNrDdjwggcAHWC6UPSqKVDyxMXvzK",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "debt_interest_vault",
+              "address": "HUawLjjms5uEkXNZdUHRoY97NbuAuDcLKqzGEkiZ3wFa",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_collateral_vault",
+              "address": "AAcGJRzHvaBpkdsc9UMpdd9vv3r4xawLkoJm88oNzWTT",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "owner_debt_account",
+              "address": "CSMCeXe79GVUNNiodgG2DnGxr6x4R1u4SRFnXGBHBbzT",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_delegation",
+              "address": "Fsxcumkqu5BQbyHLsG5xXWXDWrDMy5xzqDj8gPvMyrpv",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "delegated_program",
+              "address": "EPGF9iFrbGnhWgC3To9rC9vxinEYuDHaz4RXgLPvuRkp",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "authority",
+              "address": "9EnRPNkQisp7mdZqqncSh8dJ5ZPF8yrzCiPamqHjaPK9",
+              "writable": true,
+              "signer": true
+            },
+            {
+              "name": "token_program",
+              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_2022_program",
+              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "7aXFfRmTXXN6gXcWMHEkT5afvaxS6tQD7FEDX9BjANX1",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": [
+            {
+              "name": "order",
+              "address": "93TpK3oBEoNpmmB5cJ6nSL38tfD6jz7BErJAK1weCqoP",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "market",
+              "address": "DDY5ndov5t56PnUjk4uLVx7NdhC9M5C81D8YCCKefYzd",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "leverage_position",
+              "address": "DCNP6PqCzBfpPdC4fCvRVfPqWMFTMVkgH8eVKmBc1Ci3",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "leverage_delegation",
+              "address": "CVbnxZhec5iiFUFwRpjk4SWBmCZMXto4bh8ttsnvg5bk",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "custody_authority",
+              "address": "6fqQToEKNpBk3C6H42efjm4AR79hZkaX5SsZLtwnm1qq",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "custody_token_account",
+              "address": "4gBtewv9gnQbTeyAjgH1d4i9KSbooAgjxfr7rL5JWsaM",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_mint",
+              "address": "65C5Ni4SSdiND64qvMVztbLCLhP3XZSuQy6uEvwv7BYz",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "executor",
+              "address": "J2fzcjF8LUK2eNdUdyDaYWvgKcsvApEC3xmDjFuxiirW",
+              "writable": false,
+              "signer": true
+            },
+            {
+              "name": "order",
+              "address": "EDM2bxuKB5wAdmt7Hryhkno6QwAnLXypJhJeeZBAAfRt",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "owner",
+              "address": "5cdEGSyYBXWEUoLRKt7GtgmYrgqLAQD6bo7RGBUhBrmD",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_position",
+              "address": "HVs2jEbMMgxVE9uvAocpRNNfqgK1adYJ1K2spxxSu9Mq",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "leverage_delegation",
+              "address": "CQghaADX1vXFpLqrk549HZyTCDcnryV12FqfxHN9NfVm",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "custody_authority",
+              "address": "FZzHBLQkYtaVzFFrZ7y7jeue32r2Ln9jzxccdpM5q6q9",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "custody_token_account",
+              "address": "BSMsAHurWNki32zo4P2ZRMVmgmNxxomJspRNPptjp8yU",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "executor_token_account",
+              "address": "8NaB3pYZCsyTMjT6y7tdQEUVV3NesQJuxZGTP7oJWJcx",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "owner_token_account",
+              "address": "7RxaqvL4CACEbyBfmB7yoaGdr89CbEpyLDbeWoNzCLxx",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "token_mint",
+              "address": "CBj9aStL3q7NZeFNo5t5N1gJMytzzJgzx3YzjGj86zRn",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "executor",
+              "address": "GD4K9WpAVxPUMmkYdNn2wksFYwSz7qXq8hVyFqRLZxu8",
+              "writable": false,
+              "signer": true
+            },
+            {
+              "name": "token_program",
+              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_2022_program",
+              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "writable": false,
+              "signer": false
+            }
+          ]
+        },
+        "cpiHooks": [
+          {
+            "specificationKey": "leverage_delegate:before_take_profit",
+            "program": "leverage_delegate",
+            "programId": "EPGF9iFrbGnhWgC3To9rC9vxinEYuDHaz4RXgLPvuRkp",
+            "instructionName": "before_take_profit",
+            "dataHex": "05236f00df83c11f0700000000000000",
+            "accounts": [
+              {
+                "name": "order",
+                "address": "93TpK3oBEoNpmmB5cJ6nSL38tfD6jz7BErJAK1weCqoP",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "market",
+                "address": "DDY5ndov5t56PnUjk4uLVx7NdhC9M5C81D8YCCKefYzd",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "leverage_position",
+                "address": "DCNP6PqCzBfpPdC4fCvRVfPqWMFTMVkgH8eVKmBc1Ci3",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "leverage_delegation",
+                "address": "CVbnxZhec5iiFUFwRpjk4SWBmCZMXto4bh8ttsnvg5bk",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "custody_authority",
+                "address": "6fqQToEKNpBk3C6H42efjm4AR79hZkaX5SsZLtwnm1qq",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "custody_token_account",
+                "address": "4gBtewv9gnQbTeyAjgH1d4i9KSbooAgjxfr7rL5JWsaM",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "token_mint",
+                "address": "65C5Ni4SSdiND64qvMVztbLCLhP3XZSuQy6uEvwv7BYz",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "executor",
+                "address": "J2fzcjF8LUK2eNdUdyDaYWvgKcsvApEC3xmDjFuxiirW",
+                "writable": false,
+                "signer": true
+              }
+            ],
+            "remainingAccounts": []
+          },
+          {
+            "specificationKey": "leverage_delegate:after_close_order",
+            "program": "leverage_delegate",
+            "programId": "EPGF9iFrbGnhWgC3To9rC9vxinEYuDHaz4RXgLPvuRkp",
+            "instructionName": "after_close_order",
+            "dataHex": "9ce0eefa5fe5eb3b0700000000000000",
+            "accounts": [
+              {
+                "name": "order",
+                "address": "EDM2bxuKB5wAdmt7Hryhkno6QwAnLXypJhJeeZBAAfRt",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "owner",
+                "address": "5cdEGSyYBXWEUoLRKt7GtgmYrgqLAQD6bo7RGBUhBrmD",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "leverage_position",
+                "address": "HVs2jEbMMgxVE9uvAocpRNNfqgK1adYJ1K2spxxSu9Mq",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "leverage_delegation",
+                "address": "CQghaADX1vXFpLqrk549HZyTCDcnryV12FqfxHN9NfVm",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "custody_authority",
+                "address": "FZzHBLQkYtaVzFFrZ7y7jeue32r2Ln9jzxccdpM5q6q9",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "custody_token_account",
+                "address": "BSMsAHurWNki32zo4P2ZRMVmgmNxxomJspRNPptjp8yU",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "executor_token_account",
+                "address": "8NaB3pYZCsyTMjT6y7tdQEUVV3NesQJuxZGTP7oJWJcx",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "owner_token_account",
+                "address": "7RxaqvL4CACEbyBfmB7yoaGdr89CbEpyLDbeWoNzCLxx",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "token_mint",
+                "address": "CBj9aStL3q7NZeFNo5t5N1gJMytzzJgzx3YzjGj86zRn",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "executor",
+                "address": "GD4K9WpAVxPUMmkYdNn2wksFYwSz7qXq8hVyFqRLZxu8",
+                "writable": false,
+                "signer": true
+              },
+              {
+                "name": "token_program",
+                "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "token_2022_program",
+                "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+                "writable": false,
+                "signer": false
+              }
+            ],
+            "remainingAccounts": []
+          }
+        ],
+        "paritySha256": "98278e8d218ad8b6e9c9c1bb3f98b15ff8c3e8453da39938d855ecb206a47543"
+      }
+    },
+    {
+      "name": "delegated close stop loss",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-delegated_close_stop_loss",
+          "protocolRevision": "local-snapshot-0",
+          "action": "delegated_close_stop_loss",
+          "jobKind": "stop_loss",
+          "market": "8PB15EEhUh5AQoMyQKorgGGNiNLYTHkW3NZQchDuRGLh",
+          "target": "EF66W9mqDSy9zQSp18uVLREq2oDckFVF4LG8Jiq1H7yo",
+          "observedSlot": 1005,
+          "expectedStateHash": "3d00b50b67ffe7cc357414195444e84b13a4633e8177d5d7e58289150a8d46dc"
+        },
+        "primary": {
+          "specificationKey": "dusk:delegated_close_leverage",
+          "program": "dusk",
+          "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+          "instructionName": "delegated_close_leverage",
+          "dataHex": "0eda6299a413308b00200300000000000010000000f63e52e8a8c7794e0700000000000000100000009ce0eefa5fe5eb3b07000000000000000800",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "FjhMGbFokrK97Knp8Pa4EURi2RrDi1hE36DuUD5mizb4",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "futarchy_authority",
+              "address": "V85Mwoh3AsnLsU9fk7Z2gg7Uwc4kBcAd8gSRKGxogTh",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "position_owner",
+              "address": "64J6Kfte7KFgqv2xTzQeP6TpGYhskFvZLZ1WZZ991GD3",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_position",
+              "address": "H9NLc8nwfnspKXtfamuuyPibWgXGVhSU7mn3ixNxbGj4",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "debt_mint",
+              "address": "9D7UjefgFNc7zGGfaM8EE7RSktJASi9oQR4LaXkTREkB",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "collateral_mint",
+              "address": "5haFivBePZJHJTQc1odb6vHbPpjVLWtrjG5WHoY6iSte",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "debt_reserve_vault",
+              "address": "E1B14eeydLjYnuuC1UoM9H9xH2xTZbx4uguWx196PbUM",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "collateral_reserve_vault",
+              "address": "AnrnsxC1P8osaM8joe25DbjDyv9R7TW13CL6te1JurXg",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "debt_interest_vault",
+              "address": "D6HVTNpSNz1EKtE4q3iSWt6v4PReFwWkhXxVCtRXoVJx",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_collateral_vault",
+              "address": "9jopRrS6totXx28akoeUGuNu7H5D3xyXGBNQuvwbw537",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "owner_debt_account",
+              "address": "A2zYSiuAMPnnH3q2U6DXMKV5otkqGTMAL2oXxgQ3cBuU",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_delegation",
+              "address": "4gLL1izbSbVvTwq1M91Ds13GKfrkBP1611Vav5RPm3ff",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "delegated_program",
+              "address": "EPGF9iFrbGnhWgC3To9rC9vxinEYuDHaz4RXgLPvuRkp",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "authority",
+              "address": "5m5V3fWiShi8z9LiFbNm3TwCnDGj9348s1puYAtdJF23",
+              "writable": true,
+              "signer": true
+            },
+            {
+              "name": "token_program",
+              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_2022_program",
+              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "ApLmdDraqRCejgCWM2A6BJ5gX9kKDCoQw43okau61ik1",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": [
+            {
+              "name": "order",
+              "address": "8Cufbon3rAeG4H8QCreTjtPLEEKd5UAysqYvEhgzK2sv",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "market",
+              "address": "AuoNvATLZZWvwL7S6VKaHRaQz9Mg2d7Eb27B2Zet4nWT",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "leverage_position",
+              "address": "DkxdCbywBChKrRAgcWKumjSVrb4FdoLk6VaoRBHWd5sv",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "leverage_delegation",
+              "address": "3sqE4s7dquxrxoehRgySUKcXG4ZdjiDmNE29wyEWxoRr",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "custody_authority",
+              "address": "CqAA9XA5DTmEFdkqaXHoMYQ9GWtvbpBmF6ApEw481MAv",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "custody_token_account",
+              "address": "48E7W42Enqvir1qCLFNJKoiJPgM7fTmGedS8DyWcYr2Z",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_mint",
+              "address": "74VB37cGe3xUJy8igzoGLRrv774kUzSLoHkWqDWGDPmZ",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "executor",
+              "address": "6yiSPuU8R4WCPEMA8DC5Ktz5Z3c5QYvJCnU8BqRvmFC4",
+              "writable": false,
+              "signer": true
+            },
+            {
+              "name": "order",
+              "address": "AiYTcnmNtko5HwW6mAbf712gTQgEtNdVXeDxnrdwFwSJ",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "owner",
+              "address": "23kB97NDsp9WjEyGTcvL9b2NKWFNE3WcsdTq2fo9Ur7f",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_position",
+              "address": "BePYhCqR8gVZfGwCMBeqXRNEvyntwSsKpBxKjGobJYSZ",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "leverage_delegation",
+              "address": "6LivrCLJxe1UM8wx3h7cVTGbvm6Ccw3F358KPG7FiZgA",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "custody_authority",
+              "address": "7v85dAta22HuAz7Fy7opYX3CmiwGTCiub4tFwFE1NVej",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "custody_token_account",
+              "address": "7RHwE76Xv5sAeQqsEFVeLJwmHsvwi6WiruwEgo2LnbJ6",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "executor_token_account",
+              "address": "7BtjcFQGb6BP95eX2yVXXyUVcp63JXLJsbsersf77Ri1",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "owner_token_account",
+              "address": "AgU5mVzZo8mtQqUKTsCJXYxgkoVJ9t6mfVi4thLLzhGi",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "token_mint",
+              "address": "8PobUdq7Kzk1zUH1BFG4yiTwTMomZpKpT9RZnBWHxtwB",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "executor",
+              "address": "J3Dy6qyUZQNM4AR9bQzEZpK6xnGf1WtXjft3AjyLPRyE",
+              "writable": false,
+              "signer": true
+            },
+            {
+              "name": "token_program",
+              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_2022_program",
+              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "writable": false,
+              "signer": false
+            }
+          ]
+        },
+        "cpiHooks": [
+          {
+            "specificationKey": "leverage_delegate:before_stop_loss",
+            "program": "leverage_delegate",
+            "programId": "EPGF9iFrbGnhWgC3To9rC9vxinEYuDHaz4RXgLPvuRkp",
+            "instructionName": "before_stop_loss",
+            "dataHex": "f63e52e8a8c7794e0700000000000000",
+            "accounts": [
+              {
+                "name": "order",
+                "address": "8Cufbon3rAeG4H8QCreTjtPLEEKd5UAysqYvEhgzK2sv",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "market",
+                "address": "AuoNvATLZZWvwL7S6VKaHRaQz9Mg2d7Eb27B2Zet4nWT",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "leverage_position",
+                "address": "DkxdCbywBChKrRAgcWKumjSVrb4FdoLk6VaoRBHWd5sv",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "leverage_delegation",
+                "address": "3sqE4s7dquxrxoehRgySUKcXG4ZdjiDmNE29wyEWxoRr",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "custody_authority",
+                "address": "CqAA9XA5DTmEFdkqaXHoMYQ9GWtvbpBmF6ApEw481MAv",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "custody_token_account",
+                "address": "48E7W42Enqvir1qCLFNJKoiJPgM7fTmGedS8DyWcYr2Z",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "token_mint",
+                "address": "74VB37cGe3xUJy8igzoGLRrv774kUzSLoHkWqDWGDPmZ",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "executor",
+                "address": "6yiSPuU8R4WCPEMA8DC5Ktz5Z3c5QYvJCnU8BqRvmFC4",
+                "writable": false,
+                "signer": true
+              }
+            ],
+            "remainingAccounts": []
+          },
+          {
+            "specificationKey": "leverage_delegate:after_close_order",
+            "program": "leverage_delegate",
+            "programId": "EPGF9iFrbGnhWgC3To9rC9vxinEYuDHaz4RXgLPvuRkp",
+            "instructionName": "after_close_order",
+            "dataHex": "9ce0eefa5fe5eb3b0700000000000000",
+            "accounts": [
+              {
+                "name": "order",
+                "address": "AiYTcnmNtko5HwW6mAbf712gTQgEtNdVXeDxnrdwFwSJ",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "owner",
+                "address": "23kB97NDsp9WjEyGTcvL9b2NKWFNE3WcsdTq2fo9Ur7f",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "leverage_position",
+                "address": "BePYhCqR8gVZfGwCMBeqXRNEvyntwSsKpBxKjGobJYSZ",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "leverage_delegation",
+                "address": "6LivrCLJxe1UM8wx3h7cVTGbvm6Ccw3F358KPG7FiZgA",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "custody_authority",
+                "address": "7v85dAta22HuAz7Fy7opYX3CmiwGTCiub4tFwFE1NVej",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "custody_token_account",
+                "address": "7RHwE76Xv5sAeQqsEFVeLJwmHsvwi6WiruwEgo2LnbJ6",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "executor_token_account",
+                "address": "7BtjcFQGb6BP95eX2yVXXyUVcp63JXLJsbsersf77Ri1",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "owner_token_account",
+                "address": "AgU5mVzZo8mtQqUKTsCJXYxgkoVJ9t6mfVi4thLLzhGi",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "token_mint",
+                "address": "8PobUdq7Kzk1zUH1BFG4yiTwTMomZpKpT9RZnBWHxtwB",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "executor",
+                "address": "J3Dy6qyUZQNM4AR9bQzEZpK6xnGf1WtXjft3AjyLPRyE",
+                "writable": false,
+                "signer": true
+              },
+              {
+                "name": "token_program",
+                "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "token_2022_program",
+                "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+                "writable": false,
+                "signer": false
+              }
+            ],
+            "remainingAccounts": []
+          }
+        ],
+        "paritySha256": "961b447a71526c6b50aff8d3a9234cab5c2d6a4f831ebd64769b466bc3d4c160"
+      }
+    },
+    {
+      "name": "protocol revenue auction settle",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-protocol_revenue_auction_settle",
+          "protocolRevision": "local-snapshot-0",
+          "action": "protocol_revenue_auction_settle",
+          "jobKind": "auction_bid",
+          "market": "23uE62bbfpdBoJE1ByN1TiSkMEYsDkt9pDS2huKSmkXF",
+          "target": "H5yohzgtfbQHh2Bjtu4K5g5gtSdsVRQNzr5PA1U5kkuK",
+          "observedSlot": 1006,
+          "expectedStateHash": "abe716b990ecc81e493f4d06004bcaf4f7b5b73d09f8ba9095892a086d9027df"
+        },
+        "primary": {
+          "specificationKey": "dusk:settle_protocol_auction",
+          "program": "dusk",
+          "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+          "instructionName": "settle_protocol_auction",
+          "dataHex": "cecc2087081648500000e803000000000000b603000000000000",
+          "accounts": [
+            {
+              "name": "bidder",
+              "address": "7ok6E1PUkPtmk8h8b3JQpTveYisppKPEkXFuWD6Bazrg",
+              "writable": true,
+              "signer": true
+            },
+            {
+              "name": "market",
+              "address": "3uXvV9M97nPLK6N183xCivzm2xjnLW9WVa4JSuZWS8AJ",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "futarchy_authority",
+              "address": "2tV9eVNABsZeuQUQAfBNFYXR2GMExd4poWePoKXAYvg6",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "sold_mint",
+              "address": "2FMbhKArNvjkbdwupFwPHYahn3FcbsYVhzWt8j4etmZ7",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "accepted_mint",
+              "address": "GhJ9AfTd5H4xJaxc48N7bmVSsXt7dRjv56kV4W354mm2",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "sold_vault",
+              "address": "CQQNNjQJtN6ELACfPYC7dg9Bu3VYvG8TyGG8rKvQwAsF",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "bidder_payment_account",
+              "address": "DrFkGvhT9D7v428XCgqrUEdJJEhK6XVvqMzvwVdSsDJt",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "bidder_receive_account",
+              "address": "FmxVaFCcB3EDYtwe4gqubxv3WDyRkXnzBTMtNY4y3bVi",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "treasury_payment_account",
+              "address": "J2K5ZQrDirXsSwu5TcH9LADUo5XWvBYaAK23wTToLWFY",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "staking_vault_payment_account",
+              "address": "DRMBaDWe9dWYaDnbMhQwCuuEgNbugYADHXkTeMV5K9aC",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "reference_market",
+              "address": "Agvx6Na6YLXAynUNoAsJ1Y3uLg1u4PdZ6xZyBJnpHMib",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_program",
+              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_2022_program",
+              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "hHfVBiRjfr1ALt4RtsUJ9RbfcLhQkadWL2XJx8Ln9fH",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": []
+        },
+        "cpiHooks": [],
+        "paritySha256": "44998f97b14c88817fc1d69d9bd8061befa26e67d92416bf6514b5fd9de42373"
+      }
+    },
+    {
+      "name": "eligible proposal queue",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-eligible_proposal_queue",
+          "protocolRevision": "local-snapshot-0",
+          "action": "eligible_proposal_queue",
+          "jobKind": "lifecycle",
+          "market": "Cu5Jhb1STfGExWRWKxroE1CwxoGRkbMjbSxoVTJNQ7bU",
+          "target": "8LFEVRt47qZAcRpLReSgQmLMMnbbq14Dg47iskJ6hmu",
+          "observedSlot": 1007,
+          "expectedStateHash": "3da1c4f3231db3a4f6cdc3a55deb237311b8297922eeb7254d235b1c1c794a98"
+        },
+        "primary": {
+          "specificationKey": "dusk:queue_parameter_proposal",
+          "program": "dusk",
+          "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+          "instructionName": "queue_parameter_proposal",
+          "dataHex": "c259a444fdfb156c",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "hfWKgTXjs4pg75cN2W16FYY7BrnV3osssGjqUoH3XJg",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "proposal",
+              "address": "EC4gXWGGwH4wMC4oruZXKCoL7wzuLyFcTFUxAfHt7sy",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "ylp_mint",
+              "address": "Cbswx4UREcUwKmo9DBysLFskwU6D2HvEDJGNFbZPYbPx",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "base_hlp_ylp_vault",
+              "address": "HduztAtMDmxcxum49R6UyPeRChQ6Tbwm3oHZqqXNaGEo",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "quote_hlp_ylp_vault",
+              "address": "q9m2B9HN2RAGAGBuo1Xh5tjLhR8e9dXkruE3EMcDkS5",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "57nSas4saXCsu5zMNFDySVYevr7SAijQ9XwfMZf2xRwX",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": []
+        },
+        "cpiHooks": [],
+        "paritySha256": "0e05a16544df5a2d694df23dd57021c0f26c25d9232437b7408d892da25242b2"
+      }
+    },
+    {
+      "name": "eligible proposal execute",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-eligible_proposal_execute",
+          "protocolRevision": "local-snapshot-0",
+          "action": "eligible_proposal_execute",
+          "jobKind": "lifecycle",
+          "market": "9QyWxynPcNbwqLzga6ZioAL9GcA8DpEFxvkWEaGQtfzJ",
+          "target": "46hHx23qoLbib8miSTQCapmTjZ44cfkru91WfBuzjzt2",
+          "observedSlot": 1008,
+          "expectedStateHash": "832ab78c25e91229d5f74ac2b8331e73dc56f6f0fd9012c71185a4d3167488f6"
+        },
+        "primary": {
+          "specificationKey": "dusk:execute_parameter_proposal",
+          "program": "dusk",
+          "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+          "instructionName": "execute_parameter_proposal",
+          "dataHex": "2e6a707128ff9a1b",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "FzfZzW7eN9WKFdGNvPxNg9jngqMmEsUzFCENG6ReiTZr",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "proposal",
+              "address": "9mvfxXzXyhCu7S9zh9FJCSAZJoxrfdoFRXs8TLpsGVv7",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "AE5gVjXt1xyaKwv53W34ZUPXy58g7PbvKQnxj8cPAHZC",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": []
+        },
+        "cpiHooks": [],
+        "paritySha256": "d079cc6ec8f3f8380c4baaefa0c20340e926790a701c2d8a336a1b94ab6a17b7"
+      }
+    }
+  ],
+  "invalidCases": [
+    {
+      "name": "revision mismatch",
+      "expectedError": "revision_mismatch",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-lending_liquidation_trigger",
+          "protocolRevision": "another-revision",
+          "action": "lending_liquidation_trigger",
+          "jobKind": "lending_liquidation_trigger",
+          "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
+          "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
+          "observedSlot": 1000,
+          "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
+        },
+        "primary": {
+          "specificationKey": "dusk:trigger_liquidation_auction",
+          "program": "dusk",
+          "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+          "instructionName": "trigger_liquidation_auction",
+          "dataHex": "b5ac53586537f66f",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "CGjJwzCVyDu7b4mWFmU7p5eUsT4BQ8ZotPwRkGFikB2V",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "borrow_position",
+              "address": "DcPuC3SwYXCWXTAcjDjnSbedBm55JwioXAFQD1XhWcRX",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "debt_asset_mint",
+              "address": "GVFm29Zmi8C7pv3PaewC93i2JDGxd5XFaEdE34zRWt6w",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": []
+        },
+        "cpiHooks": [],
+        "paritySha256": "708dd4b6ad5e83082ab95330bb609684af198e47d1e4d679be927309a2534d62"
+      }
+    },
+    {
+      "name": "job kind mismatch",
+      "expectedError": "job_kind_mismatch",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-lending_liquidation_trigger",
+          "protocolRevision": "local-snapshot-0",
+          "action": "lending_liquidation_trigger",
+          "jobKind": "take_profit",
+          "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
+          "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
+          "observedSlot": 1000,
+          "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
+        },
+        "primary": {
+          "specificationKey": "dusk:trigger_liquidation_auction",
+          "program": "dusk",
+          "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+          "instructionName": "trigger_liquidation_auction",
+          "dataHex": "b5ac53586537f66f",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "CGjJwzCVyDu7b4mWFmU7p5eUsT4BQ8ZotPwRkGFikB2V",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "borrow_position",
+              "address": "DcPuC3SwYXCWXTAcjDjnSbedBm55JwioXAFQD1XhWcRX",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "debt_asset_mint",
+              "address": "GVFm29Zmi8C7pv3PaewC93i2JDGxd5XFaEdE34zRWt6w",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": []
+        },
+        "cpiHooks": [],
+        "paritySha256": "708dd4b6ad5e83082ab95330bb609684af198e47d1e4d679be927309a2534d62"
+      }
+    },
+    {
+      "name": "wrong instruction name",
+      "expectedError": "instruction_mismatch",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-lending_liquidation_trigger",
+          "protocolRevision": "local-snapshot-0",
+          "action": "lending_liquidation_trigger",
+          "jobKind": "lending_liquidation_trigger",
+          "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
+          "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
+          "observedSlot": 1000,
+          "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
+        },
+        "primary": {
+          "specificationKey": "dusk:trigger_liquidation_auction",
+          "program": "dusk",
+          "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+          "instructionName": "execute_parameter_proposal",
+          "dataHex": "b5ac53586537f66f",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "CGjJwzCVyDu7b4mWFmU7p5eUsT4BQ8ZotPwRkGFikB2V",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "borrow_position",
+              "address": "DcPuC3SwYXCWXTAcjDjnSbedBm55JwioXAFQD1XhWcRX",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "debt_asset_mint",
+              "address": "GVFm29Zmi8C7pv3PaewC93i2JDGxd5XFaEdE34zRWt6w",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": []
+        },
+        "cpiHooks": [],
+        "paritySha256": "708dd4b6ad5e83082ab95330bb609684af198e47d1e4d679be927309a2534d62"
+      }
+    },
+    {
+      "name": "wrong program id",
+      "expectedError": "program_id_mismatch",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-lending_liquidation_trigger",
+          "protocolRevision": "local-snapshot-0",
+          "action": "lending_liquidation_trigger",
+          "jobKind": "lending_liquidation_trigger",
+          "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
+          "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
+          "observedSlot": 1000,
+          "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
+        },
+        "primary": {
+          "specificationKey": "dusk:trigger_liquidation_auction",
+          "program": "dusk",
+          "programId": "8gwTnSCDgmoTj9rh8vpsToF6MzGi7aGrSCwfXWXDyJAm",
+          "instructionName": "trigger_liquidation_auction",
+          "dataHex": "b5ac53586537f66f",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "CGjJwzCVyDu7b4mWFmU7p5eUsT4BQ8ZotPwRkGFikB2V",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "borrow_position",
+              "address": "DcPuC3SwYXCWXTAcjDjnSbedBm55JwioXAFQD1XhWcRX",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "debt_asset_mint",
+              "address": "GVFm29Zmi8C7pv3PaewC93i2JDGxd5XFaEdE34zRWt6w",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": []
+        },
+        "cpiHooks": [],
+        "paritySha256": "708dd4b6ad5e83082ab95330bb609684af198e47d1e4d679be927309a2534d62"
+      }
+    },
+    {
+      "name": "invalid 32-byte pubkey",
+      "expectedError": "invalid_pubkey",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-lending_liquidation_trigger",
+          "protocolRevision": "local-snapshot-0",
+          "action": "lending_liquidation_trigger",
+          "jobKind": "lending_liquidation_trigger",
+          "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
+          "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
+          "observedSlot": 1000,
+          "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
+        },
+        "primary": {
+          "specificationKey": "dusk:trigger_liquidation_auction",
+          "program": "dusk",
+          "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+          "instructionName": "trigger_liquidation_auction",
+          "dataHex": "b5ac53586537f66f",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "22222222222222222222222222222222",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "borrow_position",
+              "address": "DcPuC3SwYXCWXTAcjDjnSbedBm55JwioXAFQD1XhWcRX",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "debt_asset_mint",
+              "address": "GVFm29Zmi8C7pv3PaewC93i2JDGxd5XFaEdE34zRWt6w",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": []
+        },
+        "cpiHooks": [],
+        "paritySha256": "708dd4b6ad5e83082ab95330bb609684af198e47d1e4d679be927309a2534d62"
+      }
+    },
+    {
+      "name": "bad discriminator",
+      "expectedError": "discriminator_mismatch",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-lending_liquidation_trigger",
+          "protocolRevision": "local-snapshot-0",
+          "action": "lending_liquidation_trigger",
+          "jobKind": "lending_liquidation_trigger",
+          "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
+          "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
+          "observedSlot": 1000,
+          "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
+        },
+        "primary": {
+          "specificationKey": "dusk:trigger_liquidation_auction",
+          "program": "dusk",
+          "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+          "instructionName": "trigger_liquidation_auction",
+          "dataHex": "00ac53586537f66f",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "CGjJwzCVyDu7b4mWFmU7p5eUsT4BQ8ZotPwRkGFikB2V",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "borrow_position",
+              "address": "DcPuC3SwYXCWXTAcjDjnSbedBm55JwioXAFQD1XhWcRX",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "debt_asset_mint",
+              "address": "GVFm29Zmi8C7pv3PaewC93i2JDGxd5XFaEdE34zRWt6w",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": []
+        },
+        "cpiHooks": [],
+        "paritySha256": "708dd4b6ad5e83082ab95330bb609684af198e47d1e4d679be927309a2534d62"
+      }
+    },
+    {
+      "name": "missing required account",
+      "expectedError": "missing_required_account",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-eligible_proposal_queue",
+          "protocolRevision": "local-snapshot-0",
+          "action": "eligible_proposal_queue",
+          "jobKind": "lifecycle",
+          "market": "Cu5Jhb1STfGExWRWKxroE1CwxoGRkbMjbSxoVTJNQ7bU",
+          "target": "8LFEVRt47qZAcRpLReSgQmLMMnbbq14Dg47iskJ6hmu",
+          "observedSlot": 1007,
+          "expectedStateHash": "3da1c4f3231db3a4f6cdc3a55deb237311b8297922eeb7254d235b1c1c794a98"
+        },
+        "primary": {
+          "specificationKey": "dusk:queue_parameter_proposal",
+          "program": "dusk",
+          "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+          "instructionName": "queue_parameter_proposal",
+          "dataHex": "c259a444fdfb156c",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "hfWKgTXjs4pg75cN2W16FYY7BrnV3osssGjqUoH3XJg",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "ylp_mint",
+              "address": "Cbswx4UREcUwKmo9DBysLFskwU6D2HvEDJGNFbZPYbPx",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "base_hlp_ylp_vault",
+              "address": "HduztAtMDmxcxum49R6UyPeRChQ6Tbwm3oHZqqXNaGEo",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "quote_hlp_ylp_vault",
+              "address": "q9m2B9HN2RAGAGBuo1Xh5tjLhR8e9dXkruE3EMcDkS5",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "57nSas4saXCsu5zMNFDySVYevr7SAijQ9XwfMZf2xRwX",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": []
+        },
+        "cpiHooks": [],
+        "paritySha256": "0e05a16544df5a2d694df23dd57021c0f26c25d9232437b7408d892da25242b2"
+      }
+    },
+    {
+      "name": "required account order swapped",
+      "expectedError": "account_order_mismatch",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-lending_liquidation_trigger",
+          "protocolRevision": "local-snapshot-0",
+          "action": "lending_liquidation_trigger",
+          "jobKind": "lending_liquidation_trigger",
+          "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
+          "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
+          "observedSlot": 1000,
+          "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
+        },
+        "primary": {
+          "specificationKey": "dusk:trigger_liquidation_auction",
+          "program": "dusk",
+          "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+          "instructionName": "trigger_liquidation_auction",
+          "dataHex": "b5ac53586537f66f",
+          "accounts": [
+            {
+              "name": "borrow_position",
+              "address": "DcPuC3SwYXCWXTAcjDjnSbedBm55JwioXAFQD1XhWcRX",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "market",
+              "address": "CGjJwzCVyDu7b4mWFmU7p5eUsT4BQ8ZotPwRkGFikB2V",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "debt_asset_mint",
+              "address": "GVFm29Zmi8C7pv3PaewC93i2JDGxd5XFaEdE34zRWt6w",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": []
+        },
+        "cpiHooks": [],
+        "paritySha256": "708dd4b6ad5e83082ab95330bb609684af198e47d1e4d679be927309a2534d62"
+      }
+    },
+    {
+      "name": "account flags changed",
+      "expectedError": "account_flags_mismatch",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-lending_liquidation_trigger",
+          "protocolRevision": "local-snapshot-0",
+          "action": "lending_liquidation_trigger",
+          "jobKind": "lending_liquidation_trigger",
+          "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
+          "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
+          "observedSlot": 1000,
+          "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
+        },
+        "primary": {
+          "specificationKey": "dusk:trigger_liquidation_auction",
+          "program": "dusk",
+          "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+          "instructionName": "trigger_liquidation_auction",
+          "dataHex": "b5ac53586537f66f",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "CGjJwzCVyDu7b4mWFmU7p5eUsT4BQ8ZotPwRkGFikB2V",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "borrow_position",
+              "address": "DcPuC3SwYXCWXTAcjDjnSbedBm55JwioXAFQD1XhWcRX",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "debt_asset_mint",
+              "address": "GVFm29Zmi8C7pv3PaewC93i2JDGxd5XFaEdE34zRWt6w",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": []
+        },
+        "cpiHooks": [],
+        "paritySha256": "708dd4b6ad5e83082ab95330bb609684af198e47d1e4d679be927309a2534d62"
+      }
+    },
+    {
+      "name": "fixed token program changed",
+      "expectedError": "fixed_address_mismatch",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-lending_liquidation_bid",
+          "protocolRevision": "local-snapshot-0",
+          "action": "lending_liquidation_bid",
+          "jobKind": "lending_liquidation_bid",
+          "market": "FyVqcLFgZPoQ827oQwvnvNLnggyWNkgZdMsrPVx5xERy",
+          "target": "27bfjCo21T9FVcWEztc7UzBTTYofz9FaKWGeSNCmMMWn",
+          "observedSlot": 1001,
+          "expectedStateHash": "429989957924ba760b86f69ccbd6edbb42ba39e80a49a07385d2b5b1302f4a7a"
+        },
+        "primary": {
+          "specificationKey": "dusk:bid_liquidation_auction",
+          "program": "dusk",
+          "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+          "instructionName": "bid_liquidation_auction",
+          "dataHex": "06df1ee493c51b31e8030000000000008403000000000000",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "8KdjMb7q7RcyDFrPibjyJWbbsompSvjow2snGr2XwTf6",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "futarchy_authority",
+              "address": "J7iCRaKdN5oAoFKxbMrV2T2WUZuDy45Z15m5fKEGxxK7",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "liquidator",
+              "address": "7Hsyrt5aenxyBi5wSteHgz6GSA9LMTH2wiy9bmh1SHM6",
+              "writable": true,
+              "signer": true
+            },
+            {
+              "name": "debt_asset_mint",
+              "address": "5rf3o8QqCGQnJ3ucXCMdbTnjNu2oC78nbPkGMWyKvvVv",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "collateral_asset_mint",
+              "address": "2cvQFMUdw4hvUCyQFaT9qv1ra5s6KcQw95cDFU4LyvrU",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "reserve_vault",
+              "address": "DUKmSN7QrW3zPLq6D6Tgm6ZTv41x5DwcVsCKXbQScDC2",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "interest_vault",
+              "address": "3eU63BB6jUTpMKCNxJh1nY2pZRh6MX873TgydxAiSmev",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "collateral_vault",
+              "address": "414kdgJ8XrFeFmMYLAiKeCwCBAhtNjSHf3ZKMZwaXFrK",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "insurance_vault",
+              "address": "8iXRo7wuRGVWZXLAnCWZrpeTrYsBxY9dum2nvZJzz1D6",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "collateral_insurance_vault",
+              "address": "qh2SnaxFFjfY7dPxagUam8xCVUhiUFLSyGvd4wxFddm",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "liquidator_debt_account",
+              "address": "9TFRosPjCQhwz8zqjLHftuB4z89QPDJRLMTCasBUCXxx",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "liquidator_collateral_account",
+              "address": "5y9YPG5ChZs3mCBrj8qWdNfCQ9yhEuwbT5iMXjUjZMyt",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "borrow_position",
+              "address": "37VmoGvCoshurDmw5vzwt1N5mnraozNrN4VqJC1oPXWZ",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "token_program",
+              "address": "EKxBaSHKAEaJsfDPspsLawmZGDFK1kDi3QCQWNXQj8to",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_2022_program",
+              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "5h7HcCR9X9k7pnR2gqFFnqywYENRk3rqbyJomHc5Ydj6",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": []
+        },
+        "cpiHooks": [],
+        "paritySha256": "ee73ba7804e03e9cee555387dde3fcf2117a787a9b8cfe6a73d09244e3925c6e"
+      }
+    },
+    {
+      "name": "required delegation account omitted",
+      "expectedError": "required_optional_account_missing",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-delegated_close_take_profit",
+          "protocolRevision": "local-snapshot-0",
+          "action": "delegated_close_take_profit",
+          "jobKind": "take_profit",
+          "market": "3JSi3jkznPd3X6fCfd62EceVZmTkatZnCsxvmJYTgiwh",
+          "target": "ueKqkxyA2nLLjeC5CJ4DYWDmRJLaLtC1YEBvusAg5Qp",
+          "observedSlot": 1004,
+          "expectedStateHash": "c5ec654bd0f8f5e73267fa823d0005ec18978d781c14a0786704a800ba2c436f"
+        },
+        "primary": {
+          "specificationKey": "dusk:delegated_close_leverage",
+          "program": "dusk",
+          "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+          "instructionName": "delegated_close_leverage",
+          "dataHex": "0eda6299a413308b0020030000000000001000000005236f00df83c11f0700000000000000100000009ce0eefa5fe5eb3b07000000000000000800",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "D9dUWBBPvPpPzM15d2DfUx5yZYcyDNwKSds3ej9xy5Ph",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "futarchy_authority",
+              "address": "Fhyz3U2Vva1Fm91eKUsCBpg7FoqTLETwYrNUyomgzF9g",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "position_owner",
+              "address": "4WXeCgXAqmgnmo2g8hj3Hz2cKtoP4z8rxWkNV5AFCLgD",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_position",
+              "address": "4PpxiUAJ18Db7MvyRzQ24YVunCjPsF2oeXXcD5xrSRZa",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "debt_mint",
+              "address": "3UxoqkcmnHRCj1GLNge86g5WKKk1iuyFht4S3hVkAmGF",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "collateral_mint",
+              "address": "3EBnRyGUaUiMJLTNY67A7c4XNUNQhA3c7FNtVTpuq9TL",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "debt_reserve_vault",
+              "address": "4N9U1AmwUVu9zmGsXWjWnw3Jm2jyRSRq5T3TAKBuYdFB",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "collateral_reserve_vault",
+              "address": "7GsdN1UsFn2AyztoNrDdjwggcAHWC6UPSqKVDyxMXvzK",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "debt_interest_vault",
+              "address": "HUawLjjms5uEkXNZdUHRoY97NbuAuDcLKqzGEkiZ3wFa",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_collateral_vault",
+              "address": "AAcGJRzHvaBpkdsc9UMpdd9vv3r4xawLkoJm88oNzWTT",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "owner_debt_account",
+              "address": "CSMCeXe79GVUNNiodgG2DnGxr6x4R1u4SRFnXGBHBbzT",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "delegated_program",
+              "address": "EPGF9iFrbGnhWgC3To9rC9vxinEYuDHaz4RXgLPvuRkp",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "authority",
+              "address": "9EnRPNkQisp7mdZqqncSh8dJ5ZPF8yrzCiPamqHjaPK9",
+              "writable": true,
+              "signer": true
+            },
+            {
+              "name": "token_program",
+              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_2022_program",
+              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "7aXFfRmTXXN6gXcWMHEkT5afvaxS6tQD7FEDX9BjANX1",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": [
+            {
+              "name": "order",
+              "address": "93TpK3oBEoNpmmB5cJ6nSL38tfD6jz7BErJAK1weCqoP",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "market",
+              "address": "DDY5ndov5t56PnUjk4uLVx7NdhC9M5C81D8YCCKefYzd",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "leverage_position",
+              "address": "DCNP6PqCzBfpPdC4fCvRVfPqWMFTMVkgH8eVKmBc1Ci3",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "leverage_delegation",
+              "address": "CVbnxZhec5iiFUFwRpjk4SWBmCZMXto4bh8ttsnvg5bk",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "custody_authority",
+              "address": "6fqQToEKNpBk3C6H42efjm4AR79hZkaX5SsZLtwnm1qq",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "custody_token_account",
+              "address": "4gBtewv9gnQbTeyAjgH1d4i9KSbooAgjxfr7rL5JWsaM",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_mint",
+              "address": "65C5Ni4SSdiND64qvMVztbLCLhP3XZSuQy6uEvwv7BYz",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "executor",
+              "address": "J2fzcjF8LUK2eNdUdyDaYWvgKcsvApEC3xmDjFuxiirW",
+              "writable": false,
+              "signer": true
+            },
+            {
+              "name": "order",
+              "address": "EDM2bxuKB5wAdmt7Hryhkno6QwAnLXypJhJeeZBAAfRt",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "owner",
+              "address": "5cdEGSyYBXWEUoLRKt7GtgmYrgqLAQD6bo7RGBUhBrmD",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_position",
+              "address": "HVs2jEbMMgxVE9uvAocpRNNfqgK1adYJ1K2spxxSu9Mq",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "leverage_delegation",
+              "address": "CQghaADX1vXFpLqrk549HZyTCDcnryV12FqfxHN9NfVm",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "custody_authority",
+              "address": "FZzHBLQkYtaVzFFrZ7y7jeue32r2Ln9jzxccdpM5q6q9",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "custody_token_account",
+              "address": "BSMsAHurWNki32zo4P2ZRMVmgmNxxomJspRNPptjp8yU",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "executor_token_account",
+              "address": "8NaB3pYZCsyTMjT6y7tdQEUVV3NesQJuxZGTP7oJWJcx",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "owner_token_account",
+              "address": "7RxaqvL4CACEbyBfmB7yoaGdr89CbEpyLDbeWoNzCLxx",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "token_mint",
+              "address": "CBj9aStL3q7NZeFNo5t5N1gJMytzzJgzx3YzjGj86zRn",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "executor",
+              "address": "GD4K9WpAVxPUMmkYdNn2wksFYwSz7qXq8hVyFqRLZxu8",
+              "writable": false,
+              "signer": true
+            },
+            {
+              "name": "token_program",
+              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_2022_program",
+              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "writable": false,
+              "signer": false
+            }
+          ]
+        },
+        "cpiHooks": [
+          {
+            "specificationKey": "leverage_delegate:before_take_profit",
+            "program": "leverage_delegate",
+            "programId": "EPGF9iFrbGnhWgC3To9rC9vxinEYuDHaz4RXgLPvuRkp",
+            "instructionName": "before_take_profit",
+            "dataHex": "05236f00df83c11f0700000000000000",
+            "accounts": [
+              {
+                "name": "order",
+                "address": "93TpK3oBEoNpmmB5cJ6nSL38tfD6jz7BErJAK1weCqoP",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "market",
+                "address": "DDY5ndov5t56PnUjk4uLVx7NdhC9M5C81D8YCCKefYzd",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "leverage_position",
+                "address": "DCNP6PqCzBfpPdC4fCvRVfPqWMFTMVkgH8eVKmBc1Ci3",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "leverage_delegation",
+                "address": "CVbnxZhec5iiFUFwRpjk4SWBmCZMXto4bh8ttsnvg5bk",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "custody_authority",
+                "address": "6fqQToEKNpBk3C6H42efjm4AR79hZkaX5SsZLtwnm1qq",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "custody_token_account",
+                "address": "4gBtewv9gnQbTeyAjgH1d4i9KSbooAgjxfr7rL5JWsaM",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "token_mint",
+                "address": "65C5Ni4SSdiND64qvMVztbLCLhP3XZSuQy6uEvwv7BYz",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "executor",
+                "address": "J2fzcjF8LUK2eNdUdyDaYWvgKcsvApEC3xmDjFuxiirW",
+                "writable": false,
+                "signer": true
+              }
+            ],
+            "remainingAccounts": []
+          },
+          {
+            "specificationKey": "leverage_delegate:after_close_order",
+            "program": "leverage_delegate",
+            "programId": "EPGF9iFrbGnhWgC3To9rC9vxinEYuDHaz4RXgLPvuRkp",
+            "instructionName": "after_close_order",
+            "dataHex": "9ce0eefa5fe5eb3b0700000000000000",
+            "accounts": [
+              {
+                "name": "order",
+                "address": "EDM2bxuKB5wAdmt7Hryhkno6QwAnLXypJhJeeZBAAfRt",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "owner",
+                "address": "5cdEGSyYBXWEUoLRKt7GtgmYrgqLAQD6bo7RGBUhBrmD",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "leverage_position",
+                "address": "HVs2jEbMMgxVE9uvAocpRNNfqgK1adYJ1K2spxxSu9Mq",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "leverage_delegation",
+                "address": "CQghaADX1vXFpLqrk549HZyTCDcnryV12FqfxHN9NfVm",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "custody_authority",
+                "address": "FZzHBLQkYtaVzFFrZ7y7jeue32r2Ln9jzxccdpM5q6q9",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "custody_token_account",
+                "address": "BSMsAHurWNki32zo4P2ZRMVmgmNxxomJspRNPptjp8yU",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "executor_token_account",
+                "address": "8NaB3pYZCsyTMjT6y7tdQEUVV3NesQJuxZGTP7oJWJcx",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "owner_token_account",
+                "address": "7RxaqvL4CACEbyBfmB7yoaGdr89CbEpyLDbeWoNzCLxx",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "token_mint",
+                "address": "CBj9aStL3q7NZeFNo5t5N1gJMytzzJgzx3YzjGj86zRn",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "executor",
+                "address": "GD4K9WpAVxPUMmkYdNn2wksFYwSz7qXq8hVyFqRLZxu8",
+                "writable": false,
+                "signer": true
+              },
+              {
+                "name": "token_program",
+                "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "token_2022_program",
+                "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+                "writable": false,
+                "signer": false
+              }
+            ],
+            "remainingAccounts": []
+          }
+        ],
+        "paritySha256": "98278e8d218ad8b6e9c9c1bb3f98b15ff8c3e8453da39938d855ecb206a47543"
+      }
+    },
+    {
+      "name": "CPI hook sequence changed",
+      "expectedError": "cpi_hook_mismatch",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-delegated_close_take_profit",
+          "protocolRevision": "local-snapshot-0",
+          "action": "delegated_close_take_profit",
+          "jobKind": "take_profit",
+          "market": "3JSi3jkznPd3X6fCfd62EceVZmTkatZnCsxvmJYTgiwh",
+          "target": "ueKqkxyA2nLLjeC5CJ4DYWDmRJLaLtC1YEBvusAg5Qp",
+          "observedSlot": 1004,
+          "expectedStateHash": "c5ec654bd0f8f5e73267fa823d0005ec18978d781c14a0786704a800ba2c436f"
+        },
+        "primary": {
+          "specificationKey": "dusk:delegated_close_leverage",
+          "program": "dusk",
+          "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+          "instructionName": "delegated_close_leverage",
+          "dataHex": "0eda6299a413308b0020030000000000001000000005236f00df83c11f0700000000000000100000009ce0eefa5fe5eb3b07000000000000000800",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "D9dUWBBPvPpPzM15d2DfUx5yZYcyDNwKSds3ej9xy5Ph",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "futarchy_authority",
+              "address": "Fhyz3U2Vva1Fm91eKUsCBpg7FoqTLETwYrNUyomgzF9g",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "position_owner",
+              "address": "4WXeCgXAqmgnmo2g8hj3Hz2cKtoP4z8rxWkNV5AFCLgD",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_position",
+              "address": "4PpxiUAJ18Db7MvyRzQ24YVunCjPsF2oeXXcD5xrSRZa",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "debt_mint",
+              "address": "3UxoqkcmnHRCj1GLNge86g5WKKk1iuyFht4S3hVkAmGF",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "collateral_mint",
+              "address": "3EBnRyGUaUiMJLTNY67A7c4XNUNQhA3c7FNtVTpuq9TL",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "debt_reserve_vault",
+              "address": "4N9U1AmwUVu9zmGsXWjWnw3Jm2jyRSRq5T3TAKBuYdFB",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "collateral_reserve_vault",
+              "address": "7GsdN1UsFn2AyztoNrDdjwggcAHWC6UPSqKVDyxMXvzK",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "debt_interest_vault",
+              "address": "HUawLjjms5uEkXNZdUHRoY97NbuAuDcLKqzGEkiZ3wFa",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_collateral_vault",
+              "address": "AAcGJRzHvaBpkdsc9UMpdd9vv3r4xawLkoJm88oNzWTT",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "owner_debt_account",
+              "address": "CSMCeXe79GVUNNiodgG2DnGxr6x4R1u4SRFnXGBHBbzT",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_delegation",
+              "address": "Fsxcumkqu5BQbyHLsG5xXWXDWrDMy5xzqDj8gPvMyrpv",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "delegated_program",
+              "address": "EPGF9iFrbGnhWgC3To9rC9vxinEYuDHaz4RXgLPvuRkp",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "authority",
+              "address": "9EnRPNkQisp7mdZqqncSh8dJ5ZPF8yrzCiPamqHjaPK9",
+              "writable": true,
+              "signer": true
+            },
+            {
+              "name": "token_program",
+              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_2022_program",
+              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "7aXFfRmTXXN6gXcWMHEkT5afvaxS6tQD7FEDX9BjANX1",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": [
+            {
+              "name": "order",
+              "address": "93TpK3oBEoNpmmB5cJ6nSL38tfD6jz7BErJAK1weCqoP",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "market",
+              "address": "DDY5ndov5t56PnUjk4uLVx7NdhC9M5C81D8YCCKefYzd",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "leverage_position",
+              "address": "DCNP6PqCzBfpPdC4fCvRVfPqWMFTMVkgH8eVKmBc1Ci3",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "leverage_delegation",
+              "address": "CVbnxZhec5iiFUFwRpjk4SWBmCZMXto4bh8ttsnvg5bk",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "custody_authority",
+              "address": "6fqQToEKNpBk3C6H42efjm4AR79hZkaX5SsZLtwnm1qq",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "custody_token_account",
+              "address": "4gBtewv9gnQbTeyAjgH1d4i9KSbooAgjxfr7rL5JWsaM",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_mint",
+              "address": "65C5Ni4SSdiND64qvMVztbLCLhP3XZSuQy6uEvwv7BYz",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "executor",
+              "address": "J2fzcjF8LUK2eNdUdyDaYWvgKcsvApEC3xmDjFuxiirW",
+              "writable": false,
+              "signer": true
+            },
+            {
+              "name": "order",
+              "address": "EDM2bxuKB5wAdmt7Hryhkno6QwAnLXypJhJeeZBAAfRt",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "owner",
+              "address": "5cdEGSyYBXWEUoLRKt7GtgmYrgqLAQD6bo7RGBUhBrmD",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_position",
+              "address": "HVs2jEbMMgxVE9uvAocpRNNfqgK1adYJ1K2spxxSu9Mq",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "leverage_delegation",
+              "address": "CQghaADX1vXFpLqrk549HZyTCDcnryV12FqfxHN9NfVm",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "custody_authority",
+              "address": "FZzHBLQkYtaVzFFrZ7y7jeue32r2Ln9jzxccdpM5q6q9",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "custody_token_account",
+              "address": "BSMsAHurWNki32zo4P2ZRMVmgmNxxomJspRNPptjp8yU",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "executor_token_account",
+              "address": "8NaB3pYZCsyTMjT6y7tdQEUVV3NesQJuxZGTP7oJWJcx",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "owner_token_account",
+              "address": "7RxaqvL4CACEbyBfmB7yoaGdr89CbEpyLDbeWoNzCLxx",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "token_mint",
+              "address": "CBj9aStL3q7NZeFNo5t5N1gJMytzzJgzx3YzjGj86zRn",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "executor",
+              "address": "GD4K9WpAVxPUMmkYdNn2wksFYwSz7qXq8hVyFqRLZxu8",
+              "writable": false,
+              "signer": true
+            },
+            {
+              "name": "token_program",
+              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_2022_program",
+              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "writable": false,
+              "signer": false
+            }
+          ]
+        },
+        "cpiHooks": [
+          {
+            "specificationKey": "leverage_delegate:after_close_order",
+            "program": "leverage_delegate",
+            "programId": "EPGF9iFrbGnhWgC3To9rC9vxinEYuDHaz4RXgLPvuRkp",
+            "instructionName": "after_close_order",
+            "dataHex": "9ce0eefa5fe5eb3b0700000000000000",
+            "accounts": [
+              {
+                "name": "order",
+                "address": "EDM2bxuKB5wAdmt7Hryhkno6QwAnLXypJhJeeZBAAfRt",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "owner",
+                "address": "5cdEGSyYBXWEUoLRKt7GtgmYrgqLAQD6bo7RGBUhBrmD",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "leverage_position",
+                "address": "HVs2jEbMMgxVE9uvAocpRNNfqgK1adYJ1K2spxxSu9Mq",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "leverage_delegation",
+                "address": "CQghaADX1vXFpLqrk549HZyTCDcnryV12FqfxHN9NfVm",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "custody_authority",
+                "address": "FZzHBLQkYtaVzFFrZ7y7jeue32r2Ln9jzxccdpM5q6q9",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "custody_token_account",
+                "address": "BSMsAHurWNki32zo4P2ZRMVmgmNxxomJspRNPptjp8yU",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "executor_token_account",
+                "address": "8NaB3pYZCsyTMjT6y7tdQEUVV3NesQJuxZGTP7oJWJcx",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "owner_token_account",
+                "address": "7RxaqvL4CACEbyBfmB7yoaGdr89CbEpyLDbeWoNzCLxx",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "token_mint",
+                "address": "CBj9aStL3q7NZeFNo5t5N1gJMytzzJgzx3YzjGj86zRn",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "executor",
+                "address": "GD4K9WpAVxPUMmkYdNn2wksFYwSz7qXq8hVyFqRLZxu8",
+                "writable": false,
+                "signer": true
+              },
+              {
+                "name": "token_program",
+                "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "token_2022_program",
+                "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+                "writable": false,
+                "signer": false
+              }
+            ],
+            "remainingAccounts": []
+          },
+          {
+            "specificationKey": "leverage_delegate:before_take_profit",
+            "program": "leverage_delegate",
+            "programId": "EPGF9iFrbGnhWgC3To9rC9vxinEYuDHaz4RXgLPvuRkp",
+            "instructionName": "before_take_profit",
+            "dataHex": "05236f00df83c11f0700000000000000",
+            "accounts": [
+              {
+                "name": "order",
+                "address": "93TpK3oBEoNpmmB5cJ6nSL38tfD6jz7BErJAK1weCqoP",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "market",
+                "address": "DDY5ndov5t56PnUjk4uLVx7NdhC9M5C81D8YCCKefYzd",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "leverage_position",
+                "address": "DCNP6PqCzBfpPdC4fCvRVfPqWMFTMVkgH8eVKmBc1Ci3",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "leverage_delegation",
+                "address": "CVbnxZhec5iiFUFwRpjk4SWBmCZMXto4bh8ttsnvg5bk",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "custody_authority",
+                "address": "6fqQToEKNpBk3C6H42efjm4AR79hZkaX5SsZLtwnm1qq",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "custody_token_account",
+                "address": "4gBtewv9gnQbTeyAjgH1d4i9KSbooAgjxfr7rL5JWsaM",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "token_mint",
+                "address": "65C5Ni4SSdiND64qvMVztbLCLhP3XZSuQy6uEvwv7BYz",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "executor",
+                "address": "J2fzcjF8LUK2eNdUdyDaYWvgKcsvApEC3xmDjFuxiirW",
+                "writable": false,
+                "signer": true
+              }
+            ],
+            "remainingAccounts": []
+          }
+        ],
+        "paritySha256": "98278e8d218ad8b6e9c9c1bb3f98b15ff8c3e8453da39938d855ecb206a47543"
+      }
+    },
+    {
+      "name": "remaining accounts changed",
+      "expectedError": "remaining_accounts_mismatch",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-delegated_close_stop_loss",
+          "protocolRevision": "local-snapshot-0",
+          "action": "delegated_close_stop_loss",
+          "jobKind": "stop_loss",
+          "market": "8PB15EEhUh5AQoMyQKorgGGNiNLYTHkW3NZQchDuRGLh",
+          "target": "EF66W9mqDSy9zQSp18uVLREq2oDckFVF4LG8Jiq1H7yo",
+          "observedSlot": 1005,
+          "expectedStateHash": "3d00b50b67ffe7cc357414195444e84b13a4633e8177d5d7e58289150a8d46dc"
+        },
+        "primary": {
+          "specificationKey": "dusk:delegated_close_leverage",
+          "program": "dusk",
+          "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+          "instructionName": "delegated_close_leverage",
+          "dataHex": "0eda6299a413308b00200300000000000010000000f63e52e8a8c7794e0700000000000000100000009ce0eefa5fe5eb3b07000000000000000800",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "FjhMGbFokrK97Knp8Pa4EURi2RrDi1hE36DuUD5mizb4",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "futarchy_authority",
+              "address": "V85Mwoh3AsnLsU9fk7Z2gg7Uwc4kBcAd8gSRKGxogTh",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "position_owner",
+              "address": "64J6Kfte7KFgqv2xTzQeP6TpGYhskFvZLZ1WZZ991GD3",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_position",
+              "address": "H9NLc8nwfnspKXtfamuuyPibWgXGVhSU7mn3ixNxbGj4",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "debt_mint",
+              "address": "9D7UjefgFNc7zGGfaM8EE7RSktJASi9oQR4LaXkTREkB",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "collateral_mint",
+              "address": "5haFivBePZJHJTQc1odb6vHbPpjVLWtrjG5WHoY6iSte",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "debt_reserve_vault",
+              "address": "E1B14eeydLjYnuuC1UoM9H9xH2xTZbx4uguWx196PbUM",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "collateral_reserve_vault",
+              "address": "AnrnsxC1P8osaM8joe25DbjDyv9R7TW13CL6te1JurXg",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "debt_interest_vault",
+              "address": "D6HVTNpSNz1EKtE4q3iSWt6v4PReFwWkhXxVCtRXoVJx",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_collateral_vault",
+              "address": "9jopRrS6totXx28akoeUGuNu7H5D3xyXGBNQuvwbw537",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "owner_debt_account",
+              "address": "A2zYSiuAMPnnH3q2U6DXMKV5otkqGTMAL2oXxgQ3cBuU",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_delegation",
+              "address": "4gLL1izbSbVvTwq1M91Ds13GKfrkBP1611Vav5RPm3ff",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "delegated_program",
+              "address": "EPGF9iFrbGnhWgC3To9rC9vxinEYuDHaz4RXgLPvuRkp",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "authority",
+              "address": "5m5V3fWiShi8z9LiFbNm3TwCnDGj9348s1puYAtdJF23",
+              "writable": true,
+              "signer": true
+            },
+            {
+              "name": "token_program",
+              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_2022_program",
+              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "ApLmdDraqRCejgCWM2A6BJ5gX9kKDCoQw43okau61ik1",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": [
+            {
+              "name": "market",
+              "address": "AuoNvATLZZWvwL7S6VKaHRaQz9Mg2d7Eb27B2Zet4nWT",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "order",
+              "address": "8Cufbon3rAeG4H8QCreTjtPLEEKd5UAysqYvEhgzK2sv",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_position",
+              "address": "DkxdCbywBChKrRAgcWKumjSVrb4FdoLk6VaoRBHWd5sv",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "leverage_delegation",
+              "address": "3sqE4s7dquxrxoehRgySUKcXG4ZdjiDmNE29wyEWxoRr",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "custody_authority",
+              "address": "CqAA9XA5DTmEFdkqaXHoMYQ9GWtvbpBmF6ApEw481MAv",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "custody_token_account",
+              "address": "48E7W42Enqvir1qCLFNJKoiJPgM7fTmGedS8DyWcYr2Z",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_mint",
+              "address": "74VB37cGe3xUJy8igzoGLRrv774kUzSLoHkWqDWGDPmZ",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "executor",
+              "address": "6yiSPuU8R4WCPEMA8DC5Ktz5Z3c5QYvJCnU8BqRvmFC4",
+              "writable": false,
+              "signer": true
+            },
+            {
+              "name": "order",
+              "address": "AiYTcnmNtko5HwW6mAbf712gTQgEtNdVXeDxnrdwFwSJ",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "owner",
+              "address": "23kB97NDsp9WjEyGTcvL9b2NKWFNE3WcsdTq2fo9Ur7f",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_position",
+              "address": "BePYhCqR8gVZfGwCMBeqXRNEvyntwSsKpBxKjGobJYSZ",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "leverage_delegation",
+              "address": "6LivrCLJxe1UM8wx3h7cVTGbvm6Ccw3F358KPG7FiZgA",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "custody_authority",
+              "address": "7v85dAta22HuAz7Fy7opYX3CmiwGTCiub4tFwFE1NVej",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "custody_token_account",
+              "address": "7RHwE76Xv5sAeQqsEFVeLJwmHsvwi6WiruwEgo2LnbJ6",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "executor_token_account",
+              "address": "7BtjcFQGb6BP95eX2yVXXyUVcp63JXLJsbsersf77Ri1",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "owner_token_account",
+              "address": "AgU5mVzZo8mtQqUKTsCJXYxgkoVJ9t6mfVi4thLLzhGi",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "token_mint",
+              "address": "8PobUdq7Kzk1zUH1BFG4yiTwTMomZpKpT9RZnBWHxtwB",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "executor",
+              "address": "J3Dy6qyUZQNM4AR9bQzEZpK6xnGf1WtXjft3AjyLPRyE",
+              "writable": false,
+              "signer": true
+            },
+            {
+              "name": "token_program",
+              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_2022_program",
+              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "writable": false,
+              "signer": false
+            }
+          ]
+        },
+        "cpiHooks": [
+          {
+            "specificationKey": "leverage_delegate:before_stop_loss",
+            "program": "leverage_delegate",
+            "programId": "EPGF9iFrbGnhWgC3To9rC9vxinEYuDHaz4RXgLPvuRkp",
+            "instructionName": "before_stop_loss",
+            "dataHex": "f63e52e8a8c7794e0700000000000000",
+            "accounts": [
+              {
+                "name": "order",
+                "address": "8Cufbon3rAeG4H8QCreTjtPLEEKd5UAysqYvEhgzK2sv",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "market",
+                "address": "AuoNvATLZZWvwL7S6VKaHRaQz9Mg2d7Eb27B2Zet4nWT",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "leverage_position",
+                "address": "DkxdCbywBChKrRAgcWKumjSVrb4FdoLk6VaoRBHWd5sv",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "leverage_delegation",
+                "address": "3sqE4s7dquxrxoehRgySUKcXG4ZdjiDmNE29wyEWxoRr",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "custody_authority",
+                "address": "CqAA9XA5DTmEFdkqaXHoMYQ9GWtvbpBmF6ApEw481MAv",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "custody_token_account",
+                "address": "48E7W42Enqvir1qCLFNJKoiJPgM7fTmGedS8DyWcYr2Z",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "token_mint",
+                "address": "74VB37cGe3xUJy8igzoGLRrv774kUzSLoHkWqDWGDPmZ",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "executor",
+                "address": "6yiSPuU8R4WCPEMA8DC5Ktz5Z3c5QYvJCnU8BqRvmFC4",
+                "writable": false,
+                "signer": true
+              }
+            ],
+            "remainingAccounts": []
+          },
+          {
+            "specificationKey": "leverage_delegate:after_close_order",
+            "program": "leverage_delegate",
+            "programId": "EPGF9iFrbGnhWgC3To9rC9vxinEYuDHaz4RXgLPvuRkp",
+            "instructionName": "after_close_order",
+            "dataHex": "9ce0eefa5fe5eb3b0700000000000000",
+            "accounts": [
+              {
+                "name": "order",
+                "address": "AiYTcnmNtko5HwW6mAbf712gTQgEtNdVXeDxnrdwFwSJ",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "owner",
+                "address": "23kB97NDsp9WjEyGTcvL9b2NKWFNE3WcsdTq2fo9Ur7f",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "leverage_position",
+                "address": "BePYhCqR8gVZfGwCMBeqXRNEvyntwSsKpBxKjGobJYSZ",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "leverage_delegation",
+                "address": "6LivrCLJxe1UM8wx3h7cVTGbvm6Ccw3F358KPG7FiZgA",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "custody_authority",
+                "address": "7v85dAta22HuAz7Fy7opYX3CmiwGTCiub4tFwFE1NVej",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "custody_token_account",
+                "address": "7RHwE76Xv5sAeQqsEFVeLJwmHsvwi6WiruwEgo2LnbJ6",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "executor_token_account",
+                "address": "7BtjcFQGb6BP95eX2yVXXyUVcp63JXLJsbsersf77Ri1",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "owner_token_account",
+                "address": "AgU5mVzZo8mtQqUKTsCJXYxgkoVJ9t6mfVi4thLLzhGi",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "token_mint",
+                "address": "8PobUdq7Kzk1zUH1BFG4yiTwTMomZpKpT9RZnBWHxtwB",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "executor",
+                "address": "J3Dy6qyUZQNM4AR9bQzEZpK6xnGf1WtXjft3AjyLPRyE",
+                "writable": false,
+                "signer": true
+              },
+              {
+                "name": "token_program",
+                "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "token_2022_program",
+                "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+                "writable": false,
+                "signer": false
+              }
+            ],
+            "remainingAccounts": []
+          }
+        ],
+        "paritySha256": "961b447a71526c6b50aff8d3a9234cab5c2d6a4f831ebd64769b466bc3d4c160"
+      }
+    },
+    {
+      "name": "embedded hook bytes changed",
+      "expectedError": "delegated_hook_data_mismatch",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-delegated_close_stop_loss",
+          "protocolRevision": "local-snapshot-0",
+          "action": "delegated_close_stop_loss",
+          "jobKind": "stop_loss",
+          "market": "8PB15EEhUh5AQoMyQKorgGGNiNLYTHkW3NZQchDuRGLh",
+          "target": "EF66W9mqDSy9zQSp18uVLREq2oDckFVF4LG8Jiq1H7yo",
+          "observedSlot": 1005,
+          "expectedStateHash": "3d00b50b67ffe7cc357414195444e84b13a4633e8177d5d7e58289150a8d46dc"
+        },
+        "primary": {
+          "specificationKey": "dusk:delegated_close_leverage",
+          "program": "dusk",
+          "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+          "instructionName": "delegated_close_leverage",
+          "dataHex": "0eda6299a413308b00200300000000000010000000f63e52e8a8c7794e0700000000000000100000009ce0eefa5fe5eb3b07000000000000000800",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "FjhMGbFokrK97Knp8Pa4EURi2RrDi1hE36DuUD5mizb4",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "futarchy_authority",
+              "address": "V85Mwoh3AsnLsU9fk7Z2gg7Uwc4kBcAd8gSRKGxogTh",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "position_owner",
+              "address": "64J6Kfte7KFgqv2xTzQeP6TpGYhskFvZLZ1WZZ991GD3",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_position",
+              "address": "H9NLc8nwfnspKXtfamuuyPibWgXGVhSU7mn3ixNxbGj4",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "debt_mint",
+              "address": "9D7UjefgFNc7zGGfaM8EE7RSktJASi9oQR4LaXkTREkB",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "collateral_mint",
+              "address": "5haFivBePZJHJTQc1odb6vHbPpjVLWtrjG5WHoY6iSte",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "debt_reserve_vault",
+              "address": "E1B14eeydLjYnuuC1UoM9H9xH2xTZbx4uguWx196PbUM",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "collateral_reserve_vault",
+              "address": "AnrnsxC1P8osaM8joe25DbjDyv9R7TW13CL6te1JurXg",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "debt_interest_vault",
+              "address": "D6HVTNpSNz1EKtE4q3iSWt6v4PReFwWkhXxVCtRXoVJx",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_collateral_vault",
+              "address": "9jopRrS6totXx28akoeUGuNu7H5D3xyXGBNQuvwbw537",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "owner_debt_account",
+              "address": "A2zYSiuAMPnnH3q2U6DXMKV5otkqGTMAL2oXxgQ3cBuU",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_delegation",
+              "address": "4gLL1izbSbVvTwq1M91Ds13GKfrkBP1611Vav5RPm3ff",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "delegated_program",
+              "address": "EPGF9iFrbGnhWgC3To9rC9vxinEYuDHaz4RXgLPvuRkp",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "authority",
+              "address": "5m5V3fWiShi8z9LiFbNm3TwCnDGj9348s1puYAtdJF23",
+              "writable": true,
+              "signer": true
+            },
+            {
+              "name": "token_program",
+              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_2022_program",
+              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "ApLmdDraqRCejgCWM2A6BJ5gX9kKDCoQw43okau61ik1",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": [
+            {
+              "name": "order",
+              "address": "8Cufbon3rAeG4H8QCreTjtPLEEKd5UAysqYvEhgzK2sv",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "market",
+              "address": "AuoNvATLZZWvwL7S6VKaHRaQz9Mg2d7Eb27B2Zet4nWT",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "leverage_position",
+              "address": "DkxdCbywBChKrRAgcWKumjSVrb4FdoLk6VaoRBHWd5sv",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "leverage_delegation",
+              "address": "3sqE4s7dquxrxoehRgySUKcXG4ZdjiDmNE29wyEWxoRr",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "custody_authority",
+              "address": "CqAA9XA5DTmEFdkqaXHoMYQ9GWtvbpBmF6ApEw481MAv",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "custody_token_account",
+              "address": "48E7W42Enqvir1qCLFNJKoiJPgM7fTmGedS8DyWcYr2Z",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_mint",
+              "address": "74VB37cGe3xUJy8igzoGLRrv774kUzSLoHkWqDWGDPmZ",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "executor",
+              "address": "6yiSPuU8R4WCPEMA8DC5Ktz5Z3c5QYvJCnU8BqRvmFC4",
+              "writable": false,
+              "signer": true
+            },
+            {
+              "name": "order",
+              "address": "AiYTcnmNtko5HwW6mAbf712gTQgEtNdVXeDxnrdwFwSJ",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "owner",
+              "address": "23kB97NDsp9WjEyGTcvL9b2NKWFNE3WcsdTq2fo9Ur7f",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "leverage_position",
+              "address": "BePYhCqR8gVZfGwCMBeqXRNEvyntwSsKpBxKjGobJYSZ",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "leverage_delegation",
+              "address": "6LivrCLJxe1UM8wx3h7cVTGbvm6Ccw3F358KPG7FiZgA",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "custody_authority",
+              "address": "7v85dAta22HuAz7Fy7opYX3CmiwGTCiub4tFwFE1NVej",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "custody_token_account",
+              "address": "7RHwE76Xv5sAeQqsEFVeLJwmHsvwi6WiruwEgo2LnbJ6",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "executor_token_account",
+              "address": "7BtjcFQGb6BP95eX2yVXXyUVcp63JXLJsbsersf77Ri1",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "owner_token_account",
+              "address": "AgU5mVzZo8mtQqUKTsCJXYxgkoVJ9t6mfVi4thLLzhGi",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "token_mint",
+              "address": "8PobUdq7Kzk1zUH1BFG4yiTwTMomZpKpT9RZnBWHxtwB",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "executor",
+              "address": "J3Dy6qyUZQNM4AR9bQzEZpK6xnGf1WtXjft3AjyLPRyE",
+              "writable": false,
+              "signer": true
+            },
+            {
+              "name": "token_program",
+              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_2022_program",
+              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "writable": false,
+              "signer": false
+            }
+          ]
+        },
+        "cpiHooks": [
+          {
+            "specificationKey": "leverage_delegate:before_stop_loss",
+            "program": "leverage_delegate",
+            "programId": "EPGF9iFrbGnhWgC3To9rC9vxinEYuDHaz4RXgLPvuRkp",
+            "instructionName": "before_stop_loss",
+            "dataHex": "f63e52e8a8c7794e0700000000000008",
+            "accounts": [
+              {
+                "name": "order",
+                "address": "8Cufbon3rAeG4H8QCreTjtPLEEKd5UAysqYvEhgzK2sv",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "market",
+                "address": "AuoNvATLZZWvwL7S6VKaHRaQz9Mg2d7Eb27B2Zet4nWT",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "leverage_position",
+                "address": "DkxdCbywBChKrRAgcWKumjSVrb4FdoLk6VaoRBHWd5sv",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "leverage_delegation",
+                "address": "3sqE4s7dquxrxoehRgySUKcXG4ZdjiDmNE29wyEWxoRr",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "custody_authority",
+                "address": "CqAA9XA5DTmEFdkqaXHoMYQ9GWtvbpBmF6ApEw481MAv",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "custody_token_account",
+                "address": "48E7W42Enqvir1qCLFNJKoiJPgM7fTmGedS8DyWcYr2Z",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "token_mint",
+                "address": "74VB37cGe3xUJy8igzoGLRrv774kUzSLoHkWqDWGDPmZ",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "executor",
+                "address": "6yiSPuU8R4WCPEMA8DC5Ktz5Z3c5QYvJCnU8BqRvmFC4",
+                "writable": false,
+                "signer": true
+              }
+            ],
+            "remainingAccounts": []
+          },
+          {
+            "specificationKey": "leverage_delegate:after_close_order",
+            "program": "leverage_delegate",
+            "programId": "EPGF9iFrbGnhWgC3To9rC9vxinEYuDHaz4RXgLPvuRkp",
+            "instructionName": "after_close_order",
+            "dataHex": "9ce0eefa5fe5eb3b0700000000000000",
+            "accounts": [
+              {
+                "name": "order",
+                "address": "AiYTcnmNtko5HwW6mAbf712gTQgEtNdVXeDxnrdwFwSJ",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "owner",
+                "address": "23kB97NDsp9WjEyGTcvL9b2NKWFNE3WcsdTq2fo9Ur7f",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "leverage_position",
+                "address": "BePYhCqR8gVZfGwCMBeqXRNEvyntwSsKpBxKjGobJYSZ",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "leverage_delegation",
+                "address": "6LivrCLJxe1UM8wx3h7cVTGbvm6Ccw3F358KPG7FiZgA",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "custody_authority",
+                "address": "7v85dAta22HuAz7Fy7opYX3CmiwGTCiub4tFwFE1NVej",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "custody_token_account",
+                "address": "7RHwE76Xv5sAeQqsEFVeLJwmHsvwi6WiruwEgo2LnbJ6",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "executor_token_account",
+                "address": "7BtjcFQGb6BP95eX2yVXXyUVcp63JXLJsbsersf77Ri1",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "owner_token_account",
+                "address": "AgU5mVzZo8mtQqUKTsCJXYxgkoVJ9t6mfVi4thLLzhGi",
+                "writable": true,
+                "signer": false
+              },
+              {
+                "name": "token_mint",
+                "address": "8PobUdq7Kzk1zUH1BFG4yiTwTMomZpKpT9RZnBWHxtwB",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "executor",
+                "address": "J3Dy6qyUZQNM4AR9bQzEZpK6xnGf1WtXjft3AjyLPRyE",
+                "writable": false,
+                "signer": true
+              },
+              {
+                "name": "token_program",
+                "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "token_2022_program",
+                "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+                "writable": false,
+                "signer": false
+              }
+            ],
+            "remainingAccounts": []
+          }
+        ],
+        "paritySha256": "961b447a71526c6b50aff8d3a9234cab5c2d6a4f831ebd64769b466bc3d4c160"
+      }
+    },
+    {
+      "name": "canonical parity changed",
+      "expectedError": "parity_mismatch",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-eligible_proposal_execute",
+          "protocolRevision": "local-snapshot-0",
+          "action": "eligible_proposal_execute",
+          "jobKind": "lifecycle",
+          "market": "9QyWxynPcNbwqLzga6ZioAL9GcA8DpEFxvkWEaGQtfzJ",
+          "target": "46hHx23qoLbib8miSTQCapmTjZ44cfkru91WfBuzjzt2",
+          "observedSlot": 1008,
+          "expectedStateHash": "832ab78c25e91229d5f74ac2b8331e73dc56f6f0fd9012c71185a4d3167488f6"
+        },
+        "primary": {
+          "specificationKey": "dusk:execute_parameter_proposal",
+          "program": "dusk",
+          "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+          "instructionName": "execute_parameter_proposal",
+          "dataHex": "2e6a707128ff9a1b",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "FzfZzW7eN9WKFdGNvPxNg9jngqMmEsUzFCENG6ReiTZr",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "proposal",
+              "address": "9mvfxXzXyhCu7S9zh9FJCSAZJoxrfdoFRXs8TLpsGVv7",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "AE5gVjXt1xyaKwv53W34ZUPXy58g7PbvKQnxj8cPAHZC",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": []
+        },
+        "cpiHooks": [],
+        "paritySha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    }
+  ]
+}

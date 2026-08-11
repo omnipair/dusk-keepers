@@ -7,4 +7,4 @@
 - Run lending trigger, lending bidder, lending settler, leverage/order execution, revenue auctions, lifecycle, and sentinel as separate services. Signing services use distinct wallets and remote-signer policies.
 - Never store seed phrases, keypair JSON, private keys, database credentials, RPC credentials, or signer tokens in source, logs, health output, fixtures, or plaintext environment templates.
 - Blockhash expiry before submit may create a new signing generation only after revalidation. An unknown submitted transaction must be reconciled to landed or definitively not landed before any re-sign.
-
+- `protocol/keeper-instructions.v1.json` and its envelope fixtures are generated from the pinned IDLs. Never hand-edit them; regenerate and review the semantic diff. Validation proves instruction shape, not economic eligibility or account freshness.

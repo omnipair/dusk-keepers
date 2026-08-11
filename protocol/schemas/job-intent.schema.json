@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://omnipair.dev/schemas/dusk/job-intent.schema.json",
+  "title": "Keeper job intent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "intentId",
+    "protocolRevision",
+    "action",
+    "jobKind",
+    "market",
+    "target",
+    "observedSlot",
+    "expectedStateHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "intentId": { "type": "string", "minLength": 1 },
+    "protocolRevision": { "type": "string", "minLength": 1 },
+    "action": { "$ref": "#/$defs/jobAction" },
+    "jobKind": { "$ref": "candidate-intent.schema.json#/$defs/jobKind" },
+    "market": { "type": "string", "minLength": 1 },
+    "target": { "type": "string", "minLength": 1 },
+    "observedSlot": { "type": "integer", "minimum": 0 },
+    "expectedStateHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  },
+  "$defs": {
+    "jobAction": {
+      "enum": [
+        "lending_liquidation_trigger",
+        "lending_liquidation_bid",
+        "lending_liquidation_floor_settle",
+        "leverage_liquidation",
+        "delegated_close_take_profit",
+        "delegated_close_stop_loss",
+        "protocol_revenue_auction_settle",
+        "eligible_proposal_queue",
+        "eligible_proposal_execute"
+      ]
+    }
+  }
+}
+
