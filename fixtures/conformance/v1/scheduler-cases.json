@@ -1,0 +1,107 @@
+{
+  "$schema": "../../../protocol/schemas/scheduler-fixture.schema.json",
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "name": "global priority is deterministic",
+      "lockedConflictKeys": [],
+      "candidates": [
+        {
+          "candidateId": "tp-a",
+          "jobKind": "take_profit",
+          "conflictKey": "position:a",
+          "market": "market:meta-usdc",
+          "target": "position:a",
+          "observedSlot": 12,
+          "protocolRevision": "local-snapshot-0",
+          "expectedStateHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        {
+          "candidateId": "lend-liq-b",
+          "jobKind": "lending_liquidation_settle",
+          "conflictKey": "obligation:b",
+          "market": "market:meta-usdc",
+          "target": "obligation:b",
+          "observedSlot": 10,
+          "protocolRevision": "local-snapshot-0",
+          "expectedStateHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        },
+        {
+          "candidateId": "sl-c",
+          "jobKind": "stop_loss",
+          "conflictKey": "position:c",
+          "market": "market:meta-usdc",
+          "target": "position:c",
+          "observedSlot": 11,
+          "protocolRevision": "local-snapshot-0",
+          "expectedStateHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        }
+      ],
+      "expectedOrder": ["lend-liq-b", "sl-c", "tp-a"]
+    },
+    {
+      "name": "higher priority replaces the same conflict key",
+      "lockedConflictKeys": [],
+      "candidates": [
+        {
+          "candidateId": "tp-old",
+          "jobKind": "take_profit",
+          "conflictKey": "position:d",
+          "market": "market:meta-usdc",
+          "target": "position:d",
+          "observedSlot": 20,
+          "protocolRevision": "local-snapshot-0",
+          "expectedStateHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        },
+        {
+          "candidateId": "lev-liq-new",
+          "jobKind": "leverage_liquidation",
+          "conflictKey": "position:d",
+          "market": "market:meta-usdc",
+          "target": "position:d",
+          "observedSlot": 19,
+          "protocolRevision": "local-snapshot-0",
+          "expectedStateHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        }
+      ],
+      "expectedOrder": ["lev-liq-new"]
+    },
+    {
+      "name": "newer observation wins at equal priority and leases suppress work",
+      "lockedConflictKeys": ["position:locked"],
+      "candidates": [
+        {
+          "candidateId": "sl-old",
+          "jobKind": "stop_loss",
+          "conflictKey": "position:e",
+          "market": "market:meta-usdc",
+          "target": "position:e",
+          "observedSlot": 30,
+          "protocolRevision": "local-snapshot-0",
+          "expectedStateHash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        },
+        {
+          "candidateId": "sl-new",
+          "jobKind": "stop_loss",
+          "conflictKey": "position:e",
+          "market": "market:meta-usdc",
+          "target": "position:e",
+          "observedSlot": 31,
+          "protocolRevision": "local-snapshot-0",
+          "expectedStateHash": "1111111111111111111111111111111111111111111111111111111111111111"
+        },
+        {
+          "candidateId": "locked-liq",
+          "jobKind": "leverage_liquidation",
+          "conflictKey": "position:locked",
+          "market": "market:meta-usdc",
+          "target": "position:locked",
+          "observedSlot": 32,
+          "protocolRevision": "local-snapshot-0",
+          "expectedStateHash": "2222222222222222222222222222222222222222222222222222222222222222"
+        }
+      ],
+      "expectedOrder": ["sl-new"]
+    }
+  ]
+}

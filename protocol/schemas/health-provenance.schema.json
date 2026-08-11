@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://omnipair.dev/schemas/dusk/health-provenance.schema.json",
+  "title": "Keeper health and build provenance",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "status",
+    "mode",
+    "service",
+    "profile",
+    "runtime",
+    "protocol",
+    "dependencies",
+    "slots",
+    "work",
+    "circuitBreaker",
+    "parity",
+    "timestamps"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "status": { "enum": ["healthy", "degraded", "unhealthy"] },
+    "mode": { "enum": ["shadow", "live"] },
+    "service": { "type": "string", "minLength": 1 },
+    "profile": { "type": "string", "minLength": 1 },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["language", "version", "buildSha"],
+      "properties": {
+        "language": { "enum": ["rust", "typescript"] },
+        "version": { "type": "string", "minLength": 1 },
+        "buildSha": { "oneOf": [{ "type": "null" }, { "type": "string", "pattern": "^[0-9a-f]{40}$" }] }
+      }
+    },
+    "protocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["revision", "lockStatus", "lockSha256", "sourceWorktreeFingerprintSha256"],
+      "properties": {
+        "revision": { "type": "string", "minLength": 1 },
+        "lockStatus": { "enum": ["draft", "captured", "frozen"] },
+        "lockSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "sourceWorktreeFingerprintSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rpc", "websocket", "indexer", "database", "leaseStore", "signer"],
+      "properties": {
+        "rpc": { "$ref": "#/$defs/dependencyState" },
+        "websocket": { "$ref": "#/$defs/dependencyState" },
+        "indexer": { "$ref": "#/$defs/dependencyState" },
+        "database": { "$ref": "#/$defs/dependencyState" },
+        "leaseStore": { "$ref": "#/$defs/dependencyState" },
+        "signer": { "$ref": "#/$defs/dependencyState" }
+      }
+    },
+    "slots": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rpc", "indexer", "lastReconciled", "lag"],
+      "properties": {
+        "rpc": { "$ref": "#/$defs/nullableInteger" },
+        "indexer": { "$ref": "#/$defs/nullableInteger" },
+        "lastReconciled": { "$ref": "#/$defs/nullableInteger" },
+        "lag": { "$ref": "#/$defs/nullableInteger" }
+      }
+    },
+    "work": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pending", "inFlight", "awaitingReconciliation", "oldestAttemptAgeSeconds"],
+      "properties": {
+        "pending": { "type": "integer", "minimum": 0 },
+        "inFlight": { "type": "integer", "minimum": 0 },
+        "awaitingReconciliation": { "type": "integer", "minimum": 0 },
+        "oldestAttemptAgeSeconds": { "$ref": "#/$defs/nullableInteger" }
+      }
+    },
+    "circuitBreaker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "reason"],
+      "properties": {
+        "state": { "enum": ["closed", "open", "half_open"] },
+        "reason": { "oneOf": [{ "type": "null" }, { "type": "string", "minLength": 1 }] }
+      }
+    },
+    "parity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "lastComparedAt", "mismatchCount"],
+      "properties": {
+        "status": { "enum": ["matching", "mismatched", "unknown"] },
+        "lastComparedAt": { "$ref": "#/$defs/nullableTimestamp" },
+        "mismatchCount": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "timestamps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startedAt", "lastScanAt", "lastSuccessAt", "generatedAt"],
+      "properties": {
+        "startedAt": { "type": "string", "format": "date-time" },
+        "lastScanAt": { "$ref": "#/$defs/nullableTimestamp" },
+        "lastSuccessAt": { "$ref": "#/$defs/nullableTimestamp" },
+        "generatedAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "$defs": {
+    "dependencyState": { "enum": ["ok", "degraded", "down", "disabled", "unknown"] },
+    "nullableInteger": {
+      "oneOf": [{ "type": "null" }, { "type": "integer", "minimum": 0 }]
+    },
+    "nullableTimestamp": {
+      "oneOf": [{ "type": "null" }, { "type": "string", "format": "date-time" }]
+    }
+  }
+}
+

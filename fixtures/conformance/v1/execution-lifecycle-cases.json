@@ -1,0 +1,316 @@
+{
+  "$schema": "../../../protocol/schemas/lifecycle-fixture.schema.json",
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "name": "happy path journals one confirmed execution",
+      "attemptId": "attempt-happy",
+      "workKey": "1111111111111111111111111111111111111111111111111111111111111111",
+      "candidate": {
+        "candidateId": "tp-happy",
+        "jobKind": "take_profit",
+        "conflictKey": "position:happy",
+        "market": "market:meta-usdc",
+        "target": "position:happy",
+        "observedSlot": 100,
+        "protocolRevision": "local-snapshot-0",
+        "expectedStateHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "events": [
+        { "type": "step_succeeded", "step": "discover" },
+        { "type": "step_succeeded", "step": "revalidate" },
+        { "type": "step_succeeded", "step": "evaluate" },
+        { "type": "step_succeeded", "step": "policy" },
+        { "type": "step_succeeded", "step": "simulate" },
+        { "type": "step_succeeded", "step": "lease" },
+        {
+          "type": "step_succeeded",
+          "step": "sign",
+          "blockhash": "blockhash-happy",
+          "lastValidBlockHeight": 250,
+          "signature": "signature-happy"
+        },
+        { "type": "step_succeeded", "step": "submit" },
+        { "type": "step_succeeded", "step": "confirm", "slot": 105 },
+        { "type": "step_succeeded", "step": "postcondition" },
+        { "type": "step_succeeded", "step": "journal" }
+      ],
+      "expected": {
+        "phase": "complete",
+        "nextStep": null,
+        "eventSequence": 11,
+        "signingGeneration": 0,
+        "outcomeStatus": "executed",
+        "reasonCode": "confirmed",
+        "raceCode": null,
+        "signature": "signature-happy",
+        "confirmedSlot": 105,
+        "errorCode": null
+      }
+    },
+    {
+      "name": "account drift is an expected race and not a failure",
+      "attemptId": "attempt-race",
+      "workKey": "2222222222222222222222222222222222222222222222222222222222222222",
+      "candidate": {
+        "candidateId": "sl-race",
+        "jobKind": "stop_loss",
+        "conflictKey": "position:race",
+        "market": "market:meta-usdc",
+        "target": "position:race",
+        "observedSlot": 200,
+        "protocolRevision": "local-snapshot-0",
+        "expectedStateHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "events": [
+        { "type": "step_succeeded", "step": "discover" },
+        { "type": "expected_race", "step": "revalidate", "raceCode": "account_changed" },
+        { "type": "step_succeeded", "step": "journal" }
+      ],
+      "expected": {
+        "phase": "complete",
+        "nextStep": null,
+        "eventSequence": 3,
+        "signingGeneration": 0,
+        "outcomeStatus": "skipped",
+        "reasonCode": "state_changed",
+        "raceCode": "account_changed",
+        "signature": null,
+        "confirmedSlot": null,
+        "errorCode": null
+      }
+    },
+    {
+      "name": "expiry before submit requires revalidation and a new signing generation",
+      "attemptId": "attempt-expired-before-submit",
+      "workKey": "3333333333333333333333333333333333333333333333333333333333333333",
+      "candidate": {
+        "candidateId": "lev-expired-before-submit",
+        "jobKind": "leverage_liquidation",
+        "conflictKey": "position:expired-before-submit",
+        "market": "market:meta-usdc",
+        "target": "position:expired-before-submit",
+        "observedSlot": 300,
+        "protocolRevision": "local-snapshot-0",
+        "expectedStateHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      },
+      "events": [
+        { "type": "step_succeeded", "step": "discover" },
+        { "type": "step_succeeded", "step": "revalidate" },
+        { "type": "step_succeeded", "step": "evaluate" },
+        { "type": "step_succeeded", "step": "policy" },
+        { "type": "step_succeeded", "step": "simulate" },
+        { "type": "step_succeeded", "step": "lease" },
+        {
+          "type": "step_succeeded",
+          "step": "sign",
+          "blockhash": "blockhash-expired",
+          "lastValidBlockHeight": 350,
+          "signature": "signature-expired"
+        },
+        { "type": "blockhash_expired", "timing": "before_submit" },
+        { "type": "step_succeeded", "step": "revalidate" },
+        { "type": "step_succeeded", "step": "evaluate" },
+        { "type": "step_succeeded", "step": "policy" },
+        { "type": "step_succeeded", "step": "simulate" },
+        { "type": "step_succeeded", "step": "lease" },
+        {
+          "type": "step_succeeded",
+          "step": "sign",
+          "blockhash": "blockhash-fresh",
+          "lastValidBlockHeight": 500,
+          "signature": "signature-fresh"
+        },
+        { "type": "step_succeeded", "step": "submit" },
+        { "type": "step_succeeded", "step": "confirm", "slot": 310 },
+        { "type": "step_succeeded", "step": "postcondition" },
+        { "type": "step_succeeded", "step": "journal" }
+      ],
+      "expected": {
+        "phase": "complete",
+        "nextStep": null,
+        "eventSequence": 18,
+        "signingGeneration": 1,
+        "outcomeStatus": "executed",
+        "reasonCode": "confirmed",
+        "raceCode": null,
+        "signature": "signature-fresh",
+        "confirmedSlot": 310,
+        "errorCode": null
+      }
+    },
+    {
+      "name": "unknown submission waits for finality before resigning",
+      "attemptId": "attempt-unknown-not-landed",
+      "workKey": "4444444444444444444444444444444444444444444444444444444444444444",
+      "candidate": {
+        "candidateId": "lend-settle-unknown",
+        "jobKind": "lending_liquidation_settle",
+        "conflictKey": "obligation:unknown",
+        "market": "market:meta-usdc",
+        "target": "obligation:unknown",
+        "observedSlot": 400,
+        "protocolRevision": "local-snapshot-0",
+        "expectedStateHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      },
+      "events": [
+        { "type": "step_succeeded", "step": "discover" },
+        { "type": "step_succeeded", "step": "revalidate" },
+        { "type": "step_succeeded", "step": "evaluate" },
+        { "type": "step_succeeded", "step": "policy" },
+        { "type": "step_succeeded", "step": "simulate" },
+        { "type": "step_succeeded", "step": "lease" },
+        {
+          "type": "step_succeeded",
+          "step": "sign",
+          "blockhash": "blockhash-unknown",
+          "lastValidBlockHeight": 450,
+          "signature": "signature-unknown"
+        },
+        { "type": "step_succeeded", "step": "submit" },
+        { "type": "blockhash_expired", "timing": "after_submit_unknown" },
+        { "type": "submitted_not_landed_finalized" },
+        { "type": "step_succeeded", "step": "revalidate" },
+        { "type": "step_succeeded", "step": "evaluate" },
+        { "type": "step_succeeded", "step": "policy" },
+        { "type": "step_succeeded", "step": "simulate" },
+        { "type": "step_succeeded", "step": "lease" },
+        {
+          "type": "step_succeeded",
+          "step": "sign",
+          "blockhash": "blockhash-after-reconcile",
+          "lastValidBlockHeight": 600,
+          "signature": "signature-after-reconcile"
+        },
+        { "type": "step_succeeded", "step": "submit" },
+        { "type": "step_succeeded", "step": "confirm", "slot": 420 },
+        { "type": "step_succeeded", "step": "postcondition" },
+        { "type": "step_succeeded", "step": "journal" }
+      ],
+      "expected": {
+        "phase": "complete",
+        "nextStep": null,
+        "eventSequence": 20,
+        "signingGeneration": 1,
+        "outcomeStatus": "executed",
+        "reasonCode": "confirmed",
+        "raceCode": null,
+        "signature": "signature-after-reconcile",
+        "confirmedSlot": 420,
+        "errorCode": null
+      }
+    },
+    {
+      "name": "a late landing never creates a second signature",
+      "attemptId": "attempt-unknown-landed",
+      "workKey": "5555555555555555555555555555555555555555555555555555555555555555",
+      "candidate": {
+        "candidateId": "auction-late-landing",
+        "jobKind": "auction_bid",
+        "conflictKey": "auction:late",
+        "market": "market:meta-usdc",
+        "target": "auction:late",
+        "observedSlot": 500,
+        "protocolRevision": "local-snapshot-0",
+        "expectedStateHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+      },
+      "events": [
+        { "type": "step_succeeded", "step": "discover" },
+        { "type": "step_succeeded", "step": "revalidate" },
+        { "type": "step_succeeded", "step": "evaluate" },
+        { "type": "step_succeeded", "step": "policy" },
+        { "type": "step_succeeded", "step": "simulate" },
+        { "type": "step_succeeded", "step": "lease" },
+        {
+          "type": "step_succeeded",
+          "step": "sign",
+          "blockhash": "blockhash-late",
+          "lastValidBlockHeight": 550,
+          "signature": "signature-late"
+        },
+        { "type": "step_succeeded", "step": "submit" },
+        { "type": "blockhash_expired", "timing": "after_submit_unknown" },
+        { "type": "submitted_landed", "slot": 512 },
+        { "type": "step_succeeded", "step": "postcondition" },
+        { "type": "step_succeeded", "step": "journal" }
+      ],
+      "expected": {
+        "phase": "complete",
+        "nextStep": null,
+        "eventSequence": 12,
+        "signingGeneration": 0,
+        "outcomeStatus": "executed",
+        "reasonCode": "confirmed",
+        "raceCode": null,
+        "signature": "signature-late",
+        "confirmedSlot": 512,
+        "errorCode": null
+      }
+    },
+    {
+      "name": "terminal policy rejection is journaled without signing",
+      "attemptId": "attempt-policy-denied",
+      "workKey": "6666666666666666666666666666666666666666666666666666666666666666",
+      "candidate": {
+        "candidateId": "bid-policy-denied",
+        "jobKind": "lending_liquidation_bid",
+        "conflictKey": "auction:lending:denied",
+        "market": "market:meta-usdc",
+        "target": "auction:lending:denied",
+        "observedSlot": 600,
+        "protocolRevision": "local-snapshot-0",
+        "expectedStateHash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "events": [
+        { "type": "step_succeeded", "step": "discover" },
+        { "type": "step_succeeded", "step": "revalidate" },
+        { "type": "step_succeeded", "step": "evaluate" },
+        { "type": "failure", "step": "policy", "failureClass": "terminal", "reasonCode": "policy_denied" },
+        { "type": "step_succeeded", "step": "journal" }
+      ],
+      "expected": {
+        "phase": "complete",
+        "nextStep": null,
+        "eventSequence": 5,
+        "signingGeneration": 0,
+        "outcomeStatus": "terminal_failure",
+        "reasonCode": "policy_denied",
+        "raceCode": null,
+        "signature": null,
+        "confirmedSlot": null,
+        "errorCode": null
+      }
+    },
+    {
+      "name": "out of order execution is rejected without mutating the attempt",
+      "attemptId": "attempt-invalid-order",
+      "workKey": "7777777777777777777777777777777777777777777777777777777777777777",
+      "candidate": {
+        "candidateId": "invalid-order",
+        "jobKind": "lifecycle",
+        "conflictKey": "proposal:invalid-order",
+        "market": "market:meta-usdc",
+        "target": "proposal:invalid-order",
+        "observedSlot": 700,
+        "protocolRevision": "local-snapshot-0",
+        "expectedStateHash": "7777777777777777777777777777777777777777777777777777777777777777"
+      },
+      "events": [
+        { "type": "step_succeeded", "step": "discover" },
+        { "type": "step_succeeded", "step": "submit" }
+      ],
+      "expected": {
+        "phase": "active",
+        "nextStep": "revalidate",
+        "eventSequence": 1,
+        "signingGeneration": 0,
+        "outcomeStatus": null,
+        "reasonCode": null,
+        "raceCode": null,
+        "signature": null,
+        "confirmedSlot": null,
+        "errorCode": "unexpected_step"
+      }
+    }
+  ]
+}

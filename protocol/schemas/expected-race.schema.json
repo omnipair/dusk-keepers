@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://omnipair.dev/schemas/dusk/expected-race.schema.json",
+  "title": "Expected keeper race",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["raceCode", "observedAtStep", "detailHash"],
+  "properties": {
+    "raceCode": { "$ref": "#/$defs/raceCode" },
+    "observedAtStep": { "$ref": "#/$defs/executionStep" },
+    "detailHash": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      ]
+    }
+  },
+  "$defs": {
+    "raceCode": {
+      "enum": [
+        "account_changed",
+        "account_closed",
+        "position_already_closed",
+        "order_already_closed",
+        "trigger_no_longer_met",
+        "obligation_no_longer_liquidatable",
+        "auction_already_settled",
+        "lease_contended",
+        "duplicate_signature_confirmed"
+      ]
+    },
+    "executionStep": {
+      "enum": [
+        "discover",
+        "revalidate",
+        "evaluate",
+        "policy",
+        "simulate",
+        "lease",
+        "sign",
+        "submit",
+        "confirm",
+        "postcondition",
+        "journal"
+      ]
+    }
+  }
+}
+

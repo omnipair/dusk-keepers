@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://omnipair.dev/schemas/dusk/execution-attempt.schema.json",
+  "title": "Durable keeper execution attempt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "attemptId",
+    "attemptNumber",
+    "workKey",
+    "candidate",
+    "phase",
+    "nextStep",
+    "eventSequence",
+    "signingGeneration",
+    "blockhash",
+    "lastValidBlockHeight",
+    "signature",
+    "confirmedSlot",
+    "outcome",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "attemptId": { "type": "string", "minLength": 1 },
+    "attemptNumber": { "type": "integer", "minimum": 1 },
+    "workKey": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "candidate": { "$ref": "candidate-intent.schema.json" },
+    "phase": {
+      "enum": ["active", "awaiting_reconciliation", "outcome_pending_journal", "complete"]
+    },
+    "nextStep": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "expected-race.schema.json#/$defs/executionStep" }
+      ]
+    },
+    "eventSequence": { "type": "integer", "minimum": 0 },
+    "signingGeneration": { "type": "integer", "minimum": 0 },
+    "blockhash": { "oneOf": [{ "type": "null" }, { "type": "string", "minLength": 1 }] },
+    "lastValidBlockHeight": {
+      "oneOf": [{ "type": "null" }, { "type": "integer", "minimum": 0 }]
+    },
+    "signature": { "oneOf": [{ "type": "null" }, { "type": "string", "minLength": 1 }] },
+    "confirmedSlot": {
+      "oneOf": [{ "type": "null" }, { "type": "integer", "minimum": 0 }]
+    },
+    "outcome": {
+      "oneOf": [{ "type": "null" }, { "$ref": "execution-outcome.schema.json" }]
+    },
+    "createdAt": {
+      "oneOf": [{ "type": "null" }, { "type": "string", "format": "date-time" }]
+    },
+    "updatedAt": {
+      "oneOf": [{ "type": "null" }, { "type": "string", "format": "date-time" }]
+    }
+  }
+}

@@ -1,0 +1,19 @@
+[workspace]
+members = [
+  "rust/crates/dusk-adapter",
+  "rust/crates/keeper-core",
+  "rust/apps/keeper",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "UNLICENSED"
+publish = false
+
+[workspace.dependencies]
+serde = { version = "=1.0.228", features = ["derive"] }
+serde_json = "=1.0.150"
+dusk-adapter = { path = "rust/crates/dusk-adapter" }
+keeper-core = { path = "rust/crates/keeper-core" }

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://omnipair.dev/schemas/dusk/lifecycle-fixture.schema.json",
+  "title": "Cross-runtime execution lifecycle fixture bundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "cases"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "attemptId", "workKey", "candidate", "events", "expected"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "attemptId": { "type": "string", "minLength": 1 },
+          "workKey": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "candidate": { "$ref": "candidate-intent.schema.json" },
+          "events": { "type": "array", "items": { "$ref": "execution-event.schema.json" } },
+          "expected": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["phase", "nextStep", "eventSequence", "signingGeneration", "outcomeStatus", "reasonCode", "raceCode", "signature", "confirmedSlot", "errorCode"],
+            "properties": {
+              "phase": { "enum": ["active", "awaiting_reconciliation", "outcome_pending_journal", "complete"] },
+              "nextStep": { "oneOf": [{ "type": "null" }, { "$ref": "expected-race.schema.json#/$defs/executionStep" }] },
+              "eventSequence": { "type": "integer", "minimum": 0 },
+              "signingGeneration": { "type": "integer", "minimum": 0 },
+              "outcomeStatus": { "oneOf": [{ "type": "null" }, { "enum": ["executed", "skipped", "retryable_failure", "terminal_failure"] }] },
+              "reasonCode": { "oneOf": [{ "type": "null" }, { "type": "string", "minLength": 1 }] },
+              "raceCode": { "oneOf": [{ "type": "null" }, { "$ref": "expected-race.schema.json#/$defs/raceCode" }] },
+              "signature": { "oneOf": [{ "type": "null" }, { "type": "string", "minLength": 1 }] },
+              "confirmedSlot": { "oneOf": [{ "type": "null" }, { "type": "integer", "minimum": 0 }] },
+              "errorCode": { "oneOf": [{ "type": "null" }, { "type": "string", "minLength": 1 }] }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+

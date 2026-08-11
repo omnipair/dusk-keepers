@@ -1,0 +1,55 @@
+{
+  "$schema": "../../../protocol/schemas/health-provenance.schema.json",
+  "schemaVersion": 1,
+  "status": "degraded",
+  "mode": "shadow",
+  "service": "dusk-sentinel",
+  "profile": "sentinel",
+  "runtime": {
+    "language": "rust",
+    "version": "0.1.0",
+    "buildSha": null
+  },
+  "protocol": {
+    "revision": "local-snapshot-0",
+    "lockStatus": "captured",
+    "lockSha256": "69df9afe1445d0e1a3809e87c3fb4917b41ebf40effe90af89e1170a8f5b8dc9",
+    "sourceWorktreeFingerprintSha256": "d87e5189c0da4fe823a1504243aea31eefa66f380b62370b27b591a4b4e780fd"
+  },
+  "dependencies": {
+    "rpc": "unknown",
+    "websocket": "unknown",
+    "indexer": "unknown",
+    "database": "unknown",
+    "leaseStore": "unknown",
+    "signer": "disabled"
+  },
+  "slots": {
+    "rpc": null,
+    "indexer": null,
+    "lastReconciled": null,
+    "lag": null
+  },
+  "work": {
+    "pending": 0,
+    "inFlight": 0,
+    "awaitingReconciliation": 0,
+    "oldestAttemptAgeSeconds": null
+  },
+  "circuitBreaker": {
+    "state": "open",
+    "reason": "captured_protocol_lock"
+  },
+  "parity": {
+    "status": "unknown",
+    "lastComparedAt": null,
+    "mismatchCount": 0
+  },
+  "timestamps": {
+    "startedAt": "2026-08-11T17:20:53Z",
+    "lastScanAt": null,
+    "lastSuccessAt": null,
+    "generatedAt": "2026-08-11T17:20:53Z"
+  }
+}
+

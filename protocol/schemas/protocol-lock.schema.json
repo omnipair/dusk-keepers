@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://omnipair.dev/schemas/dusk/protocol-lock.schema.json",
+  "title": "Dusk keeper protocol lock",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "revision", "status", "generatedAt", "source", "toolchain", "programs", "sdk", "compatibility"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "revision": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["draft", "captured", "frozen"] },
+    "generatedAt": { "$ref": "#/$defs/nullableTimestamp" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "branch", "gitCommit", "worktreeFingerprintSha256"],
+      "properties": {
+        "repository": { "type": "string", "minLength": 1 },
+        "branch": { "type": "string", "minLength": 1 },
+        "gitCommit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "worktreeFingerprintSha256": { "$ref": "#/$defs/nullableHash" }
+      }
+    },
+    "toolchain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["anchor", "rust", "solana", "surfpool", "node"],
+      "properties": {
+        "anchor": { "$ref": "#/$defs/nullableVersion" },
+        "rust": { "$ref": "#/$defs/nullableVersion" },
+        "solana": { "$ref": "#/$defs/nullableVersion" },
+        "surfpool": { "$ref": "#/$defs/nullableVersion" },
+        "node": { "$ref": "#/$defs/nullableVersion" }
+      }
+    },
+    "programs": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/program" } },
+    "sdk": { "$ref": "#/$defs/artifact" },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["accountLayoutFingerprintSha256", "instructionFingerprintSha256", "eventFingerprintSha256", "errorFingerprintSha256", "pdaFingerprintSha256"],
+      "properties": {
+        "accountLayoutFingerprintSha256": { "$ref": "#/$defs/nullableHash" },
+        "instructionFingerprintSha256": { "$ref": "#/$defs/nullableHash" },
+        "eventFingerprintSha256": { "$ref": "#/$defs/nullableHash" },
+        "errorFingerprintSha256": { "$ref": "#/$defs/nullableHash" },
+        "pdaFingerprintSha256": { "$ref": "#/$defs/nullableHash" }
+      }
+    }
+  },
+  "$defs": {
+    "nullableTimestamp": { "oneOf": [{ "type": "null" }, { "type": "string", "format": "date-time" }] },
+    "nullableVersion": { "oneOf": [{ "type": "null" }, { "type": "string", "minLength": 1 }] },
+    "nullableHash": { "oneOf": [{ "type": "null" }, { "type": "string", "pattern": "^[0-9a-f]{64}$" }] },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/nullableHash" }
+      }
+    },
+    "program": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "programId", "binary", "idl"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "programId": { "oneOf": [{ "type": "null" }, { "type": "string", "minLength": 32, "maxLength": 44 }] },
+        "binary": { "$ref": "#/$defs/artifact" },
+        "idl": { "$ref": "#/$defs/artifact" }
+      }
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://omnipair.dev/schemas/dusk/candidate-intent.schema.json",
+  "title": "Dusk keeper candidate intent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["candidateId", "jobKind", "conflictKey", "market", "target", "observedSlot", "protocolRevision", "expectedStateHash"],
+  "properties": {
+    "candidateId": { "type": "string", "minLength": 1 },
+    "jobKind": { "$ref": "#/$defs/jobKind" },
+    "conflictKey": { "type": "string", "minLength": 1 },
+    "market": { "type": "string", "minLength": 1 },
+    "target": { "type": "string", "minLength": 1 },
+    "observedSlot": { "type": "integer", "minimum": 0 },
+    "protocolRevision": { "type": "string", "minLength": 1 },
+    "expectedStateHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  },
+  "$defs": {
+    "jobKind": {
+      "enum": [
+        "leverage_liquidation",
+        "lending_liquidation_trigger",
+        "lending_liquidation_bid",
+        "lending_liquidation_settle",
+        "stop_loss",
+        "take_profit",
+        "auction_bid",
+        "lifecycle",
+        "sentinel"
+      ]
+    }
+  }
+}

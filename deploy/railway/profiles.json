@@ -1,0 +1,69 @@
+{
+  "$schema": "../../protocol/schemas/deployment-profiles.schema.json",
+  "schemaVersion": 1,
+  "services": [
+    {
+      "name": "dusk-leverage-keeper",
+      "profile": "leverage",
+      "jobKinds": ["leverage_liquidation", "stop_loss", "take_profit"],
+      "liveRuntime": "rust",
+      "shadowRuntime": "typescript",
+      "walletRole": "leverage_executor",
+      "signingRequired": true
+    },
+    {
+      "name": "dusk-lending-trigger",
+      "profile": "lending-trigger",
+      "jobKinds": ["lending_liquidation_trigger"],
+      "liveRuntime": "rust",
+      "shadowRuntime": "typescript",
+      "walletRole": "lending_trigger",
+      "signingRequired": true
+    },
+    {
+      "name": "dusk-lending-bidder",
+      "profile": "lending-bidder",
+      "jobKinds": ["lending_liquidation_bid"],
+      "liveRuntime": "rust",
+      "shadowRuntime": "typescript",
+      "walletRole": "lending_bidder",
+      "signingRequired": true
+    },
+    {
+      "name": "dusk-lending-settler",
+      "profile": "lending-settler",
+      "jobKinds": ["lending_liquidation_settle"],
+      "liveRuntime": "rust",
+      "shadowRuntime": "typescript",
+      "walletRole": "lending_settler",
+      "signingRequired": true
+    },
+    {
+      "name": "dusk-auction-arbitrageur",
+      "profile": "auction-arbitrage",
+      "jobKinds": ["auction_bid"],
+      "liveRuntime": "rust",
+      "shadowRuntime": "typescript",
+      "walletRole": "revenue_auction_bidder",
+      "signingRequired": true
+    },
+    {
+      "name": "dusk-lifecycle-keeper",
+      "profile": "lifecycle",
+      "jobKinds": ["lifecycle"],
+      "liveRuntime": "typescript",
+      "shadowRuntime": "rust",
+      "walletRole": "lifecycle_executor",
+      "signingRequired": true
+    },
+    {
+      "name": "dusk-sentinel",
+      "profile": "sentinel",
+      "jobKinds": ["sentinel"],
+      "liveRuntime": "rust",
+      "shadowRuntime": "typescript",
+      "walletRole": "none",
+      "signingRequired": false
+    }
+  ]
+}

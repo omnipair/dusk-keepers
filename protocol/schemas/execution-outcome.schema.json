@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://omnipair.dev/schemas/dusk/execution-outcome.schema.json",
+  "title": "Dusk keeper execution outcome",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "attemptId",
+    "attemptNumber",
+    "workKey",
+    "candidateId",
+    "jobKind",
+    "conflictKey",
+    "status",
+    "reasonCode",
+    "raceCode",
+    "observedSlot",
+    "finalizedSlot",
+    "protocolRevision",
+    "signature",
+    "signingGeneration"
+  ],
+  "properties": {
+    "attemptId": { "type": "string", "minLength": 1 },
+    "attemptNumber": { "type": "integer", "minimum": 1 },
+    "workKey": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "candidateId": { "type": "string", "minLength": 1 },
+    "jobKind": {
+      "enum": [
+        "leverage_liquidation",
+        "lending_liquidation_trigger",
+        "lending_liquidation_bid",
+        "lending_liquidation_settle",
+        "stop_loss",
+        "take_profit",
+        "auction_bid",
+        "lifecycle",
+        "sentinel"
+      ]
+    },
+    "conflictKey": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["executed", "skipped", "retryable_failure", "terminal_failure"] },
+    "reasonCode": {
+      "enum": [
+        "confirmed",
+        "shadow_mode",
+        "stale_observation",
+        "state_changed",
+        "already_resolved",
+        "bounds_not_met",
+        "policy_denied",
+        "lease_not_acquired",
+        "simulation_rejected",
+        "signing_denied",
+        "rpc_unavailable",
+        "blockhash_expired",
+        "confirmation_unknown",
+        "postcondition_failed",
+        "insufficient_signer_balance",
+        "protocol_revision_mismatch",
+        "unsupported_protocol",
+        "unknown"
+      ]
+    },
+    "raceCode": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "expected-race.schema.json#/$defs/raceCode" }
+      ]
+    },
+    "observedSlot": { "type": "integer", "minimum": 0 },
+    "finalizedSlot": {
+      "oneOf": [{ "type": "null" }, { "type": "integer", "minimum": 0 }]
+    },
+    "protocolRevision": { "type": "string", "minLength": 1 },
+    "signature": { "oneOf": [{ "type": "null" }, { "type": "string", "minLength": 1 }] },
+    "signingGeneration": { "type": "integer", "minimum": 0 }
+  }
+}

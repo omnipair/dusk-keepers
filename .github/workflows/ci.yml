@@ -1,0 +1,59 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      live_release:
+        description: Require a frozen protocol lock
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  repository-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node scripts/validate-repo.mjs
+      - run: npm test
+      - run: npm run keeper:ts:check
+
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo fmt --all --check
+      - run: cargo clippy --locked --workspace --all-targets -- -D warnings
+      - run: cargo test --locked --workspace
+
+  containers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build --file deploy/railway/rust.Dockerfile --tag dusk-keeper-rs:test .
+      - run: docker build --file deploy/railway/typescript.Dockerfile --tag dusk-keeper-ts:test .
+
+  live-release-gate:
+    if: github.event_name == 'workflow_dispatch' && inputs.live_release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Require immutable protocol artifacts
+        env:
+          REQUIRE_FROZEN_PROTOCOL: "1"
+        run: node scripts/validate-repo.mjs

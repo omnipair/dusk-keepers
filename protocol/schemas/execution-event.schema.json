@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://omnipair.dev/schemas/dusk/execution-event.schema.json",
+  "title": "Keeper lifecycle event",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "step"],
+      "properties": {
+        "type": { "const": "step_succeeded" },
+        "step": { "$ref": "expected-race.schema.json#/$defs/executionStep" },
+        "blockhash": { "type": "string", "minLength": 1 },
+        "lastValidBlockHeight": { "type": "integer", "minimum": 0 },
+        "signature": { "type": "string", "minLength": 1 },
+        "slot": { "type": "integer", "minimum": 0 }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "step", "raceCode"],
+      "properties": {
+        "type": { "const": "expected_race" },
+        "step": { "$ref": "expected-race.schema.json#/$defs/executionStep" },
+        "raceCode": { "$ref": "expected-race.schema.json#/$defs/raceCode" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "step", "failureClass", "reasonCode"],
+      "properties": {
+        "type": { "const": "failure" },
+        "step": { "$ref": "expected-race.schema.json#/$defs/executionStep" },
+        "failureClass": { "enum": ["retryable", "terminal"] },
+        "reasonCode": {
+          "enum": [
+            "stale_observation",
+            "state_changed",
+            "bounds_not_met",
+            "policy_denied",
+            "simulation_rejected",
+            "signing_denied",
+            "rpc_unavailable",
+            "confirmation_unknown",
+            "postcondition_failed",
+            "insufficient_signer_balance",
+            "protocol_revision_mismatch",
+            "unsupported_protocol",
+            "unknown"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "timing"],
+      "properties": {
+        "type": { "const": "blockhash_expired" },
+        "timing": { "enum": ["before_submit", "after_submit_unknown"] }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "const": "submitted_not_landed_finalized" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "slot"],
+      "properties": {
+        "type": { "const": "submitted_landed" },
+        "slot": { "type": "integer", "minimum": 0 }
+      }
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "@omnipair/dusk-keepers",
+  "version": "0.0.0-private",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "workspaces": [
+    "typescript/apps/*",
+    "typescript/packages/*"
+  ],
+  "scripts": {
+    "check": "node scripts/validate-repo.mjs",
+    "test": "node --experimental-strip-types --test typescript/tests/*.test.ts",
+    "keeper:ts:check": "node --experimental-strip-types typescript/apps/keeper/src/index.ts --check"
+  }
+}
+

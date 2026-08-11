@@ -1,0 +1,11 @@
+[package]
+name = "dusk-keeper"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+dusk-adapter.workspace = true
+keeper-core.workspace = true
+
