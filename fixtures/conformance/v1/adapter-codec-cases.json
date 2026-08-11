@@ -1,0 +1,448 @@
+{
+  "$schema": "../../../protocol/schemas/adapter-codec-fixture.schema.json",
+  "schemaVersion": 1,
+  "encodingCases": [
+    {
+      "name": "dusk trigger_liquidation_auction",
+      "specificationKey": "dusk:trigger_liquidation_auction",
+      "arguments": {},
+      "argumentLayoutSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "expectedDataHex": "b5ac53586537f66f"
+    },
+    {
+      "name": "dusk bid_liquidation_auction",
+      "specificationKey": "dusk:bid_liquidation_auction",
+      "arguments": {
+        "repayAmount": "18446744073709551615",
+        "minCollateralOut": "0"
+      },
+      "argumentLayoutSha256": "aae8041af36876a0fef84695f9e6a9a1ca7e937177a44bb0fe6f55b3e0876886",
+      "expectedDataHex": "06df1ee493c51b31ffffffffffffffff0000000000000000"
+    },
+    {
+      "name": "dusk settle_liquidation_auction_floor",
+      "specificationKey": "dusk:settle_liquidation_auction_floor",
+      "arguments": {
+        "repayAmount": "1000",
+        "minCollateralOut": "850",
+        "maxInsuranceDraw": "100",
+        "maxSocializedLoss": "50"
+      },
+      "argumentLayoutSha256": "819732c64338713a4d28d2d0873852ea45164c579c903dfec0a5481e69593eba",
+      "expectedDataHex": "2e5d574e55318979e803000000000000520300000000000064000000000000003200000000000000"
+    },
+    {
+      "name": "dusk liquidate_leverage",
+      "specificationKey": "dusk:liquidate_leverage",
+      "arguments": {
+        "debtAsset": 1
+      },
+      "argumentLayoutSha256": "853228ce736147c516397d25bc2e3a9e7443982a010f3cf3221210e47e7eec52",
+      "expectedDataHex": "bc840a53ab4e742901"
+    },
+    {
+      "name": "dusk delegated_close_leverage",
+      "specificationKey": "dusk:delegated_close_leverage",
+      "arguments": {
+        "debtAsset": 0,
+        "minAmountOut": "800",
+        "beforeIxDataHex": "05236f00df83c11f0807060504030201",
+        "afterIxDataHex": "9ce0eefa5fe5eb3b0700000000000000",
+        "beforeAccountsLen": 8
+      },
+      "argumentLayoutSha256": "51cd16d1ec0954114df44420b813bab2dd2985513f9124c81832c343bfd694e7",
+      "expectedDataHex": "0eda6299a413308b0020030000000000001000000005236f00df83c11f0807060504030201100000009ce0eefa5fe5eb3b07000000000000000800"
+    },
+    {
+      "name": "leverage_delegate before_take_profit",
+      "specificationKey": "leverage_delegate:before_take_profit",
+      "arguments": {
+        "orderId": "72623859790382856"
+      },
+      "argumentLayoutSha256": "8d1d15f0f2c7bea4435e7c3ce00fc59e960ec07c34714923cd9ebd0cc1ae953c",
+      "expectedDataHex": "05236f00df83c11f0807060504030201"
+    },
+    {
+      "name": "leverage_delegate after_close_order",
+      "specificationKey": "leverage_delegate:after_close_order",
+      "arguments": {
+        "orderId": "7"
+      },
+      "argumentLayoutSha256": "8d1d15f0f2c7bea4435e7c3ce00fc59e960ec07c34714923cd9ebd0cc1ae953c",
+      "expectedDataHex": "9ce0eefa5fe5eb3b0700000000000000"
+    },
+    {
+      "name": "leverage_delegate before_stop_loss",
+      "specificationKey": "leverage_delegate:before_stop_loss",
+      "arguments": {
+        "orderId": "18446744073709551615"
+      },
+      "argumentLayoutSha256": "8d1d15f0f2c7bea4435e7c3ce00fc59e960ec07c34714923cd9ebd0cc1ae953c",
+      "expectedDataHex": "f63e52e8a8c7794effffffffffffffff"
+    },
+    {
+      "name": "dusk settle_protocol_auction",
+      "specificationKey": "dusk:settle_protocol_auction",
+      "arguments": {
+        "lane": "buyback",
+        "source": "interest",
+        "soldAmount": "1000",
+        "maxPaymentAmount": "950"
+      },
+      "argumentLayoutSha256": "20a24b8b7bf95f2a14b8cb3ddd89789964e020f3584cc7246748cca7f5065665",
+      "expectedDataHex": "cecc2087081648500101e803000000000000b603000000000000"
+    },
+    {
+      "name": "dusk queue_parameter_proposal",
+      "specificationKey": "dusk:queue_parameter_proposal",
+      "arguments": {},
+      "argumentLayoutSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "expectedDataHex": "c259a444fdfb156c"
+    },
+    {
+      "name": "dusk execute_parameter_proposal",
+      "specificationKey": "dusk:execute_parameter_proposal",
+      "arguments": {},
+      "argumentLayoutSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "expectedDataHex": "2e6a707128ff9a1b"
+    }
+  ],
+  "invalidEncodingCases": [
+    {
+      "name": "unknown instruction",
+      "specificationKey": "dusk:not_a_keeper_instruction",
+      "arguments": {},
+      "expectedError": "unsupported_instruction"
+    },
+    {
+      "name": "u64 overflow",
+      "specificationKey": "dusk:bid_liquidation_auction",
+      "arguments": {
+        "repayAmount": "18446744073709551616",
+        "minCollateralOut": "0"
+      },
+      "expectedError": "invalid_arguments"
+    },
+    {
+      "name": "negative u64",
+      "specificationKey": "dusk:bid_liquidation_auction",
+      "arguments": {
+        "repayAmount": "-1",
+        "minCollateralOut": "0"
+      },
+      "expectedError": "invalid_arguments"
+    },
+    {
+      "name": "non-canonical u64",
+      "specificationKey": "dusk:bid_liquidation_auction",
+      "arguments": {
+        "repayAmount": "+1",
+        "minCollateralOut": "0"
+      },
+      "expectedError": "invalid_arguments"
+    },
+    {
+      "name": "u8 overflow",
+      "specificationKey": "dusk:liquidate_leverage",
+      "arguments": {
+        "debtAsset": 256
+      },
+      "expectedError": "invalid_arguments"
+    },
+    {
+      "name": "unknown protocol auction enum",
+      "specificationKey": "dusk:settle_protocol_auction",
+      "arguments": {
+        "lane": "treasury",
+        "source": "interest",
+        "soldAmount": "1",
+        "maxPaymentAmount": "1"
+      },
+      "expectedError": "invalid_arguments"
+    },
+    {
+      "name": "malformed delegated hook hex",
+      "specificationKey": "dusk:delegated_close_leverage",
+      "arguments": {
+        "debtAsset": 0,
+        "minAmountOut": "1",
+        "beforeIxDataHex": "abc",
+        "afterIxDataHex": "00",
+        "beforeAccountsLen": 1
+      },
+      "expectedError": "invalid_arguments"
+    },
+    {
+      "name": "unexpected no-argument field",
+      "specificationKey": "dusk:queue_parameter_proposal",
+      "arguments": {
+        "invented": true
+      },
+      "expectedError": "invalid_arguments"
+    }
+  ],
+  "pdaCases": [
+    {
+      "name": "dusk market",
+      "recipeKey": "dusk:market",
+      "inputs": {
+        "baseAssetMint": "75zkLdzuZUnXqVCJi9ocF2ujaryecBPUwDqJVViREpbN",
+        "quoteAssetMint": "ES5SwuoAYbS8WzFGDuAqezp4w9zPyxg1cSTXkgccPrS8",
+        "paramsHash": "1c2e7deab60101b4bb17bb1b3c96a1272bab1e359de0d62bbbf5025e5eac7fd8"
+      },
+      "expectedAddress": "DoUS5uhPTvgL8qgjQNmchNbqATuYiESBHYZR9dLfMteE",
+      "expectedBump": 254
+    },
+    {
+      "name": "dusk borrow_position",
+      "recipeKey": "dusk:borrow_position",
+      "inputs": {
+        "market": "7WFFCDpvNekDrz6vtMbFhT2zYw2pxcDX4qfmrGbRGirq",
+        "positionId": "HwxnuwRd7Y4EbgXTXz8m2LDz7JfUPm2HRmQX4KnPKGVF"
+      },
+      "expectedAddress": "6gynRBRmseANFDKzSN83wcoMmAHR2go5cdL4KW7Ezosf",
+      "expectedBump": 255
+    },
+    {
+      "name": "dusk futarchy_authority",
+      "recipeKey": "dusk:futarchy_authority",
+      "inputs": {},
+      "expectedAddress": "6rMTBE6pM3rRkHXhrJTj6tBcFPTjdLoph6JUPjgtEkeW",
+      "expectedBump": 254
+    },
+    {
+      "name": "dusk event_authority",
+      "recipeKey": "dusk:event_authority",
+      "inputs": {},
+      "expectedAddress": "8h8J4xnS1jyTgWNCPHjgeeQjsC17WCxQYF3Rwr3Qc726",
+      "expectedBump": 255
+    },
+    {
+      "name": "dusk leverage_position",
+      "recipeKey": "dusk:leverage_position",
+      "inputs": {
+        "market": "E6iqYDhkzmbxnUdnbPBNqG7Uv1aWTVXgBQDh3BRw53m6",
+        "positionId": "4cxjy9EweZSD4Y3Zst7dpYCcKSQ27JDdzrMmBLR8gVbu"
+      },
+      "expectedAddress": "HgMrivUKbh2HNb9LGpTew3oX2ARicVewCKpt6bfMsfTX",
+      "expectedBump": 255
+    },
+    {
+      "name": "dusk leverage_collateral_vault",
+      "recipeKey": "dusk:leverage_collateral_vault",
+      "inputs": {
+        "market": "EGrkf7cgnJhTaDCPa2qx5iY1u2XM5B3rZE7c9NsGaT3C",
+        "collateralMint": "8A2SZcybi6uUhWaNHbdSPB6Xmhn9hQRao4xrGpLfMgqk"
+      },
+      "expectedAddress": "9JqeKs5xFXA1YnmEKMJPVT9yJRN4cyz2fc6qXnDy4jhv",
+      "expectedBump": 255
+    },
+    {
+      "name": "leverage_delegate order",
+      "recipeKey": "leverage_delegate:order",
+      "inputs": {
+        "position": "CKHPzoPsN7TZVd9imyjKoZeZ4uG8EcSw6Bo7QJpzKpYP",
+        "owner": "2EszGfdkZaeUSwU8Mw4khpJ3y2eedErgiZX2jNCCYaWy",
+        "orderId": "72623859790382856"
+      },
+      "expectedAddress": "Hix5H437WFpVqjWvTRAK2t3h8M7Mag1ywAzM7d3JKGpV",
+      "expectedBump": 252
+    },
+    {
+      "name": "leverage_delegate custody_authority",
+      "recipeKey": "leverage_delegate:custody_authority",
+      "inputs": {
+        "order": "BWGQNbbUBFkYFCEGFMZWvtqL6hq7BLit5s7CeqT3JiuZ"
+      },
+      "expectedAddress": "8cF4KFHoEyffzS3JX8fzBAe9bEhSD6yPNAPxxMf7sUbR",
+      "expectedBump": 255
+    }
+  ],
+  "invalidPdaCases": [
+    {
+      "name": "unknown PDA recipe",
+      "recipeKey": "dusk:unknown",
+      "inputs": {},
+      "expectedError": "unknown_recipe"
+    },
+    {
+      "name": "missing PDA input",
+      "recipeKey": "dusk:market",
+      "inputs": {
+        "quoteAssetMint": "ES5SwuoAYbS8WzFGDuAqezp4w9zPyxg1cSTXkgccPrS8",
+        "paramsHash": "1c2e7deab60101b4bb17bb1b3c96a1272bab1e359de0d62bbbf5025e5eac7fd8"
+      },
+      "expectedError": "missing_input"
+    },
+    {
+      "name": "unexpected PDA input",
+      "recipeKey": "dusk:event_authority",
+      "inputs": {
+        "invented": "1"
+      },
+      "expectedError": "unexpected_input"
+    },
+    {
+      "name": "invalid pubkey PDA input",
+      "recipeKey": "dusk:market",
+      "inputs": {
+        "baseAssetMint": "not-base58",
+        "quoteAssetMint": "ES5SwuoAYbS8WzFGDuAqezp4w9zPyxg1cSTXkgccPrS8",
+        "paramsHash": "1c2e7deab60101b4bb17bb1b3c96a1272bab1e359de0d62bbbf5025e5eac7fd8"
+      },
+      "expectedError": "invalid_seed_value"
+    },
+    {
+      "name": "invalid bytes32 PDA input",
+      "recipeKey": "dusk:market",
+      "inputs": {
+        "baseAssetMint": "75zkLdzuZUnXqVCJi9ocF2ujaryecBPUwDqJVViREpbN",
+        "quoteAssetMint": "ES5SwuoAYbS8WzFGDuAqezp4w9zPyxg1cSTXkgccPrS8",
+        "paramsHash": "00"
+      },
+      "expectedError": "invalid_seed_value"
+    },
+    {
+      "name": "overflowing u64 PDA input",
+      "recipeKey": "leverage_delegate:order",
+      "inputs": {
+        "position": "CKHPzoPsN7TZVd9imyjKoZeZ4uG8EcSw6Bo7QJpzKpYP",
+        "owner": "2EszGfdkZaeUSwU8Mw4khpJ3y2eedErgiZX2jNCCYaWy",
+        "orderId": "18446744073709551616"
+      },
+      "expectedError": "invalid_seed_value"
+    },
+    {
+      "name": "non-canonical u64 PDA input",
+      "recipeKey": "leverage_delegate:order",
+      "inputs": {
+        "position": "CKHPzoPsN7TZVd9imyjKoZeZ4uG8EcSw6Bo7QJpzKpYP",
+        "owner": "2EszGfdkZaeUSwU8Mw4khpJ3y2eedErgiZX2jNCCYaWy",
+        "orderId": "+1"
+      },
+      "expectedError": "invalid_seed_value"
+    }
+  ],
+  "staticAccountCases": [
+    {
+      "name": "dusk:bid_liquidation_auction token_program",
+      "instructionKey": "dusk:bid_liquidation_auction",
+      "accountName": "token_program",
+      "expectedAddress": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+    },
+    {
+      "name": "dusk:bid_liquidation_auction token_2022_program",
+      "instructionKey": "dusk:bid_liquidation_auction",
+      "accountName": "token_2022_program",
+      "expectedAddress": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+    },
+    {
+      "name": "dusk:bid_liquidation_auction program",
+      "instructionKey": "dusk:bid_liquidation_auction",
+      "accountName": "program",
+      "expectedAddress": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv"
+    },
+    {
+      "name": "dusk:settle_liquidation_auction_floor token_program",
+      "instructionKey": "dusk:settle_liquidation_auction_floor",
+      "accountName": "token_program",
+      "expectedAddress": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+    },
+    {
+      "name": "dusk:settle_liquidation_auction_floor token_2022_program",
+      "instructionKey": "dusk:settle_liquidation_auction_floor",
+      "accountName": "token_2022_program",
+      "expectedAddress": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+    },
+    {
+      "name": "dusk:settle_liquidation_auction_floor program",
+      "instructionKey": "dusk:settle_liquidation_auction_floor",
+      "accountName": "program",
+      "expectedAddress": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv"
+    },
+    {
+      "name": "dusk:liquidate_leverage token_program",
+      "instructionKey": "dusk:liquidate_leverage",
+      "accountName": "token_program",
+      "expectedAddress": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+    },
+    {
+      "name": "dusk:liquidate_leverage token_2022_program",
+      "instructionKey": "dusk:liquidate_leverage",
+      "accountName": "token_2022_program",
+      "expectedAddress": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+    },
+    {
+      "name": "dusk:liquidate_leverage program",
+      "instructionKey": "dusk:liquidate_leverage",
+      "accountName": "program",
+      "expectedAddress": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv"
+    },
+    {
+      "name": "dusk:delegated_close_leverage delegated_program",
+      "instructionKey": "dusk:delegated_close_leverage",
+      "accountName": "delegated_program",
+      "expectedAddress": "EPGF9iFrbGnhWgC3To9rC9vxinEYuDHaz4RXgLPvuRkp"
+    },
+    {
+      "name": "dusk:delegated_close_leverage token_program",
+      "instructionKey": "dusk:delegated_close_leverage",
+      "accountName": "token_program",
+      "expectedAddress": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+    },
+    {
+      "name": "dusk:delegated_close_leverage token_2022_program",
+      "instructionKey": "dusk:delegated_close_leverage",
+      "accountName": "token_2022_program",
+      "expectedAddress": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+    },
+    {
+      "name": "dusk:delegated_close_leverage program",
+      "instructionKey": "dusk:delegated_close_leverage",
+      "accountName": "program",
+      "expectedAddress": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv"
+    },
+    {
+      "name": "leverage_delegate:after_close_order token_program",
+      "instructionKey": "leverage_delegate:after_close_order",
+      "accountName": "token_program",
+      "expectedAddress": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+    },
+    {
+      "name": "leverage_delegate:after_close_order token_2022_program",
+      "instructionKey": "leverage_delegate:after_close_order",
+      "accountName": "token_2022_program",
+      "expectedAddress": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+    },
+    {
+      "name": "dusk:settle_protocol_auction token_program",
+      "instructionKey": "dusk:settle_protocol_auction",
+      "accountName": "token_program",
+      "expectedAddress": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+    },
+    {
+      "name": "dusk:settle_protocol_auction token_2022_program",
+      "instructionKey": "dusk:settle_protocol_auction",
+      "accountName": "token_2022_program",
+      "expectedAddress": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+    },
+    {
+      "name": "dusk:settle_protocol_auction program",
+      "instructionKey": "dusk:settle_protocol_auction",
+      "accountName": "program",
+      "expectedAddress": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv"
+    },
+    {
+      "name": "dusk:queue_parameter_proposal program",
+      "instructionKey": "dusk:queue_parameter_proposal",
+      "accountName": "program",
+      "expectedAddress": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv"
+    },
+    {
+      "name": "dusk:execute_parameter_proposal program",
+      "instructionKey": "dusk:execute_parameter_proposal",
+      "accountName": "program",
+      "expectedAddress": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv"
+    }
+  ]
+}

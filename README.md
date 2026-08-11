@@ -13,6 +13,7 @@ repository or in plaintext environment variables.
 
 - `protocol/`: language-neutral JSON Schemas and protocol compatibility rules.
 - `protocol/keeper-instructions.v1.json`: mechanically generated critical-instruction contract pinned to both IDLs.
+- `protocol/keeper-account-resolution.v1.json`: generated static-account and PDA seed manifest.
 - `fixtures/`: golden inputs shared by the Rust and TypeScript test suites.
 - `rust/`: the first live-runtime target; currently a safe, non-signing skeleton.
 - `typescript/`: the shadow/reference runtime and future lifecycle workers.
@@ -43,6 +44,7 @@ changing the pinned protocol snapshot:
 
 ```bash
 node scripts/generate-instruction-contract.mjs --write
+node scripts/generate-adapter-codecs.mjs --write
 ```
 
 ## Safety state

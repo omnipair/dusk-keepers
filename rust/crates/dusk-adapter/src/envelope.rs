@@ -717,30 +717,6 @@ impl fmt::Display for EnvelopeValidationError {
 
 impl Error for EnvelopeValidationError {}
 
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct ResolvedAccountSet {
-    pub accounts: Vec<ResolvedAccountMeta>,
-    pub remaining_accounts: Vec<ResolvedAccountMeta>,
-}
-
-/// Resolves addresses only. PDA derivation and RPC lookup implementations live
-/// outside the IDL validator and must re-read safety-critical accounts directly.
-pub trait AccountResolver: Send + Sync {
-    type Error;
-    fn resolve(
-        &self,
-        intent: &JobIntent,
-        specification_key: &str,
-    ) -> Result<ResolvedAccountSet, Self::Error>;
-}
-
-/// Encodes business arguments with a generated/native protocol client. The
-/// validator only proves the resulting discriminator and delegated hook layout.
-pub trait InstructionDataEncoder: Send + Sync {
-    type Error;
-    fn encode(&self, intent: &JobIntent, specification_key: &str) -> Result<Vec<u8>, Self::Error>;
-}
-
 /// The signer accepts only envelopes validated under a live-ready frozen lock;
 /// implementations remain outside this crate and should enforce service-wallet
 /// policies remotely.

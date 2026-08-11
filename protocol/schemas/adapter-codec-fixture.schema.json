@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://omnipair.dev/schemas/dusk/adapter-codec-fixture.schema.json",
+  "title": "Cross-runtime instruction codec and account resolution fixtures",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schemaVersion",
+    "encodingCases",
+    "invalidEncodingCases",
+    "pdaCases",
+    "invalidPdaCases",
+    "staticAccountCases"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "encodingCases": {
+      "type": "array",
+      "minItems": 11,
+      "items": { "$ref": "#/$defs/encodingCase" }
+    },
+    "invalidEncodingCases": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/invalidEncodingCase" }
+    },
+    "pdaCases": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/pdaCase" }
+    },
+    "invalidPdaCases": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/invalidPdaCase" }
+    },
+    "staticAccountCases": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/staticAccountCase" }
+    }
+  },
+  "$defs": {
+    "arguments": { "type": "object" },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "encodingCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "specificationKey",
+        "arguments",
+        "argumentLayoutSha256",
+        "expectedDataHex"
+      ],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "specificationKey": { "type": "string", "minLength": 1 },
+        "arguments": { "$ref": "#/$defs/arguments" },
+        "argumentLayoutSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "expectedDataHex": {
+          "type": "string",
+          "minLength": 16,
+          "pattern": "^(?:[0-9a-f]{2})+$"
+        }
+      }
+    },
+    "invalidEncodingCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "specificationKey", "arguments", "expectedError"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "specificationKey": { "type": "string", "minLength": 1 },
+        "arguments": { "$ref": "#/$defs/arguments" },
+        "expectedError": {
+          "enum": ["unsupported_instruction", "invalid_arguments", "contract_mismatch"]
+        }
+      }
+    },
+    "pdaCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "recipeKey", "inputs", "expectedAddress", "expectedBump"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "recipeKey": { "type": "string", "minLength": 1 },
+        "inputs": { "$ref": "#/$defs/inputs" },
+        "expectedAddress": {
+          "type": "string",
+          "minLength": 32,
+          "maxLength": 44,
+          "pattern": "^[1-9A-HJ-NP-Za-km-z]+$"
+        },
+        "expectedBump": { "type": "integer", "minimum": 0, "maximum": 255 }
+      }
+    },
+    "invalidPdaCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "recipeKey", "inputs", "expectedError"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "recipeKey": { "type": "string", "minLength": 1 },
+        "inputs": { "$ref": "#/$defs/inputs" },
+        "expectedError": {
+          "enum": [
+            "unknown_recipe",
+            "missing_input",
+            "unexpected_input",
+            "invalid_seed_value",
+            "invalid_program_id",
+            "unable_to_find_pda"
+          ]
+        }
+      }
+    },
+    "staticAccountCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "instructionKey", "accountName", "expectedAddress"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "instructionKey": { "type": "string", "minLength": 1 },
+        "accountName": { "type": "string", "minLength": 1 },
+        "expectedAddress": {
+          "type": "string",
+          "minLength": 32,
+          "maxLength": 44,
+          "pattern": "^[1-9A-HJ-NP-Za-km-z]+$"
+        }
+      }
+    }
+  }
+}

@@ -24,6 +24,8 @@ const schemaPaths = [
   "protocol/schemas/instruction-envelope.schema.json",
   "protocol/schemas/instruction-contract.schema.json",
   "protocol/schemas/instruction-envelope-fixture.schema.json",
+  "protocol/schemas/account-resolution-manifest.schema.json",
+  "protocol/schemas/adapter-codec-fixture.schema.json",
 ];
 
 for (const path of schemaPaths) {
@@ -189,6 +191,48 @@ for (const fixtureCase of instructionFixtures.validCases) {
 
 await import("./generate-instruction-contract.mjs");
 
+const resolutionManifest = await readJson("protocol/keeper-account-resolution.v1.json");
+assert.equal(resolutionManifest.schemaVersion, 1);
+assert.equal(resolutionManifest.protocolRevision, lock.revision);
+assert.equal(resolutionManifest.programs.length, lock.programs.length);
+assert.equal(
+  new Set(resolutionManifest.pdaRecipes.map((recipe) => recipe.key)).size,
+  resolutionManifest.pdaRecipes.length,
+  "PDA recipe keys must be unique",
+);
+assert.ok(resolutionManifest.pdaRecipes.length > 0);
+assert.ok(resolutionManifest.staticAccounts.length > 0);
+for (const program of resolutionManifest.programs) {
+  const pinned = lock.programs.find((candidate) => candidate.name === program.name);
+  assert.ok(pinned, `${program.name}: resolution manifest program is not pinned`);
+  assert.equal(program.programId, pinned.programId);
+  assert.equal(program.idlSha256, pinned.idl.sha256);
+}
+
+const adapterCodecFixtures = await readJson(
+  "fixtures/conformance/v1/adapter-codec-cases.json",
+);
+assert.equal(adapterCodecFixtures.schemaVersion, 1);
+assert.equal(adapterCodecFixtures.encodingCases.length, instructionContract.instructions.length);
+assert.equal(
+  new Set(adapterCodecFixtures.encodingCases.map((fixtureCase) => fixtureCase.specificationKey))
+    .size,
+  instructionContract.instructions.length,
+  "every keeper instruction must have exactly one golden encoding vector",
+);
+for (const fixtureCase of adapterCodecFixtures.encodingCases) {
+  assert.match(fixtureCase.argumentLayoutSha256, /^[0-9a-f]{64}$/);
+}
+assert.equal(adapterCodecFixtures.pdaCases.length, resolutionManifest.pdaRecipes.length);
+assert.equal(
+  adapterCodecFixtures.staticAccountCases.length,
+  resolutionManifest.staticAccounts.length,
+);
+assert.ok(adapterCodecFixtures.invalidEncodingCases.length > 0);
+assert.ok(adapterCodecFixtures.invalidPdaCases.length > 0);
+
+await import("./generate-adapter-codecs.mjs");
+
 if (process.env.REQUIRE_FROZEN_PROTOCOL === "1") {
   assert.equal(lock.status, "frozen", "live deployment requires a frozen protocol lock");
   assert.ok(lock.source.worktreeFingerprintSha256, "missing worktree fingerprint");
@@ -200,5 +244,5 @@ if (process.env.REQUIRE_FROZEN_PROTOCOL === "1") {
 }
 
 console.log(
-  `validated ${schemaPaths.length} schemas, ${bundle.cases.length} scheduler cases, ${lifecycleBundle.cases.length} lifecycle cases, ${instructionFixtures.validCases.length + instructionFixtures.invalidCases.length} instruction envelopes, ${profiles.services.length} service profiles, and ${lock.revision} (${lock.status})`,
+  `validated ${schemaPaths.length} schemas, ${bundle.cases.length} scheduler cases, ${lifecycleBundle.cases.length} lifecycle cases, ${instructionFixtures.validCases.length + instructionFixtures.invalidCases.length} instruction envelopes, ${adapterCodecFixtures.encodingCases.length} encoding vectors, ${adapterCodecFixtures.pdaCases.length} PDA vectors, ${profiles.services.length} service profiles, and ${lock.revision} (${lock.status})`,
 );

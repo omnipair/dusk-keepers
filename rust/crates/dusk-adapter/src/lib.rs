@@ -10,6 +10,10 @@ use serde::Deserialize;
 
 pub mod envelope;
 pub use envelope::*;
+pub mod codec;
+pub use codec::*;
+pub mod resolution;
+pub use resolution::*;
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]

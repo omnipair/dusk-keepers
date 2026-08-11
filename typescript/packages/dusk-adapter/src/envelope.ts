@@ -549,19 +549,6 @@ function validationError(
   return new EnvelopeValidationError(code, message);
 }
 
-export interface ResolvedAccountSet {
-  readonly accounts: readonly ResolvedAccountMeta[];
-  readonly remainingAccounts: readonly ResolvedAccountMeta[];
-}
-
-export interface AccountResolver {
-  resolve(intent: JobIntent, specificationKey: string): Promise<ResolvedAccountSet>;
-}
-
-export interface InstructionDataEncoder {
-  encode(intent: JobIntent, specificationKey: string): Promise<Uint8Array>;
-}
-
 export interface EnvelopeSigner<SignedTransaction> {
   sign(envelope: SignableJobEnvelope): Promise<SignedTransaction>;
 }

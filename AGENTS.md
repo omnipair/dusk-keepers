@@ -8,3 +8,4 @@
 - Never store seed phrases, keypair JSON, private keys, database credentials, RPC credentials, or signer tokens in source, logs, health output, fixtures, or plaintext environment templates.
 - Blockhash expiry before submit may create a new signing generation only after revalidation. An unknown submitted transaction must be reconciled to landed or definitively not landed before any re-sign.
 - `protocol/keeper-instructions.v1.json` and its envelope fixtures are generated from the pinned IDLs. Never hand-edit them; regenerate and review the semantic diff. Validation proves instruction shape, not economic eligibility or account freshness.
+- `protocol/keeper-account-resolution.v1.json` and adapter codec fixtures are generated from the pinned IDLs. Keep Rust Borsh/PDA code and TypeScript Borsh/PDA code native and independent; decimal-string `u64` wire values, exact seed encoding, bumps, and static addresses must match the shared vectors.

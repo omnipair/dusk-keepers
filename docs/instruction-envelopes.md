@@ -38,13 +38,12 @@ they are not treated as top-level transactions.
 
 ## Explicit ports
 
-The adapter does not discover accounts, derive PDAs, read RPC, evaluate position
-health/proposal eligibility, encode business arguments, sign, or submit. Native
-`AccountResolver`, `InstructionDataEncoder`, and `EnvelopeSigner` ports make those
-boundaries explicit. Account resolution must follow direct-RPC revalidation, and
-the remote signer accepts only `SignableJobEnvelope`. That type is constructible
-by the adapter only after both envelope validation and the complete frozen-lock
-live-readiness gate pass; ordinary `ValidatedJobEnvelope` remains shadow-only.
+The adapter does not evaluate position health/proposal eligibility, sign, or
+submit. Native Borsh encoding and deterministic IDL-derived PDA/static resolution
+are described in `adapter-codecs.md`. Dynamic base accounts and Token-2022
+transfer-hook metas remain behind separate direct-RPC ports. The remote signer
+accepts only `SignableJobEnvelope`, which remains unconstructible under the
+captured lock; ordinary `ValidatedJobEnvelope` is shadow-only.
 
 Passing envelope validation does not prove that a liquidation is healthy, an
 auction is profitable, a proposal is eligible/timelocked, or a transaction is
@@ -54,7 +53,6 @@ validity.
 
 For non-delegated instructions, IDLs do not describe dynamic Token-2022 transfer
 hook tails. Those remaining metas are checked as valid public keys but their mint
-extension-derived order must be produced by the direct-RPC account resolver and
-verified through simulation. Argument suffixes are owned by the native generated
-encoder; this slice validates their pinned discriminator, while economic bounds
-remain typed policy inputs and on-chain constraints.
+extension-derived order must be produced by the typed direct-RPC transfer-hook
+resolver and verified through simulation. Argument bytes now come from the
+native codecs; economic bounds remain policy inputs and on-chain constraints.
