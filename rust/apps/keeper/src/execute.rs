@@ -197,6 +197,15 @@ pub fn classify_simulation_failure(detail: &str) -> (ReasonCode, Option<Expected
     if detail.contains("InvalidAssetMint") || detail.contains("InvalidMint") {
         return (ReasonCode::BoundsNotMet, None);
     }
+    // 6047 is BrokenInvariant at the hLP reserve-identity check. It is a
+    // protocol defect rather than anything this keeper did, and it is
+    // classified rather than left unrecognized so an operator reads the cause
+    // instead of a stack trace. It stays loud: retrying does not clear it
+    // while debt is outstanding, and a keeper quietly looping on it would
+    // hide that the backstop cannot run at all.
+    if detail.contains("BrokenInvariant") || detail.contains("6047") {
+        return (ReasonCode::UnsupportedProtocol, None);
+    }
     if detail.contains("BlockhashNotFound") {
         return (ReasonCode::BlockhashExpired, None);
     }
@@ -525,6 +534,15 @@ mod tests {
         let (reason, race) = classify_simulation_failure("Error Code: InvalidSettlementPrice");
         assert_eq!(reason, ReasonCode::BoundsNotMet);
         assert_eq!(race, Some(ExpectedRace::ObligationNoLongerLiquidatable));
+    }
+
+    /// The hLP invariant failure is a protocol defect, not a keeper fault,
+    /// and must not be filed as an expected race that retries would clear.
+    #[test]
+    fn the_hlp_invariant_failure_is_named_and_not_a_race() {
+        let (reason, race) = classify_simulation_failure("Error Code: BrokenInvariant");
+        assert_eq!(reason, ReasonCode::UnsupportedProtocol);
+        assert_eq!(race, None);
     }
 
     #[test]
