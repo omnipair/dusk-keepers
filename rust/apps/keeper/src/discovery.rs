@@ -55,6 +55,8 @@ struct RpcError {
 #[derive(Deserialize)]
 struct ProgramAccount {
     account: AccountData,
+    #[serde(default)]
+    pubkey: String,
 }
 
 #[derive(Deserialize)]
@@ -147,9 +149,246 @@ impl RpcClient {
             ]),
         )?;
         // The slice makes every payload empty; the count is the answer.
-        Ok(accounts.iter().filter(|entry| entry.account.data.len() >= 1).count())
+        Ok(accounts.iter().filter(|entry| !entry.account.data.is_empty()).count())
+    }
+
+    /// Fetch a program's accounts of one type, with their data.
+    ///
+    /// The counting variant slices the payload away; this one keeps it,
+    /// because acting on a position requires reading it. Kept separate so the
+    /// wallet-less sentinel never pays for data it does not use.
+    pub fn program_accounts(
+        &self,
+        program_id: &str,
+        discriminator: [u8; 8],
+    ) -> Result<Vec<([u8; 32], Vec<u8>)>, DiscoveryError> {
+        let encoded = bs58::encode(discriminator).into_string();
+        let accounts: Vec<ProgramAccount> = self.call(
+            "getProgramAccounts",
+            serde_json::json!([
+                program_id,
+                {
+                    "encoding": "base64",
+                    "commitment": "confirmed",
+                    "filters": [
+                        { "memcmp": { "offset": 0, "bytes": encoded } }
+                    ]
+                }
+            ]),
+        )?;
+        let mut decoded = Vec::with_capacity(accounts.len());
+        for entry in accounts {
+            let payload = entry
+                .account
+                .data
+                .first()
+                .ok_or_else(|| DiscoveryError::Malformed("account carried no data".into()))?;
+            let bytes = decode_base64(payload)
+                .ok_or_else(|| DiscoveryError::Malformed("account data was not base64".into()))?;
+            let address = decode_base58_key(&entry.pubkey)?;
+            decoded.push((address, bytes));
+        }
+        Ok(decoded)
+    }
+
+    /// A market's base and quote mints, read from the account itself.
+    ///
+    /// `base_side.asset_mint` sits at a fixed offset after the discriminator,
+    /// the version byte and the yLP mint. The quote side is nested far enough
+    /// into a large struct that hand-computing its offset would be a standing
+    /// invitation to drift, so the quote mint is supplied by the caller and
+    /// only the base mint is verified here. The program checks both anyway.
+    pub fn market_base_mint(&self, market: &str) -> Result<[u8; 32], DiscoveryError> {
+        let data = self.account_data(market)?;
+        if data.len() < 73 {
+            return Err(DiscoveryError::Malformed("market account is too short".into()));
+        }
+        let mut mint = [0_u8; 32];
+        mint.copy_from_slice(&data[41..73]);
+        Ok(mint)
+    }
+
+    pub fn account_data(&self, address: &str) -> Result<Vec<u8>, DiscoveryError> {
+        #[derive(Deserialize)]
+        struct Value {
+            value: Option<AccountData>,
+        }
+        let response: Value = self.call(
+            "getAccountInfo",
+            serde_json::json!([
+                address,
+                { "encoding": "base64", "commitment": "confirmed" }
+            ]),
+        )?;
+        let account = response
+            .value
+            .ok_or_else(|| DiscoveryError::Malformed(format!("{address} does not exist")))?;
+        let payload = account
+            .data
+            .first()
+            .ok_or_else(|| DiscoveryError::Malformed("account carried no data".into()))?;
+        decode_base64(payload)
+            .ok_or_else(|| DiscoveryError::Malformed("account data was not base64".into()))
+    }
+
+    pub fn latest_blockhash(&self) -> Result<[u8; 32], DiscoveryError> {
+        #[derive(Deserialize)]
+        struct Value {
+            value: Inner,
+        }
+        #[derive(Deserialize)]
+        struct Inner {
+            blockhash: String,
+        }
+        let response: Value = self.call(
+            "getLatestBlockhash",
+            serde_json::json!([{ "commitment": "confirmed" }]),
+        )?;
+        decode_base58_key(&response.value.blockhash)
+    }
+
+    /// Simulate a signed transaction. `Ok(None)` means the program accepted it.
+    ///
+    /// The signature is not verified by the node here: the transaction is
+    /// signed before simulation anyway, and asking the node to verify adds a
+    /// failure mode that says nothing about whether the instruction would
+    /// succeed.
+    pub fn simulate(&self, transaction_base64: &str) -> Result<Option<String>, DiscoveryError> {
+        #[derive(Deserialize)]
+        struct Value {
+            value: Inner,
+        }
+        #[derive(Deserialize)]
+        struct Inner {
+            err: Option<serde_json::Value>,
+            logs: Option<Vec<String>>,
+        }
+        let response: Value = self.call(
+            "simulateTransaction",
+            serde_json::json!([
+                transaction_base64,
+                {
+                    "commitment": "confirmed",
+                    "encoding": "base64",
+                    "sigVerify": false,
+                    "replaceRecentBlockhash": true
+                }
+            ]),
+        )?;
+        let Some(error) = response.value.err else {
+            return Ok(None);
+        };
+        // The logs name the error; the `err` field only gives its number.
+        // Both are kept, because classification reads the name and a human
+        // reading an alert needs the raw form.
+        let named = response
+            .value
+            .logs
+            .unwrap_or_default()
+            .into_iter()
+            .filter(|line| line.contains("Error") || line.contains("failed"))
+            .collect::<Vec<_>>()
+            .join(" | ");
+        Ok(Some(format!("{error} {named}").trim().to_owned()))
+    }
+
+    pub fn send_transaction(&self, transaction_base64: &str) -> Result<String, DiscoveryError> {
+        self.call(
+            "sendTransaction",
+            serde_json::json!([
+                transaction_base64,
+                {
+                    "encoding": "base64",
+                    "preflightCommitment": "confirmed",
+                    "maxRetries": 3
+                }
+            ]),
+        )
+    }
+
+    pub fn signature_confirmed(&self, signature: &str) -> Result<bool, DiscoveryError> {
+        #[derive(Deserialize)]
+        struct Value {
+            value: Vec<Option<Status>>,
+        }
+        #[derive(Deserialize)]
+        struct Status {
+            #[serde(rename = "confirmationStatus")]
+            confirmation_status: Option<String>,
+            err: Option<serde_json::Value>,
+        }
+        let response: Value = self.call(
+            "getSignatureStatuses",
+            serde_json::json!([[signature], { "searchTransactionHistory": true }]),
+        )?;
+        Ok(response
+            .value
+            .first()
+            .and_then(|entry| entry.as_ref())
+            .is_some_and(|status| {
+                status.err.is_none()
+                    && matches!(
+                        status.confirmation_status.as_deref(),
+                        Some("confirmed" | "finalized")
+                    )
+            }))
+    }
+
+    pub fn lamports(&self, address: &str) -> Result<u64, DiscoveryError> {
+        #[derive(Deserialize)]
+        struct Value {
+            value: u64,
+        }
+        let response: Value = self.call(
+            "getBalance",
+            serde_json::json!([address, { "commitment": "confirmed" }]),
+        )?;
+        Ok(response.value)
     }
 }
+
+fn decode_base58_key(encoded: &str) -> Result<[u8; 32], DiscoveryError> {
+    let bytes = bs58::decode(encoded)
+        .into_vec()
+        .map_err(|error| DiscoveryError::Malformed(error.to_string()))?;
+    if bytes.len() != 32 {
+        return Err(DiscoveryError::Malformed(format!(
+            "expected a 32-byte key, found {} bytes",
+            bytes.len()
+        )));
+    }
+    let mut key = [0_u8; 32];
+    key.copy_from_slice(&bytes);
+    Ok(key)
+}
+
+/// Standard-alphabet base64 with padding, the encoding the RPC returns.
+fn decode_base64(input: &str) -> Option<Vec<u8>> {
+    const ALPHABET: &[u8; 64] =
+        b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    let mut lookup = [255_u8; 256];
+    for (index, byte) in ALPHABET.iter().enumerate() {
+        lookup[*byte as usize] = index as u8;
+    }
+    let trimmed = input.trim_end_matches('=');
+    let mut output = Vec::with_capacity(trimmed.len() * 3 / 4);
+    let mut accumulator = 0_u32;
+    let mut bits = 0_u32;
+    for byte in trimmed.bytes() {
+        let value = lookup[byte as usize];
+        if value == 255 {
+            return None;
+        }
+        accumulator = (accumulator << 6) | value as u32;
+        bits += 6;
+        if bits >= 8 {
+            bits -= 8;
+            output.push((accumulator >> bits) as u8);
+        }
+    }
+    Some(output)
+}
+
 
 /// One discovery pass over the pinned programs.
 pub fn observe(client: &RpcClient, dusk_program_id: &str) -> Result<Observation, DiscoveryError> {

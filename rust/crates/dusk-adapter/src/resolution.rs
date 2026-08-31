@@ -700,7 +700,7 @@ mod tests {
             );
         }
         assert_eq!(
-            resolver.pda_recipe_key("dusk:trigger_liquidation_auction", "market"),
+            resolver.pda_recipe_key("dusk:start_liquidation_auction", "market"),
             Some("dusk:market")
         );
     }

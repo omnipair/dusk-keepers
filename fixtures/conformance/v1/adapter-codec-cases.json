@@ -3,42 +3,39 @@
   "schemaVersion": 1,
   "encodingCases": [
     {
-      "name": "dusk trigger_liquidation_auction",
-      "specificationKey": "dusk:trigger_liquidation_auction",
+      "name": "dusk start_liquidation_auction",
+      "specificationKey": "dusk:start_liquidation_auction",
       "arguments": {},
       "argumentLayoutSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-      "expectedDataHex": "b5ac53586537f66f"
+      "expectedDataHex": "20d273353a03e178"
     },
     {
-      "name": "dusk bid_liquidation_auction",
-      "specificationKey": "dusk:bid_liquidation_auction",
+      "name": "dusk fill_liquidation_auction",
+      "specificationKey": "dusk:fill_liquidation_auction",
       "arguments": {
         "repayAmount": "18446744073709551615",
         "minCollateralOut": "0"
       },
       "argumentLayoutSha256": "aae8041af36876a0fef84695f9e6a9a1ca7e937177a44bb0fe6f55b3e0876886",
-      "expectedDataHex": "06df1ee493c51b31ffffffffffffffff0000000000000000"
+      "expectedDataHex": "17767c65bf022c93ffffffffffffffff0000000000000000"
     },
     {
-      "name": "dusk settle_liquidation_auction_floor",
-      "specificationKey": "dusk:settle_liquidation_auction_floor",
+      "name": "dusk backstop_liquidation_auction",
+      "specificationKey": "dusk:backstop_liquidation_auction",
       "arguments": {
-        "repayAmount": "1000",
-        "minCollateralOut": "850",
-        "maxInsuranceDraw": "100",
-        "maxSocializedLoss": "50"
+        "minCallerBountyOut": "100"
       },
-      "argumentLayoutSha256": "819732c64338713a4d28d2d0873852ea45164c579c903dfec0a5481e69593eba",
-      "expectedDataHex": "2e5d574e55318979e803000000000000520300000000000064000000000000003200000000000000"
+      "argumentLayoutSha256": "8971fdb0534addc78d04c1a2b0853226c102e51505e94b7c93e6d6415330c91a",
+      "expectedDataHex": "870f320b4cfc53186400000000000000"
     },
     {
-      "name": "dusk liquidate_leverage",
-      "specificationKey": "dusk:liquidate_leverage",
+      "name": "dusk liquidate_leverage_position",
+      "specificationKey": "dusk:liquidate_leverage_position",
       "arguments": {
         "debtAsset": 1
       },
       "argumentLayoutSha256": "853228ce736147c516397d25bc2e3a9e7443982a010f3cf3221210e47e7eec52",
-      "expectedDataHex": "bc840a53ab4e742901"
+      "expectedDataHex": "d848eddff8d19da501"
     },
     {
       "name": "dusk delegated_close_leverage",
@@ -46,12 +43,13 @@
       "arguments": {
         "debtAsset": 0,
         "minAmountOut": "800",
+        "closeBps": 10000,
         "beforeIxDataHex": "05236f00df83c11f0807060504030201",
         "afterIxDataHex": "9ce0eefa5fe5eb3b0700000000000000",
         "beforeAccountsLen": 8
       },
-      "argumentLayoutSha256": "51cd16d1ec0954114df44420b813bab2dd2985513f9124c81832c343bfd694e7",
-      "expectedDataHex": "0eda6299a413308b0020030000000000001000000005236f00df83c11f0807060504030201100000009ce0eefa5fe5eb3b07000000000000000800"
+      "argumentLayoutSha256": "3d78e829d2a4b89c975f0957845b52eb4e949b38ac8ea16d91362c0d0e3244e0",
+      "expectedDataHex": "0eda6299a413308b00200300000000000010271000000005236f00df83c11f0807060504030201100000009ce0eefa5fe5eb3b07000000000000000800"
     },
     {
       "name": "leverage_delegate before_take_profit",
@@ -116,7 +114,7 @@
     },
     {
       "name": "u64 overflow",
-      "specificationKey": "dusk:bid_liquidation_auction",
+      "specificationKey": "dusk:fill_liquidation_auction",
       "arguments": {
         "repayAmount": "18446744073709551616",
         "minCollateralOut": "0"
@@ -125,7 +123,7 @@
     },
     {
       "name": "negative u64",
-      "specificationKey": "dusk:bid_liquidation_auction",
+      "specificationKey": "dusk:fill_liquidation_auction",
       "arguments": {
         "repayAmount": "-1",
         "minCollateralOut": "0"
@@ -134,7 +132,7 @@
     },
     {
       "name": "non-canonical u64",
-      "specificationKey": "dusk:bid_liquidation_auction",
+      "specificationKey": "dusk:fill_liquidation_auction",
       "arguments": {
         "repayAmount": "+1",
         "minCollateralOut": "0"
@@ -143,7 +141,7 @@
     },
     {
       "name": "u8 overflow",
-      "specificationKey": "dusk:liquidate_leverage",
+      "specificationKey": "dusk:liquidate_leverage_position",
       "arguments": {
         "debtAsset": 256
       },
@@ -247,15 +245,6 @@
       },
       "expectedAddress": "GZ1iwLzCskzpPz5Lw2jj31TnKZAeB5tsKyXP1p1TXn2T",
       "expectedBump": 255
-    },
-    {
-      "name": "leverage_delegate custody_authority",
-      "recipeKey": "leverage_delegate:custody_authority",
-      "inputs": {
-        "order": "BWGQNbbUBFkYFCEGFMZWvtqL6hq7BLit5s7CeqT3JiuZ"
-      },
-      "expectedAddress": "4ok5Pv7zPkeGYMFc9uoCVo3mUzt3LHnvTNELq93uUTEn",
-      "expectedBump": 255
     }
   ],
   "invalidPdaCases": [
@@ -325,56 +314,68 @@
   ],
   "staticAccountCases": [
     {
-      "name": "dusk:bid_liquidation_auction token_program",
-      "instructionKey": "dusk:bid_liquidation_auction",
+      "name": "dusk:fill_liquidation_auction token_program",
+      "instructionKey": "dusk:fill_liquidation_auction",
       "accountName": "token_program",
       "expectedAddress": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
     },
     {
-      "name": "dusk:bid_liquidation_auction token_2022_program",
-      "instructionKey": "dusk:bid_liquidation_auction",
+      "name": "dusk:fill_liquidation_auction token_2022_program",
+      "instructionKey": "dusk:fill_liquidation_auction",
       "accountName": "token_2022_program",
       "expectedAddress": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
     },
     {
-      "name": "dusk:bid_liquidation_auction program",
-      "instructionKey": "dusk:bid_liquidation_auction",
+      "name": "dusk:fill_liquidation_auction program",
+      "instructionKey": "dusk:fill_liquidation_auction",
       "accountName": "program",
       "expectedAddress": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X"
     },
     {
-      "name": "dusk:settle_liquidation_auction_floor token_program",
-      "instructionKey": "dusk:settle_liquidation_auction_floor",
+      "name": "dusk:backstop_liquidation_auction instructions_sysvar",
+      "instructionKey": "dusk:backstop_liquidation_auction",
+      "accountName": "instructions_sysvar",
+      "expectedAddress": "Sysvar1nstructions1111111111111111111111111"
+    },
+    {
+      "name": "dusk:backstop_liquidation_auction token_program",
+      "instructionKey": "dusk:backstop_liquidation_auction",
       "accountName": "token_program",
       "expectedAddress": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
     },
     {
-      "name": "dusk:settle_liquidation_auction_floor token_2022_program",
-      "instructionKey": "dusk:settle_liquidation_auction_floor",
+      "name": "dusk:backstop_liquidation_auction token_2022_program",
+      "instructionKey": "dusk:backstop_liquidation_auction",
       "accountName": "token_2022_program",
       "expectedAddress": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
     },
     {
-      "name": "dusk:settle_liquidation_auction_floor program",
-      "instructionKey": "dusk:settle_liquidation_auction_floor",
+      "name": "dusk:backstop_liquidation_auction program",
+      "instructionKey": "dusk:backstop_liquidation_auction",
       "accountName": "program",
       "expectedAddress": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X"
     },
     {
-      "name": "dusk:liquidate_leverage token_program",
-      "instructionKey": "dusk:liquidate_leverage",
+      "name": "dusk:liquidate_leverage_position instructions_sysvar",
+      "instructionKey": "dusk:liquidate_leverage_position",
+      "accountName": "instructions_sysvar",
+      "expectedAddress": "Sysvar1nstructions1111111111111111111111111"
+    },
+    {
+      "name": "dusk:liquidate_leverage_position token_program",
+      "instructionKey": "dusk:liquidate_leverage_position",
       "accountName": "token_program",
       "expectedAddress": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
     },
     {
-      "name": "dusk:liquidate_leverage token_2022_program",
-      "instructionKey": "dusk:liquidate_leverage",
+      "name": "dusk:liquidate_leverage_position token_2022_program",
+      "instructionKey": "dusk:liquidate_leverage_position",
       "accountName": "token_2022_program",
       "expectedAddress": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
     },
     {
-      "name": "dusk:liquidate_leverage program",
-      "instructionKey": "dusk:liquidate_leverage",
+      "name": "dusk:liquidate_leverage_position program",
+      "instructionKey": "dusk:liquidate_leverage_position",
       "accountName": "program",
       "expectedAddress": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X"
     },
@@ -383,6 +384,12 @@
       "instructionKey": "dusk:delegated_close_leverage",
       "accountName": "delegated_program",
       "expectedAddress": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv"
+    },
+    {
+      "name": "dusk:delegated_close_leverage instructions_sysvar",
+      "instructionKey": "dusk:delegated_close_leverage",
+      "accountName": "instructions_sysvar",
+      "expectedAddress": "Sysvar1nstructions1111111111111111111111111"
     },
     {
       "name": "dusk:delegated_close_leverage token_program",

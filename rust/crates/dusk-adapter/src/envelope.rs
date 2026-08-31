@@ -831,7 +831,20 @@ mod tests {
             .expect("a valid fixture must exist")
             .envelope;
 
-        let error = validator().validate_for_signing(envelope).unwrap_err();
+        // The rule is that a lock which has not been frozen cannot authorize
+        // signing. That is tested against a lock demoted here rather than
+        // against the repository's own, because the repository's lock is
+        // frozen once a deployment is real — and a test that only passes
+        // while nothing is deployed stops testing the rule at exactly the
+        // moment the rule starts to matter.
+        let mut lock = ProtocolLock::from_json(LOCK).expect("lock must parse");
+        lock.status = crate::LockStatus::Captured;
+        let contract =
+            InstructionContract::from_json(CONTRACT).expect("instruction contract must parse");
+        let validator =
+            EnvelopeValidator::new(lock, contract).expect("contract must match lock");
+
+        let error = validator.validate_for_signing(envelope).unwrap_err();
         assert_eq!(
             error.code,
             EnvelopeValidationErrorCode::LiveProtocolNotReady

@@ -7,8 +7,9 @@
   "source": {
     "repository": "https://github.com/omnipair/dusk",
     "branch": "feat/optimizations",
-    "note": "Devnet deployment of 2026-08-29; program keypairs and address registry in ~/.config/omnipair/dusk-devnet. Built from a working tree ahead of the recorded commit; binaries attested from chain (upgradeable loader programdata slot 489593996).",
-    "gitCommit": "dd7fb53"
+    "note": "Devnet deployment of 2026-08-29; program keypairs and address registry in ~/.config/omnipair/dusk-devnet. Binaries attested from chain (upgradeable loader programdata slot 489593996). source.worktreeFingerprintSha256 covers programs/ in the dusk repository and is reproduced by scripts/compute-worktree-fingerprint.mjs.",
+    "gitCommit": "dd7fb53150163ed5b0bf3ae14fea9f2b47aa0d15",
+    "worktreeFingerprintSha256": "9306f255037426d8e7058cc77108500c8ff03fc14528a00ba7b806544bf455b3"
   },
   "toolchain": {
     "anchor": "0.31.1",
@@ -22,7 +23,7 @@
       "name": "dusk",
       "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "binary": {
-        "path": "on-chain (devnet)",
+        "path": "chain:devnet:JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
         "sha256": "8191b4cf3ed18fa755e1235ed5e9056b046f9e90a01b74a9e29aba235f722833"
       },
       "idl": {
@@ -34,7 +35,7 @@
       "name": "leverage_delegate",
       "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
       "binary": {
-        "path": "on-chain (devnet)",
+        "path": "chain:devnet:AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
         "sha256": "afe03f80ee2289f4c74195539b6d30489fb5eef93d0927760506438d3050e2b2"
       },
       "idl": {

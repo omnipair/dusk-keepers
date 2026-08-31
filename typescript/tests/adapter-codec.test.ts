@@ -128,7 +128,7 @@ test("resolves every generated static account", () => {
     );
   }
   assert.equal(
-    resolver.pdaRecipeKey("dusk:trigger_liquidation_auction", "market"),
+    resolver.pdaRecipeKey("dusk:start_liquidation_auction", "market"),
     "dusk:market",
   );
 });
@@ -142,7 +142,7 @@ test("rejects an Anchor discriminator drift in the instruction contract", () => 
     () =>
       encodeKeeperInstructionJson(
         drifted as unknown as InstructionContract,
-        "dusk:trigger_liquidation_auction",
+        "dusk:start_liquidation_auction",
         {},
       ),
     (error) => error instanceof InstructionEncodingError && error.code === "contract_mismatch",

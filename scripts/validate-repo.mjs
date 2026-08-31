@@ -43,6 +43,17 @@ assert.ok(lock.programs.some((program) => program.name === "leverage_delegate"))
 
 async function verifyArtifact(artifact, label) {
   assert.match(artifact.sha256, /^[0-9a-f]{64}$/, `${label}: missing SHA-256`);
+  // A binary attested from the chain has no local file to re-hash: the hash
+  // came from the upgradeable loader's programdata account, which is the
+  // authority on what is actually running. Verifying it here would mean
+  // rebuilding it bit-identically, which is what the verifiable-build
+  // pipeline is for and not what this validator does.
+  if (artifact.path.startsWith("chain:")) {
+    const [, cluster, programId] = artifact.path.split(":");
+    assert.ok(cluster, `${label}: chain artifact must name a cluster`);
+    assert.match(programId ?? "", /^[1-9A-HJ-NP-Za-km-z]{32,44}$/, `${label}: chain artifact must name a program id`);
+    return;
+  }
   const bytes = await readFile(new URL(artifact.path, root));
   const actual = createHash("sha256").update(bytes).digest("hex");
   assert.equal(actual, artifact.sha256, `${label}: artifact hash mismatch`);

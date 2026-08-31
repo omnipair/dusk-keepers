@@ -20,28 +20,28 @@
     {
       "action": "lending_liquidation_trigger",
       "jobKind": "lending_liquidation_trigger",
-      "primaryInstructionKey": "dusk:trigger_liquidation_auction",
+      "primaryInstructionKey": "dusk:start_liquidation_auction",
       "cpiInstructionKeys": [],
       "requiredOptionalAccounts": []
     },
     {
       "action": "lending_liquidation_bid",
       "jobKind": "lending_liquidation_bid",
-      "primaryInstructionKey": "dusk:bid_liquidation_auction",
+      "primaryInstructionKey": "dusk:fill_liquidation_auction",
       "cpiInstructionKeys": [],
       "requiredOptionalAccounts": []
     },
     {
       "action": "lending_liquidation_floor_settle",
       "jobKind": "lending_liquidation_settle",
-      "primaryInstructionKey": "dusk:settle_liquidation_auction_floor",
+      "primaryInstructionKey": "dusk:backstop_liquidation_auction",
       "cpiInstructionKeys": [],
       "requiredOptionalAccounts": []
     },
     {
       "action": "leverage_liquidation",
       "jobKind": "leverage_liquidation",
-      "primaryInstructionKey": "dusk:liquidate_leverage",
+      "primaryInstructionKey": "dusk:liquidate_leverage_position",
       "cpiInstructionKeys": [],
       "requiredOptionalAccounts": []
     },
@@ -95,11 +95,11 @@
   ],
   "instructions": [
     {
-      "key": "dusk:trigger_liquidation_auction",
+      "key": "dusk:start_liquidation_auction",
       "program": "dusk",
       "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-      "instructionName": "trigger_liquidation_auction",
-      "discriminatorHex": "b5ac53586537f66f",
+      "instructionName": "start_liquidation_auction",
+      "discriminatorHex": "20d273353a03e178",
       "accounts": [
         {
           "name": "market",
@@ -125,11 +125,11 @@
       ]
     },
     {
-      "key": "dusk:bid_liquidation_auction",
+      "key": "dusk:fill_liquidation_auction",
       "program": "dusk",
       "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-      "instructionName": "bid_liquidation_auction",
-      "discriminatorHex": "06df1ee493c51b31",
+      "instructionName": "fill_liquidation_auction",
+      "discriminatorHex": "17767c65bf022c93",
       "accounts": [
         {
           "name": "market",
@@ -141,6 +141,13 @@
         {
           "name": "futarchy_authority",
           "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "position_owner",
+          "writable": true,
           "signer": false,
           "optional": false,
           "fixedAddress": null
@@ -267,11 +274,11 @@
       ]
     },
     {
-      "key": "dusk:settle_liquidation_auction_floor",
+      "key": "dusk:backstop_liquidation_auction",
       "program": "dusk",
       "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-      "instructionName": "settle_liquidation_auction_floor",
-      "discriminatorHex": "2e5d574e55318979",
+      "instructionName": "backstop_liquidation_auction",
+      "discriminatorHex": "870f320b4cfc5318",
       "accounts": [
         {
           "name": "market",
@@ -288,8 +295,15 @@
           "fixedAddress": null
         },
         {
-          "name": "liquidator",
+          "name": "position_owner",
           "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "liquidator",
+          "writable": false,
           "signer": true,
           "optional": false,
           "fixedAddress": null
@@ -309,7 +323,14 @@
           "fixedAddress": null
         },
         {
-          "name": "reserve_vault",
+          "name": "debt_reserve_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "collateral_reserve_vault",
           "writable": true,
           "signer": false,
           "optional": false,
@@ -337,21 +358,14 @@
           "fixedAddress": null
         },
         {
-          "name": "collateral_insurance_vault",
-          "writable": true,
-          "signer": false,
-          "optional": false,
-          "fixedAddress": null
-        },
-        {
-          "name": "liquidator_debt_account",
-          "writable": true,
-          "signer": false,
-          "optional": false,
-          "fixedAddress": null
-        },
-        {
           "name": "liquidator_collateral_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "owner_debt_account",
           "writable": true,
           "signer": false,
           "optional": false,
@@ -377,6 +391,13 @@
           "signer": false,
           "optional": true,
           "fixedAddress": null
+        },
+        {
+          "name": "instructions_sysvar",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "Sysvar1nstructions1111111111111111111111111"
         },
         {
           "name": "token_program",
@@ -409,11 +430,11 @@
       ]
     },
     {
-      "key": "dusk:liquidate_leverage",
+      "key": "dusk:liquidate_leverage_position",
       "program": "dusk",
       "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-      "instructionName": "liquidate_leverage",
-      "discriminatorHex": "bc840a53ab4e7429",
+      "instructionName": "liquidate_leverage_position",
+      "discriminatorHex": "d848eddff8d19da5",
       "accounts": [
         {
           "name": "market",
@@ -519,6 +540,13 @@
           "signer": true,
           "optional": false,
           "fixedAddress": null
+        },
+        {
+          "name": "instructions_sysvar",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "Sysvar1nstructions1111111111111111111111111"
         },
         {
           "name": "token_program",
@@ -670,6 +698,13 @@
           "fixedAddress": null
         },
         {
+          "name": "instructions_sysvar",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
           "name": "token_program",
           "writable": false,
           "signer": false,
@@ -735,14 +770,14 @@
           "fixedAddress": null
         },
         {
-          "name": "custody_authority",
+          "name": "custody_token_account",
           "writable": false,
           "signer": false,
           "optional": false,
           "fixedAddress": null
         },
         {
-          "name": "custody_token_account",
+          "name": "collateral_mint",
           "writable": false,
           "signer": false,
           "optional": false,
@@ -794,13 +829,6 @@
         },
         {
           "name": "leverage_delegation",
-          "writable": false,
-          "signer": false,
-          "optional": false,
-          "fixedAddress": null
-        },
-        {
-          "name": "custody_authority",
           "writable": false,
           "signer": false,
           "optional": false,
@@ -893,14 +921,14 @@
           "fixedAddress": null
         },
         {
-          "name": "custody_authority",
+          "name": "custody_token_account",
           "writable": false,
           "signer": false,
           "optional": false,
           "fixedAddress": null
         },
         {
-          "name": "custody_token_account",
+          "name": "collateral_mint",
           "writable": false,
           "signer": false,
           "optional": false,

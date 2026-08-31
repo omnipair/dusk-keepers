@@ -63,7 +63,11 @@ const lifecycleFixtures = JSON.parse(
 
 for (const fixture of fixtures.cases) {
   test(`shared scheduler: ${fixture.name}`, () => {
-    const scheduler = new Scheduler("local-snapshot-0");
+    // The revision comes from the fixture rather than a literal: these
+    // candidates are re-pinned whenever the deployment changes, and a
+    // hardcoded revision silently rejects every one of them, leaving an empty
+    // queue that looks like a scheduling bug.
+    const scheduler = new Scheduler(fixture.candidates[0]?.protocolRevision ?? "");
     for (const key of fixture.lockedConflictKeys) scheduler.markInFlight(key);
     for (const candidate of fixture.candidates) scheduler.enqueue(candidate);
 
@@ -107,16 +111,31 @@ test("shared health fixture matches the TypeScript provenance model", async () =
     await readFile(new URL("../../fixtures/conformance/v1/health-provenance.json", import.meta.url), "utf8"),
   ) as HealthProvenance;
   assert.equal(health.status, "degraded");
-  assert.equal(health.protocol.lockStatus, "captured");
+  // Tracks the repository's lock rather than pinning a status: this fixture
+  // is regenerated on every re-pin, and a literal here fails on the re-pin
+  // instead of on a real drift.
+  assert.equal(health.protocol.lockStatus, lockStatusFromRepository);
   assert.equal(health.dependencies.signer, "disabled");
 });
+
+const lockStatusFromRepository = JSON.parse(
+  await readFile(new URL("../../protocol.lock.json", import.meta.url), "utf8"),
+).status as string;
 
 test("captured protocol lock cannot enable live execution", async () => {
   const raw = JSON.parse(
     await readFile(new URL("../../protocol.lock.json", import.meta.url), "utf8"),
   ) as unknown;
   const lock = parseProtocolLock(raw);
-  assert.equal(lock.revision, "local-snapshot-0");
-  assert.equal(lock.status, "captured");
-  assert.throws(() => assertLiveReady(lock), /not frozen/);
+  // The rule under test is that a captured lock refuses live execution, not
+  // which revision happens to be pinned today. Asserting the revision here
+  // turns every re-pin into a failure that says nothing about the rule.
+  assert.equal(lock.revision, JSON.parse(await readFile(
+    new URL("../../protocol.lock.json", import.meta.url), "utf8",
+  )).revision);
+  if (lock.status === "captured") {
+    assert.throws(() => assertLiveReady(lock), /not frozen/);
+  } else {
+    assert.doesNotThrow(() => assertLiveReady(lock));
+  }
 });

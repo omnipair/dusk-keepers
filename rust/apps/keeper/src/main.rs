@@ -1,4 +1,5 @@
 use std::{
+    collections::BTreeMap,
     env,
     error::Error,
     io::{Read, Write},
@@ -12,11 +13,17 @@ use std::{
     time::Duration,
 };
 
-use dusk_adapter::ProtocolLock;
+use dusk_adapter::{InstructionContract, ProtocolLock};
 
 mod discovery;
+mod execute;
+mod signer;
+mod transaction;
 
 use discovery::{observe, Observation, RpcClient};
+use execute::{MarketMints, TriggerJob};
+use keeper_core::OutcomeStatus;
+use signer::{LocalKeypair, TransactionSigner};
 
 /// What the last discovery pass saw, shared with the health endpoint.
 #[derive(Clone, Debug, Default)]
@@ -24,6 +31,19 @@ struct Snapshot {
     observation: Observation,
     error: Option<String>,
     passes: u64,
+    /// Execution counters. Sent is deliberately separate from evaluated: on a
+    /// healthy market the first climbs and the second does not, and an
+    /// operator needs to see that the keeper is working rather than idle.
+    evaluated: u64,
+    sent: u64,
+    last_signature: Option<String>,
+    last_execution_error: Option<String>,
+    /// Why the last pass declined to act, counted by reason.
+    ///
+    /// Without this, "every position is healthy" and "every simulation is
+    /// failing because the keeper builds a malformed transaction" both read as
+    /// zero sends. They are the two most important states to tell apart.
+    last_reasons: BTreeMap<String, u32>,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -48,6 +68,13 @@ struct Config {
     profile: String,
     bind_address: SocketAddr,
     protocol_lock: PathBuf,
+    instruction_contract: PathBuf,
+    /// Ceiling on transactions per pass. A keeper that has gone wrong should
+    /// run out of permission before it runs out of money.
+    max_sends_per_pass: usize,
+    /// Below this the keeper reports unready rather than discovering it
+    /// cannot pay halfway through a liquidation.
+    minimum_lamports: u64,
 }
 
 impl Config {
@@ -59,10 +86,24 @@ impl Config {
         let protocol_lock = env::var("DUSK_PROTOCOL_LOCK")
             .unwrap_or_else(|_| "protocol.lock.json".into())
             .into();
+        let instruction_contract = env::var("DUSK_INSTRUCTION_CONTRACT")
+            .unwrap_or_else(|_| "protocol/keeper-instructions.v1.json".into())
+            .into();
+        let max_sends_per_pass = env::var("KEEPER_MAX_SENDS_PER_PASS")
+            .ok()
+            .and_then(|value| value.parse().ok())
+            .unwrap_or(4);
+        let minimum_lamports = env::var("KEEPER_MINIMUM_LAMPORTS")
+            .ok()
+            .and_then(|value| value.parse().ok())
+            .unwrap_or(20_000_000);
         Ok(Self {
+            bind_address,
+            instruction_contract,
+            max_sends_per_pass,
+            minimum_lamports,
             mode,
             profile,
-            bind_address,
             protocol_lock,
         })
     }
@@ -74,12 +115,13 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     if config.mode == Mode::Live {
         lock.assert_live_ready()?;
-        return Err("live executor is intentionally not implemented in this scaffold".into());
     }
 
     println!(
-        "keeper profile={} mode=shadow protocol_revision={}",
-        config.profile, lock.revision
+        "keeper profile={} mode={} protocol_revision={}",
+        config.profile,
+        if config.mode == Mode::Live { "live" } else { "shadow" },
+        lock.revision
     );
     if env::args().any(|argument| argument == "--check") {
         return Ok(());
@@ -94,6 +136,37 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let snapshot = Arc::new(Mutex::new(Snapshot::default()));
 
+    // A profile that signs needs a key; one that does not must never have
+    // one. The sentinel is the whole reason this is a per-profile decision
+    // rather than a global switch.
+    let executor: Option<LocalKeypair> = if config.profile == "sentinel" {
+        None
+    } else {
+        match load_signer() {
+            Ok(keypair) => {
+                println!("keeper signer={}", keypair.public_key_base58());
+                Some(keypair)
+            }
+            // Absent in shadow mode is expected; absent in live mode is not,
+            // and refusing to start is better than running as a keeper that
+            // silently never acts.
+            Err(error) if config.mode == Mode::Shadow => {
+                println!("keeper signer=none ({error})");
+                None
+            }
+            Err(error) => return Err(Box::new(error)),
+        }
+    };
+
+    let contract = match std::fs::read_to_string(&config.instruction_contract) {
+        Ok(raw) => Some(InstructionContract::from_json(&raw)?),
+        Err(error) if executor.is_none() => {
+            println!("keeper contract=absent ({error})");
+            None
+        }
+        Err(error) => return Err(Box::new(error)),
+    };
+
     // Discovery runs even in shadow mode: reading is how the sentinel earns
     // trust before any profile is given a key.
     if let Ok(endpoint) = env::var("SOLANA_RPC_HTTP_URL") {
@@ -102,6 +175,11 @@ fn main() -> Result<(), Box<dyn Error>> {
             .and_then(|value| value.parse().ok())
             .unwrap_or(15_000);
         let shared = Arc::clone(&snapshot);
+        let program_id_key = decode_program_id(&dusk_program_id)?;
+        let markets = market_mints_from_environment();
+        let dry_run = config.mode == Mode::Shadow;
+        let max_sends = config.max_sends_per_pass;
+        let minimum_lamports = config.minimum_lamports;
         thread::spawn(move || {
             let client = RpcClient::new(endpoint, Duration::from_secs(20));
             loop {
@@ -119,12 +197,185 @@ fn main() -> Result<(), Box<dyn Error>> {
                         Err(error) => current.error = Some(error.to_string()),
                     }
                 }
+
+                if let (Some(signer), Some(contract)) = (executor.as_ref(), contract.as_ref()) {
+                    run_execution_pass(
+                        &client,
+                        contract,
+                        signer,
+                        program_id_key,
+                        &markets,
+                        max_sends,
+                        minimum_lamports,
+                        dry_run,
+                        &shared,
+                    );
+                }
+
                 thread::sleep(Duration::from_millis(interval));
             }
         });
     }
 
     serve(config.bind_address, &config.profile, &lock.revision, snapshot)
+}
+
+
+/// The signer, from the environment or from a file.
+///
+/// The variable is how a deployed keeper receives a key, since there is no
+/// filesystem to mount one onto; the path is how a local run uses an existing
+/// Solana keypair without pasting it into a shell.
+fn load_signer() -> Result<LocalKeypair, signer::SignerError> {
+    match env::var("KEEPER_SIGNER_KEY_PATH") {
+        Ok(path) => LocalKeypair::from_file(path),
+        Err(_) => LocalKeypair::from_environment("KEEPER_SIGNER_KEY"),
+    }
+}
+
+fn decode_program_id(encoded: &str) -> Result<[u8; 32], Box<dyn Error>> {
+    let bytes = bs58::decode(encoded).into_vec()?;
+    if bytes.len() != 32 {
+        return Err(format!("program id is {} bytes, not 32", bytes.len()).into());
+    }
+    let mut key = [0_u8; 32];
+    key.copy_from_slice(&bytes);
+    Ok(key)
+}
+
+/// `market:base_mint:quote_mint` entries, comma separated.
+///
+/// Declared rather than discovered because the quote mint sits behind a large
+/// nested struct whose offset would have to be hand-computed, and a wrong
+/// offset is a silent wrong answer. Passing a wrong mint here is not: the
+/// program resolves it against the market and rejects it.
+fn market_mints_from_environment() -> Vec<MarketMints> {
+    let Ok(raw) = env::var("KEEPER_MARKETS") else {
+        return Vec::new();
+    };
+    let decode = |value: &str| -> Option<[u8; 32]> {
+        let bytes = bs58::decode(value.trim()).into_vec().ok()?;
+        let mut key = [0_u8; 32];
+        if bytes.len() != 32 {
+            return None;
+        }
+        key.copy_from_slice(&bytes);
+        Some(key)
+    };
+    raw.split(',')
+        .filter_map(|entry| {
+            let mut parts = entry.split(':');
+            Some(MarketMints {
+                market: decode(parts.next()?)?,
+                base: decode(parts.next()?)?,
+                quote: decode(parts.next()?)?,
+            })
+        })
+        .collect()
+}
+
+/// One execution pass, folded into the shared snapshot.
+///
+/// The balance floor is checked here rather than at startup because a keeper
+/// that has been running for a week is exactly the one that has spent its
+/// SOL, and discovering that mid-liquidation is how a position ends up
+/// half-handled.
+#[allow(clippy::too_many_arguments)]
+fn run_execution_pass(
+    client: &RpcClient,
+    contract: &InstructionContract,
+    signer: &LocalKeypair,
+    program_id: [u8; 32],
+    markets: &[MarketMints],
+    max_sends_per_pass: usize,
+    minimum_lamports: u64,
+    dry_run: bool,
+    shared: &Arc<Mutex<Snapshot>>,
+) {
+    if !dry_run {
+        match client.lamports(&signer.public_key_base58()) {
+            Ok(balance) if balance < minimum_lamports => {
+                if let Ok(mut current) = shared.lock() {
+                    current.last_execution_error = Some(format!(
+                        "signer holds {balance} lamports, below the {minimum_lamports} floor"
+                    ));
+                }
+                return;
+            }
+            Ok(_) => {}
+            Err(error) => {
+                if let Ok(mut current) = shared.lock() {
+                    current.last_execution_error = Some(error.to_string());
+                }
+                return;
+            }
+        }
+    }
+
+    let job = TriggerJob {
+        client,
+        contract,
+        dry_run,
+        market_mints: markets.to_vec(),
+        max_sends_per_pass,
+        program_id,
+        signer,
+    };
+    match job.run_pass() {
+        Ok(reports) => {
+            if let Ok(mut current) = shared.lock() {
+                current.evaluated += reports.len() as u64;
+                current.last_execution_error = None;
+                current.last_reasons = reports.iter().fold(
+                    BTreeMap::new(),
+                    |mut counts, report| {
+                        *counts
+                            .entry(
+                                serde_json::to_value(report.reason)
+                                    .ok()
+                                    .and_then(|value| value.as_str().map(str::to_owned))
+                                    .unwrap_or_else(|| "unknown".into()),
+                            )
+                            .or_insert(0) += 1;
+                        counts
+                    },
+                );
+                for report in &reports {
+                    if report.status == OutcomeStatus::Executed {
+                        current.sent += 1;
+                        current.last_signature = report.signature.clone();
+                        println!(
+                            "keeper executed position={} debt_mint={} signature={}",
+                            report.position,
+                            report.debt_mint,
+                            report.signature.as_deref().unwrap_or("-")
+                        );
+                    } else if report.reason == keeper_core::ReasonCode::SimulationRejected {
+                        // An unrecognized rejection is the one skip worth
+                        // printing: the expected ones are silent by design,
+                        // so anything reaching here is either a new program
+                        // error or a keeper that is building bad transactions.
+                        println!(
+                            "keeper unclassified position={} detail={}",
+                            report.position,
+                            report.detail.as_deref().unwrap_or("-")
+                        );
+                    } else if report.status == OutcomeStatus::RetryableFailure {
+                        println!(
+                            "keeper submit_failed position={} detail={}",
+                            report.position,
+                            report.detail.as_deref().unwrap_or("-")
+                        );
+                    }
+                }
+            }
+        }
+        Err(error) => {
+            if let Ok(mut current) = shared.lock() {
+                current.last_execution_error = Some(error.to_string());
+            }
+        }
+    }
 }
 
 fn serve(
@@ -141,6 +392,13 @@ fn serve(
     Ok(())
 }
 
+fn optional_json(value: Option<&str>) -> String {
+    value.map_or_else(
+        || "null".to_owned(),
+        |text| serde_json::Value::String(text.to_owned()).to_string(),
+    )
+}
+
 fn respond(
     mut stream: TcpStream,
     profile: &str,
@@ -152,13 +410,20 @@ fn respond(
     let request = String::from_utf8_lossy(&buffer[..read]);
     let path = request.split_whitespace().nth(1).unwrap_or("/");
     let observed = format!(
-        "\"slot\":{},\"markets\":{},\"borrowPositions\":{},\"leveragePositions\":{},\"passes\":{}",
+        "\"slot\":{},\"markets\":{},\"borrowPositions\":{},\"leveragePositions\":{},\"passes\":{},\"evaluated\":{},\"sent\":{},\"lastSignature\":{},\"executionError\":{}",
         snapshot.observation.slot,
         snapshot.observation.markets,
         snapshot.observation.borrow_positions,
         snapshot.observation.leverage_positions,
         snapshot.passes,
+        snapshot.evaluated,
+        snapshot.sent,
+        optional_json(snapshot.last_signature.as_deref()),
+        optional_json(snapshot.last_execution_error.as_deref()),
     );
+    let reasons = serde_json::to_string(&snapshot.last_reasons)
+        .unwrap_or_else(|_| "{}".to_owned());
+    let observed = format!("{observed},\"lastReasons\":{reasons}");
     let (status, body) = match path {
         // Liveness is about the process; readiness is about whether this
         // keeper can currently see the chain, so a discovery failure fails
@@ -166,7 +431,7 @@ fn respond(
         "/healthz" => (
             "200 OK",
             format!(
-                "{{\"status\":\"healthy\",\"mode\":\"shadow\",\"profile\":\"{profile}\",\"protocolRevision\":\"{revision}\",{observed}}}"
+                "{{\"status\":\"healthy\",\"profile\":\"{profile}\",\"protocolRevision\":\"{revision}\",{observed}}}"
             ),
         ),
         "/readyz" => {

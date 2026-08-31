@@ -200,33 +200,31 @@ function encodeVector(bytes) {
 
 function wireToIdlArguments(specificationKey, argumentsValue) {
   switch (specificationKey) {
-    case "dusk:trigger_liquidation_auction":
+    case "dusk:start_liquidation_auction":
     case "dusk:queue_parameter_proposal":
     case "dusk:execute_parameter_proposal":
       return {};
-    case "dusk:bid_liquidation_auction":
+    case "dusk:fill_liquidation_auction":
       return {
         args: {
           repay_amount: argumentsValue.repayAmount,
           min_collateral_out: argumentsValue.minCollateralOut,
         },
       };
-    case "dusk:settle_liquidation_auction_floor":
+    case "dusk:backstop_liquidation_auction":
       return {
         args: {
-          repay_amount: argumentsValue.repayAmount,
-          min_collateral_out: argumentsValue.minCollateralOut,
-          max_insurance_draw: argumentsValue.maxInsuranceDraw,
-          max_socialized_loss: argumentsValue.maxSocializedLoss,
+          min_caller_bounty_out: argumentsValue.minCallerBountyOut,
         },
       };
-    case "dusk:liquidate_leverage":
+    case "dusk:liquidate_leverage_position":
       return { args: { debt_asset: argumentsValue.debtAsset } };
     case "dusk:delegated_close_leverage":
       return {
         args: {
           debt_asset: argumentsValue.debtAsset,
           min_amount_out: argumentsValue.minAmountOut,
+          close_bps: argumentsValue.closeBps,
           delegated: {
             before_ix_data: Buffer.from(argumentsValue.beforeIxDataHex, "hex"),
             after_ix_data: Buffer.from(argumentsValue.afterIxDataHex, "hex"),
@@ -387,21 +385,17 @@ function buildEncodingCases(contract, idls) {
   ).toString("hex");
 
   const argumentsByKey = {
-    "dusk:trigger_liquidation_auction": {},
-    "dusk:bid_liquidation_auction": {
+    "dusk:start_liquidation_auction": {},
+    "dusk:fill_liquidation_auction": {
       repayAmount: "18446744073709551615",
       minCollateralOut: "0",
     },
-    "dusk:settle_liquidation_auction_floor": {
-      repayAmount: "1000",
-      minCollateralOut: "850",
-      maxInsuranceDraw: "100",
-      maxSocializedLoss: "50",
-    },
-    "dusk:liquidate_leverage": { debtAsset: 1 },
+    "dusk:backstop_liquidation_auction": { minCallerBountyOut: "100" },
+    "dusk:liquidate_leverage_position": { debtAsset: 1 },
     "dusk:delegated_close_leverage": {
       debtAsset: 0,
       minAmountOut: "800",
+      closeBps: 10000,
       beforeIxDataHex: beforeData,
       afterIxDataHex: afterData,
       beforeAccountsLen: 8,
@@ -617,25 +611,25 @@ function buildFixtureBundle(contract, manifest, idls) {
       },
       {
         name: "u64 overflow",
-        specificationKey: "dusk:bid_liquidation_auction",
+        specificationKey: "dusk:fill_liquidation_auction",
         arguments: { repayAmount: "18446744073709551616", minCollateralOut: "0" },
         expectedError: "invalid_arguments",
       },
       {
         name: "negative u64",
-        specificationKey: "dusk:bid_liquidation_auction",
+        specificationKey: "dusk:fill_liquidation_auction",
         arguments: { repayAmount: "-1", minCollateralOut: "0" },
         expectedError: "invalid_arguments",
       },
       {
         name: "non-canonical u64",
-        specificationKey: "dusk:bid_liquidation_auction",
+        specificationKey: "dusk:fill_liquidation_auction",
         arguments: { repayAmount: "+1", minCollateralOut: "0" },
         expectedError: "invalid_arguments",
       },
       {
         name: "u8 overflow",
-        specificationKey: "dusk:liquidate_leverage",
+        specificationKey: "dusk:liquidate_leverage_position",
         arguments: { debtAsset: 256 },
         expectedError: "invalid_arguments",
       },

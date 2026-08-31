@@ -2,19 +2,23 @@ import { createHash } from "node:crypto";
 
 import type { InstructionContract } from "./envelope.ts";
 
-export interface BidLiquidationAuctionArgs {
+export interface FillLiquidationAuctionArgs {
   readonly repayAmount: bigint;
   readonly minCollateralOut: bigint;
 }
 
-export interface SettleLiquidationAuctionFloorArgs {
-  readonly repayAmount: bigint;
-  readonly minCollateralOut: bigint;
-  readonly maxInsuranceDraw: bigint;
-  readonly maxSocializedLoss: bigint;
+/**
+ * The backstop's only argument.
+ *
+ * It does not take loss bounds: how much insurance is drawn and how much loss
+ * is socialized are decided by market state, not by whoever calls. The caller
+ * only states the bounty it will accept.
+ */
+export interface BackstopLiquidationAuctionArgs {
+  readonly minCallerBountyOut: bigint;
 }
 
-export interface LiquidateLeverageArgs {
+export interface LiquidateLeveragePositionArgs {
   readonly debtAsset: number;
 }
 
@@ -27,6 +31,8 @@ export interface DelegatedCpiArgs {
 export interface DelegatedCloseLeverageArgs {
   readonly debtAsset: number;
   readonly minAmountOut: bigint;
+  /** What fraction of the position to close. */
+  readonly closeBps: number;
   readonly delegated: DelegatedCpiArgs;
 }
 
@@ -45,18 +51,18 @@ export interface SettleProtocolAuctionArgs {
 }
 
 export type KeeperInstructionArguments =
-  | { readonly specificationKey: "dusk:trigger_liquidation_auction" }
+  | { readonly specificationKey: "dusk:start_liquidation_auction" }
   | {
-      readonly specificationKey: "dusk:bid_liquidation_auction";
-      readonly arguments: BidLiquidationAuctionArgs;
+      readonly specificationKey: "dusk:fill_liquidation_auction";
+      readonly arguments: FillLiquidationAuctionArgs;
     }
   | {
-      readonly specificationKey: "dusk:settle_liquidation_auction_floor";
-      readonly arguments: SettleLiquidationAuctionFloorArgs;
+      readonly specificationKey: "dusk:backstop_liquidation_auction";
+      readonly arguments: BackstopLiquidationAuctionArgs;
     }
   | {
-      readonly specificationKey: "dusk:liquidate_leverage";
-      readonly arguments: LiquidateLeverageArgs;
+      readonly specificationKey: "dusk:liquidate_leverage_position";
+      readonly arguments: LiquidateLeveragePositionArgs;
     }
   | {
       readonly specificationKey: "dusk:delegated_close_leverage";
@@ -134,26 +140,24 @@ export function encodeKeeperInstruction(
 
   const writer = new BorshWriter();
   switch (request.specificationKey) {
-    case "dusk:trigger_liquidation_auction":
+    case "dusk:start_liquidation_auction":
     case "dusk:queue_parameter_proposal":
     case "dusk:execute_parameter_proposal":
       break;
-    case "dusk:bid_liquidation_auction":
+    case "dusk:fill_liquidation_auction":
       writer.u64(request.arguments.repayAmount);
       writer.u64(request.arguments.minCollateralOut);
       break;
-    case "dusk:settle_liquidation_auction_floor":
-      writer.u64(request.arguments.repayAmount);
-      writer.u64(request.arguments.minCollateralOut);
-      writer.u64(request.arguments.maxInsuranceDraw);
-      writer.u64(request.arguments.maxSocializedLoss);
+    case "dusk:backstop_liquidation_auction":
+      writer.u64(request.arguments.minCallerBountyOut);
       break;
-    case "dusk:liquidate_leverage":
+    case "dusk:liquidate_leverage_position":
       writer.u8(request.arguments.debtAsset);
       break;
     case "dusk:delegated_close_leverage":
       writer.u8(request.arguments.debtAsset);
       writer.u64(request.arguments.minAmountOut);
+      writer.u16(request.arguments.closeBps);
       writer.bytes(request.arguments.delegated.beforeIxData);
       writer.bytes(request.arguments.delegated.afterIxData);
       writer.u16(request.arguments.delegated.beforeAccountsLen);
@@ -179,12 +183,12 @@ export function parseKeeperInstructionArguments(
 ): KeeperInstructionArguments {
   const argumentsValue = requireRecord(value);
   switch (specificationKey) {
-    case "dusk:trigger_liquidation_auction":
+    case "dusk:start_liquidation_auction":
     case "dusk:queue_parameter_proposal":
     case "dusk:execute_parameter_proposal":
       requireKeys(argumentsValue, []);
       return { specificationKey };
-    case "dusk:bid_liquidation_auction":
+    case "dusk:fill_liquidation_auction":
       requireKeys(argumentsValue, ["repayAmount", "minCollateralOut"]);
       return {
         specificationKey,
@@ -193,23 +197,15 @@ export function parseKeeperInstructionArguments(
           minCollateralOut: decimalU64(argumentsValue.minCollateralOut),
         },
       };
-    case "dusk:settle_liquidation_auction_floor":
-      requireKeys(argumentsValue, [
-        "repayAmount",
-        "minCollateralOut",
-        "maxInsuranceDraw",
-        "maxSocializedLoss",
-      ]);
+    case "dusk:backstop_liquidation_auction":
+      requireKeys(argumentsValue, ["minCallerBountyOut"]);
       return {
         specificationKey,
         arguments: {
-          repayAmount: decimalU64(argumentsValue.repayAmount),
-          minCollateralOut: decimalU64(argumentsValue.minCollateralOut),
-          maxInsuranceDraw: decimalU64(argumentsValue.maxInsuranceDraw),
-          maxSocializedLoss: decimalU64(argumentsValue.maxSocializedLoss),
+          minCallerBountyOut: decimalU64(argumentsValue.minCallerBountyOut),
         },
       };
-    case "dusk:liquidate_leverage":
+    case "dusk:liquidate_leverage_position":
       requireKeys(argumentsValue, ["debtAsset"]);
       return {
         specificationKey,
@@ -219,6 +215,7 @@ export function parseKeeperInstructionArguments(
       requireKeys(argumentsValue, [
         "debtAsset",
         "minAmountOut",
+        "closeBps",
         "beforeIxDataHex",
         "afterIxDataHex",
         "beforeAccountsLen",
@@ -227,6 +224,7 @@ export function parseKeeperInstructionArguments(
         specificationKey,
         arguments: {
           debtAsset: unsignedNumber(argumentsValue.debtAsset, 0xff, "debtAsset"),
+          closeBps: unsignedNumber(argumentsValue.closeBps, 0xffff, "closeBps"),
           minAmountOut: decimalU64(argumentsValue.minAmountOut),
           delegated: {
             beforeIxData: variableHex(argumentsValue.beforeIxDataHex),

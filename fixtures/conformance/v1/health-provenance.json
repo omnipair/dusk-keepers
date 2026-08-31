@@ -12,9 +12,9 @@
   },
   "protocol": {
     "revision": "devnet-1",
-    "lockStatus": "captured",
-    "lockSha256": "69df9afe1445d0e1a3809e87c3fb4917b41ebf40effe90af89e1170a8f5b8dc9",
-    "sourceWorktreeFingerprintSha256": "d87e5189c0da4fe823a1504243aea31eefa66f380b62370b27b591a4b4e780fd"
+    "lockStatus": "frozen",
+    "lockSha256": "a8f84e8dd64802475e15c547a6d1dcda00d07017936e842a48b1a8cd933bd980",
+    "sourceWorktreeFingerprintSha256": "9306f255037426d8e7058cc77108500c8ff03fc14528a00ba7b806544bf455b3"
   },
   "dependencies": {
     "rpc": "unknown",
@@ -52,4 +52,3 @@
     "generatedAt": "2026-08-11T17:20:53Z"
   }
 }
-

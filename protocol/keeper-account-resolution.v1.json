@@ -16,55 +16,67 @@
   ],
   "staticAccounts": [
     {
-      "instructionKey": "dusk:bid_liquidation_auction",
+      "instructionKey": "dusk:fill_liquidation_auction",
       "accountName": "token_program",
       "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
       "source": "idl_fixed_address"
     },
     {
-      "instructionKey": "dusk:bid_liquidation_auction",
+      "instructionKey": "dusk:fill_liquidation_auction",
       "accountName": "token_2022_program",
       "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
       "source": "idl_fixed_address"
     },
     {
-      "instructionKey": "dusk:bid_liquidation_auction",
+      "instructionKey": "dusk:fill_liquidation_auction",
       "accountName": "program",
       "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "source": "instruction_program"
     },
     {
-      "instructionKey": "dusk:settle_liquidation_auction_floor",
+      "instructionKey": "dusk:backstop_liquidation_auction",
+      "accountName": "instructions_sysvar",
+      "address": "Sysvar1nstructions1111111111111111111111111",
+      "source": "idl_fixed_address"
+    },
+    {
+      "instructionKey": "dusk:backstop_liquidation_auction",
       "accountName": "token_program",
       "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
       "source": "idl_fixed_address"
     },
     {
-      "instructionKey": "dusk:settle_liquidation_auction_floor",
+      "instructionKey": "dusk:backstop_liquidation_auction",
       "accountName": "token_2022_program",
       "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
       "source": "idl_fixed_address"
     },
     {
-      "instructionKey": "dusk:settle_liquidation_auction_floor",
+      "instructionKey": "dusk:backstop_liquidation_auction",
       "accountName": "program",
       "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "source": "instruction_program"
     },
     {
-      "instructionKey": "dusk:liquidate_leverage",
+      "instructionKey": "dusk:liquidate_leverage_position",
+      "accountName": "instructions_sysvar",
+      "address": "Sysvar1nstructions1111111111111111111111111",
+      "source": "idl_fixed_address"
+    },
+    {
+      "instructionKey": "dusk:liquidate_leverage_position",
       "accountName": "token_program",
       "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
       "source": "idl_fixed_address"
     },
     {
-      "instructionKey": "dusk:liquidate_leverage",
+      "instructionKey": "dusk:liquidate_leverage_position",
       "accountName": "token_2022_program",
       "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
       "source": "idl_fixed_address"
     },
     {
-      "instructionKey": "dusk:liquidate_leverage",
+      "instructionKey": "dusk:liquidate_leverage_position",
       "accountName": "program",
       "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "source": "instruction_program"
@@ -74,6 +86,12 @@
       "accountName": "delegated_program",
       "address": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
       "source": "action_cpi_program"
+    },
+    {
+      "instructionKey": "dusk:delegated_close_leverage",
+      "accountName": "instructions_sysvar",
+      "address": "Sysvar1nstructions1111111111111111111111111",
+      "source": "idl_fixed_address"
     },
     {
       "instructionKey": "dusk:delegated_close_leverage",
@@ -143,7 +161,7 @@
       "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "usages": [
         {
-          "instructionKey": "dusk:trigger_liquidation_auction",
+          "instructionKey": "dusk:start_liquidation_auction",
           "accountName": "market",
           "idlSeedPaths": [
             "const:6d61726b65745f7632",
@@ -153,7 +171,7 @@
           ]
         },
         {
-          "instructionKey": "dusk:bid_liquidation_auction",
+          "instructionKey": "dusk:fill_liquidation_auction",
           "accountName": "market",
           "idlSeedPaths": [
             "const:6d61726b65745f7632",
@@ -163,7 +181,7 @@
           ]
         },
         {
-          "instructionKey": "dusk:settle_liquidation_auction_floor",
+          "instructionKey": "dusk:backstop_liquidation_auction",
           "accountName": "market",
           "idlSeedPaths": [
             "const:6d61726b65745f7632",
@@ -231,7 +249,7 @@
       "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "usages": [
         {
-          "instructionKey": "dusk:trigger_liquidation_auction",
+          "instructionKey": "dusk:start_liquidation_auction",
           "accountName": "borrow_position",
           "idlSeedPaths": [
             "const:626f72726f775f706f736974696f6e5f7632",
@@ -240,7 +258,7 @@
           ]
         },
         {
-          "instructionKey": "dusk:bid_liquidation_auction",
+          "instructionKey": "dusk:fill_liquidation_auction",
           "accountName": "borrow_position",
           "idlSeedPaths": [
             "const:626f72726f775f706f736974696f6e5f7632",
@@ -249,7 +267,7 @@
           ]
         },
         {
-          "instructionKey": "dusk:settle_liquidation_auction_floor",
+          "instructionKey": "dusk:backstop_liquidation_auction",
           "accountName": "borrow_position",
           "idlSeedPaths": [
             "const:626f72726f775f706f736974696f6e5f7632",
@@ -281,14 +299,14 @@
       "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "usages": [
         {
-          "instructionKey": "dusk:bid_liquidation_auction",
+          "instructionKey": "dusk:fill_liquidation_auction",
           "accountName": "futarchy_authority",
           "idlSeedPaths": [
             "const:66757461726368795f617574686f72697479"
           ]
         },
         {
-          "instructionKey": "dusk:settle_liquidation_auction_floor",
+          "instructionKey": "dusk:backstop_liquidation_auction",
           "accountName": "futarchy_authority",
           "idlSeedPaths": [
             "const:66757461726368795f617574686f72697479"
@@ -315,21 +333,21 @@
       "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "usages": [
         {
-          "instructionKey": "dusk:bid_liquidation_auction",
+          "instructionKey": "dusk:fill_liquidation_auction",
           "accountName": "event_authority",
           "idlSeedPaths": [
             "const:5f5f6576656e745f617574686f72697479"
           ]
         },
         {
-          "instructionKey": "dusk:settle_liquidation_auction_floor",
+          "instructionKey": "dusk:backstop_liquidation_auction",
           "accountName": "event_authority",
           "idlSeedPaths": [
             "const:5f5f6576656e745f617574686f72697479"
           ]
         },
         {
-          "instructionKey": "dusk:liquidate_leverage",
+          "instructionKey": "dusk:liquidate_leverage_position",
           "accountName": "event_authority",
           "idlSeedPaths": [
             "const:5f5f6576656e745f617574686f72697479"
@@ -490,48 +508,6 @@
           "kind": "input",
           "name": "orderId",
           "encoding": "u64_le"
-        }
-      ]
-    },
-    {
-      "key": "leverage_delegate:custody_authority",
-      "program": "leverage_delegate",
-      "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
-      "usages": [
-        {
-          "instructionKey": "leverage_delegate:before_take_profit",
-          "accountName": "custody_authority",
-          "idlSeedPaths": [
-            "const:6c657665726167655f64656c65676174655f617574686f72697479",
-            "account:order"
-          ]
-        },
-        {
-          "instructionKey": "leverage_delegate:after_close_order",
-          "accountName": "custody_authority",
-          "idlSeedPaths": [
-            "const:6c657665726167655f64656c65676174655f617574686f72697479",
-            "account:order"
-          ]
-        },
-        {
-          "instructionKey": "leverage_delegate:before_stop_loss",
-          "accountName": "custody_authority",
-          "idlSeedPaths": [
-            "const:6c657665726167655f64656c65676174655f617574686f72697479",
-            "account:order"
-          ]
-        }
-      ],
-      "seeds": [
-        {
-          "kind": "const",
-          "valueHex": "6c657665726167655f64656c65676174655f617574686f72697479"
-        },
-        {
-          "kind": "input",
-          "name": "order",
-          "encoding": "pubkey"
         }
       ]
     }

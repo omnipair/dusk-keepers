@@ -14,21 +14,23 @@ use sha2::{Digest, Sha256};
 use crate::InstructionContract;
 
 #[derive(Clone, Debug, BorshSerialize, Eq, PartialEq)]
-pub struct BidLiquidationAuctionArgs {
+pub struct FillLiquidationAuctionArgs {
     pub repay_amount: u64,
     pub min_collateral_out: u64,
 }
 
 #[derive(Clone, Debug, BorshSerialize, Eq, PartialEq)]
-pub struct SettleLiquidationAuctionFloorArgs {
-    pub repay_amount: u64,
-    pub min_collateral_out: u64,
-    pub max_insurance_draw: u64,
-    pub max_socialized_loss: u64,
+/// The backstop's only argument.
+///
+/// It does not take loss bounds: how much insurance is drawn and how much loss
+/// is socialized are decided by market state, not by whoever calls. The caller
+/// only states the bounty it will accept.
+pub struct BackstopLiquidationAuctionArgs {
+    pub min_caller_bounty_out: u64,
 }
 
 #[derive(Clone, Debug, BorshSerialize, Eq, PartialEq)]
-pub struct LiquidateLeverageArgs {
+pub struct LiquidateLeveragePositionArgs {
     pub debt_asset: u8,
 }
 
@@ -43,6 +45,9 @@ pub struct DelegatedCpiArgs {
 pub struct DelegatedCloseLeverageArgs {
     pub debt_asset: u8,
     pub min_amount_out: u64,
+    /// What fraction of the position to close. Field order is the borsh wire
+    /// order, so this sits between the minimum out and the CPI payload.
+    pub close_bps: u16,
     pub delegated: DelegatedCpiArgs,
 }
 
@@ -73,10 +78,10 @@ pub struct SettleProtocolAuctionArgs {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum KeeperInstructionArguments {
-    TriggerLiquidationAuction,
-    BidLiquidationAuction(BidLiquidationAuctionArgs),
-    SettleLiquidationAuctionFloor(SettleLiquidationAuctionFloorArgs),
-    LiquidateLeverage(LiquidateLeverageArgs),
+    StartLiquidationAuction,
+    FillLiquidationAuction(FillLiquidationAuctionArgs),
+    BackstopLiquidationAuction(BackstopLiquidationAuctionArgs),
+    LiquidateLeveragePosition(LiquidateLeveragePositionArgs),
     DelegatedCloseLeverage(DelegatedCloseLeverageArgs),
     BeforeTakeProfit(ExecuteOrderArgs),
     AfterCloseOrder(ExecuteOrderArgs),
@@ -89,10 +94,10 @@ pub enum KeeperInstructionArguments {
 impl KeeperInstructionArguments {
     pub fn specification_key(&self) -> &'static str {
         match self {
-            Self::TriggerLiquidationAuction => "dusk:trigger_liquidation_auction",
-            Self::BidLiquidationAuction(_) => "dusk:bid_liquidation_auction",
-            Self::SettleLiquidationAuctionFloor(_) => "dusk:settle_liquidation_auction_floor",
-            Self::LiquidateLeverage(_) => "dusk:liquidate_leverage",
+            Self::StartLiquidationAuction => "dusk:start_liquidation_auction",
+            Self::FillLiquidationAuction(_) => "dusk:fill_liquidation_auction",
+            Self::BackstopLiquidationAuction(_) => "dusk:backstop_liquidation_auction",
+            Self::LiquidateLeveragePosition(_) => "dusk:liquidate_leverage_position",
             Self::DelegatedCloseLeverage(_) => "dusk:delegated_close_leverage",
             Self::BeforeTakeProfit(_) => "leverage_delegate:before_take_profit",
             Self::AfterCloseOrder(_) => "leverage_delegate:after_close_order",
@@ -105,12 +110,12 @@ impl KeeperInstructionArguments {
 
     fn borsh_bytes(&self) -> Result<Vec<u8>, InstructionEncodingError> {
         let result = match self {
-            Self::TriggerLiquidationAuction
+            Self::StartLiquidationAuction
             | Self::QueueParameterProposal
             | Self::ExecuteParameterProposal => return Ok(Vec::new()),
-            Self::BidLiquidationAuction(value) => borsh::to_vec(value),
-            Self::SettleLiquidationAuctionFloor(value) => borsh::to_vec(value),
-            Self::LiquidateLeverage(value) => borsh::to_vec(value),
+            Self::FillLiquidationAuction(value) => borsh::to_vec(value),
+            Self::BackstopLiquidationAuction(value) => borsh::to_vec(value),
+            Self::LiquidateLeveragePosition(value) => borsh::to_vec(value),
             Self::DelegatedCloseLeverage(value) => borsh::to_vec(value),
             Self::BeforeTakeProfit(value)
             | Self::AfterCloseOrder(value)
@@ -181,34 +186,31 @@ pub fn parse_keeper_instruction_arguments(
     value: Value,
 ) -> Result<KeeperInstructionArguments, InstructionEncodingError> {
     match specification_key {
-        "dusk:trigger_liquidation_auction" => {
+        "dusk:start_liquidation_auction" => {
             parse_empty(value)?;
-            Ok(KeeperInstructionArguments::TriggerLiquidationAuction)
+            Ok(KeeperInstructionArguments::StartLiquidationAuction)
         }
-        "dusk:bid_liquidation_auction" => {
-            let wire: BidWire = parse_wire(value)?;
-            Ok(KeeperInstructionArguments::BidLiquidationAuction(
-                BidLiquidationAuctionArgs {
+        "dusk:fill_liquidation_auction" => {
+            let wire: FillWire = parse_wire(value)?;
+            Ok(KeeperInstructionArguments::FillLiquidationAuction(
+                FillLiquidationAuctionArgs {
                     repay_amount: decimal_u64(&wire.repay_amount)?,
                     min_collateral_out: decimal_u64(&wire.min_collateral_out)?,
                 },
             ))
         }
-        "dusk:settle_liquidation_auction_floor" => {
-            let wire: SettleFloorWire = parse_wire(value)?;
-            Ok(KeeperInstructionArguments::SettleLiquidationAuctionFloor(
-                SettleLiquidationAuctionFloorArgs {
-                    repay_amount: decimal_u64(&wire.repay_amount)?,
-                    min_collateral_out: decimal_u64(&wire.min_collateral_out)?,
-                    max_insurance_draw: decimal_u64(&wire.max_insurance_draw)?,
-                    max_socialized_loss: decimal_u64(&wire.max_socialized_loss)?,
+        "dusk:backstop_liquidation_auction" => {
+            let wire: BackstopWire = parse_wire(value)?;
+            Ok(KeeperInstructionArguments::BackstopLiquidationAuction(
+                BackstopLiquidationAuctionArgs {
+                    min_caller_bounty_out: decimal_u64(&wire.min_caller_bounty_out)?,
                 },
             ))
         }
-        "dusk:liquidate_leverage" => {
+        "dusk:liquidate_leverage_position" => {
             let wire: LiquidateWire = parse_wire(value)?;
-            Ok(KeeperInstructionArguments::LiquidateLeverage(
-                LiquidateLeverageArgs {
+            Ok(KeeperInstructionArguments::LiquidateLeveragePosition(
+                LiquidateLeveragePositionArgs {
                     debt_asset: wire.debt_asset,
                 },
             ))
@@ -219,6 +221,7 @@ pub fn parse_keeper_instruction_arguments(
                 DelegatedCloseLeverageArgs {
                     debt_asset: wire.debt_asset,
                     min_amount_out: decimal_u64(&wire.min_amount_out)?,
+                    close_bps: wire.close_bps,
                     delegated: DelegatedCpiArgs {
                         before_ix_data: variable_hex(&wire.before_ix_data_hex)?,
                         after_ix_data: variable_hex(&wire.after_ix_data_hex)?,
@@ -305,18 +308,15 @@ impl From<ProtocolRevenueSourceWire> for ProtocolRevenueSource {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct BidWire {
+struct FillWire {
     repay_amount: String,
     min_collateral_out: String,
 }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct SettleFloorWire {
-    repay_amount: String,
-    min_collateral_out: String,
-    max_insurance_draw: String,
-    max_socialized_loss: String,
+struct BackstopWire {
+    min_caller_bounty_out: String,
 }
 
 #[derive(Deserialize)]
@@ -330,6 +330,7 @@ struct LiquidateWire {
 struct DelegatedCloseWire {
     debt_asset: u8,
     min_amount_out: String,
+    close_bps: u16,
     before_ix_data_hex: String,
     after_ix_data_hex: String,
     before_accounts_len: u16,
@@ -539,7 +540,7 @@ mod tests {
         contract.instructions[0].discriminator_hex = "00".repeat(8);
         let error = encode_keeper_instruction(
             &contract,
-            &KeeperInstructionArguments::TriggerLiquidationAuction,
+            &KeeperInstructionArguments::StartLiquidationAuction,
         )
         .expect_err("a contract mismatch must fail closed");
         assert_eq!(error.code, InstructionEncodingErrorCode::ContractMismatch);

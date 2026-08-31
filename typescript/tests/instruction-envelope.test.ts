@@ -45,8 +45,14 @@ for (const fixture of fixtures.validCases) {
 test("captured lock cannot produce a signable instruction envelope", () => {
   const fixture = fixtures.validCases[0];
   assert.ok(fixture, "a valid instruction fixture must exist");
+  // The rule is that a lock which has not been frozen cannot authorize
+  // signing, tested against a lock demoted here rather than the repository's
+  // own. The repository's lock is frozen once a deployment is real, and a
+  // test that only passes while nothing is deployed stops testing the rule at
+  // exactly the moment the rule starts to matter.
+  const capturedValidator = new EnvelopeValidator({ ...lock, status: "captured" }, contract);
   assert.throws(
-    () => validator.validateForSigning(fixture.envelope),
+    () => capturedValidator.validateForSigning(fixture.envelope),
     (error) =>
       error instanceof EnvelopeValidationError && error.code === "live_protocol_not_ready",
   );

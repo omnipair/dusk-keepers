@@ -10,22 +10,22 @@ const actionDefinitions = [
   {
     action: "lending_liquidation_trigger",
     jobKind: "lending_liquidation_trigger",
-    primary: ["dusk", "trigger_liquidation_auction"],
+    primary: ["dusk", "start_liquidation_auction"],
   },
   {
     action: "lending_liquidation_bid",
     jobKind: "lending_liquidation_bid",
-    primary: ["dusk", "bid_liquidation_auction"],
+    primary: ["dusk", "fill_liquidation_auction"],
   },
   {
     action: "lending_liquidation_floor_settle",
     jobKind: "lending_liquidation_settle",
-    primary: ["dusk", "settle_liquidation_auction_floor"],
+    primary: ["dusk", "backstop_liquidation_auction"],
   },
   {
     action: "leverage_liquidation",
     jobKind: "leverage_liquidation",
-    primary: ["dusk", "liquidate_leverage"],
+    primary: ["dusk", "liquidate_leverage_position"],
   },
   {
     action: "delegated_close_take_profit",
@@ -172,21 +172,17 @@ function discriminator(specification) {
 function directInstructionData(specification) {
   const prefix = discriminator(specification);
   switch (specification.instructionName) {
-    case "trigger_liquidation_auction":
+    case "start_liquidation_auction":
     case "queue_parameter_proposal":
     case "execute_parameter_proposal":
       return prefix;
-    case "bid_liquidation_auction":
+    case "fill_liquidation_auction":
       return Buffer.concat([prefix, encodeU64(1_000), encodeU64(900)]);
-    case "settle_liquidation_auction_floor":
-      return Buffer.concat([
-        prefix,
-        encodeU64(1_000),
-        encodeU64(850),
-        encodeU64(100),
-        encodeU64(50),
-      ]);
-    case "liquidate_leverage":
+    // One argument, not four: the backstop pays the caller a bounty and takes
+    // its loss parameters from market state rather than from the caller.
+    case "backstop_liquidation_auction":
+      return Buffer.concat([prefix, encodeU64(100)]);
+    case "liquidate_leverage_position":
       return Buffer.concat([prefix, Buffer.from([0])]);
     case "settle_protocol_auction":
       return Buffer.concat([prefix, Buffer.from([0, 0]), encodeU64(1_000), encodeU64(950)]);
