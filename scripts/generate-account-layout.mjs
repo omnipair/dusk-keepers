@@ -58,7 +58,20 @@ const WANTED = {
     "insurance.quote_vault",
     "params_hash",
   ],
-  LeveragePosition: ["owner", "market", "position_id"],
+  LeveragePosition: ["owner", "market", "position_id", "debt_asset"],
+  // Only the fields ahead of `update`, which is a data-carrying enum and so
+  // gives everything after it no fixed offset. The lifecycle keeper does not
+  // need the rest: whether a proposal may be queued or executed is the
+  // program's judgement, asked by simulation, not a status byte read here.
+  FutarchyAuthority: [
+    "fee_auction.accepted_mint",
+    "fee_auction.recipients.treasury",
+    "fee_auction.recipients.staking_vault",
+    "buyback_auction.accepted_mint",
+    "buyback_auction.recipients.treasury",
+    "buyback_auction.recipients.staking_vault",
+  ],
+  ParameterProposal: ["market", "proposer", "nonce"],
 };
 
 /** Fixed sizes for the primitives the IDL uses. */
@@ -154,12 +167,34 @@ async function build() {
   const accounts = Object.entries(WANTED).map(([accountName, fields]) => {
     const defined = types.get(accountName);
     assert.ok(defined, `${accountName} is absent from the pinned IDL`);
+    const located = fields.map((field) => ({
+      path: field,
+      ...locate(accountName, field, types),
+    }));
+
+    // The full size doubles as a decode guard: a short account is a different
+    // account, not a truncated one. Some accounts carry a data-bearing enum
+    // and have no single size, so those record the minimum the requested
+    // fields imply instead. The weaker guard is stated rather than a strong
+    // one being faked.
+    let exactSize = null;
+    try {
+      exactSize = 8 + structSize(defined, types, accountName);
+    } catch {
+      exactSize = null;
+    }
+
     return {
       name: accountName,
-      // The full size doubles as a decode guard: a short account is a
-      // different account, not a truncated one.
-      sizeWithDiscriminator: 8 + structSize(defined, types, accountName),
-      fields: fields.map((field) => ({ path: field, ...locate(accountName, field, types) })),
+      ...(exactSize === null
+        ? {
+            minimumSize: located.reduce(
+              (highest, field) => Math.max(highest, field.offset + field.size),
+              0,
+            ),
+          }
+        : { sizeWithDiscriminator: exactSize }),
+      fields: located,
     };
   });
 

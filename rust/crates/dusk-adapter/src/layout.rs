@@ -28,7 +28,13 @@ pub struct AccountLayoutManifest {
 #[serde(rename_all = "camelCase")]
 pub struct AccountLayout {
     pub name: String,
-    pub size_with_discriminator: usize,
+    /// The account's exact size, when it has one.
+    #[serde(default)]
+    pub size_with_discriminator: Option<usize>,
+    /// The least an account must be for the requested fields to exist, for
+    /// accounts carrying a data-bearing enum that gives them no single size.
+    #[serde(default)]
+    pub minimum_size: Option<usize>,
     pub fields: Vec<FieldLocation>,
 }
 
@@ -70,9 +76,34 @@ impl fmt::Display for LayoutError {
 impl Error for LayoutError {}
 
 /// A single account's fields, keyed by path.
+/// How an account's length is checked.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum SizeGuard {
+    /// The account is exactly this long; anything else is a different account.
+    Exact(usize),
+    /// The account is at least this long. Weaker, and used only where the
+    /// layout genuinely has no fixed size.
+    AtLeast(usize),
+}
+
+impl SizeGuard {
+    fn admits(self, length: usize) -> bool {
+        match self {
+            Self::Exact(size) => length == size,
+            Self::AtLeast(size) => length >= size,
+        }
+    }
+
+    fn expected(self) -> usize {
+        match self {
+            Self::AtLeast(size) | Self::Exact(size) => size,
+        }
+    }
+}
+
 pub struct AccountReader<'a> {
     fields: BTreeMap<&'a str, &'a FieldLocation>,
-    size: usize,
+    guard: SizeGuard,
 }
 
 impl<'a> AccountReader<'a> {
@@ -82,9 +113,9 @@ impl<'a> AccountReader<'a> {
     /// a shorter account is a different account, and reading a valid-looking
     /// prefix out of the wrong type is exactly the failure offsets invite.
     pub fn bytes(&self, path: &str, data: &'a [u8]) -> Result<&'a [u8], LayoutError> {
-        if data.len() != self.size {
+        if !self.guard.admits(data.len()) {
             return Err(LayoutError::ShortAccount {
-                expected: self.size,
+                expected: self.guard.expected(),
                 found: data.len(),
             });
         }
@@ -122,8 +153,13 @@ impl<'a> AccountReader<'a> {
             .ok_or_else(|| LayoutError::Malformed(format!("{path} is empty")))
     }
 
+    /// The length a synthetic account must have to satisfy the guard.
     pub fn size(&self) -> usize {
-        self.size
+        self.guard.expected()
+    }
+
+    pub fn guard(&self) -> SizeGuard {
+        self.guard
     }
 }
 
@@ -150,13 +186,22 @@ impl AccountLayoutManifest {
             .iter()
             .find(|entry| entry.name == account)
             .ok_or_else(|| LayoutError::UnknownAccount(account.to_owned()))?;
+        let guard = match (layout.size_with_discriminator, layout.minimum_size) {
+            (Some(size), _) => SizeGuard::Exact(size),
+            (None, Some(size)) => SizeGuard::AtLeast(size),
+            (None, None) => {
+                return Err(LayoutError::Malformed(format!(
+                    "{account} states neither an exact nor a minimum size"
+                )));
+            }
+        };
         Ok(AccountReader {
             fields: layout
                 .fields
                 .iter()
                 .map(|field| (field.path.as_str(), field))
                 .collect(),
-            size: layout.size_with_discriminator,
+            guard,
         })
     }
 }
@@ -200,6 +245,24 @@ mod tests {
             position.pubkey("owner", &[0_u8; 32]),
             Err(LayoutError::ShortAccount { .. })
         ));
+    }
+
+    /// A variable-layout account cannot claim an exact size, and must not
+    /// silently borrow the strong guard from the accounts that can.
+    #[test]
+    fn a_variable_account_is_guarded_by_a_minimum() {
+        let manifest = manifest();
+        assert!(matches!(
+            manifest.reader("BorrowPosition").unwrap().guard(),
+            SizeGuard::Exact(_)
+        ));
+        let proposal = manifest.reader("ParameterProposal").unwrap();
+        assert!(matches!(proposal.guard(), SizeGuard::AtLeast(_)));
+        // Longer than the minimum is fine; shorter is not.
+        let long = vec![0_u8; proposal.size() + 500];
+        assert!(proposal.pubkey("market", &long).is_ok());
+        let short = vec![0_u8; proposal.size() - 1];
+        assert!(proposal.pubkey("market", &short).is_err());
     }
 
     #[test]

@@ -19,15 +19,21 @@ use dusk_adapter::{
 };
 
 mod accounts;
+mod arbitrageur;
 mod bidder;
 mod discovery;
 mod execute;
+mod leverage;
+mod lifecycle;
 mod settler;
 mod signer;
 mod transaction;
 
 use discovery::{observe, Observation, RpcClient};
+use arbitrageur::{ArbitragePolicy, ArbitrageurJob};
 use bidder::{BidPolicy, BidderJob};
+use leverage::LeverageJob;
+use lifecycle::LifecycleJob;
 use settler::{SettlePolicy, SettlerJob};
 use execute::TriggerJob;
 use keeper_core::OutcomeStatus;
@@ -397,6 +403,21 @@ fn settle_policy() -> Option<SettlePolicy> {
     })
 }
 
+/// How much revenue the arbitrageur will buy, and at what tolerance.
+///
+/// Required rather than defaulted, like the other spending profiles: the
+/// ceiling is the operator's money, and a keeper that picks it is picking how
+/// much of someone else's balance to commit.
+fn arbitrage_policy() -> Option<ArbitragePolicy> {
+    Some(ArbitragePolicy {
+        max_sold: env::var("KEEPER_AUCTION_MAX_SOLD").ok()?.parse().ok()?,
+        slippage_bps: env::var("KEEPER_AUCTION_SLIPPAGE_BPS")
+            .ok()
+            .and_then(|value| value.parse().ok())
+            .unwrap_or(50),
+    })
+}
+
 /// One execution pass, folded into the shared snapshot.
 ///
 /// The balance floor is checked here rather than at startup because a keeper
@@ -456,6 +477,43 @@ fn run_execution_pass(
         "lending-bidder" => bid_pass(&job, contract, layout, resolver, signer, dry_run),
         "lending-settler" => settle_pass(&job, contract, layout, resolver, signer, dry_run),
         "lending-trigger" => job.run_pass(),
+        "auction-arbitrage" => match arbitrage_policy() {
+            None => Ok(Vec::new()),
+            Some(policy) => ArbitrageurJob {
+                client,
+                contract,
+                dry_run,
+                layout,
+                max_sends_per_pass,
+                policy,
+                program_id,
+                resolver,
+                signer,
+            }
+            .run_pass(),
+        },
+        "leverage" => LeverageJob {
+            client,
+            contract,
+            dry_run,
+            layout,
+            max_sends_per_pass,
+            program_id,
+            resolver,
+            signer,
+        }
+        .run_pass(),
+        "lifecycle" => LifecycleJob {
+            client,
+            contract,
+            dry_run,
+            layout,
+            max_sends_per_pass,
+            program_id,
+            resolver,
+            signer,
+        }
+        .run_pass(),
         _ => Ok(Vec::new()),
     };
 

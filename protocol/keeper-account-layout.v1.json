@@ -185,6 +185,68 @@
           "path": "position_id",
           "offset": 72,
           "size": 32
+        },
+        {
+          "path": "debt_asset",
+          "offset": 138,
+          "size": 1
+        }
+      ]
+    },
+    {
+      "name": "FutarchyAuthority",
+      "sizeWithDiscriminator": 395,
+      "fields": [
+        {
+          "path": "fee_auction.accepted_mint",
+          "offset": 153,
+          "size": 32
+        },
+        {
+          "path": "fee_auction.recipients.treasury",
+          "offset": 185,
+          "size": 32
+        },
+        {
+          "path": "fee_auction.recipients.staking_vault",
+          "offset": 217,
+          "size": 32
+        },
+        {
+          "path": "buyback_auction.accepted_mint",
+          "offset": 273,
+          "size": 32
+        },
+        {
+          "path": "buyback_auction.recipients.treasury",
+          "offset": 305,
+          "size": 32
+        },
+        {
+          "path": "buyback_auction.recipients.staking_vault",
+          "offset": 337,
+          "size": 32
+        }
+      ]
+    },
+    {
+      "name": "ParameterProposal",
+      "minimumSize": 80,
+      "fields": [
+        {
+          "path": "market",
+          "offset": 8,
+          "size": 32
+        },
+        {
+          "path": "proposer",
+          "offset": 40,
+          "size": 32
+        },
+        {
+          "path": "nonce",
+          "offset": 72,
+          "size": 8
         }
       ]
     }
