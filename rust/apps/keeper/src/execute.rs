@@ -217,6 +217,20 @@ pub struct TriggerJob<'a> {
 }
 
 impl TriggerJob<'_> {
+    /// Every decodable borrow position, before any profile's filter.
+    pub fn all_positions(&self) -> Result<Vec<BorrowPositionRecord>, ExecutionError> {
+        let accounts = self.client.program_accounts(
+            &bs58::encode(self.program_id).into_string(),
+            account_discriminator("BorrowPosition"),
+        )?;
+        Ok(accounts
+            .into_iter()
+            .filter_map(|(address, data)| {
+                BorrowPositionRecord::decode(self.layout, address, &data)
+            })
+            .collect())
+    }
+
     /// Positions worth simulating: initialized, collateralized, and not
     /// already under auction. Everything past this point costs an RPC call, so
     /// the cheap filters run first.

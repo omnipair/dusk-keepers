@@ -275,6 +275,65 @@ impl RpcClient {
         Ok(Some(format!("{error} {named}").trim().to_owned()))
     }
 
+    /// Simulate, and read named accounts as they would stand afterwards.
+    ///
+    /// Necessary rather than convenient: `fill_liquidation_auction` returns
+    /// `Ok` without acting when the auction has already recovered, so a
+    /// simulation that succeeds does not mean a fill happened. Only the
+    /// post-state shows whether tokens actually moved.
+    pub fn simulate_with_accounts(
+        &self,
+        transaction_base64: &str,
+        addresses: &[String],
+    ) -> Result<(Option<String>, Vec<Option<Vec<u8>>>), DiscoveryError> {
+        #[derive(Deserialize)]
+        struct Value {
+            value: Inner,
+        }
+        #[derive(Deserialize)]
+        struct Inner {
+            err: Option<serde_json::Value>,
+            logs: Option<Vec<String>>,
+            accounts: Option<Vec<Option<AccountData>>>,
+        }
+        let response: Value = self.call(
+            "simulateTransaction",
+            serde_json::json!([
+                transaction_base64,
+                {
+                    "commitment": "confirmed",
+                    "encoding": "base64",
+                    "sigVerify": false,
+                    "replaceRecentBlockhash": true,
+                    "accounts": { "encoding": "base64", "addresses": addresses }
+                }
+            ]),
+        )?;
+        let decoded = response
+            .value
+            .accounts
+            .unwrap_or_default()
+            .into_iter()
+            .map(|entry| {
+                entry
+                    .and_then(|account| account.data.first().cloned())
+                    .and_then(|payload| decode_base64(&payload))
+            })
+            .collect();
+        let Some(error) = response.value.err else {
+            return Ok((None, decoded));
+        };
+        let named = response
+            .value
+            .logs
+            .unwrap_or_default()
+            .into_iter()
+            .filter(|line| line.contains("Error") || line.contains("failed"))
+            .collect::<Vec<_>>()
+            .join(" | ");
+        Ok((Some(format!("{error} {named}").trim().to_owned()), decoded))
+    }
+
     pub fn send_transaction(&self, transaction_base64: &str) -> Result<String, DiscoveryError> {
         self.call(
             "sendTransaction",

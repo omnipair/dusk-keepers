@@ -96,6 +96,9 @@ pub struct OrientedMarket {
     pub debt_mint: [u8; 32],
     pub collateral_mint: [u8; 32],
     pub debt_reserve_vault: [u8; 32],
+    // Named by the backstop and the leverage liquidation but not by the fill,
+    // so nothing reads it yet.
+    #[allow(dead_code)]
     pub collateral_reserve_vault: [u8; 32],
     pub debt_interest_vault: [u8; 32],
     pub collateral_collateral_vault: [u8; 32],
@@ -189,9 +192,28 @@ impl AccountAssembler<'_> {
                     detail: "fixed address does not decode".into(),
                 })?
             } else if let Some(recipe) = self.resolver.pda_recipe_key(instruction_key, name) {
+                // Recipes disagree about which inputs they take, and an
+                // unexpected one is an error rather than a harmless extra, so
+                // each is given exactly what it asks for out of the shared
+                // pool.
+                let wanted = self
+                    .resolver
+                    .recipe_inputs(recipe)
+                    .ok_or_else(|| AssemblyError {
+                        account: name.to_owned(),
+                        detail: format!("{recipe}: unknown PDA recipe"),
+                    })?;
+                let mut inputs = BTreeMap::new();
+                for key in wanted {
+                    let value = self.pda_inputs.get(key).ok_or_else(|| AssemblyError {
+                        account: name.to_owned(),
+                        detail: format!("{recipe} needs seed input {key}"),
+                    })?;
+                    inputs.insert(key.to_owned(), value.clone());
+                }
                 let resolved =
                     self.resolver
-                        .derive_pda(recipe, &self.pda_inputs)
+                        .derive_pda(recipe, &inputs)
                         .map_err(|error| AssemblyError {
                             account: name.to_owned(),
                             detail: error.to_string(),

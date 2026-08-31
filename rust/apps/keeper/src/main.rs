@@ -13,15 +13,20 @@ use std::{
     time::Duration,
 };
 
-use dusk_adapter::{AccountLayoutManifest, InstructionContract, ProtocolLock};
+use dusk_adapter::{
+    AccountLayoutManifest, AccountResolutionManifest, DeterministicAccountResolver,
+    InstructionContract, ProtocolLock,
+};
 
 mod accounts;
+mod bidder;
 mod discovery;
 mod execute;
 mod signer;
 mod transaction;
 
 use discovery::{observe, Observation, RpcClient};
+use bidder::{BidPolicy, BidderJob};
 use execute::TriggerJob;
 use keeper_core::OutcomeStatus;
 use signer::{LocalKeypair, TransactionSigner};
@@ -71,6 +76,7 @@ struct Config {
     protocol_lock: PathBuf,
     instruction_contract: PathBuf,
     account_layout: PathBuf,
+    account_resolution: PathBuf,
     /// Ceiling on transactions per pass. A keeper that has gone wrong should
     /// run out of permission before it runs out of money.
     max_sends_per_pass: usize,
@@ -94,6 +100,9 @@ impl Config {
         let account_layout = env::var("DUSK_ACCOUNT_LAYOUT")
             .unwrap_or_else(|_| "protocol/keeper-account-layout.v1.json".into())
             .into();
+        let account_resolution = env::var("DUSK_ACCOUNT_RESOLUTION")
+            .unwrap_or_else(|_| "protocol/keeper-account-resolution.v1.json".into())
+            .into();
         let max_sends_per_pass = env::var("KEEPER_MAX_SENDS_PER_PASS")
             .ok()
             .and_then(|value| value.parse().ok())
@@ -104,6 +113,7 @@ impl Config {
             .unwrap_or(20_000_000);
         Ok(Self {
             account_layout,
+            account_resolution,
             bind_address,
             instruction_contract,
             max_sends_per_pass,
@@ -173,6 +183,21 @@ fn main() -> Result<(), Box<dyn Error>> {
         Err(error) => return Err(Box::new(error)),
     };
 
+    let resolver = match std::fs::read_to_string(&config.account_resolution) {
+        Ok(raw) => {
+            let manifest = AccountResolutionManifest::from_json(&raw)?;
+            contract
+                .as_ref()
+                .map(|contract| DeterministicAccountResolver::new(&lock, contract, manifest))
+                .transpose()?
+        }
+        Err(error) if executor.is_none() => {
+            println!("keeper resolution=absent ({error})");
+            None
+        }
+        Err(error) => return Err(Box::new(error)),
+    };
+
     // Offsets generated for a different deployment are not approximately
     // right, they are arbitrary, so a mismatch stops the keeper rather than
     // letting it read whatever happens to sit at those bytes.
@@ -199,6 +224,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let shared = Arc::clone(&snapshot);
         let program_id_key = decode_program_id(&dusk_program_id)?;
         let dry_run = config.mode == Mode::Shadow;
+        let profile = config.profile.clone();
         let max_sends = config.max_sends_per_pass;
         let minimum_lamports = config.minimum_lamports;
         thread::spawn(move || {
@@ -219,14 +245,19 @@ fn main() -> Result<(), Box<dyn Error>> {
                     }
                 }
 
-                if let (Some(signer), Some(contract), Some(layout)) =
-                    (executor.as_ref(), contract.as_ref(), layout.as_ref())
-                {
+                if let (Some(signer), Some(contract), Some(layout), Some(resolver)) = (
+                    executor.as_ref(),
+                    contract.as_ref(),
+                    layout.as_ref(),
+                    resolver.as_ref(),
+                ) {
                     run_execution_pass(
                         &client,
                         contract,
                         layout,
+                        resolver,
                         signer,
+                        &profile,
                         program_id_key,
                         max_sends,
                         minimum_lamports,
@@ -266,6 +297,61 @@ fn decode_program_id(encoded: &str) -> Result<[u8; 32], Box<dyn Error>> {
     Ok(key)
 }
 
+/// Fill any auction the trigger profile has opened.
+///
+/// Candidate discovery is shared with the trigger — the same positions, read
+/// the same way — but the two profiles want opposite halves of it: the trigger
+/// wants positions with no auction running, the bidder wants the ones that
+/// have one.
+fn bid_pass(
+    trigger: &TriggerJob<'_>,
+    contract: &InstructionContract,
+    layout: &AccountLayoutManifest,
+    resolver: &DeterministicAccountResolver,
+    signer: &LocalKeypair,
+    dry_run: bool,
+) -> Result<Vec<execute::AttemptReport>, execute::ExecutionError> {
+    let Some(policy) = bid_policy() else {
+        // A bidder with no declared price is not a conservative bidder, it is
+        // one that will accept anything. It declines to run instead.
+        return Ok(Vec::new());
+    };
+    let bidder = BidderJob {
+        client: trigger.client,
+        contract,
+        dry_run,
+        layout,
+        policy,
+        resolver,
+        signer,
+    };
+    let mut reports = Vec::new();
+    for position in bidder.candidates(trigger.all_positions()?) {
+        reports.push(bidder.attempt(&position)?);
+    }
+    Ok(reports)
+}
+
+/// The bidder's economic bounds, all required.
+///
+/// There is no default that is right for every market: these encode what the
+/// operator believes the collateral is worth, which the keeper has no
+/// independent source for. Guessing on the operator's behalf would mean
+/// guessing with the operator's money.
+fn bid_policy() -> Option<BidPolicy> {
+    Some(BidPolicy {
+        max_repay: env::var("KEEPER_BID_MAX_REPAY").ok()?.parse().ok()?,
+        min_collateral_bps: env::var("KEEPER_BID_MIN_COLLATERAL_BPS")
+            .ok()?
+            .parse()
+            .ok()?,
+        slippage_bps: env::var("KEEPER_BID_SLIPPAGE_BPS")
+            .ok()
+            .and_then(|value| value.parse().ok())
+            .unwrap_or(50),
+    })
+}
+
 /// One execution pass, folded into the shared snapshot.
 ///
 /// The balance floor is checked here rather than at startup because a keeper
@@ -277,7 +363,9 @@ fn run_execution_pass(
     client: &RpcClient,
     contract: &InstructionContract,
     layout: &AccountLayoutManifest,
+    resolver: &DeterministicAccountResolver,
     signer: &LocalKeypair,
+    profile: &str,
     program_id: [u8; 32],
     max_sends_per_pass: usize,
     minimum_lamports: u64,
@@ -315,7 +403,17 @@ fn run_execution_pass(
         program_id,
         signer,
     };
-    match job.run_pass() {
+
+    // Which job a service runs is its profile, not a flag: one service, one
+    // wallet, one thing it is allowed to do. A profile with no job here does
+    // nothing rather than falling back to something it was not deployed for.
+    let outcome = match profile {
+        "lending-bidder" => bid_pass(&job, contract, layout, resolver, signer, dry_run),
+        "lending-trigger" => job.run_pass(),
+        _ => Ok(Vec::new()),
+    };
+
+    match outcome {
         Ok(reports) => {
             if let Ok(mut current) = shared.lock() {
                 current.evaluated += reports.len() as u64;

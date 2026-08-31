@@ -280,6 +280,29 @@ impl DeterministicAccountResolver {
             .map(|recipe| recipe.key.as_str())
     }
 
+    /// The seed input names a recipe expects.
+    ///
+    /// Callers assembling several accounts share one pool of known values, but
+    /// recipes disagree about which of them they take, and supplying an
+    /// unexpected input is an error rather than a harmless extra. This lets a
+    /// caller pass exactly what a recipe asks for.
+    pub fn recipe_inputs(&self, recipe_key: &str) -> Option<Vec<&str>> {
+        self.manifest
+            .pda_recipes
+            .iter()
+            .find(|entry| entry.key == recipe_key)
+            .map(|recipe| {
+                recipe
+                    .seeds
+                    .iter()
+                    .filter_map(|seed| match seed {
+                        PdaSeedRecipe::Input { name, .. } => Some(name.as_str()),
+                        PdaSeedRecipe::Const { .. } => None,
+                    })
+                    .collect()
+            })
+    }
+
     pub fn derive_pda(
         &self,
         recipe_key: &str,
