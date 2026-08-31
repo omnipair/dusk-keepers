@@ -46,6 +46,8 @@ const WANTED = {
     "quote_side.reserve_vault",
     "quote_side.collateral_vault",
     "quote_side.interest_vault",
+    "insurance.base_vault",
+    "insurance.quote_vault",
     "params_hash",
   ],
   LeveragePosition: ["owner", "market", "position_id"],

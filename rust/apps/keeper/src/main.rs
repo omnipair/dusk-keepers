@@ -15,6 +15,7 @@ use std::{
 
 use dusk_adapter::{AccountLayoutManifest, InstructionContract, ProtocolLock};
 
+mod accounts;
 mod discovery;
 mod execute;
 mod signer;

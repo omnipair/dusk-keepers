@@ -111,6 +111,16 @@
           "size": 32
         },
         {
+          "path": "insurance.base_vault",
+          "offset": 2607,
+          "size": 32
+        },
+        {
+          "path": "insurance.quote_vault",
+          "offset": 2639,
+          "size": 32
+        },
+        {
           "path": "params_hash",
           "offset": 2755,
           "size": 32

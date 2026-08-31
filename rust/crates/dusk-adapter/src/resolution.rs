@@ -412,6 +412,18 @@ fn encode_seed_value(
     }
 }
 
+/// Solana's off-curve address search, over raw seeds.
+///
+/// Exposed because not every account a keeper needs has a recipe in the
+/// manifest: an associated token account is derived from the owner, the token
+/// program and the mint, none of which the manifest knows in advance.
+pub fn derive_program_address(
+    seeds: &[Vec<u8>],
+    program_id: &str,
+) -> Result<ResolvedPda, AccountResolutionError> {
+    find_program_address(seeds, program_id)
+}
+
 fn find_program_address(
     seeds: &[Vec<u8>],
     program_id: &str,
