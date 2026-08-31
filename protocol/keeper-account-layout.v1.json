@@ -164,6 +164,11 @@
           "path": "params_hash",
           "offset": 2755,
           "size": 32
+        },
+        {
+          "path": "last_update_slot",
+          "offset": 2907,
+          "size": 8
         }
       ]
     },

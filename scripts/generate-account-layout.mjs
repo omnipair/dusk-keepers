@@ -57,6 +57,7 @@ const WANTED = {
     "insurance.base_vault",
     "insurance.quote_vault",
     "params_hash",
+    "last_update_slot",
   ],
   LeveragePosition: ["owner", "market", "position_id", "debt_asset"],
   // Only the fields ahead of `update`, which is a data-carrying enum and so
