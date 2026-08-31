@@ -108,6 +108,13 @@ impl<'a> AccountReader<'a> {
             .map_err(|_| LayoutError::Malformed(format!("{path} is not 8 bytes")))
     }
 
+    pub fn i128(&self, path: &str, data: &[u8]) -> Result<i128, LayoutError> {
+        let bytes = self.bytes(path, data)?;
+        <[u8; 16]>::try_from(bytes)
+            .map(i128::from_le_bytes)
+            .map_err(|_| LayoutError::Malformed(format!("{path} is not 16 bytes")))
+    }
+
     pub fn u8(&self, path: &str, data: &[u8]) -> Result<u8, LayoutError> {
         self.bytes(path, data)?
             .first()

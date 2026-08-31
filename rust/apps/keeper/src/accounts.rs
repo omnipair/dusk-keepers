@@ -40,6 +40,12 @@ pub struct MarketAccounts {
     pub quote_interest_vault: [u8; 32],
     pub base_insurance_vault: [u8; 32],
     pub quote_insurance_vault: [u8; 32],
+    pub ylp_mint: [u8; 32],
+    pub base_ylp_vault: [u8; 32],
+    pub quote_ylp_vault: [u8; 32],
+    /// Whether the market carries hLP that must be settled alongside any
+    /// instruction that updates it.
+    pub hlp_active: bool,
 }
 
 impl MarketAccounts {
@@ -61,7 +67,39 @@ impl MarketAccounts {
             quote_interest_vault: reader.pubkey("quote_side.interest_vault", data).ok()?,
             quote_mint: reader.pubkey("quote_side.asset_mint", data).ok()?,
             quote_reserve_vault: reader.pubkey("quote_side.reserve_vault", data).ok()?,
+            base_ylp_vault: reader.pubkey("base_hlp_vault.ylp_vault", data).ok()?,
+            quote_ylp_vault: reader.pubkey("quote_hlp_vault.ylp_vault", data).ok()?,
+            ylp_mint: reader.pubkey("ylp_mint", data).ok()?,
+            // Mirrors Market::has_active_hlp. Getting this wrong in either
+            // direction breaks the instruction: too few accounts is
+            // NotEnoughAccounts, too many shifts whatever the instruction
+            // expects after the prefix.
+            hlp_active: reader.u64("base_hlp_vault.hlp_supply", data).ok()? > 0
+                || reader.i128("base_hlp_vault.residual_exposure", data).ok()? != 0
+                || reader.u64("quote_hlp_vault.hlp_supply", data).ok()? > 0
+                || reader.i128("quote_hlp_vault.residual_exposure", data).ok()? != 0,
         })
+    }
+
+    /// The hLP settlement prefix, in the order the program checks it.
+    ///
+    /// Instructions that update the market must carry these when the market
+    /// has active hLP, and must not when it does not: the program reads the
+    /// prefix positionally, so an extra account is as wrong as a missing one.
+    pub fn hlp_remaining_accounts(&self) -> Vec<AccountMeta> {
+        if !self.hlp_active {
+            return Vec::new();
+        }
+        [
+            self.ylp_mint,
+            self.base_ylp_vault,
+            self.quote_ylp_vault,
+            self.base_interest_vault,
+            self.quote_interest_vault,
+        ]
+        .into_iter()
+        .map(AccountMeta::writable)
+        .collect()
     }
 
     /// The market's two sides, oriented by which one carries the debt.
@@ -276,8 +314,12 @@ mod tests {
             quote_collateral_vault: [13; 32],
             quote_insurance_vault: [15; 32],
             quote_interest_vault: [14; 32],
+            base_ylp_vault: [6; 32],
+            hlp_active: true,
             quote_mint: [11; 32],
             quote_reserve_vault: [12; 32],
+            quote_ylp_vault: [16; 32],
+            ylp_mint: [7; 32],
         };
         let base_debt = market.oriented(true);
         let quote_debt = market.oriented(false);
@@ -290,5 +332,39 @@ mod tests {
             base_debt.collateral_insurance_vault,
             quote_debt.collateral_insurance_vault
         );
+    }
+
+    /// The prefix is positional, so its order is part of the contract with the
+    /// program and an inactive market must contribute nothing at all.
+    #[test]
+    fn the_hlp_prefix_is_ordered_and_conditional() {
+        let mut market = MarketAccounts {
+            address: [0; 32],
+            base_collateral_vault: [3; 32],
+            base_insurance_vault: [5; 32],
+            base_interest_vault: [4; 32],
+            base_mint: [1; 32],
+            base_reserve_vault: [2; 32],
+            base_ylp_vault: [6; 32],
+            hlp_active: true,
+            quote_collateral_vault: [13; 32],
+            quote_insurance_vault: [15; 32],
+            quote_interest_vault: [14; 32],
+            quote_mint: [11; 32],
+            quote_reserve_vault: [12; 32],
+            quote_ylp_vault: [16; 32],
+            ylp_mint: [7; 32],
+        };
+        let prefix = market.hlp_remaining_accounts();
+        assert_eq!(prefix.len(), 5);
+        assert_eq!(prefix[0].pubkey, market.ylp_mint);
+        assert_eq!(prefix[1].pubkey, market.base_ylp_vault);
+        assert_eq!(prefix[2].pubkey, market.quote_ylp_vault);
+        assert_eq!(prefix[3].pubkey, market.base_interest_vault);
+        assert_eq!(prefix[4].pubkey, market.quote_interest_vault);
+        assert!(prefix.iter().all(|meta| meta.is_writable));
+
+        market.hlp_active = false;
+        assert!(market.hlp_remaining_accounts().is_empty());
     }
 }

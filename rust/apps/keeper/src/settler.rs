@@ -143,6 +143,9 @@ impl SettlerJob<'_> {
         }
         .assemble(INSTRUCTION_KEY)
         .map_err(|error| ExecutionError::Assembly(error.to_string()))?;
+        // The market update this instruction performs settles hLP, which the
+        // program reads from the remaining accounts.
+        let accounts = [accounts, market.hlp_remaining_accounts()].concat();
 
         let data = encode_keeper_instruction(
             self.contract,

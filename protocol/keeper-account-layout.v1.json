@@ -121,6 +121,36 @@
           "size": 8
         },
         {
+          "path": "base_hlp_vault.ylp_vault",
+          "offset": 1751,
+          "size": 32
+        },
+        {
+          "path": "quote_hlp_vault.ylp_vault",
+          "offset": 2135,
+          "size": 32
+        },
+        {
+          "path": "base_hlp_vault.hlp_supply",
+          "offset": 1831,
+          "size": 8
+        },
+        {
+          "path": "quote_hlp_vault.hlp_supply",
+          "offset": 2215,
+          "size": 8
+        },
+        {
+          "path": "base_hlp_vault.residual_exposure",
+          "offset": 1839,
+          "size": 16
+        },
+        {
+          "path": "quote_hlp_vault.residual_exposure",
+          "offset": 2223,
+          "size": 16
+        },
+        {
           "path": "insurance.base_vault",
           "offset": 2607,
           "size": 32
