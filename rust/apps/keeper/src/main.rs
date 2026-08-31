@@ -22,11 +22,13 @@ mod accounts;
 mod bidder;
 mod discovery;
 mod execute;
+mod settler;
 mod signer;
 mod transaction;
 
 use discovery::{observe, Observation, RpcClient};
 use bidder::{BidPolicy, BidderJob};
+use settler::{SettlePolicy, SettlerJob};
 use execute::TriggerJob;
 use keeper_core::OutcomeStatus;
 use signer::{LocalKeypair, TransactionSigner};
@@ -352,6 +354,49 @@ fn bid_policy() -> Option<BidPolicy> {
     })
 }
 
+/// Settle any auction that has run its course.
+fn settle_pass(
+    trigger: &TriggerJob<'_>,
+    contract: &InstructionContract,
+    layout: &AccountLayoutManifest,
+    resolver: &DeterministicAccountResolver,
+    signer: &LocalKeypair,
+    dry_run: bool,
+) -> Result<Vec<execute::AttemptReport>, execute::ExecutionError> {
+    let Some(policy) = settle_policy() else {
+        return Ok(Vec::new());
+    };
+    let settler = SettlerJob {
+        client: trigger.client,
+        contract,
+        dry_run,
+        layout,
+        policy,
+        resolver,
+        signer,
+    };
+    let mut reports = Vec::new();
+    for position in settler.candidates(trigger.all_positions()?) {
+        reports.push(settler.attempt(&position)?);
+    }
+    Ok(reports)
+}
+
+/// What the settler will accept for calling the backstop.
+///
+/// Required rather than defaulted, for the same reason the bidder's bounds
+/// are: the floor encodes what the operator thinks the work is worth, and a
+/// settler that accepts anything will settle at a loss.
+fn settle_policy() -> Option<SettlePolicy> {
+    Some(SettlePolicy {
+        min_bounty: env::var("KEEPER_SETTLE_MIN_BOUNTY").ok()?.parse().ok()?,
+        slippage_bps: env::var("KEEPER_SETTLE_SLIPPAGE_BPS")
+            .ok()
+            .and_then(|value| value.parse().ok())
+            .unwrap_or(50),
+    })
+}
+
 /// One execution pass, folded into the shared snapshot.
 ///
 /// The balance floor is checked here rather than at startup because a keeper
@@ -409,6 +454,7 @@ fn run_execution_pass(
     // nothing rather than falling back to something it was not deployed for.
     let outcome = match profile {
         "lending-bidder" => bid_pass(&job, contract, layout, resolver, signer, dry_run),
+        "lending-settler" => settle_pass(&job, contract, layout, resolver, signer, dry_run),
         "lending-trigger" => job.run_pass(),
         _ => Ok(Vec::new()),
     };

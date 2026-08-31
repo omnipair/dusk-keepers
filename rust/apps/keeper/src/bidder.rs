@@ -38,7 +38,7 @@ const INSTRUCTION_KEY: &str = "dusk:fill_liquidation_auction";
 /// SPL token account balances live eight bytes in at offset 64.
 const TOKEN_AMOUNT_OFFSET: usize = 64;
 
-fn token_amount(data: &[u8]) -> Option<u64> {
+pub fn token_amount(data: &[u8]) -> Option<u64> {
     data.get(TOKEN_AMOUNT_OFFSET..TOKEN_AMOUNT_OFFSET + 8)
         .and_then(|bytes| <[u8; 8]>::try_from(bytes).ok())
         .map(u64::from_le_bytes)
