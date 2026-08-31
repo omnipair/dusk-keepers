@@ -140,9 +140,10 @@ impl AttemptReport {
 /// stay quiet; the second has to be loud. Anchor error codes are matched as
 /// text because that is what simulation returns.
 pub fn classify_simulation_failure(detail: &str) -> (ReasonCode, Option<ExpectedRace>) {
-    // 6069 is PositionNotLiquidatable, which the program also raises when an
-    // auction is already running.
-    if detail.contains("PositionNotLiquidatable") || detail.contains("6069") {
+    // 6109 is PositionNotLiquidatable, which the program also raises when an
+    // auction is already running. Both forms are matched because simulation
+    // returns the number in `err` and the name only in the logs.
+    if detail.contains("PositionNotLiquidatable") || detail.contains("6109") {
         return (
             ReasonCode::BoundsNotMet,
             Some(ExpectedRace::ObligationNoLongerLiquidatable),
