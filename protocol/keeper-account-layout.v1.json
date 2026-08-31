@@ -136,6 +136,26 @@
           "size": 8
         },
         {
+          "path": "base_hlp_vault.debt_principal",
+          "offset": 1823,
+          "size": 8
+        },
+        {
+          "path": "quote_hlp_vault.debt_principal",
+          "offset": 2207,
+          "size": 8
+        },
+        {
+          "path": "base_hlp_vault.debt_shares",
+          "offset": 1807,
+          "size": 16
+        },
+        {
+          "path": "quote_hlp_vault.debt_shares",
+          "offset": 2191,
+          "size": 16
+        },
+        {
           "path": "quote_hlp_vault.hlp_supply",
           "offset": 2215,
           "size": 8
