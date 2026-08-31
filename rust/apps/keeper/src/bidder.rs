@@ -210,11 +210,65 @@ impl BidderJob<'_> {
     }
 
     fn encode(&self, instruction: Instruction) -> Result<String, ExecutionError> {
-        let blockhash = self.client.latest_blockhash()?;
+        self.encode_with(instruction, self.client.latest_blockhash()?)
+    }
+
+    /// Encode against a caller-supplied blockhash.
+    ///
+    /// Simulation is asked to replace the blockhash anyway, so fetching a
+    /// fresh one for each probe of the cap search doubles the round trips to
+    /// change nothing. The send path still takes a current one.
+    fn encode_with(
+        &self,
+        instruction: Instruction,
+        blockhash: [u8; 32],
+    ) -> Result<String, ExecutionError> {
         let message = compile_message(self.signer.public_key(), &[instruction], blockhash)
             .map_err(|error| ExecutionError::Assembly(error.to_string()))?;
         let signature = self.signer.sign(&message);
         Ok(base64(&serialize_transaction(&[signature], &message)))
+    }
+
+    /// The largest repayment the program will accept for this position.
+    ///
+    /// Liquidation is partial: the protocol caps how much of a position one
+    /// fill may repay, and a bidder that asked for more is refused outright
+    /// rather than trimmed. The cap depends on the position's health and the
+    /// market's terms, so this searches for it by simulation instead of
+    /// recomputing it — the same reason the price is measured rather than
+    /// derived. A dozen simulations is cheap next to a wrong cap formula that
+    /// silently drifts from the program.
+    fn largest_acceptable_repay(
+        &self,
+        position: &BorrowPositionRecord,
+        market: &MarketAccounts,
+    ) -> Result<Option<u64>, ExecutionError> {
+        let blockhash = self.client.latest_blockhash()?;
+        let accepts = |amount: u64| -> Result<bool, ExecutionError> {
+            let (instruction, _) = self.fill_instruction(position, market, amount, 0)?;
+            let encoded = self.encode_with(instruction, blockhash)?;
+            Ok(self.client.simulate(&encoded)?.is_none())
+        };
+
+        if accepts(self.policy.max_repay)? {
+            return Ok(Some(self.policy.max_repay));
+        }
+        let mut low = 0_u64;
+        let mut high = self.policy.max_repay;
+        // Ten halvings resolve the cap to a thousandth of the ceiling, which
+        // is far finer than the fee any fill pays.
+        for _ in 0..10 {
+            let middle = low + (high - low) / 2;
+            if middle == low {
+                break;
+            }
+            if accepts(middle)? {
+                low = middle;
+            } else {
+                high = middle;
+            }
+        }
+        Ok((low > 0).then_some(low))
     }
 
     pub fn attempt(
@@ -224,10 +278,22 @@ impl BidderJob<'_> {
         let position_key = bs58::encode(position.address).into_string();
         let market = self.market_accounts(position.market)?;
 
-        // Measure first: no floor, so the program reports what the fill would
+        let Some(repay_amount) = self.largest_acceptable_repay(position, &market)? else {
+            return Ok(AttemptReport {
+                debt_mint: String::new(),
+                detail: Some("no repayment within the ceiling is acceptable".into()),
+                position: position_key,
+                race: None,
+                reason: ReasonCode::BoundsNotMet,
+                signature: None,
+                status: OutcomeStatus::Skipped,
+            });
+        };
+
+        // Measure: no floor, so the program reports what the fill would
         // actually return rather than refusing terms the bidder guessed at.
         let (measuring, collateral_account) =
-            self.fill_instruction(position, &market, self.policy.max_repay, 0)?;
+            self.fill_instruction(position, &market, repay_amount, 0)?;
         let collateral_key = bs58::encode(collateral_account).into_string();
         let before = self
             .client
@@ -276,15 +342,15 @@ impl BidderJob<'_> {
             });
         }
 
-        let required = (self.policy.max_repay as u128)
+        let required = (repay_amount as u128)
             .saturating_mul(self.policy.min_collateral_bps as u128)
             / 10_000;
         if (collateral_out as u128) < required {
             return Ok(AttemptReport {
                 debt_mint: collateral_key,
                 detail: Some(format!(
-                    "{collateral_out} collateral for {} debt is below the {} bps floor",
-                    self.policy.max_repay, self.policy.min_collateral_bps
+                    "{collateral_out} collateral for {repay_amount} debt is below the {} bps floor",
+                    self.policy.min_collateral_bps
                 )),
                 position: position_key,
                 race: None,
@@ -314,13 +380,15 @@ impl BidderJob<'_> {
             .saturating_mul((10_000 - self.policy.slippage_bps.min(10_000)) as u128)
             / 10_000;
         let (sending, _) =
-            self.fill_instruction(position, &market, self.policy.max_repay, floor as u64)?;
+            self.fill_instruction(position, &market, repay_amount, floor as u64)?;
         let encoded = self.encode(sending)?;
 
         match self.client.send_transaction(&encoded) {
             Ok(signature) => Ok(AttemptReport {
                 debt_mint: collateral_key,
-                detail: Some(format!("filled for at least {floor} collateral")),
+                detail: Some(format!(
+                    "repaid {repay_amount} for at least {floor} collateral"
+                )),
                 position: position_key,
                 race: None,
                 reason: ReasonCode::Confirmed,

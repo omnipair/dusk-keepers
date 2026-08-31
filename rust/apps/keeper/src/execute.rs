@@ -188,6 +188,12 @@ pub fn classify_simulation_failure(detail: &str) -> (ReasonCode, Option<Expected
             Some(ExpectedRace::ObligationNoLongerLiquidatable),
         );
     }
+    // 6123 is LiquidationRepayTooLarge: liquidation is partial, and asking to
+    // repay more than the cap is refused rather than trimmed. A bound, not a
+    // fault.
+    if detail.contains("LiquidationRepayTooLarge") || detail.contains("6123") {
+        return (ReasonCode::BoundsNotMet, None);
+    }
     if detail.contains("InvalidAssetMint") || detail.contains("InvalidMint") {
         return (ReasonCode::BoundsNotMet, None);
     }
