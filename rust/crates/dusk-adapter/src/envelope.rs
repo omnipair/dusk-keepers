@@ -763,6 +763,40 @@ mod tests {
         EnvelopeValidator::new(lock, contract).expect("contract must match lock")
     }
 
+    /// Rewrites every valid case's parity digest in place.
+    ///
+    /// The digest is a checksum over the envelope's bytes and account order,
+    /// not an independent statement about the protocol, so recomputing it with
+    /// the production function is the correct way to re-pin these fixtures
+    /// after a deployment change. Ignored by default; run explicitly with
+    /// `cargo test -p dusk-adapter -- --ignored regenerate_parity`.
+    #[test]
+    #[ignore]
+    fn regenerate_parity_digests() {
+        let path = concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../../fixtures/conformance/v1/instruction-envelope-cases.json"
+        );
+        let raw = std::fs::read_to_string(path).expect("fixtures must be readable");
+        let mut document: serde_json::Value =
+            serde_json::from_str(&raw).expect("fixtures must parse");
+
+        let cases = document
+            .get_mut("validCases")
+            .and_then(|value| value.as_array_mut())
+            .expect("validCases must be an array");
+        for case in cases {
+            let envelope_value = case.get("envelope").expect("case must carry an envelope");
+            let envelope: JobEnvelope = serde_json::from_value(envelope_value.clone())
+                .expect("envelope must parse");
+            let parity = envelope_parity_sha256(&envelope).expect("parity must compute");
+            case["envelope"]["paritySha256"] = serde_json::Value::String(parity);
+        }
+
+        let rendered = serde_json::to_string_pretty(&document).expect("fixtures must render");
+        std::fs::write(path, format!("{rendered}\n")).expect("fixtures must be writable");
+    }
+
     #[test]
     fn validates_all_shared_real_instruction_envelopes() {
         let fixtures: FixtureBundle =

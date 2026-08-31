@@ -1,19 +1,19 @@
 {
   "$schema": "./schemas/instruction-contract.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "local-snapshot-0",
+  "protocolRevision": "devnet-1",
   "programs": [
     {
       "name": "dusk",
-      "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+      "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "idlPath": "artifacts/dusk.json",
-      "idlSha256": "5e67579b6dbec5620a5578844cd56c44458a3167095d8db2e85fd76643d5473f"
+      "idlSha256": "7be629ec9f677bbd96324a4463fee336eeb2c9099aa3534138983424a535dfda"
     },
     {
       "name": "leverage_delegate",
-      "programId": "EPGF9iFrbGnhWgC3To9rC9vxinEYuDHaz4RXgLPvuRkp",
+      "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
       "idlPath": "artifacts/leverage_delegate.json",
-      "idlSha256": "948b9475071daa318cbc9f0e3cc2f8d150191a4ec3dc54e63a661ea489cc5f4a"
+      "idlSha256": "d0a5997fba913d78c31f585abb068b7048fe302b35f50e3d5a246680400c7d81"
     }
   ],
   "actions": [
@@ -97,7 +97,7 @@
     {
       "key": "dusk:trigger_liquidation_auction",
       "program": "dusk",
-      "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+      "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "instructionName": "trigger_liquidation_auction",
       "discriminatorHex": "b5ac53586537f66f",
       "accounts": [
@@ -127,7 +127,7 @@
     {
       "key": "dusk:bid_liquidation_auction",
       "program": "dusk",
-      "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+      "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "instructionName": "bid_liquidation_auction",
       "discriminatorHex": "06df1ee493c51b31",
       "accounts": [
@@ -269,7 +269,7 @@
     {
       "key": "dusk:settle_liquidation_auction_floor",
       "program": "dusk",
-      "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+      "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "instructionName": "settle_liquidation_auction_floor",
       "discriminatorHex": "2e5d574e55318979",
       "accounts": [
@@ -411,7 +411,7 @@
     {
       "key": "dusk:liquidate_leverage",
       "program": "dusk",
-      "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+      "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "instructionName": "liquidate_leverage",
       "discriminatorHex": "bc840a53ab4e7429",
       "accounts": [
@@ -553,7 +553,7 @@
     {
       "key": "dusk:delegated_close_leverage",
       "program": "dusk",
-      "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+      "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "instructionName": "delegated_close_leverage",
       "discriminatorHex": "0eda6299a413308b",
       "accounts": [
@@ -702,7 +702,7 @@
     {
       "key": "leverage_delegate:before_take_profit",
       "program": "leverage_delegate",
-      "programId": "EPGF9iFrbGnhWgC3To9rC9vxinEYuDHaz4RXgLPvuRkp",
+      "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
       "instructionName": "before_take_profit",
       "discriminatorHex": "05236f00df83c11f",
       "accounts": [
@@ -767,7 +767,7 @@
     {
       "key": "leverage_delegate:after_close_order",
       "program": "leverage_delegate",
-      "programId": "EPGF9iFrbGnhWgC3To9rC9vxinEYuDHaz4RXgLPvuRkp",
+      "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
       "instructionName": "after_close_order",
       "discriminatorHex": "9ce0eefa5fe5eb3b",
       "accounts": [
@@ -860,7 +860,7 @@
     {
       "key": "leverage_delegate:before_stop_loss",
       "program": "leverage_delegate",
-      "programId": "EPGF9iFrbGnhWgC3To9rC9vxinEYuDHaz4RXgLPvuRkp",
+      "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
       "instructionName": "before_stop_loss",
       "discriminatorHex": "f63e52e8a8c7794e",
       "accounts": [
@@ -925,7 +925,7 @@
     {
       "key": "dusk:settle_protocol_auction",
       "program": "dusk",
-      "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+      "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "instructionName": "settle_protocol_auction",
       "discriminatorHex": "cecc208708164850",
       "accounts": [
@@ -1039,7 +1039,7 @@
     {
       "key": "dusk:queue_parameter_proposal",
       "program": "dusk",
-      "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+      "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "instructionName": "queue_parameter_proposal",
       "discriminatorHex": "c259a444fdfb156c",
       "accounts": [
@@ -1097,7 +1097,7 @@
     {
       "key": "dusk:execute_parameter_proposal",
       "program": "dusk",
-      "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+      "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "instructionName": "execute_parameter_proposal",
       "discriminatorHex": "2e6a707128ff9a1b",
       "accounts": [

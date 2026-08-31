@@ -11,7 +11,7 @@
     "buildSha": null
   },
   "protocol": {
-    "revision": "local-snapshot-0",
+    "revision": "devnet-1",
     "lockStatus": "captured",
     "lockSha256": "69df9afe1445d0e1a3809e87c3fb4917b41ebf40effe90af89e1170a8f5b8dc9",
     "sourceWorktreeFingerprintSha256": "d87e5189c0da4fe823a1504243aea31eefa66f380b62370b27b591a4b4e780fd"

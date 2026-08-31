@@ -288,7 +288,16 @@ mod tests {
         .expect("fixtures must parse");
 
         for fixture in fixtures.cases {
-            let mut scheduler = Scheduler::new("local-snapshot-0");
+            // The revision comes from the fixture rather than a literal: these
+            // candidates are re-pinned whenever the deployment changes, and a
+            // hardcoded revision silently rejects every one of them, leaving an
+            // empty queue that looks like a scheduling bug.
+            let revision = fixture
+                .candidates
+                .first()
+                .map(|candidate| candidate.protocol_revision.clone())
+                .expect("scheduler fixture must carry candidates");
+            let mut scheduler = Scheduler::new(&revision);
             for key in fixture.locked_conflict_keys {
                 scheduler.mark_in_flight(key);
             }

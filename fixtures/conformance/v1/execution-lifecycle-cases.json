@@ -13,7 +13,7 @@
         "market": "market:meta-usdc",
         "target": "position:happy",
         "observedSlot": 100,
-        "protocolRevision": "local-snapshot-0",
+        "protocolRevision": "devnet-1",
         "expectedStateHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
       },
       "events": [
@@ -59,7 +59,7 @@
         "market": "market:meta-usdc",
         "target": "position:race",
         "observedSlot": 200,
-        "protocolRevision": "local-snapshot-0",
+        "protocolRevision": "devnet-1",
         "expectedStateHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
       },
       "events": [
@@ -91,7 +91,7 @@
         "market": "market:meta-usdc",
         "target": "position:expired-before-submit",
         "observedSlot": 300,
-        "protocolRevision": "local-snapshot-0",
+        "protocolRevision": "devnet-1",
         "expectedStateHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
       },
       "events": [
@@ -150,7 +150,7 @@
         "market": "market:meta-usdc",
         "target": "obligation:unknown",
         "observedSlot": 400,
-        "protocolRevision": "local-snapshot-0",
+        "protocolRevision": "devnet-1",
         "expectedStateHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
       },
       "events": [
@@ -211,7 +211,7 @@
         "market": "market:meta-usdc",
         "target": "auction:late",
         "observedSlot": 500,
-        "protocolRevision": "local-snapshot-0",
+        "protocolRevision": "devnet-1",
         "expectedStateHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
       },
       "events": [
@@ -258,7 +258,7 @@
         "market": "market:meta-usdc",
         "target": "auction:lending:denied",
         "observedSlot": 600,
-        "protocolRevision": "local-snapshot-0",
+        "protocolRevision": "devnet-1",
         "expectedStateHash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
       },
       "events": [
@@ -292,7 +292,7 @@
         "market": "market:meta-usdc",
         "target": "proposal:invalid-order",
         "observedSlot": 700,
-        "protocolRevision": "local-snapshot-0",
+        "protocolRevision": "devnet-1",
         "expectedStateHash": "7777777777777777777777777777777777777777777777777777777777777777"
       },
       "events": [

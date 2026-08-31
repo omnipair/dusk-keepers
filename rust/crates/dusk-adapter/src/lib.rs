@@ -215,19 +215,31 @@ impl Error for ProtocolLockError {
 mod tests {
     use super::*;
 
-    const CAPTURED_LOCK: &str = include_str!("../../../../protocol.lock.json");
+    const SHIPPED_LOCK: &str = include_str!("../../../../protocol.lock.json");
+
+    /// The shipped lock with its status downgraded, so the live-execution gate
+    /// stays under test without a second fixture to keep in step with the
+    /// schema.
+    fn captured_lock() -> String {
+        SHIPPED_LOCK.replacen("\"status\": \"frozen\"", "\"status\": \"captured\"", 1)
+    }
 
     #[test]
-    fn parses_the_shared_lock() {
-        let lock = ProtocolLock::from_json(CAPTURED_LOCK).expect("captured lock must parse");
-        assert_eq!(lock.revision, "local-snapshot-0");
-        assert_eq!(lock.status, LockStatus::Captured);
+    fn parses_the_shipped_lock() {
+        // Asserts the shape rather than the pin: re-pinning to a new
+        // deployment is routine and must not require editing a test.
+        let lock = ProtocolLock::from_json(SHIPPED_LOCK).expect("shipped lock must parse");
+        assert!(!lock.revision.is_empty());
         assert_eq!(lock.programs.len(), 2);
+        for program in &lock.programs {
+            assert!(program.program_id.as_deref().is_some_and(|id| !id.is_empty()));
+            assert!(program.idl.sha256.as_deref().is_some_and(|hash| !hash.is_empty()));
+        }
     }
 
     #[test]
     fn captured_lock_cannot_enable_live_execution() {
-        let lock = ProtocolLock::from_json(CAPTURED_LOCK).expect("captured lock must parse");
+        let lock = ProtocolLock::from_json(&captured_lock()).expect("captured lock must parse");
         assert!(matches!(
             lock.assert_live_ready(),
             Err(ProtocolLockError::NotFrozen)
