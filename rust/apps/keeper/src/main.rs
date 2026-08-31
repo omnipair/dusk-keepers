@@ -13,7 +13,7 @@ use std::{
     time::Duration,
 };
 
-use dusk_adapter::{InstructionContract, ProtocolLock};
+use dusk_adapter::{AccountLayoutManifest, InstructionContract, ProtocolLock};
 
 mod discovery;
 mod execute;
@@ -21,7 +21,7 @@ mod signer;
 mod transaction;
 
 use discovery::{observe, Observation, RpcClient};
-use execute::{MarketMints, TriggerJob};
+use execute::TriggerJob;
 use keeper_core::OutcomeStatus;
 use signer::{LocalKeypair, TransactionSigner};
 
@@ -69,6 +69,7 @@ struct Config {
     bind_address: SocketAddr,
     protocol_lock: PathBuf,
     instruction_contract: PathBuf,
+    account_layout: PathBuf,
     /// Ceiling on transactions per pass. A keeper that has gone wrong should
     /// run out of permission before it runs out of money.
     max_sends_per_pass: usize,
@@ -89,6 +90,9 @@ impl Config {
         let instruction_contract = env::var("DUSK_INSTRUCTION_CONTRACT")
             .unwrap_or_else(|_| "protocol/keeper-instructions.v1.json".into())
             .into();
+        let account_layout = env::var("DUSK_ACCOUNT_LAYOUT")
+            .unwrap_or_else(|_| "protocol/keeper-account-layout.v1.json".into())
+            .into();
         let max_sends_per_pass = env::var("KEEPER_MAX_SENDS_PER_PASS")
             .ok()
             .and_then(|value| value.parse().ok())
@@ -98,6 +102,7 @@ impl Config {
             .and_then(|value| value.parse().ok())
             .unwrap_or(20_000_000);
         Ok(Self {
+            account_layout,
             bind_address,
             instruction_contract,
             max_sends_per_pass,
@@ -167,6 +172,22 @@ fn main() -> Result<(), Box<dyn Error>> {
         Err(error) => return Err(Box::new(error)),
     };
 
+    // Offsets generated for a different deployment are not approximately
+    // right, they are arbitrary, so a mismatch stops the keeper rather than
+    // letting it read whatever happens to sit at those bytes.
+    let layout = match std::fs::read_to_string(&config.account_layout) {
+        Ok(raw) => {
+            let manifest = AccountLayoutManifest::from_json(&raw)?;
+            manifest.assert_matches(&lock.revision)?;
+            Some(manifest)
+        }
+        Err(error) if executor.is_none() => {
+            println!("keeper layout=absent ({error})");
+            None
+        }
+        Err(error) => return Err(Box::new(error)),
+    };
+
     // Discovery runs even in shadow mode: reading is how the sentinel earns
     // trust before any profile is given a key.
     if let Ok(endpoint) = env::var("SOLANA_RPC_HTTP_URL") {
@@ -176,7 +197,6 @@ fn main() -> Result<(), Box<dyn Error>> {
             .unwrap_or(15_000);
         let shared = Arc::clone(&snapshot);
         let program_id_key = decode_program_id(&dusk_program_id)?;
-        let markets = market_mints_from_environment();
         let dry_run = config.mode == Mode::Shadow;
         let max_sends = config.max_sends_per_pass;
         let minimum_lamports = config.minimum_lamports;
@@ -198,13 +218,15 @@ fn main() -> Result<(), Box<dyn Error>> {
                     }
                 }
 
-                if let (Some(signer), Some(contract)) = (executor.as_ref(), contract.as_ref()) {
+                if let (Some(signer), Some(contract), Some(layout)) =
+                    (executor.as_ref(), contract.as_ref(), layout.as_ref())
+                {
                     run_execution_pass(
                         &client,
                         contract,
+                        layout,
                         signer,
                         program_id_key,
-                        &markets,
                         max_sends,
                         minimum_lamports,
                         dry_run,
@@ -243,37 +265,6 @@ fn decode_program_id(encoded: &str) -> Result<[u8; 32], Box<dyn Error>> {
     Ok(key)
 }
 
-/// `market:base_mint:quote_mint` entries, comma separated.
-///
-/// Declared rather than discovered because the quote mint sits behind a large
-/// nested struct whose offset would have to be hand-computed, and a wrong
-/// offset is a silent wrong answer. Passing a wrong mint here is not: the
-/// program resolves it against the market and rejects it.
-fn market_mints_from_environment() -> Vec<MarketMints> {
-    let Ok(raw) = env::var("KEEPER_MARKETS") else {
-        return Vec::new();
-    };
-    let decode = |value: &str| -> Option<[u8; 32]> {
-        let bytes = bs58::decode(value.trim()).into_vec().ok()?;
-        let mut key = [0_u8; 32];
-        if bytes.len() != 32 {
-            return None;
-        }
-        key.copy_from_slice(&bytes);
-        Some(key)
-    };
-    raw.split(',')
-        .filter_map(|entry| {
-            let mut parts = entry.split(':');
-            Some(MarketMints {
-                market: decode(parts.next()?)?,
-                base: decode(parts.next()?)?,
-                quote: decode(parts.next()?)?,
-            })
-        })
-        .collect()
-}
-
 /// One execution pass, folded into the shared snapshot.
 ///
 /// The balance floor is checked here rather than at startup because a keeper
@@ -284,9 +275,9 @@ fn market_mints_from_environment() -> Vec<MarketMints> {
 fn run_execution_pass(
     client: &RpcClient,
     contract: &InstructionContract,
+    layout: &AccountLayoutManifest,
     signer: &LocalKeypair,
     program_id: [u8; 32],
-    markets: &[MarketMints],
     max_sends_per_pass: usize,
     minimum_lamports: u64,
     dry_run: bool,
@@ -314,9 +305,11 @@ fn run_execution_pass(
 
     let job = TriggerJob {
         client,
+        confirmation_attempts: 8,
+        confirmation_interval: Duration::from_millis(1_500),
         contract,
         dry_run,
-        market_mints: markets.to_vec(),
+        layout,
         max_sends_per_pass,
         program_id,
         signer,

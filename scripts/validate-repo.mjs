@@ -244,6 +244,10 @@ assert.ok(adapterCodecFixtures.invalidPdaCases.length > 0);
 
 await import("./generate-adapter-codecs.mjs");
 
+// Offsets are only trustworthy while they match the pinned IDL, so a stale
+// layout is a build failure rather than a silent wrong read at runtime.
+await import("./generate-account-layout.mjs");
+
 if (process.env.REQUIRE_FROZEN_PROTOCOL === "1") {
   assert.equal(lock.status, "frozen", "live deployment requires a frozen protocol lock");
   assert.ok(lock.source.worktreeFingerprintSha256, "missing worktree fingerprint");

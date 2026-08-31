@@ -191,23 +191,6 @@ impl RpcClient {
         Ok(decoded)
     }
 
-    /// A market's base and quote mints, read from the account itself.
-    ///
-    /// `base_side.asset_mint` sits at a fixed offset after the discriminator,
-    /// the version byte and the yLP mint. The quote side is nested far enough
-    /// into a large struct that hand-computing its offset would be a standing
-    /// invitation to drift, so the quote mint is supplied by the caller and
-    /// only the base mint is verified here. The program checks both anyway.
-    pub fn market_base_mint(&self, market: &str) -> Result<[u8; 32], DiscoveryError> {
-        let data = self.account_data(market)?;
-        if data.len() < 73 {
-            return Err(DiscoveryError::Malformed("market account is too short".into()));
-        }
-        let mut mint = [0_u8; 32];
-        mint.copy_from_slice(&data[41..73]);
-        Ok(mint)
-    }
-
     pub fn account_data(&self, address: &str) -> Result<Vec<u8>, DiscoveryError> {
         #[derive(Deserialize)]
         struct Value {

@@ -13,7 +13,10 @@
 
 use std::{error::Error, fmt};
 
-use dusk_adapter::{InstructionContract, KeeperInstructionArguments, encode_keeper_instruction};
+use dusk_adapter::{
+    AccountLayoutManifest, InstructionContract, KeeperInstructionArguments,
+    encode_keeper_instruction,
+};
 use keeper_core::{OutcomeStatus, ReasonCode, lifecycle::ExpectedRace};
 
 use crate::{
@@ -25,8 +28,9 @@ use crate::{
 /// A borrow position as the keeper needs to see it.
 ///
 /// Decoded by offset rather than through a full Anchor deserializer: the
-/// keeper needs five fields out of twenty, and the account is fixed-layout, so
-/// a decoder for the rest would be code that can only rot.
+/// keeper needs five fields out of twenty, and a decoder for the rest would be
+/// a second Rust model of a protocol struct, free to drift. The offsets are
+/// generated from the pinned IDL rather than written here.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BorrowPositionRecord {
     pub address: [u8; 32],
@@ -40,8 +44,6 @@ pub struct BorrowPositionRecord {
 }
 
 impl BorrowPositionRecord {
-    pub const LEN: usize = 266;
-
     pub fn has_active_auction(&self) -> bool {
         self.auction_debt_asset != u8::MAX
     }
@@ -50,29 +52,54 @@ impl BorrowPositionRecord {
         self.base_collateral > 0 || self.quote_collateral > 0
     }
 
-    pub fn decode(address: [u8; 32], data: &[u8]) -> Option<Self> {
-        if data.len() < Self::LEN {
+    pub fn decode(
+        layout: &AccountLayoutManifest,
+        address: [u8; 32],
+        data: &[u8],
+    ) -> Option<Self> {
+        if data.first_chunk::<8>()? != &account_discriminator("BorrowPosition") {
             return None;
         }
-        if data[..8] != account_discriminator("BorrowPosition") {
-            return None;
-        }
-        let field = |start: usize| -> [u8; 32] {
-            let mut value = [0_u8; 32];
-            value.copy_from_slice(&data[start..start + 32]);
-            value
-        };
-        let amount = |start: usize| -> u64 {
-            u64::from_le_bytes(data[start..start + 8].try_into().unwrap_or([0; 8]))
-        };
+        let reader = layout.reader("BorrowPosition").ok()?;
         Some(Self {
             address,
-            auction_debt_asset: data[240],
-            base_collateral: amount(104),
-            market: field(40),
-            owner: field(8),
-            position_id: field(72),
-            quote_collateral: amount(112),
+            auction_debt_asset: reader.u8("auction_debt_asset", data).ok()?,
+            base_collateral: reader.u64("base_collateral", data).ok()?,
+            market: reader.pubkey("market", data).ok()?,
+            owner: reader.pubkey("owner", data).ok()?,
+            position_id: reader.pubkey("position_id", data).ok()?,
+            quote_collateral: reader.u64("quote_collateral", data).ok()?,
+        })
+    }
+}
+
+/// A market's mint pair, read from the market account itself.
+///
+/// Previously these were declared in an environment variable because the quote
+/// side's offset could not be hand-counted. Generated offsets remove the need
+/// for the hint, and with it the chance of a deployment configured to watch a
+/// market it names incorrectly.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct MarketMints {
+    pub market: [u8; 32],
+    pub base: [u8; 32],
+    pub quote: [u8; 32],
+}
+
+impl MarketMints {
+    pub fn decode(
+        layout: &AccountLayoutManifest,
+        market: [u8; 32],
+        data: &[u8],
+    ) -> Option<Self> {
+        if data.first_chunk::<8>()? != &account_discriminator("Market") {
+            return None;
+        }
+        let reader = layout.reader("Market").ok()?;
+        Some(Self {
+            base: reader.pubkey("base_side.asset_mint", data).ok()?,
+            market,
+            quote: reader.pubkey("quote_side.asset_mint", data).ok()?,
         })
     }
 }
@@ -173,28 +200,19 @@ pub fn classify_simulation_failure(detail: &str) -> (ReasonCode, Option<Expected
     (ReasonCode::SimulationRejected, None)
 }
 
-/// The mint pair of one market.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct MarketMints {
-    pub market: [u8; 32],
-    pub base: [u8; 32],
-    pub quote: [u8; 32],
-}
-
 pub struct TriggerJob<'a> {
     pub client: &'a RpcClient,
     pub contract: &'a InstructionContract,
     pub program_id: [u8; 32],
-    /// Per market, the pair of mints it trades, used as the candidate debt
-    /// assets. A wrong hint cannot cause a wrong action: the program resolves
-    /// the mint against the market itself and rejects one that does not
-    /// belong. A position whose market is absent is left alone rather than
-    /// guessed at.
-    pub market_mints: Vec<MarketMints>,
+    pub layout: &'a AccountLayoutManifest,
     pub signer: &'a dyn TransactionSigner,
     /// Ceiling on transactions sent per pass, so a bad tick cannot become an
     /// unbounded spend.
     pub max_sends_per_pass: usize,
+    /// How many times to ask whether a submitted signature has landed, and how
+    /// long to wait between asks.
+    pub confirmation_attempts: u32,
+    pub confirmation_interval: std::time::Duration,
     pub dry_run: bool,
 }
 
@@ -209,9 +227,24 @@ impl TriggerJob<'_> {
         )?;
         Ok(accounts
             .into_iter()
-            .filter_map(|(address, data)| BorrowPositionRecord::decode(address, &data))
+            .filter_map(|(address, data)| {
+                BorrowPositionRecord::decode(self.layout, address, &data)
+            })
             .filter(|record| record.has_collateral() && !record.has_active_auction())
             .collect())
+    }
+
+    /// The mints a market trades, read from the market account.
+    fn market_mints(&self, market: [u8; 32]) -> Result<MarketMints, ExecutionError> {
+        let data = self
+            .client
+            .account_data(&bs58::encode(market).into_string())?;
+        MarketMints::decode(self.layout, market, &data).ok_or_else(|| {
+            ExecutionError::Assembly(format!(
+                "{} is not a market account",
+                bs58::encode(market).into_string()
+            ))
+        })
     }
 
     fn trigger_instruction(
@@ -296,10 +329,21 @@ impl TriggerJob<'_> {
                 // would make a dropped transaction indistinguishable from a
                 // landed one, and the next pass would find the position
                 // untouched with no record of why.
-                let confirmed = self
-                    .client
-                    .signature_confirmed(&signature)
-                    .unwrap_or(false);
+                //
+                // Confirmation is polled rather than read once: asking
+                // immediately after submitting reports "unknown" for a
+                // transaction that lands a second later, which is the normal
+                // case and should not look like a failure.
+                let mut confirmed = false;
+                for attempt in 0..self.confirmation_attempts {
+                    if attempt > 0 {
+                        std::thread::sleep(self.confirmation_interval);
+                    }
+                    if self.client.signature_confirmed(&signature).unwrap_or(false) {
+                        confirmed = true;
+                        break;
+                    }
+                }
                 Ok(AttemptReport {
                     debt_mint: mint_key,
                     detail: if confirmed {
@@ -338,32 +382,18 @@ impl TriggerJob<'_> {
     pub fn run_pass(&self) -> Result<Vec<AttemptReport>, ExecutionError> {
         let mut reports = Vec::new();
         let mut sent = 0_usize;
+        // One read per market rather than per position: a market's mints do
+        // not change within a pass.
+        let mut markets: std::collections::BTreeMap<[u8; 32], MarketMints> =
+            std::collections::BTreeMap::new();
         for position in self.candidates()? {
             let position_key = bs58::encode(position.address).into_string();
-            let Some(mints) = self
-                .market_mints
-                .iter()
-                .find(|entry| entry.market == position.market)
-            else {
-                continue;
+            let mints = match markets.entry(position.market) {
+                std::collections::btree_map::Entry::Occupied(entry) => *entry.get(),
+                std::collections::btree_map::Entry::Vacant(entry) => {
+                    *entry.insert(self.market_mints(position.market)?)
+                }
             };
-            // Anchor the declared pair to the chain before using it. The
-            // program would reject a wrong mint anyway, but a mismatch here
-            // means the deployment's configuration disagrees with the market
-            // it names, which is worth saying out loud rather than absorbing
-            // as a stream of rejected simulations.
-            let declared_base = self
-                .client
-                .market_base_mint(&bs58::encode(position.market).into_string())?;
-            if declared_base != mints.base {
-                reports.push(AttemptReport::skipped(
-                    &position_key,
-                    &bs58::encode(mints.base).into_string(),
-                    ExpectedRace::AccountChanged,
-                    "configured base mint does not match the market on chain",
-                ));
-                continue;
-            }
             let (base_mint, quote_mint) = (mints.base, mints.quote);
             // Which side carries the debt is not stored on the position, so
             // the program is asked. It is only worth asking about a side whose
@@ -407,8 +437,19 @@ impl TriggerJob<'_> {
 mod tests {
     use super::*;
 
+    const LAYOUT: &str = include_str!("../../../../protocol/keeper-account-layout.v1.json");
+
+    fn layout() -> AccountLayoutManifest {
+        AccountLayoutManifest::from_json(LAYOUT).expect("layout must parse")
+    }
+
+    /// Built at the size the generated layout describes, so a layout change
+    /// that moves these fields fails the test instead of being papered over
+    /// by a fixture that was hand-sized to match.
     fn encoded_position(auction_asset: u8, base_collateral: u64) -> Vec<u8> {
-        let mut data = vec![0_u8; BorrowPositionRecord::LEN];
+        let manifest = layout();
+        let reader = manifest.reader("BorrowPosition").expect("layout has the account");
+        let mut data = vec![0_u8; reader.size()];
         data[..8].copy_from_slice(&account_discriminator("BorrowPosition"));
         data[8..40].copy_from_slice(&[1_u8; 32]);
         data[40..72].copy_from_slice(&[2_u8; 32]);
@@ -420,7 +461,10 @@ mod tests {
 
     #[test]
     fn decodes_the_fields_the_keeper_acts_on() {
-        let record = BorrowPositionRecord::decode([9; 32], &encoded_position(u8::MAX, 500)).unwrap();
+        let manifest = layout();
+        let record =
+            BorrowPositionRecord::decode(&manifest, [9; 32], &encoded_position(u8::MAX, 500))
+                .unwrap();
         assert_eq!(record.owner, [1; 32]);
         assert_eq!(record.market, [2; 32]);
         assert_eq!(record.position_id, [3; 32]);
@@ -431,7 +475,9 @@ mod tests {
 
     #[test]
     fn an_open_auction_is_visible() {
-        let record = BorrowPositionRecord::decode([9; 32], &encoded_position(0, 500)).unwrap();
+        let manifest = layout();
+        let record =
+            BorrowPositionRecord::decode(&manifest, [9; 32], &encoded_position(0, 500)).unwrap();
         assert!(record.has_active_auction());
     }
 
@@ -439,12 +485,12 @@ mod tests {
     fn rejects_an_account_of_another_type() {
         let mut data = encoded_position(u8::MAX, 1);
         data[..8].copy_from_slice(&account_discriminator("Market"));
-        assert!(BorrowPositionRecord::decode([9; 32], &data).is_none());
+        assert!(BorrowPositionRecord::decode(&layout(), [9; 32], &data).is_none());
     }
 
     #[test]
     fn rejects_a_truncated_account() {
-        assert!(BorrowPositionRecord::decode([9; 32], &[0_u8; 32]).is_none());
+        assert!(BorrowPositionRecord::decode(&layout(), [9; 32], &[0_u8; 32]).is_none());
     }
 
     #[test]

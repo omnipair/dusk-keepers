@@ -1,0 +1,142 @@
+{
+  "$schema": "./schemas/account-layout.schema.json",
+  "schemaVersion": 1,
+  "protocolRevision": "devnet-1",
+  "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+  "idlSha256": "7be629ec9f677bbd96324a4463fee336eeb2c9099aa3534138983424a535dfda",
+  "accounts": [
+    {
+      "name": "BorrowPosition",
+      "sizeWithDiscriminator": 266,
+      "fields": [
+        {
+          "path": "owner",
+          "offset": 8,
+          "size": 32
+        },
+        {
+          "path": "market",
+          "offset": 40,
+          "size": 32
+        },
+        {
+          "path": "position_id",
+          "offset": 72,
+          "size": 32
+        },
+        {
+          "path": "base_collateral",
+          "offset": 104,
+          "size": 8
+        },
+        {
+          "path": "quote_collateral",
+          "offset": 112,
+          "size": 8
+        },
+        {
+          "path": "base_referral_partner",
+          "offset": 140,
+          "size": 32
+        },
+        {
+          "path": "quote_referral_partner",
+          "offset": 172,
+          "size": 32
+        },
+        {
+          "path": "auction_debt_asset",
+          "offset": 240,
+          "size": 1
+        }
+      ]
+    },
+    {
+      "name": "Market",
+      "sizeWithDiscriminator": 2917,
+      "fields": [
+        {
+          "path": "ylp_mint",
+          "offset": 9,
+          "size": 32
+        },
+        {
+          "path": "base_side.asset_mint",
+          "offset": 41,
+          "size": 32
+        },
+        {
+          "path": "base_side.asset_decimals",
+          "offset": 73,
+          "size": 1
+        },
+        {
+          "path": "base_side.reserve_vault",
+          "offset": 106,
+          "size": 32
+        },
+        {
+          "path": "base_side.collateral_vault",
+          "offset": 138,
+          "size": 32
+        },
+        {
+          "path": "base_side.interest_vault",
+          "offset": 170,
+          "size": 32
+        },
+        {
+          "path": "quote_side.asset_mint",
+          "offset": 546,
+          "size": 32
+        },
+        {
+          "path": "quote_side.asset_decimals",
+          "offset": 578,
+          "size": 1
+        },
+        {
+          "path": "quote_side.reserve_vault",
+          "offset": 611,
+          "size": 32
+        },
+        {
+          "path": "quote_side.collateral_vault",
+          "offset": 643,
+          "size": 32
+        },
+        {
+          "path": "quote_side.interest_vault",
+          "offset": 675,
+          "size": 32
+        },
+        {
+          "path": "params_hash",
+          "offset": 2755,
+          "size": 32
+        }
+      ]
+    },
+    {
+      "name": "LeveragePosition",
+      "sizeWithDiscriminator": 220,
+      "fields": [
+        {
+          "path": "owner",
+          "offset": 8,
+          "size": 32
+        },
+        {
+          "path": "market",
+          "offset": 40,
+          "size": 32
+        },
+        {
+          "path": "position_id",
+          "offset": 72,
+          "size": 32
+        }
+      ]
+    }
+  ]
+}
