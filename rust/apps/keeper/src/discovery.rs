@@ -1,0 +1,183 @@
+//! Candidate discovery.
+//!
+//! The sentinel's whole job, and the first stage of every other profile's.
+//! It reads the chain directly rather than trusting the indexer: a keeper that
+//! acted on database state alone would act on a view that is, by construction,
+//! behind the cluster it is trying to race.
+//!
+//! Nothing here signs. Discovery is deliberately separable from execution so
+//! the wallet-less sentinel can prove the read path works before any profile
+//! is given a key.
+
+use std::{error::Error, fmt, time::Duration};
+
+use serde::Deserialize;
+
+/// What a discovery pass observed.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct Observation {
+    pub markets: usize,
+    pub borrow_positions: usize,
+    pub leverage_positions: usize,
+    pub slot: u64,
+}
+
+#[derive(Debug)]
+pub enum DiscoveryError {
+    Transport(String),
+    Rpc(String),
+    Malformed(String),
+}
+
+impl fmt::Display for DiscoveryError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Transport(detail) => write!(formatter, "rpc transport failed: {detail}"),
+            Self::Rpc(detail) => write!(formatter, "rpc returned an error: {detail}"),
+            Self::Malformed(detail) => write!(formatter, "rpc response was malformed: {detail}"),
+        }
+    }
+}
+
+impl Error for DiscoveryError {}
+
+#[derive(Deserialize)]
+struct RpcEnvelope<T> {
+    result: Option<T>,
+    error: Option<RpcError>,
+}
+
+#[derive(Deserialize)]
+struct RpcError {
+    message: String,
+}
+
+#[derive(Deserialize)]
+struct ProgramAccount {
+    account: AccountData,
+}
+
+#[derive(Deserialize)]
+struct AccountData {
+    data: Vec<String>,
+}
+
+/// Anchor prefixes every account with an eight-byte discriminator, so counting
+/// by type is a prefix match rather than a full decode. The sentinel only
+/// needs counts, and decoding every account to get them would cost far more.
+pub fn account_discriminator(account_name: &str) -> [u8; 8] {
+    use sha2::{Digest, Sha256};
+    let digest = Sha256::digest(format!("account:{account_name}").as_bytes());
+    let mut discriminator = [0_u8; 8];
+    discriminator.copy_from_slice(&digest[..8]);
+    discriminator
+}
+
+pub struct RpcClient {
+    endpoint: String,
+    agent: ureq::Agent,
+}
+
+impl RpcClient {
+    pub fn new(endpoint: impl Into<String>, timeout: Duration) -> Self {
+        Self {
+            endpoint: endpoint.into(),
+            agent: ureq::AgentBuilder::new()
+                .timeout_read(timeout)
+                .timeout_write(timeout)
+                .build(),
+        }
+    }
+
+    fn call<T: for<'de> Deserialize<'de>>(
+        &self,
+        method: &str,
+        params: serde_json::Value,
+    ) -> Result<T, DiscoveryError> {
+        let body = serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": method,
+            "params": params,
+        });
+        let response = self
+            .agent
+            .post(&self.endpoint)
+            .set("content-type", "application/json")
+            .send_json(body)
+            .map_err(|error| DiscoveryError::Transport(error.to_string()))?;
+        let envelope: RpcEnvelope<T> = response
+            .into_json()
+            .map_err(|error| DiscoveryError::Malformed(error.to_string()))?;
+        if let Some(error) = envelope.error {
+            return Err(DiscoveryError::Rpc(error.message));
+        }
+        envelope
+            .result
+            .ok_or_else(|| DiscoveryError::Malformed("response carried no result".into()))
+    }
+
+    pub fn slot(&self) -> Result<u64, DiscoveryError> {
+        self.call("getSlot", serde_json::json!([{"commitment": "confirmed"}]))
+    }
+
+    /// Count a program's accounts of one type.
+    ///
+    /// Only the discriminator is fetched: the filter runs on the node, and the
+    /// slice keeps a large account set from being pulled over the wire just to
+    /// be counted.
+    pub fn count_accounts(
+        &self,
+        program_id: &str,
+        discriminator: [u8; 8],
+    ) -> Result<usize, DiscoveryError> {
+        let encoded = bs58::encode(discriminator).into_string();
+        let accounts: Vec<ProgramAccount> = self.call(
+            "getProgramAccounts",
+            serde_json::json!([
+                program_id,
+                {
+                    "encoding": "base64",
+                    "commitment": "confirmed",
+                    "dataSlice": { "offset": 0, "length": 0 },
+                    "filters": [
+                        { "memcmp": { "offset": 0, "bytes": encoded } }
+                    ]
+                }
+            ]),
+        )?;
+        // The slice makes every payload empty; the count is the answer.
+        Ok(accounts.iter().filter(|entry| entry.account.data.len() >= 1).count())
+    }
+}
+
+/// One discovery pass over the pinned programs.
+pub fn observe(client: &RpcClient, dusk_program_id: &str) -> Result<Observation, DiscoveryError> {
+    let slot = client.slot()?;
+    let markets = client.count_accounts(dusk_program_id, account_discriminator("Market"))?;
+    let borrow_positions =
+        client.count_accounts(dusk_program_id, account_discriminator("BorrowPosition"))?;
+    let leverage_positions =
+        client.count_accounts(dusk_program_id, account_discriminator("LeveragePosition"))?;
+    Ok(Observation {
+        borrow_positions,
+        leverage_positions,
+        markets,
+        slot,
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn discriminators_are_stable_and_distinct() {
+        // Anchor derives these from the account name; a change here means the
+        // program's layout changed, not that this code drifted.
+        let market = account_discriminator("Market");
+        let borrow = account_discriminator("BorrowPosition");
+        assert_ne!(market, borrow);
+        assert_eq!(market, account_discriminator("Market"));
+    }
+}
