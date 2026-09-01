@@ -52,6 +52,10 @@ struct Snapshot {
     sent: u64,
     last_signature: Option<String>,
     last_execution_error: Option<String>,
+    /// The last skip's own words. A reason code says a bound was not met; it
+    /// does not say which bound or by how much, and an operator looking at a
+    /// keeper that never acts needs the second thing.
+    last_skip_detail: Option<String>,
     /// Why the last pass declined to act, counted by reason.
     ///
     /// Without this, "every position is healthy" and "every simulation is
@@ -522,6 +526,10 @@ fn run_execution_pass(
             if let Ok(mut current) = shared.lock() {
                 current.evaluated += reports.len() as u64;
                 current.last_execution_error = None;
+                current.last_skip_detail = reports
+                    .iter()
+                    .find(|report| report.status != OutcomeStatus::Executed)
+                    .and_then(|report| report.detail.clone());
                 current.last_reasons = reports.iter().fold(
                     BTreeMap::new(),
                     |mut counts, report| {
@@ -616,6 +624,10 @@ fn respond(
         snapshot.sent,
         optional_json(snapshot.last_signature.as_deref()),
         optional_json(snapshot.last_execution_error.as_deref()),
+    );
+    let observed = format!(
+        "{observed},\"lastSkipDetail\":{}",
+        optional_json(snapshot.last_skip_detail.as_deref())
     );
     let reasons = serde_json::to_string(&snapshot.last_reasons)
         .unwrap_or_else(|_| "{}".to_owned());

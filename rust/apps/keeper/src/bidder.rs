@@ -245,16 +245,29 @@ impl BidderJob<'_> {
         &self,
         position: &BorrowPositionRecord,
         market: &MarketAccounts,
-    ) -> Result<Option<u64>, ExecutionError> {
+    ) -> Result<(Option<u64>, Option<String>), ExecutionError> {
         let blockhash = self.client.latest_blockhash()?;
-        let accepts = |amount: u64| -> Result<bool, ExecutionError> {
+        // The reason the *largest* probe was refused is kept. Without it a
+        // search that fails at every size reports "no acceptable repayment",
+        // which reads as the bidder deciding the terms are bad when it may be
+        // the program refusing for a reason that has nothing to do with price.
+        let mut refusal: Option<String> = None;
+        let mut accepts = |amount: u64| -> Result<bool, ExecutionError> {
             let (instruction, _) = self.fill_instruction(position, market, amount, 0)?;
             let encoded = self.encode_with(instruction, blockhash)?;
-            Ok(self.client.simulate(&encoded)?.is_none())
+            match self.client.simulate(&encoded)? {
+                None => Ok(true),
+                Some(detail) => {
+                    if refusal.is_none() {
+                        refusal = Some(detail);
+                    }
+                    Ok(false)
+                }
+            }
         };
 
         if accepts(self.policy.max_repay)? {
-            return Ok(Some(self.policy.max_repay));
+            return Ok((Some(self.policy.max_repay), None));
         }
         let mut low = 0_u64;
         let mut high = self.policy.max_repay;
@@ -271,7 +284,7 @@ impl BidderJob<'_> {
                 high = middle;
             }
         }
-        Ok((low > 0).then_some(low))
+        Ok(((low > 0).then_some(low), refusal))
     }
 
     pub fn attempt(
@@ -281,13 +294,20 @@ impl BidderJob<'_> {
         let position_key = bs58::encode(position.address).into_string();
         let market = self.market_accounts(position.market)?;
 
-        let Some(repay_amount) = self.largest_acceptable_repay(position, &market)? else {
+        let (accepted, refusal) = self.largest_acceptable_repay(position, &market)?;
+        let Some(repay_amount) = accepted else {
+            // Classify on what the program actually said. A cap that is simply
+            // smaller than the ceiling is a bound; an invariant failure is not,
+            // and reporting the second as the first hides a protocol defect
+            // behind a pricing decision.
+            let detail = refusal.unwrap_or_else(|| "no repayment was accepted".into());
+            let (reason, race) = classify_simulation_failure(&detail);
             return Ok(AttemptReport {
                 debt_mint: String::new(),
-                detail: Some("no repayment within the ceiling is acceptable".into()),
+                detail: Some(format!("no repayment within the ceiling: {detail}")),
                 position: position_key,
-                race: None,
-                reason: ReasonCode::BoundsNotMet,
+                race,
+                reason,
                 signature: None,
                 status: OutcomeStatus::Skipped,
             });
