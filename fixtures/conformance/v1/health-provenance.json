@@ -13,8 +13,8 @@
   "protocol": {
     "revision": "devnet-1",
     "lockStatus": "frozen",
-    "lockSha256": "a8f84e8dd64802475e15c547a6d1dcda00d07017936e842a48b1a8cd933bd980",
-    "sourceWorktreeFingerprintSha256": "9306f255037426d8e7058cc77108500c8ff03fc14528a00ba7b806544bf455b3"
+    "lockSha256": "6a17f9aba6a1e29b266d41b15b0628a70d0b9aa25551fa61b688f0aed975f564",
+    "sourceWorktreeFingerprintSha256": "17930e6f96af5f4595803fe14e8e716c70750b77f3ca8a8ed5b13d074eb30b2b"
   },
   "dependencies": {
     "rpc": "unknown",
