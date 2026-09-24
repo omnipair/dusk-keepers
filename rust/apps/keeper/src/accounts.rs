@@ -49,11 +49,7 @@ pub struct MarketAccounts {
 }
 
 impl MarketAccounts {
-    pub fn decode(
-        layout: &AccountLayoutManifest,
-        address: [u8; 32],
-        data: &[u8],
-    ) -> Option<Self> {
+    pub fn decode(layout: &AccountLayoutManifest, address: [u8; 32], data: &[u8]) -> Option<Self> {
         let reader = layout.reader("Market").ok()?;
         Some(Self {
             address,
@@ -77,7 +73,10 @@ impl MarketAccounts {
             hlp_active: reader.u64("base_hlp_vault.hlp_supply", data).ok()? > 0
                 || reader.i128("base_hlp_vault.residual_exposure", data).ok()? != 0
                 || reader.u64("quote_hlp_vault.hlp_supply", data).ok()? > 0
-                || reader.i128("quote_hlp_vault.residual_exposure", data).ok()? != 0,
+                || reader
+                    .i128("quote_hlp_vault.residual_exposure", data)
+                    .ok()?
+                    != 0,
         })
     }
 

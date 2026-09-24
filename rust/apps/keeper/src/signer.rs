@@ -63,8 +63,8 @@ impl LocalKeypair {
     /// trusted, so a truncated or spliced file fails here instead of
     /// producing signatures no one can verify.
     pub fn from_json(raw: &str) -> Result<Self, SignerError> {
-        let bytes: Vec<u8> = serde_json::from_str(raw)
-            .map_err(|error| SignerError::Malformed(error.to_string()))?;
+        let bytes: Vec<u8> =
+            serde_json::from_str(raw).map_err(|error| SignerError::Malformed(error.to_string()))?;
         if bytes.len() != 64 {
             return Err(SignerError::Malformed(format!(
                 "expected 64 bytes, found {}",

@@ -787,8 +787,8 @@ mod tests {
             .expect("validCases must be an array");
         for case in cases {
             let envelope_value = case.get("envelope").expect("case must carry an envelope");
-            let envelope: JobEnvelope = serde_json::from_value(envelope_value.clone())
-                .expect("envelope must parse");
+            let envelope: JobEnvelope =
+                serde_json::from_value(envelope_value.clone()).expect("envelope must parse");
             let parity = envelope_parity_sha256(&envelope).expect("parity must compute");
             case["envelope"]["paritySha256"] = serde_json::Value::String(parity);
         }
@@ -841,8 +841,7 @@ mod tests {
         lock.status = crate::LockStatus::Captured;
         let contract =
             InstructionContract::from_json(CONTRACT).expect("instruction contract must parse");
-        let validator =
-            EnvelopeValidator::new(lock, contract).expect("contract must match lock");
+        let validator = EnvelopeValidator::new(lock, contract).expect("contract must match lock");
 
         let error = validator.validate_for_signing(envelope).unwrap_err();
         assert_eq!(

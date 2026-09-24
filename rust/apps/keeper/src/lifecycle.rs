@@ -39,11 +39,7 @@ pub struct ProposalRecord {
 }
 
 impl ProposalRecord {
-    pub fn decode(
-        layout: &AccountLayoutManifest,
-        address: [u8; 32],
-        data: &[u8],
-    ) -> Option<Self> {
+    pub fn decode(layout: &AccountLayoutManifest, address: [u8; 32], data: &[u8]) -> Option<Self> {
         if data.first_chunk::<8>()? != &account_discriminator("ParameterProposal") {
             return None;
         }

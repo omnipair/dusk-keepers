@@ -50,11 +50,7 @@ pub struct FutarchyConfig {
 }
 
 impl FutarchyConfig {
-    pub fn decode(
-        layout: &AccountLayoutManifest,
-        address: [u8; 32],
-        data: &[u8],
-    ) -> Option<Self> {
+    pub fn decode(layout: &AccountLayoutManifest, address: [u8; 32], data: &[u8]) -> Option<Self> {
         if data.first_chunk::<8>()? != &account_discriminator("FutarchyAuthority") {
             return None;
         }
@@ -75,7 +71,9 @@ impl FutarchyConfig {
                 staking_vault: reader
                     .pubkey("fee_auction.recipients.staking_vault", data)
                     .ok()?,
-                treasury: reader.pubkey("fee_auction.recipients.treasury", data).ok()?,
+                treasury: reader
+                    .pubkey("fee_auction.recipients.treasury", data)
+                    .ok()?,
             },
         })
     }
@@ -265,8 +263,16 @@ impl ArbitrageurJob<'_> {
     ) -> Result<AttemptReport, ExecutionError> {
         let label = format!(
             "{}/{}/{}",
-            if matches!(lane, ProtocolAuctionLane::Fee) { "fee" } else { "buyback" },
-            if matches!(source, ProtocolRevenueSource::Swap) { "swap" } else { "interest" },
+            if matches!(lane, ProtocolAuctionLane::Fee) {
+                "fee"
+            } else {
+                "buyback"
+            },
+            if matches!(source, ProtocolRevenueSource::Swap) {
+                "swap"
+            } else {
+                "interest"
+            },
             if sold_is_base { "base" } else { "quote" },
         );
         let market_key = bs58::encode(market.address).into_string();
@@ -340,9 +346,8 @@ impl ArbitrageurJob<'_> {
             });
         }
 
-        let ceiling = (paid as u128)
-            .saturating_mul((10_000 + self.policy.slippage_bps) as u128)
-            / 10_000;
+        let ceiling =
+            (paid as u128).saturating_mul((10_000 + self.policy.slippage_bps) as u128) / 10_000;
         let (sending, _) = self.settle_instruction(
             market,
             futarchy,

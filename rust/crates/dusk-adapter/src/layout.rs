@@ -232,8 +232,14 @@ mod tests {
         let manifest = manifest();
         let market = manifest.reader("Market").unwrap();
         let data = vec![0_u8; market.size()];
-        let base = market.bytes("base_side.asset_mint", &data).unwrap().as_ptr();
-        let quote = market.bytes("quote_side.asset_mint", &data).unwrap().as_ptr();
+        let base = market
+            .bytes("base_side.asset_mint", &data)
+            .unwrap()
+            .as_ptr();
+        let quote = market
+            .bytes("quote_side.asset_mint", &data)
+            .unwrap()
+            .as_ptr();
         assert_ne!(base, quote);
     }
 

@@ -52,11 +52,7 @@ impl BorrowPositionRecord {
         self.base_collateral > 0 || self.quote_collateral > 0
     }
 
-    pub fn decode(
-        layout: &AccountLayoutManifest,
-        address: [u8; 32],
-        data: &[u8],
-    ) -> Option<Self> {
+    pub fn decode(layout: &AccountLayoutManifest, address: [u8; 32], data: &[u8]) -> Option<Self> {
         if data.first_chunk::<8>()? != &account_discriminator("BorrowPosition") {
             return None;
         }
@@ -87,11 +83,7 @@ pub struct MarketMints {
 }
 
 impl MarketMints {
-    pub fn decode(
-        layout: &AccountLayoutManifest,
-        market: [u8; 32],
-        data: &[u8],
-    ) -> Option<Self> {
+    pub fn decode(layout: &AccountLayoutManifest, market: [u8; 32], data: &[u8]) -> Option<Self> {
         if data.first_chunk::<8>()? != &account_discriminator("Market") {
             return None;
         }
@@ -240,9 +232,7 @@ impl TriggerJob<'_> {
         )?;
         Ok(accounts
             .into_iter()
-            .filter_map(|(address, data)| {
-                BorrowPositionRecord::decode(self.layout, address, &data)
-            })
+            .filter_map(|(address, data)| BorrowPositionRecord::decode(self.layout, address, &data))
             .collect())
     }
 
@@ -256,9 +246,7 @@ impl TriggerJob<'_> {
         )?;
         Ok(accounts
             .into_iter()
-            .filter_map(|(address, data)| {
-                BorrowPositionRecord::decode(self.layout, address, &data)
-            })
+            .filter_map(|(address, data)| BorrowPositionRecord::decode(self.layout, address, &data))
             .filter(|record| record.has_collateral() && !record.has_active_auction())
             .collect())
     }
@@ -477,7 +465,9 @@ mod tests {
     /// by a fixture that was hand-sized to match.
     fn encoded_position(auction_asset: u8, base_collateral: u64) -> Vec<u8> {
         let manifest = layout();
-        let reader = manifest.reader("BorrowPosition").expect("layout has the account");
+        let reader = manifest
+            .reader("BorrowPosition")
+            .expect("layout has the account");
         let mut data = vec![0_u8; reader.size()];
         data[..8].copy_from_slice(&account_discriminator("BorrowPosition"));
         data[8..40].copy_from_slice(&[1_u8; 32]);

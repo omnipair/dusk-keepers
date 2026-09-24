@@ -22,15 +22,27 @@ pub struct AccountMeta {
 
 impl AccountMeta {
     pub fn readonly(pubkey: [u8; 32]) -> Self {
-        Self { is_signer: false, is_writable: false, pubkey }
+        Self {
+            is_signer: false,
+            is_writable: false,
+            pubkey,
+        }
     }
 
     pub fn writable(pubkey: [u8; 32]) -> Self {
-        Self { is_signer: false, is_writable: true, pubkey }
+        Self {
+            is_signer: false,
+            is_writable: true,
+            pubkey,
+        }
     }
 
     pub fn signer(pubkey: [u8; 32]) -> Self {
-        Self { is_signer: true, is_writable: true, pubkey }
+        Self {
+            is_signer: true,
+            is_writable: true,
+            pubkey,
+        }
     }
 }
 
@@ -141,9 +153,7 @@ pub fn compile_message(
         keys.iter()
             .position(|meta| &meta.pubkey == pubkey)
             .map(|position| position as u8)
-            .ok_or_else(|| {
-                TransactionError::UnknownAccount(bs58::encode(pubkey).into_string())
-            })
+            .ok_or_else(|| TransactionError::UnknownAccount(bs58::encode(pubkey).into_string()))
     };
 
     let mut message = vec![signers, readonly_signers, readonly_others];
@@ -180,8 +190,7 @@ pub fn serialize_transaction(signatures: &[[u8; 64]], message: &[u8]) -> Vec<u8>
 /// Base64, standard alphabet with padding. Small enough not to justify a
 /// dependency, and used only on the way out to the RPC node.
 pub fn base64(input: &[u8]) -> String {
-    const ALPHABET: &[u8; 64] =
-        b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    const ALPHABET: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     let mut output = String::with_capacity(input.len().div_ceil(3) * 4);
     for chunk in input.chunks(3) {
         let bytes = [
@@ -189,8 +198,7 @@ pub fn base64(input: &[u8]) -> String {
             chunk.get(1).copied().unwrap_or(0),
             chunk.get(2).copied().unwrap_or(0),
         ];
-        let packed =
-            ((bytes[0] as u32) << 16) | ((bytes[1] as u32) << 8) | bytes[2] as u32;
+        let packed = ((bytes[0] as u32) << 16) | ((bytes[1] as u32) << 8) | bytes[2] as u32;
         output.push(ALPHABET[(packed >> 18) as usize & 0x3f] as char);
         output.push(ALPHABET[(packed >> 12) as usize & 0x3f] as char);
         output.push(if chunk.len() > 1 {
@@ -270,9 +278,16 @@ mod tests {
 
     #[test]
     fn a_program_id_is_never_promoted_to_signer() {
-        let message =
-            compile_message(key(1), &[Instruction { accounts: vec![], data: vec![], program_id: key(9) }], key(0))
-                .unwrap();
+        let message = compile_message(
+            key(1),
+            &[Instruction {
+                accounts: vec![],
+                data: vec![],
+                program_id: key(9),
+            }],
+            key(0),
+        )
+        .unwrap();
         assert_eq!(&message[..3], &[1, 0, 1]);
     }
 

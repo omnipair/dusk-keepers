@@ -13,6 +13,9 @@ use std::{error::Error, fmt, time::Duration};
 
 use serde::Deserialize;
 
+pub type ProgramAccountData = Vec<([u8; 32], Vec<u8>)>;
+pub type SimulatedAccountData = (Option<String>, Vec<Option<Vec<u8>>>);
+
 /// What a discovery pass observed.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Observation {
@@ -149,7 +152,10 @@ impl RpcClient {
             ]),
         )?;
         // The slice makes every payload empty; the count is the answer.
-        Ok(accounts.iter().filter(|entry| !entry.account.data.is_empty()).count())
+        Ok(accounts
+            .iter()
+            .filter(|entry| !entry.account.data.is_empty())
+            .count())
     }
 
     /// Fetch a program's accounts of one type, with their data.
@@ -161,7 +167,7 @@ impl RpcClient {
         &self,
         program_id: &str,
         discriminator: [u8; 8],
-    ) -> Result<Vec<([u8; 32], Vec<u8>)>, DiscoveryError> {
+    ) -> Result<ProgramAccountData, DiscoveryError> {
         let encoded = bs58::encode(discriminator).into_string();
         let accounts: Vec<ProgramAccount> = self.call(
             "getProgramAccounts",
@@ -285,7 +291,7 @@ impl RpcClient {
         &self,
         transaction_base64: &str,
         addresses: &[String],
-    ) -> Result<(Option<String>, Vec<Option<Vec<u8>>>), DiscoveryError> {
+    ) -> Result<SimulatedAccountData, DiscoveryError> {
         #[derive(Deserialize)]
         struct Value {
             value: Inner,
@@ -406,8 +412,7 @@ fn decode_base58_key(encoded: &str) -> Result<[u8; 32], DiscoveryError> {
 
 /// Standard-alphabet base64 with padding, the encoding the RPC returns.
 fn decode_base64(input: &str) -> Option<Vec<u8>> {
-    const ALPHABET: &[u8; 64] =
-        b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    const ALPHABET: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     let mut lookup = [255_u8; 256];
     for (index, byte) in ALPHABET.iter().enumerate() {
         lookup[*byte as usize] = index as u8;
@@ -430,7 +435,6 @@ fn decode_base64(input: &str) -> Option<Vec<u8>> {
     }
     Some(output)
 }
-
 
 /// One discovery pass over the pinned programs.
 pub fn observe(client: &RpcClient, dusk_program_id: &str) -> Result<Observation, DiscoveryError> {

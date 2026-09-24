@@ -29,14 +29,14 @@ mod settler;
 mod signer;
 mod transaction;
 
-use discovery::{observe, Observation, RpcClient};
 use arbitrageur::{ArbitragePolicy, ArbitrageurJob};
 use bidder::{BidPolicy, BidderJob};
+use discovery::{Observation, RpcClient, observe};
+use execute::TriggerJob;
+use keeper_core::OutcomeStatus;
 use leverage::LeverageJob;
 use lifecycle::LifecycleJob;
 use settler::{SettlePolicy, SettlerJob};
-use execute::TriggerJob;
-use keeper_core::OutcomeStatus;
 use signer::{LocalKeypair, TransactionSigner};
 
 /// What the last discovery pass saw, shared with the health endpoint.
@@ -148,7 +148,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!(
         "keeper profile={} mode={} protocol_revision={}",
         config.profile,
-        if config.mode == Mode::Live { "live" } else { "shadow" },
+        if config.mode == Mode::Live {
+            "live"
+        } else {
+            "shadow"
+        },
         lock.revision
     );
     if env::args().any(|argument| argument == "--check") {
@@ -283,9 +287,13 @@ fn main() -> Result<(), Box<dyn Error>> {
         });
     }
 
-    serve(config.bind_address, &config.profile, &lock.revision, snapshot)
+    serve(
+        config.bind_address,
+        &config.profile,
+        &lock.revision,
+        snapshot,
+    )
 }
-
 
 /// The signer, from the environment or from a file.
 ///
@@ -530,9 +538,8 @@ fn run_execution_pass(
                     .iter()
                     .find(|report| report.status != OutcomeStatus::Executed)
                     .and_then(|report| report.detail.clone());
-                current.last_reasons = reports.iter().fold(
-                    BTreeMap::new(),
-                    |mut counts, report| {
+                current.last_reasons =
+                    reports.iter().fold(BTreeMap::new(), |mut counts, report| {
                         *counts
                             .entry(
                                 serde_json::to_value(report.reason)
@@ -542,8 +549,7 @@ fn run_execution_pass(
                             )
                             .or_insert(0) += 1;
                         counts
-                    },
-                );
+                    });
                 for report in &reports {
                     if report.status == OutcomeStatus::Executed {
                         current.sent += 1;
@@ -590,7 +596,10 @@ fn serve(
 ) -> Result<(), Box<dyn Error>> {
     let listener = TcpListener::bind(address)?;
     for stream in listener.incoming() {
-        let current = snapshot.lock().map(|guard| guard.clone()).unwrap_or_default();
+        let current = snapshot
+            .lock()
+            .map(|guard| guard.clone())
+            .unwrap_or_default();
         respond(stream?, profile, revision, &current)?;
     }
     Ok(())
@@ -629,8 +638,7 @@ fn respond(
         "{observed},\"lastSkipDetail\":{}",
         optional_json(snapshot.last_skip_detail.as_deref())
     );
-    let reasons = serde_json::to_string(&snapshot.last_reasons)
-        .unwrap_or_else(|_| "{}".to_owned());
+    let reasons = serde_json::to_string(&snapshot.last_reasons).unwrap_or_else(|_| "{}".to_owned());
     let observed = format!("{observed},\"lastReasons\":{reasons}");
     let (status, body) = match path {
         // Liveness is about the process; readiness is about whether this
