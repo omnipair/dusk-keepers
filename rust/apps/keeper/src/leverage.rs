@@ -35,6 +35,20 @@ use crate::{
 
 const INSTRUCTION_KEY: &str = "dusk:liquidate_leverage_position";
 
+// Leverage liquidation evaluates the curve, accrues interest and settles hLP
+// accounting. Solana's default per-instruction allowance is insufficient.
+// Use the same resource envelope for simulation and the submitted transaction.
+fn liquidation_instructions(instruction: Instruction) -> Vec<Instruction> {
+    let program_id = decode_key("ComputeBudget111111111111111111111111111111")
+        .expect("constant compute budget program id");
+    let budget = |tag: u8, value: u32| Instruction {
+        program_id,
+        accounts: vec![],
+        data: [vec![tag], value.to_le_bytes().to_vec()].concat(),
+    };
+    vec![budget(1, 256 * 1024), budget(2, 1_400_000), instruction]
+}
+
 /// A leverage position, as far as the keeper reads it.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct LeveragePositionRecord {
@@ -52,11 +66,7 @@ impl LeveragePositionRecord {
         self.debt_asset == 0
     }
 
-    pub fn decode(
-        layout: &AccountLayoutManifest,
-        address: [u8; 32],
-        data: &[u8],
-    ) -> Option<Self> {
+    pub fn decode(layout: &AccountLayoutManifest, address: [u8; 32], data: &[u8]) -> Option<Self> {
         if data.first_chunk::<8>()? != &account_discriminator("LeveragePosition") {
             return None;
         }
@@ -191,11 +201,9 @@ impl LeverageJob<'_> {
 
         let data = encode_keeper_instruction(
             self.contract,
-            &KeeperInstructionArguments::LiquidateLeveragePosition(
-                LiquidateLeveragePositionArgs {
-                    debt_asset: u8::from(!debt_is_base),
-                },
-            ),
+            &KeeperInstructionArguments::LiquidateLeveragePosition(LiquidateLeveragePositionArgs {
+                debt_asset: u8::from(!debt_is_base),
+            }),
         )
         .map_err(|error| ExecutionError::Encoding(error.to_string()))?;
 
@@ -221,8 +229,12 @@ impl LeverageJob<'_> {
 
     fn encode(&self, instruction: Instruction) -> Result<String, ExecutionError> {
         let blockhash = self.client.latest_blockhash()?;
-        let message = compile_message(self.signer.public_key(), &[instruction], blockhash)
-            .map_err(|error| ExecutionError::Assembly(error.to_string()))?;
+        let message = compile_message(
+            self.signer.public_key(),
+            &liquidation_instructions(instruction),
+            blockhash,
+        )
+        .map_err(|error| ExecutionError::Assembly(error.to_string()))?;
         let signature = self.signer.sign(&message);
         Ok(base64(&serialize_transaction(&[signature], &message)))
     }
@@ -311,5 +323,37 @@ impl LeverageJob<'_> {
             reports.push(report);
         }
         Ok(reports)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn liquidation_wire_message_carries_resources_before_program_execution() {
+        let program_id = [9; 32];
+        let instructions = liquidation_instructions(Instruction {
+            program_id,
+            accounts: vec![],
+            data: vec![42],
+        });
+        let message = compile_message([1; 32], &instructions, [3; 32]).unwrap();
+        // Header, three account keys, blockhash, three instructions. Inspect
+        // serialized bytes, not just the helper's in-memory representation.
+        assert_eq!(message[3], 3);
+        let compute = decode_key("ComputeBudget111111111111111111111111111111").unwrap();
+        assert_eq!(&message[36..68], &compute);
+        assert_eq!(&message[68..100], &program_id);
+        assert_eq!(
+            &message[132..],
+            &[
+                3, // instruction count
+                1, 0, 5, 1, 0, 0, 4, 0, // request 256 KiB heap
+                1, 0, 5, 2, 192, 92, 21, 0, // request 1,400,000 compute units
+                2, 0, 1, 42, // liquidation follows both budget instructions
+            ]
+        );
+        assert!(serialize_transaction(&[[0; 64]], &message).len() <= 1232);
     }
 }

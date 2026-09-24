@@ -12,8 +12,8 @@ pub mod envelope;
 pub use envelope::*;
 pub mod codec;
 pub mod layout;
-pub use layout::*;
 pub use codec::*;
+pub use layout::*;
 pub mod resolution;
 pub use resolution::*;
 
@@ -234,8 +234,19 @@ mod tests {
         assert!(!lock.revision.is_empty());
         assert_eq!(lock.programs.len(), 2);
         for program in &lock.programs {
-            assert!(program.program_id.as_deref().is_some_and(|id| !id.is_empty()));
-            assert!(program.idl.sha256.as_deref().is_some_and(|hash| !hash.is_empty()));
+            assert!(
+                program
+                    .program_id
+                    .as_deref()
+                    .is_some_and(|id| !id.is_empty())
+            );
+            assert!(
+                program
+                    .idl
+                    .sha256
+                    .as_deref()
+                    .is_some_and(|hash| !hash.is_empty())
+            );
         }
     }
 

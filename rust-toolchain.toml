@@ -1,0 +1,5 @@
+[toolchain]
+# Match the pinned Railway builder; runner image updates must not change gates.
+channel = "1.97.0"
+profile = "minimal"
+components = ["clippy", "rustfmt"]

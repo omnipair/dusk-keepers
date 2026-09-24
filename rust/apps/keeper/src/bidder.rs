@@ -73,10 +73,7 @@ pub struct BidderJob<'a> {
 impl BidderJob<'_> {
     /// Positions with an auction running are the only candidates; the trigger
     /// profile is what opens them.
-    pub fn candidates(
-        &self,
-        positions: Vec<BorrowPositionRecord>,
-    ) -> Vec<BorrowPositionRecord> {
+    pub fn candidates(&self, positions: Vec<BorrowPositionRecord>) -> Vec<BorrowPositionRecord> {
         positions
             .into_iter()
             .filter(BorrowPositionRecord::has_active_auction)
@@ -365,9 +362,8 @@ impl BidderJob<'_> {
             });
         }
 
-        let required = (repay_amount as u128)
-            .saturating_mul(self.policy.min_collateral_bps as u128)
-            / 10_000;
+        let required =
+            (repay_amount as u128).saturating_mul(self.policy.min_collateral_bps as u128) / 10_000;
         if (collateral_out as u128) < required {
             return Ok(AttemptReport {
                 debt_mint: collateral_key,
@@ -402,8 +398,7 @@ impl BidderJob<'_> {
         let floor = (collateral_out as u128)
             .saturating_mul((10_000 - self.policy.slippage_bps.min(10_000)) as u128)
             / 10_000;
-        let (sending, _) =
-            self.fill_instruction(position, &market, repay_amount, floor as u64)?;
+        let (sending, _) = self.fill_instruction(position, &market, repay_amount, floor as u64)?;
         let encoded = self.encode(sending)?;
 
         match self.client.send_transaction(&encoded) {
