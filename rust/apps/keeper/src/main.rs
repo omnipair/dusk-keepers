@@ -477,6 +477,7 @@ fn run_execution_pass(
         contract,
         dry_run,
         layout,
+        resolver,
         max_sends_per_pass,
         program_id,
         signer,

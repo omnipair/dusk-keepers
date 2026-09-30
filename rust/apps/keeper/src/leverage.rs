@@ -183,6 +183,7 @@ impl LeverageJob<'_> {
         supplied.insert("debt_reserve_vault", sides.debt_reserve_vault);
         supplied.insert("collateral_reserve_vault", sides.collateral_reserve_vault);
         supplied.insert("debt_interest_vault", sides.debt_interest_vault);
+        supplied.insert("insurance_vault", sides.debt_insurance_vault);
         supplied.insert("leverage_collateral_vault", leverage_collateral_vault);
         supplied.insert("liquidator_debt_account", liquidator_debt_account);
         supplied.insert("owner_debt_account", owner_debt_account);

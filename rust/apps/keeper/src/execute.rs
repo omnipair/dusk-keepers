@@ -11,19 +11,69 @@
 //! healthy market every position is rejected, every pass, and that is the
 //! system working.
 
-use std::{error::Error, fmt};
+use std::{collections::BTreeMap, error::Error, fmt};
 
 use dusk_adapter::{
-    AccountLayoutManifest, InstructionContract, KeeperInstructionArguments,
-    encode_keeper_instruction,
+    AccountLayoutManifest, DeterministicAccountResolver, InstructionContract,
+    KeeperInstructionArguments, encode_keeper_instruction,
 };
 use keeper_core::{OutcomeStatus, ReasonCode, lifecycle::ExpectedRace};
 
 use crate::{
+    accounts::decode_key,
     discovery::{DiscoveryError, RpcClient, account_discriminator},
     signer::TransactionSigner,
     transaction::{AccountMeta, Instruction, base64, compile_message, serialize_transaction},
 };
+
+const TRIGGER_INSTRUCTION_KEY: &str = "dusk:start_liquidation_auction";
+
+fn trigger_accounts(
+    contract: &InstructionContract,
+    position: &BorrowPositionRecord,
+    debt_mint: [u8; 32],
+    collateral_mint: [u8; 32],
+    event_authority: [u8; 32],
+    program_id: [u8; 32],
+) -> Result<Vec<AccountMeta>, ExecutionError> {
+    let instruction = contract
+        .instructions
+        .iter()
+        .find(|entry| entry.key == TRIGGER_INSTRUCTION_KEY)
+        .ok_or_else(|| {
+            ExecutionError::Assembly("liquidation trigger is absent from the contract".into())
+        })?;
+    instruction
+        .accounts
+        .iter()
+        .map(|account| {
+            let pubkey = match account.name.as_str() {
+                "market" => position.market,
+                "borrow_position" => position.address,
+                "debt_asset_mint" => debt_mint,
+                "collateral_asset_mint" => collateral_mint,
+                "event_authority" => event_authority,
+                "program" => program_id,
+                other => {
+                    return Err(ExecutionError::Assembly(format!(
+                        "unsupported liquidation trigger account: {other}"
+                    )));
+                }
+            };
+            if account.signer || account.optional {
+                return Err(ExecutionError::Assembly(format!(
+                    "unsupported liquidation trigger account flags: {}",
+                    account.name
+                )));
+            }
+            Ok(AccountMeta {
+                pubkey,
+                is_signer: false,
+                is_writable: account.writable,
+            })
+        })
+        .collect()
+}
 
 /// A borrow position as the keeper needs to see it.
 ///
@@ -212,6 +262,7 @@ pub struct TriggerJob<'a> {
     pub contract: &'a InstructionContract,
     pub program_id: [u8; 32],
     pub layout: &'a AccountLayoutManifest,
+    pub resolver: &'a DeterministicAccountResolver,
     pub signer: &'a dyn TransactionSigner,
     /// Ceiling on transactions sent per pass, so a bad tick cannot become an
     /// unbounded spend.
@@ -268,18 +319,28 @@ impl TriggerJob<'_> {
         &self,
         position: &BorrowPositionRecord,
         debt_mint: [u8; 32],
+        collateral_mint: [u8; 32],
     ) -> Result<Instruction, ExecutionError> {
+        let event_authority = self
+            .resolver
+            .derive_pda("dusk:event_authority", &BTreeMap::new())
+            .map_err(|error| ExecutionError::Assembly(error.to_string()))?;
+        let event_authority = decode_key(&event_authority.address)
+            .ok_or_else(|| ExecutionError::Assembly("event authority does not decode".into()))?;
         let data = encode_keeper_instruction(
             self.contract,
             &KeeperInstructionArguments::StartLiquidationAuction,
         )
         .map_err(|error| ExecutionError::Encoding(error.to_string()))?;
         Ok(Instruction {
-            accounts: vec![
-                AccountMeta::writable(position.market),
-                AccountMeta::writable(position.address),
-                AccountMeta::readonly(debt_mint),
-            ],
+            accounts: trigger_accounts(
+                self.contract,
+                position,
+                debt_mint,
+                collateral_mint,
+                event_authority,
+                self.program_id,
+            )?,
             data,
             program_id: self.program_id,
         })
@@ -290,10 +351,11 @@ impl TriggerJob<'_> {
         &self,
         position: &BorrowPositionRecord,
         debt_mint: [u8; 32],
+        collateral_mint: [u8; 32],
     ) -> Result<AttemptReport, ExecutionError> {
         let position_key = bs58::encode(position.address).into_string();
         let mint_key = bs58::encode(debt_mint).into_string();
-        let instruction = self.trigger_instruction(position, debt_mint)?;
+        let instruction = self.trigger_instruction(position, debt_mint, collateral_mint)?;
         let blockhash = self.client.latest_blockhash()?;
         let message = compile_message(self.signer.public_key(), &[instruction], blockhash)
             .map_err(|error| ExecutionError::Assembly(error.to_string()))?;
@@ -332,7 +394,7 @@ impl TriggerJob<'_> {
         let blockhash = self.client.latest_blockhash()?;
         let message = compile_message(
             self.signer.public_key(),
-            &[self.trigger_instruction(position, debt_mint)?],
+            &[self.trigger_instruction(position, debt_mint, collateral_mint)?],
             blockhash,
         )
         .map_err(|error| ExecutionError::Assembly(error.to_string()))?;
@@ -421,12 +483,12 @@ impl TriggerJob<'_> {
             // the operational log.
             let mut ordered = Vec::with_capacity(2);
             if position.base_collateral > 0 {
-                ordered.push(quote_mint);
+                ordered.push((quote_mint, base_mint));
             }
             if position.quote_collateral > 0 {
-                ordered.push(base_mint);
+                ordered.push((base_mint, quote_mint));
             }
-            for debt_mint in ordered {
+            for (debt_mint, collateral_mint) in ordered {
                 if sent >= self.max_sends_per_pass {
                     reports.push(AttemptReport::skipped(
                         &position_key,
@@ -436,7 +498,7 @@ impl TriggerJob<'_> {
                     ));
                     break;
                 }
-                let report = self.attempt(&position, debt_mint)?;
+                let report = self.attempt(&position, debt_mint, collateral_mint)?;
                 let executed = report.status == OutcomeStatus::Executed;
                 reports.push(report);
                 if executed {
@@ -458,6 +520,46 @@ mod tests {
 
     fn layout() -> AccountLayoutManifest {
         AccountLayoutManifest::from_json(LAYOUT).expect("layout must parse")
+    }
+
+    #[test]
+    fn trigger_accounts_follow_the_pinned_instruction_shape() {
+        let raw = include_str!("../../../../protocol/keeper-instructions.v1.json");
+        let mut contract = InstructionContract::from_json(raw).unwrap();
+        let position = BorrowPositionRecord {
+            address: [1; 32],
+            owner: [2; 32],
+            market: [3; 32],
+            position_id: [4; 32],
+            base_collateral: 10,
+            quote_collateral: 0,
+            auction_debt_asset: u8::MAX,
+        };
+        let legacy =
+            trigger_accounts(&contract, &position, [5; 32], [6; 32], [7; 32], [8; 32]).unwrap();
+        assert_eq!(legacy.len(), 3);
+        assert_eq!(legacy[2].pubkey, [5; 32]);
+
+        let specification = contract
+            .instructions
+            .iter_mut()
+            .find(|entry| entry.key == TRIGGER_INSTRUCTION_KEY)
+            .unwrap();
+        let mut collateral = specification.accounts.last().unwrap().clone();
+        collateral.name = "collateral_asset_mint".into();
+        specification.accounts.push(collateral);
+        for name in ["event_authority", "program"] {
+            let mut account = specification.accounts.last().unwrap().clone();
+            account.name = name.into();
+            specification.accounts.push(account);
+        }
+        let fee_aware =
+            trigger_accounts(&contract, &position, [5; 32], [6; 32], [7; 32], [8; 32]).unwrap();
+        assert_eq!(fee_aware.len(), 6);
+        assert_eq!(fee_aware[3].pubkey, [6; 32]);
+        assert!(!fee_aware[3].is_writable);
+        assert_eq!(fee_aware[4].pubkey, [7; 32]);
+        assert_eq!(fee_aware[5].pubkey, [8; 32]);
     }
 
     /// Built at the size the generated layout describes, so a layout change

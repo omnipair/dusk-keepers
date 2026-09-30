@@ -110,6 +110,7 @@ impl MarketAccounts {
                 collateral_mint: self.quote_mint,
                 collateral_reserve_vault: self.quote_reserve_vault,
                 debt_interest_vault: self.base_interest_vault,
+                debt_insurance_vault: self.base_insurance_vault,
                 debt_mint: self.base_mint,
                 debt_reserve_vault: self.base_reserve_vault,
             }
@@ -120,6 +121,7 @@ impl MarketAccounts {
                 collateral_mint: self.base_mint,
                 collateral_reserve_vault: self.base_reserve_vault,
                 debt_interest_vault: self.quote_interest_vault,
+                debt_insurance_vault: self.quote_insurance_vault,
                 debt_mint: self.quote_mint,
                 debt_reserve_vault: self.quote_reserve_vault,
             }
@@ -138,6 +140,7 @@ pub struct OrientedMarket {
     #[allow(dead_code)]
     pub collateral_reserve_vault: [u8; 32],
     pub debt_interest_vault: [u8; 32],
+    pub debt_insurance_vault: [u8; 32],
     pub collateral_collateral_vault: [u8; 32],
     pub collateral_insurance_vault: [u8; 32],
 }
@@ -327,6 +330,11 @@ mod tests {
         assert_eq!(quote_debt.debt_mint, market.quote_mint);
         assert_eq!(quote_debt.collateral_mint, market.base_mint);
         assert_ne!(base_debt.debt_reserve_vault, quote_debt.debt_reserve_vault);
+        assert_eq!(base_debt.debt_insurance_vault, market.base_insurance_vault);
+        assert_eq!(
+            quote_debt.debt_insurance_vault,
+            market.quote_insurance_vault
+        );
         assert_ne!(
             base_debt.collateral_insurance_vault,
             quote_debt.collateral_insurance_vault
