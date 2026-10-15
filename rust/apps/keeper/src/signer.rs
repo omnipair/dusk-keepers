@@ -43,6 +43,17 @@ pub trait TransactionSigner: Send + Sync {
     }
 }
 
+/// Public identity only. Shadow plans have placeholder signatures, never a key.
+pub struct ShadowIdentity(pub [u8; 32]);
+impl TransactionSigner for ShadowIdentity {
+    fn public_key(&self) -> [u8; 32] {
+        self.0
+    }
+    fn sign(&self, _: &[u8]) -> [u8; 64] {
+        [0; 64]
+    }
+}
+
 /// A keypair held in this process, loaded from a Solana CLI keypair file.
 ///
 /// Correct for devnet and nowhere else: the key is readable by anything that

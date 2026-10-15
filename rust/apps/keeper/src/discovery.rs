@@ -353,35 +353,6 @@ impl RpcClient {
             ]),
         )
     }
-
-    pub fn signature_confirmed(&self, signature: &str) -> Result<bool, DiscoveryError> {
-        #[derive(Deserialize)]
-        struct Value {
-            value: Vec<Option<Status>>,
-        }
-        #[derive(Deserialize)]
-        struct Status {
-            #[serde(rename = "confirmationStatus")]
-            confirmation_status: Option<String>,
-            err: Option<serde_json::Value>,
-        }
-        let response: Value = self.call(
-            "getSignatureStatuses",
-            serde_json::json!([[signature], { "searchTransactionHistory": true }]),
-        )?;
-        Ok(response
-            .value
-            .first()
-            .and_then(|entry| entry.as_ref())
-            .is_some_and(|status| {
-                status.err.is_none()
-                    && matches!(
-                        status.confirmation_status.as_deref(),
-                        Some("confirmed" | "finalized")
-                    )
-            }))
-    }
-
     pub fn lamports(&self, address: &str) -> Result<u64, DiscoveryError> {
         #[derive(Deserialize)]
         struct Value {

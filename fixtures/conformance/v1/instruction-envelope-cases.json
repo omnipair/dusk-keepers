@@ -3,42 +3,144 @@
   "schemaVersion": 1,
   "validCases": [
     {
-      "name": "lending liquidation trigger",
+      "name": "flash liquidation settle",
       "envelope": {
         "schemaVersion": 1,
         "intent": {
           "schemaVersion": 1,
-          "intentId": "intent-lending_liquidation_trigger",
-          "protocolRevision": "devnet-1",
-          "action": "lending_liquidation_trigger",
-          "jobKind": "lending_liquidation_trigger",
-          "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
-          "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
+          "intentId": "intent-flash_liquidation_settle",
+          "protocolRevision": "pr45-5a9abcb3",
+          "action": "flash_liquidation_settle",
+          "jobKind": "lending_liquidation_bid",
+          "market": "AEtZVM5c55RkzrqkuTBaHJsbZNkkTuN3ygAiJry8HyQf",
+          "target": "FVWyGN6vDKyLrbWrWEeMGg7DNfKGgetjuHMvkhTYzg4C",
           "observedSlot": 1000,
-          "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
+          "expectedStateHash": "ad5021fcc003f0219afd207d92a1801a461465e437ff4e2a1dd1964fd012cd93"
         },
         "primary": {
-          "specificationKey": "dusk:start_liquidation_auction",
+          "specificationKey": "dusk:settle_flash_liquidation",
           "program": "dusk",
           "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-          "instructionName": "start_liquidation_auction",
-          "dataHex": "20d273353a03e178",
+          "instructionName": "settle_flash_liquidation",
+          "dataHex": "a15d5938857c4f14",
           "accounts": [
             {
               "name": "market",
-              "address": "56DyBpq4ugr4xap3kywqerhB7XhtBYe5j76Rdv1T1yAu",
+              "address": "5wXmpCS2uEi36FXMs9KrZFQtwnFx6mKogmMawYHzKUhv",
               "writable": true,
               "signer": false
             },
             {
-              "name": "borrow_position",
-              "address": "81frbvapZnaokojy1yUFBBw4cWZex1KxnUo6ji5sukgw",
+              "name": "buyer",
+              "address": "2wq9RzCAnLFqsv8pN5nYGfMVYnr6BhWmLWVSS4gXxjWi",
+              "writable": true,
+              "signer": true
+            },
+            {
+              "name": "collateral_mint",
+              "address": "CdMaeW3xvWQJFUoRxuUziWg3HxQygK7o3NFZ8EZux2qh",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "debt_mint",
+              "address": "DgCpvq68gKyvi7fUvAEF6oQj5m9YQ71M3b2iU67u7S2Q",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "collateral_vault",
+              "address": "FzeTHCetQYeQhqa6cDW1U46yjR2NARVDe4MbsqaZyrn1",
               "writable": true,
               "signer": false
             },
             {
-              "name": "debt_asset_mint",
-              "address": "4obC3NyC8f5aykNfodTwQe3uw7eb9JTgbZdkP6jyGmxv",
+              "name": "reserve_vault",
+              "address": "5zB6RJh9QASqU8gPMf3kPrn2X8NFPaVrxB9zEDsy3Jjb",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "interest_vault",
+              "address": "DqMYwNpPEDbetGjst74MGgvAMdppPbboDqSGwUeaQ4iZ",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "insurance_vault",
+              "address": "69azTyWhRj6qhtXR3DwSAPV6cYYuuboKaUTZuRCny21a",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "buyer_collateral_account",
+              "address": "CYDPRAQoD7YwEt9n4YvkAX3bd6AvWfgnBYGeeWcWKjZb",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "buyer_refund_account",
+              "address": "sroPfKssneC4jKhskoTMconjoeNAo9poSM4yp4zqhZ6",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "owner_debt_account",
+              "address": "4Ge5rmJjVJXXVoMP9Ygvyx35NzcWSL3Wrt7R7cJvRCbA",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "futarchy_authority",
+              "address": "Fi63zhfouCfConYEpMcd5BNeateeProhWSytLdx7CgY",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_program",
+              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "token_2022_program",
+              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "debt_token_program",
+              "address": "Czsf9vJfYDAD1ufwJwUXNhw6KCAWZT8w8Hw8P95yAwjz",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "session",
+              "address": "9uVUxgn9f41MDUhhqbcVHZtm5tAuQLuJfYV69GD4fueP",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "repayment_vault",
+              "address": "9XKi5S1vBRvngzusYDpeyrSr22mLbeTiTrxXbNuSzJ77",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "instructions",
+              "address": "Sysvar1nstructions1111111111111111111111111",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "AyCtm6f21vRFkJUn5YiBqQZWrn4TcBjYUKcQzp7LKYfv",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
               "writable": false,
               "signer": false
             }
@@ -46,7 +148,166 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "1d0f4ef908f896fab75724747a231f9bd77dc95b305d2836a873e37f1ff8942e"
+        "paritySha256": "9134934b2eaa3723d781c477e47f91f54f696e58e5b229041116346ba07baec2"
+      }
+    },
+    {
+      "name": "flash liquidation preview",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-flash_liquidation_preview",
+          "protocolRevision": "pr45-5a9abcb3",
+          "action": "flash_liquidation_preview",
+          "jobKind": "lending_liquidation_bid",
+          "market": "HzUWCedXS7JYGNxQmLS5xkApxvQLXRQDgQLw1okk4wSF",
+          "target": "7QBSbL5egyYz5mrJyctiZKXFove2uPkEuf89hcjKUvJ7",
+          "observedSlot": 1001,
+          "expectedStateHash": "cdce92a794c3379f2470d820fc58e777a3bb8b1ba916c3a141b86f92f099f05c"
+        },
+        "primary": {
+          "specificationKey": "dusk:preview_flash_liquidation",
+          "program": "dusk",
+          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "instructionName": "preview_flash_liquidation",
+          "dataHex": "ee5e7af3d6aff60300e80300000000000000",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "Gs675hEA8QERuRqbZrLVSgZkYVmYQs286enyesrzXyNZ",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "collateral_mint",
+              "address": "EyJ435uwEJPqbsYqX8H2mdeHEFfZmHQdRm18MHwRNooj",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "debt_mint",
+              "address": "J6GWPE9Wq6WTE1LJyLNBWziAdwWoZQTs8cR9G74NCDcV",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": []
+        },
+        "cpiHooks": [],
+        "paritySha256": "ecbbe4fea67029c032f5249cbc7a7565891c49d8a6b7c7a2220f8984b7d969ba"
+      }
+    },
+    {
+      "name": "emergency liquidation preview",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-emergency_liquidation_preview",
+          "protocolRevision": "pr45-5a9abcb3",
+          "action": "emergency_liquidation_preview",
+          "jobKind": "lending_liquidation_settle",
+          "market": "4r9ENwj9SAvNQCfXmxswGm4RyQdGmm3zUcHUyiCPCTqd",
+          "target": "7qdqpTTR4kQebdZpayMaY19tCo3GMAjUoyWzde19N7ki",
+          "observedSlot": 1002,
+          "expectedStateHash": "980df6717fe2d0e73f592a701d8b079062ddc65680fe949049f19d5c04b66bd1"
+        },
+        "primary": {
+          "specificationKey": "dusk:preview_emergency_liquidation",
+          "program": "dusk",
+          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "instructionName": "preview_emergency_liquidation",
+          "dataHex": "4bc8420070e6183800e80300000000000000",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "9XTaxCsZLqLQBtUwgetpuSJ1xeq716dCUD1WayVc4FEf",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "collateral_mint",
+              "address": "3aJoFfJquX2h6fWyvoJ3oK4g3CoQWmTUPAkiizFtdiUe",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "debt_mint",
+              "address": "GH2dHVM7Qa4JB8w3spXcUMAYadA2NTEmUXnWRmGrRrNq",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "futarchy_authority",
+              "address": "GmJYT9pP6Rmxb53fmRxwZKdAxT1MuD75dYtijc5zFZEf",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": []
+        },
+        "cpiHooks": [],
+        "paritySha256": "2918998b6107e0675cdd35e6524ac0c00dbdedc91e7a10864e08433498d74daf"
+      }
+    },
+    {
+      "name": "lending liquidation trigger",
+      "envelope": {
+        "schemaVersion": 1,
+        "intent": {
+          "schemaVersion": 1,
+          "intentId": "intent-lending_liquidation_trigger",
+          "protocolRevision": "pr45-5a9abcb3",
+          "action": "lending_liquidation_trigger",
+          "jobKind": "lending_liquidation_trigger",
+          "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
+          "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
+          "observedSlot": 1003,
+          "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
+        },
+        "primary": {
+          "specificationKey": "dusk:observe_liquidation",
+          "program": "dusk",
+          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "instructionName": "observe_liquidation",
+          "dataHex": "8e9fbdd4f53c367100",
+          "accounts": [
+            {
+              "name": "market",
+              "address": "2a3FzVTuZ8ssUHS78iDiwCkTYm6uVEVncF58LEY3ywmT",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "collateral_mint",
+              "address": "4TA3NuzmmK9gCgzLJYtF8uBJYdJuGaBczzAjVTh7QqHd",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "debt_mint",
+              "address": "CJD7MAJG6BWZDkQnzyscrWEL2cf6DQbrVsJyeJt1ZZDa",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "CqHGWs2Jh9oySfNbjxBQaSuF1CTw2qVhShZV5Pfu2isB",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+              "writable": false,
+              "signer": false
+            }
+          ],
+          "remainingAccounts": []
+        },
+        "cpiHooks": [],
+        "paritySha256": "3ba0dfb781adfb8d79544edddb3460cda8d96a01583825506466bb1da1767a67"
       }
     },
     {
@@ -56,103 +317,91 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_liquidation_bid",
-          "protocolRevision": "devnet-1",
+          "protocolRevision": "pr45-5a9abcb3",
           "action": "lending_liquidation_bid",
           "jobKind": "lending_liquidation_bid",
           "market": "FyVqcLFgZPoQ827oQwvnvNLnggyWNkgZdMsrPVx5xERy",
           "target": "27bfjCo21T9FVcWEztc7UzBTTYofz9FaKWGeSNCmMMWn",
-          "observedSlot": 1001,
+          "observedSlot": 1004,
           "expectedStateHash": "429989957924ba760b86f69ccbd6edbb42ba39e80a49a07385d2b5b1302f4a7a"
         },
         "primary": {
-          "specificationKey": "dusk:fill_liquidation_auction",
+          "specificationKey": "dusk:begin_flash_liquidation",
           "program": "dusk",
           "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-          "instructionName": "fill_liquidation_auction",
-          "dataHex": "17767c65bf022c93e8030000000000008403000000000000",
+          "instructionName": "begin_flash_liquidation",
+          "dataHex": "12f22f2acb2d62fc070707070707070707070707070707070707070707070707070707070707070700e8030000000000004c040000000000008403000000000000000100",
           "accounts": [
             {
               "name": "market",
-              "address": "GHYDrEbkiQVY1Fpu4dWs3VuodXhjC3Y9QTuc7Ueoepps",
+              "address": "DR24ARsc5brWnGRwS2NFfiPqGBwxEUbxYfJ11uT3P1HG",
               "writable": true,
               "signer": false
             },
             {
-              "name": "futarchy_authority",
-              "address": "ALRHuY39zLqpgwURzwUGDhESHAzkExd7sH7JDufgLMv7",
-              "writable": false,
-              "signer": false
-            },
-            {
-              "name": "position_owner",
-              "address": "86azDDF9UK5MvyEDjGtgjMuSSagfgcqvdXN1Rd7728mu",
-              "writable": true,
-              "signer": false
-            },
-            {
-              "name": "liquidator",
-              "address": "FjBJCK9hHS2nVeMKAdAttJV4sV4AcCKoPiXdLRXKjQsm",
+              "name": "buyer",
+              "address": "C8zUkm8VXJhR1pAG9y2EUPr5KbgZPq4yqjuaPAyvTaD1",
               "writable": true,
               "signer": true
             },
             {
-              "name": "debt_asset_mint",
-              "address": "ErYjaoThCjABv3LVMfYoTVd4HNXCELGaqGxgLjsXU1UD",
+              "name": "collateral_mint",
+              "address": "UXEWvJL94UpDgikQ3sQCcGWbYo1WiuM9vtdx8wStd57",
               "writable": false,
               "signer": false
             },
             {
-              "name": "collateral_asset_mint",
-              "address": "DRwMPqq9hq3zeLf3piB4DhHHLpo3eBvZeezS2DoXAMPz",
+              "name": "debt_mint",
+              "address": "8eR3czCf3Na8RG32Bd1NTnqnoJ2bphpByDtKa7ESzgoN",
               "writable": false,
+              "signer": false
+            },
+            {
+              "name": "collateral_vault",
+              "address": "G94P6XFQtesJZN5GZLhnZcWhAZgPwWyR6TkTuEDBeqxk",
+              "writable": true,
               "signer": false
             },
             {
               "name": "reserve_vault",
-              "address": "DrGD3sb2CpJ2sKPCoQyuTKgWAVwmiLsi933i7nwRMM7g",
+              "address": "B673NEtCBrEmceoNzFtUWt1tSibMgy2gwZT82eurPqZX",
               "writable": true,
               "signer": false
             },
             {
               "name": "interest_vault",
-              "address": "GfNxx8UTAT7wPGNr1KAox6YmJFAiErzdx1V9LDRogw5h",
-              "writable": true,
-              "signer": false
-            },
-            {
-              "name": "collateral_vault",
-              "address": "FWJgyJn76HQLLz9udVJwxk1S51zZTzWh8SSSZ9vxjHQ1",
+              "address": "F8useDHoZnJ3Cr18Ho2DwNbvSHapGA3z2xc55e9tDGmX",
               "writable": true,
               "signer": false
             },
             {
               "name": "insurance_vault",
-              "address": "6TbAooRBT1ALXri3H6nC18BMhrLMWnDiVkCBMymvvgpt",
+              "address": "Deue1abr17KNvgYLxQKoCL5AHTM3srEBePXutEQKko5",
               "writable": true,
               "signer": false
             },
             {
-              "name": "collateral_insurance_vault",
-              "address": "DnNUXdmnvx4bQATNUBJbHuosf1izF4zvmrmHkMG2a7NL",
+              "name": "buyer_collateral_account",
+              "address": "Qyax1tKfaajGJaqv9RSvEU1nun2FSTt6wzMhvp2gu6W",
               "writable": true,
               "signer": false
             },
             {
-              "name": "liquidator_debt_account",
-              "address": "VbuovNNyfzaSYrJVGcd4LhCSswEeACE2wgCsYEUDaKV",
+              "name": "buyer_refund_account",
+              "address": "4bRkhzdTY9sCrvKRzidSEnsn8Vkoy2U3ZrpoE8e68hfL",
               "writable": true,
               "signer": false
             },
             {
-              "name": "liquidator_collateral_account",
-              "address": "87VoPPKhBd9ny1PUqFEcUeetykahQLhVCtANRRFbetdj",
+              "name": "owner_debt_account",
+              "address": "CAchHwpxvk5wPHRTT9Peo2Z4oMMnL1Yfj8GUZcFpZyaf",
               "writable": true,
               "signer": false
             },
             {
-              "name": "borrow_position",
-              "address": "3EGegqypjMbQYTqbphkopj9HsiBeMYLtPejMwQgT1Bm5",
-              "writable": true,
+              "name": "futarchy_authority",
+              "address": "DVeAv65S2XwaVU5JZk2JikfWLacTuu6ZvSYpjuasFzyq",
+              "writable": false,
               "signer": false
             },
             {
@@ -168,8 +417,38 @@
               "signer": false
             },
             {
+              "name": "debt_token_program",
+              "address": "BSmwsJ3GRvgyUEsmozQwM6MsXRKkzunTQyRM7qwmeuNw",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "session",
+              "address": "7bDRmQHDKno9pQnCxQ8VfXQ3kF6ArjdjZmzbaFRAznxA",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "repayment_vault",
+              "address": "G4dbtUT81s1XUXdyUwvHbGXFU3iUvFo8znuZ248vCkCv",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "instructions",
+              "address": "Sysvar1nstructions1111111111111111111111111",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "system_program",
+              "address": "11111111111111111111111111111111",
+              "writable": false,
+              "signer": false
+            },
+            {
               "name": "event_authority",
-              "address": "Fgv9Gx15oxmvgu9WBpfBtmUYUg4vZR8p3WqkzsRAFCaF",
+              "address": "51Q7zsXX1B9Tctp6afJfNMTc9Cte4atGTXiAkBQ6oz7J",
               "writable": false,
               "signer": false
             },
@@ -183,7 +462,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "02b2b920450dcd9037b0d68de9f37d6c1643fe85669e370cbee936d3ad16f93c"
+        "paritySha256": "8fb4823a76d68982e8b799710c579e8557b480e5295a7167e21128376da557f2"
       }
     },
     {
@@ -193,108 +472,90 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_liquidation_floor_settle",
-          "protocolRevision": "devnet-1",
+          "protocolRevision": "pr45-5a9abcb3",
           "action": "lending_liquidation_floor_settle",
           "jobKind": "lending_liquidation_settle",
           "market": "28NFhr44HWvSdKUAi5g7PV6VapbJuqSEUJ1Zf2NK5sEe",
           "target": "CwHetM964UZ84do1bm3HspVMX39vxrd9YJG8kADP74V8",
-          "observedSlot": 1002,
+          "observedSlot": 1005,
           "expectedStateHash": "0ffb227752af8f9fb017b1d6ff903e8a827dfa14d87442b39b65c1d4cf019093"
         },
         "primary": {
-          "specificationKey": "dusk:backstop_liquidation_auction",
+          "specificationKey": "dusk:emergency_liquidation",
           "program": "dusk",
           "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-          "instructionName": "backstop_liquidation_auction",
-          "dataHex": "870f320b4cfc53186400000000000000",
+          "instructionName": "emergency_liquidation",
+          "dataHex": "185f76884dc22cf700e8030000000000000001000000000000008403000000000000",
           "accounts": [
             {
               "name": "market",
-              "address": "4iQuu8sPdKbiTiCK9KamVVrE6Uap5Y3SrzAG83FS2nkJ",
+              "address": "5EymJZo2Yw63xjGDpFpukEAMgHFuhG17RNSVohZbCSyy",
               "writable": true,
               "signer": false
             },
             {
-              "name": "futarchy_authority",
-              "address": "4BVXMevFW6nxnX2mRoKM2fyS48W8WucGTnTyYAE7vmrR",
-              "writable": false,
-              "signer": false
-            },
-            {
-              "name": "position_owner",
-              "address": "8semckRfoeXyNtyhYrqCfr21itYAVhSvzYkWxmZUd6re",
+              "name": "buyer",
+              "address": "Bahf6seWrTYB5nxbYMGCmp3Z9uTMw5C5mKhh4wDAkRbL",
               "writable": true,
-              "signer": false
-            },
-            {
-              "name": "liquidator",
-              "address": "AxESzutsGnNNyQJGj8oVW1v2qXQDveLUQnd32rwNxQQQ",
-              "writable": false,
               "signer": true
             },
             {
-              "name": "debt_asset_mint",
-              "address": "5j6VY5WNJYn6fNtKSC5QNweUktfytmeorWh4ndui45Zo",
+              "name": "collateral_mint",
+              "address": "2KK99KFu3uZjyzay13A53sCpriwqCrox5QFgWAccJvKg",
               "writable": false,
               "signer": false
             },
             {
-              "name": "collateral_asset_mint",
-              "address": "B1GPqbstX658XAWpnCx5kAQtEeR2eWa4KjPDi5cGKu3L",
+              "name": "debt_mint",
+              "address": "Dp2h4vKgdUkyM1UsbdGRvwgHLwqCfxqL3KzDZQkxJNs1",
               "writable": false,
               "signer": false
             },
             {
-              "name": "debt_reserve_vault",
-              "address": "8UimxQU5bvFPKvso8BKPUknKB9rjb3Zaz9FwWRwJsyUJ",
+              "name": "collateral_vault",
+              "address": "HgGRQAV5QPBho9HffNxNcVTK9ZiDYrbH3JNKN1yAmTkb",
               "writable": true,
               "signer": false
             },
             {
-              "name": "collateral_reserve_vault",
-              "address": "67xfxoEF9mGYhjBKCN6zaeAVa3ttRa4HqqdvCntebgh7",
+              "name": "reserve_vault",
+              "address": "Cm7LJP3ca3QZ6DZkj1fW4shiXa3wSfEjSLfUVsAtBEeR",
               "writable": true,
               "signer": false
             },
             {
               "name": "interest_vault",
-              "address": "HXrh5ZBCnrNmFkrTDFcJsuzsRRDQ53zEViRZUyeCCw5C",
-              "writable": true,
-              "signer": false
-            },
-            {
-              "name": "collateral_vault",
-              "address": "A5Uz5P9RBpTnhMjUYcH2mBiWUbpzQm2LduGqmMuCGR23",
+              "address": "HuAMJX9RYEf22cry3huV7eVHsuHdJzZH7t9915ZiBdQD",
               "writable": true,
               "signer": false
             },
             {
               "name": "insurance_vault",
-              "address": "3DpTrmnGkNJB25wgthuWEBiJLU4oyQQm5dQZNzSj95Na",
+              "address": "2AoDPAtKr7xmJLgd15kz9239895yw37oYYPHcDd5g4aJ",
               "writable": true,
               "signer": false
             },
             {
-              "name": "liquidator_collateral_account",
-              "address": "AaU3S1Y2i7Fryde5YcxMr2ULPmQxKCwRwaq983GHvTBE",
+              "name": "buyer_collateral_account",
+              "address": "F3GybENer6ZBgQigeQApgJg25aev331L9o9TECidNFaQ",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "buyer_refund_account",
+              "address": "DmS2y6fZ5RyZ34ME1Nj5u9cc8QEeoSPCbCD8HKWNhxH2",
               "writable": true,
               "signer": false
             },
             {
               "name": "owner_debt_account",
-              "address": "7pkpjJiGjdyYYbY2X1oGGcbzX4qgG8LjjMLiSEbUjLDd",
+              "address": "EPz3haksg1uSU6LZXKdjP3XCUcXSZTqba8WLT8vskKfr",
               "writable": true,
               "signer": false
             },
             {
-              "name": "borrow_position",
-              "address": "8NnbEJuL1BCNanctARrVVxDC3eHiMDF4r2J5r7s6CAoH",
-              "writable": true,
-              "signer": false
-            },
-            {
-              "name": "instructions_sysvar",
-              "address": "Sysvar1nstructions1111111111111111111111111",
+              "name": "futarchy_authority",
+              "address": "4WnXTCnfRx7oKieE9whj1RW8KwojXoGRYy4WsifVGQCd",
               "writable": false,
               "signer": false
             },
@@ -311,8 +572,26 @@
               "signer": false
             },
             {
+              "name": "debt_token_program",
+              "address": "31W57TLSBkuwK7wWWzyF1GeT9Z2unNvbutD7pavAW3mk",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "collateral_reserve_vault",
+              "address": "4MRT2ZBLqGmiHsW8zqsBpXv3YtDWhRLYJpuF7QLsxrK7",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "instructions",
+              "address": "Sysvar1nstructions1111111111111111111111111",
+              "writable": false,
+              "signer": false
+            },
+            {
               "name": "event_authority",
-              "address": "5xtmmGkCQUhcuDU9K7SxUF8i6jME8RNoBSneUjCRTRKW",
+              "address": "8kquyqAv5cZzpjiLQfBpEQexTssfkwxBuPHe7fsVSXPs",
               "writable": false,
               "signer": false
             },
@@ -326,7 +605,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "88ec684c731314209b439dd49989a6880c5375a3e7e7fb3fe5a47eae7b12d93f"
+        "paritySha256": "9ce7309e2cc00f495a610717c4191e6dd36541faf500eba1d00d409cd0952835"
       }
     },
     {
@@ -336,120 +615,42 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-leverage_liquidation",
-          "protocolRevision": "devnet-1",
+          "protocolRevision": "pr45-5a9abcb3",
           "action": "leverage_liquidation",
           "jobKind": "leverage_liquidation",
           "market": "ETPTSwgSN95hbe3tWqw96UqbpkSZ9v2XWvfyL7vRoPTZ",
           "target": "7gMvfBzobnEoBMLXW2q6MWY4YuG7VXV86HcZNMFgKyAS",
-          "observedSlot": 1003,
+          "observedSlot": 1006,
           "expectedStateHash": "7c65dbd17f202d4af23fbbe1f5be6ff1a3d1ab4ad648e5c2e532c94d8a030f98"
         },
         "primary": {
-          "specificationKey": "dusk:liquidate_leverage_position",
+          "specificationKey": "dusk:observe_liquidation",
           "program": "dusk",
           "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-          "instructionName": "liquidate_leverage_position",
-          "dataHex": "d848eddff8d19da500",
+          "instructionName": "observe_liquidation",
+          "dataHex": "8e9fbdd4f53c367100",
           "accounts": [
             {
               "name": "market",
-              "address": "7STptfgTP9p2UEwNo6Yq8VqTMuwatvKbBTFcPcqzfHBi",
+              "address": "BaFWUUjVukvJ3g4W9aarw6vWZtkfAQd36PqwkDEpG5xX",
               "writable": true,
-              "signer": false
-            },
-            {
-              "name": "futarchy_authority",
-              "address": "26jUso7jtA3itHpicGwCyrYrWkT3u1UTCYkRf3Cj2HBk",
-              "writable": false,
-              "signer": false
-            },
-            {
-              "name": "position_owner",
-              "address": "9hgPXvpm4fnYEXF2XreCA71yAAdKr3PCYSUidrXfr14x",
-              "writable": true,
-              "signer": false
-            },
-            {
-              "name": "leverage_position",
-              "address": "5tRvBB6wypjNcJJPGiaFFm39hZ3dYuS5TAGR6ACpwPwt",
-              "writable": true,
-              "signer": false
-            },
-            {
-              "name": "debt_mint",
-              "address": "3chY5Ui7zr86TL9ELhn4aBEbnGHTMesYuWiWm57osF5P",
-              "writable": false,
               "signer": false
             },
             {
               "name": "collateral_mint",
-              "address": "GA3WJkfhibUNThFbXkZPMB1wdWDfAAq8SAXLQTCucSjQ",
+              "address": "M4YqUaetZVbJ2joQuhkiacQq2cToERV6nqBP8849pPs",
               "writable": false,
               "signer": false
             },
             {
-              "name": "debt_reserve_vault",
-              "address": "A81ZSKWJm3FtBQTW91HyN9D3DUvW8S1cCXQX524Apht9",
-              "writable": true,
-              "signer": false
-            },
-            {
-              "name": "collateral_reserve_vault",
-              "address": "G5375zfM3yRqsjb34uLRsy51fd9B5AyoFVHVobkaSWu",
-              "writable": true,
-              "signer": false
-            },
-            {
-              "name": "debt_interest_vault",
-              "address": "9rZrkwK7Yc3MUxa5TADfrt5BSxhMNMCDHRBCsxSxxctU",
-              "writable": true,
-              "signer": false
-            },
-            {
-              "name": "leverage_collateral_vault",
-              "address": "C2pe5etrWsZsmzRScLkJFBDhD1re7M6rrMwptsrH9p4F",
-              "writable": true,
-              "signer": false
-            },
-            {
-              "name": "liquidator_debt_account",
-              "address": "2cNgKWgwgexoHgQZ8xDVtjSuRww5vc99tpcAYietkW2y",
-              "writable": true,
-              "signer": false
-            },
-            {
-              "name": "owner_debt_account",
-              "address": "3yCiEuU3mLhkmisMHSFUeoxsGscDcxgdG8s72uA6j9SE",
-              "writable": true,
-              "signer": false
-            },
-            {
-              "name": "liquidator",
-              "address": "F2fRrXXJfjFRWN51S2PsBK8GujRz9k2J6MTseAu14CYm",
-              "writable": true,
-              "signer": true
-            },
-            {
-              "name": "instructions_sysvar",
-              "address": "Sysvar1nstructions1111111111111111111111111",
-              "writable": false,
-              "signer": false
-            },
-            {
-              "name": "token_program",
-              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-              "writable": false,
-              "signer": false
-            },
-            {
-              "name": "token_2022_program",
-              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "name": "debt_mint",
+              "address": "BeqF2Hp7WR7fXDJTs2wiHGFccCwsuv8UK3JEjpoivYMC",
               "writable": false,
               "signer": false
             },
             {
               "name": "event_authority",
-              "address": "F2NV7B8N9sLiFMFQhUSAe9TMkboHwmwdmVTUQnYEZrjQ",
+              "address": "EMMdyvoL7fvDNzajcqiDr581UwzubBgnDFvuAQXydFBu",
               "writable": false,
               "signer": false
             },
@@ -463,7 +664,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "9d88c207b59ba4ffa00ede52523e2ca307ad77b6f53b15b2ef99ef1690e9f225"
+        "paritySha256": "9e59ad660ce57ed995fd2e1333c1cc8e5cf4fa456c04cc5c72db365ab5e33464"
       }
     },
     {
@@ -473,12 +674,12 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-delegated_close_take_profit",
-          "protocolRevision": "devnet-1",
+          "protocolRevision": "pr45-5a9abcb3",
           "action": "delegated_close_take_profit",
           "jobKind": "take_profit",
           "market": "3JSi3jkznPd3X6fCfd62EceVZmTkatZnCsxvmJYTgiwh",
           "target": "ueKqkxyA2nLLjeC5CJ4DYWDmRJLaLtC1YEBvusAg5Qp",
-          "observedSlot": 1004,
+          "observedSlot": 1007,
           "expectedStateHash": "c5ec654bd0f8f5e73267fa823d0005ec18978d781c14a0786704a800ba2c436f"
         },
         "primary": {
@@ -486,7 +687,7 @@
           "program": "dusk",
           "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
           "instructionName": "delegated_close_leverage",
-          "dataHex": "0eda6299a413308b0020030000000000001000000005236f00df83c11f0700000000000000100000009ce0eefa5fe5eb3b07000000000000000800",
+          "dataHex": "0eda6299a413308b00200300000000000010271000000005236f00df83c11f0700000000000000100000009ce0eefa5fe5eb3b07000000000000000b00",
           "accounts": [
             {
               "name": "market",
@@ -629,8 +830,26 @@
               "signer": false
             },
             {
-              "name": "custody_token_account",
-              "address": "4gBtewv9gnQbTeyAjgH1d4i9KSbooAgjxfr7rL5JWsaM",
+              "name": "owner_token_account",
+              "address": "GAQc7XJQCPKk85MewJpqf478rSB4khECdtECwDbSwfew",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "fee_recipient",
+              "address": "3ur8SzMfzjfFcWj8HKnbX2tyqGsBA5ZKMdmdeVfzbFHn",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "executor_token_account",
+              "address": "51KqcxvXaBdf8M1UpSk1eqLGG3GW6Rz1jmwKBaBfeCwc",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "futarchy_authority",
+              "address": "DsRK4Qib94ciyZk8TzgW2Cj6EDKwxnkyofzHi5fmLAuw",
               "writable": false,
               "signer": false
             },
@@ -650,7 +869,7 @@
               "name": "executor",
               "address": "J2fzcjF8LUK2eNdUdyDaYWvgKcsvApEC3xmDjFuxiirW",
               "writable": false,
-              "signer": true
+              "signer": false
             },
             {
               "name": "order",
@@ -677,21 +896,21 @@
               "signer": false
             },
             {
-              "name": "custody_token_account",
-              "address": "BSMsAHurWNki32zo4P2ZRMVmgmNxxomJspRNPptjp8yU",
-              "writable": true,
+              "name": "owner_token_account",
+              "address": "7RxaqvL4CACEbyBfmB7yoaGdr89CbEpyLDbeWoNzCLxx",
+              "writable": false,
               "signer": false
             },
             {
               "name": "executor_token_account",
               "address": "8NaB3pYZCsyTMjT6y7tdQEUVV3NesQJuxZGTP7oJWJcx",
-              "writable": true,
+              "writable": false,
               "signer": false
             },
             {
-              "name": "owner_token_account",
-              "address": "7RxaqvL4CACEbyBfmB7yoaGdr89CbEpyLDbeWoNzCLxx",
-              "writable": true,
+              "name": "fee_recipient",
+              "address": "Bz2UCxRq5JaJMLGc6eoez3oSDPzqf7s8pfMDMZUbj1yt",
+              "writable": false,
               "signer": false
             },
             {
@@ -704,17 +923,11 @@
               "name": "executor",
               "address": "GD4K9WpAVxPUMmkYdNn2wksFYwSz7qXq8hVyFqRLZxu8",
               "writable": false,
-              "signer": true
-            },
-            {
-              "name": "token_program",
-              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-              "writable": false,
               "signer": false
             },
             {
-              "name": "token_2022_program",
-              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "name": "futarchy_authority",
+              "address": "8ggMuJ9vcayPFK3ZmKBfoz9NBeKgACfVXCqk95T49f7",
               "writable": false,
               "signer": false
             }
@@ -753,8 +966,26 @@
                 "signer": false
               },
               {
-                "name": "custody_token_account",
-                "address": "4gBtewv9gnQbTeyAjgH1d4i9KSbooAgjxfr7rL5JWsaM",
+                "name": "owner_token_account",
+                "address": "GAQc7XJQCPKk85MewJpqf478rSB4khECdtECwDbSwfew",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "fee_recipient",
+                "address": "3ur8SzMfzjfFcWj8HKnbX2tyqGsBA5ZKMdmdeVfzbFHn",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "executor_token_account",
+                "address": "51KqcxvXaBdf8M1UpSk1eqLGG3GW6Rz1jmwKBaBfeCwc",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "futarchy_authority",
+                "address": "DsRK4Qib94ciyZk8TzgW2Cj6EDKwxnkyofzHi5fmLAuw",
                 "writable": false,
                 "signer": false
               },
@@ -774,7 +1005,7 @@
                 "name": "executor",
                 "address": "J2fzcjF8LUK2eNdUdyDaYWvgKcsvApEC3xmDjFuxiirW",
                 "writable": false,
-                "signer": true
+                "signer": false
               }
             ],
             "remainingAccounts": []
@@ -811,21 +1042,21 @@
                 "signer": false
               },
               {
-                "name": "custody_token_account",
-                "address": "BSMsAHurWNki32zo4P2ZRMVmgmNxxomJspRNPptjp8yU",
-                "writable": true,
+                "name": "owner_token_account",
+                "address": "7RxaqvL4CACEbyBfmB7yoaGdr89CbEpyLDbeWoNzCLxx",
+                "writable": false,
                 "signer": false
               },
               {
                 "name": "executor_token_account",
                 "address": "8NaB3pYZCsyTMjT6y7tdQEUVV3NesQJuxZGTP7oJWJcx",
-                "writable": true,
+                "writable": false,
                 "signer": false
               },
               {
-                "name": "owner_token_account",
-                "address": "7RxaqvL4CACEbyBfmB7yoaGdr89CbEpyLDbeWoNzCLxx",
-                "writable": true,
+                "name": "fee_recipient",
+                "address": "Bz2UCxRq5JaJMLGc6eoez3oSDPzqf7s8pfMDMZUbj1yt",
+                "writable": false,
                 "signer": false
               },
               {
@@ -838,17 +1069,11 @@
                 "name": "executor",
                 "address": "GD4K9WpAVxPUMmkYdNn2wksFYwSz7qXq8hVyFqRLZxu8",
                 "writable": false,
-                "signer": true
-              },
-              {
-                "name": "token_program",
-                "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-                "writable": false,
                 "signer": false
               },
               {
-                "name": "token_2022_program",
-                "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+                "name": "futarchy_authority",
+                "address": "8ggMuJ9vcayPFK3ZmKBfoz9NBeKgACfVXCqk95T49f7",
                 "writable": false,
                 "signer": false
               }
@@ -856,7 +1081,7 @@
             "remainingAccounts": []
           }
         ],
-        "paritySha256": "79637f5ed0ec27249261459b103c1f1366dfdc3f7ae6dc7e26b528112e31d7d2"
+        "paritySha256": "7b4be38c35bd18de228622b50909a5c0f5acd34e655dc7fb67eab943e02df04f"
       }
     },
     {
@@ -866,12 +1091,12 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-delegated_close_stop_loss",
-          "protocolRevision": "devnet-1",
+          "protocolRevision": "pr45-5a9abcb3",
           "action": "delegated_close_stop_loss",
           "jobKind": "stop_loss",
           "market": "8PB15EEhUh5AQoMyQKorgGGNiNLYTHkW3NZQchDuRGLh",
           "target": "EF66W9mqDSy9zQSp18uVLREq2oDckFVF4LG8Jiq1H7yo",
-          "observedSlot": 1005,
+          "observedSlot": 1008,
           "expectedStateHash": "3d00b50b67ffe7cc357414195444e84b13a4633e8177d5d7e58289150a8d46dc"
         },
         "primary": {
@@ -879,7 +1104,7 @@
           "program": "dusk",
           "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
           "instructionName": "delegated_close_leverage",
-          "dataHex": "0eda6299a413308b00200300000000000010000000f63e52e8a8c7794e0700000000000000100000009ce0eefa5fe5eb3b07000000000000000800",
+          "dataHex": "0eda6299a413308b002003000000000000102710000000f63e52e8a8c7794e0700000000000000100000009ce0eefa5fe5eb3b07000000000000000b00",
           "accounts": [
             {
               "name": "market",
@@ -1022,8 +1247,26 @@
               "signer": false
             },
             {
-              "name": "custody_token_account",
-              "address": "48E7W42Enqvir1qCLFNJKoiJPgM7fTmGedS8DyWcYr2Z",
+              "name": "owner_token_account",
+              "address": "3ZZqmUz3hFgDwDqoC1qtL61uDdDzPM42VED4SDZiSExF",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "fee_recipient",
+              "address": "3tAC628aexhyUNFqsemYoY9CE3PAbUR9pprYakMvXnen",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "executor_token_account",
+              "address": "f8pzt4F9x2mmntKb8z7wSqvHGHbvfZCpnentQ3Wqrkc",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "futarchy_authority",
+              "address": "5dBpcMfCwQ6z7KxvVb8zdXNSpsAsWpwvAiWuzJJt85es",
               "writable": false,
               "signer": false
             },
@@ -1043,7 +1286,7 @@
               "name": "executor",
               "address": "6yiSPuU8R4WCPEMA8DC5Ktz5Z3c5QYvJCnU8BqRvmFC4",
               "writable": false,
-              "signer": true
+              "signer": false
             },
             {
               "name": "order",
@@ -1070,21 +1313,21 @@
               "signer": false
             },
             {
-              "name": "custody_token_account",
-              "address": "7RHwE76Xv5sAeQqsEFVeLJwmHsvwi6WiruwEgo2LnbJ6",
-              "writable": true,
+              "name": "owner_token_account",
+              "address": "AgU5mVzZo8mtQqUKTsCJXYxgkoVJ9t6mfVi4thLLzhGi",
+              "writable": false,
               "signer": false
             },
             {
               "name": "executor_token_account",
               "address": "7BtjcFQGb6BP95eX2yVXXyUVcp63JXLJsbsersf77Ri1",
-              "writable": true,
+              "writable": false,
               "signer": false
             },
             {
-              "name": "owner_token_account",
-              "address": "AgU5mVzZo8mtQqUKTsCJXYxgkoVJ9t6mfVi4thLLzhGi",
-              "writable": true,
+              "name": "fee_recipient",
+              "address": "GRUyDxx3UBhgbzmMRszn68rV8NieNNM2C2siN4RBczzq",
+              "writable": false,
               "signer": false
             },
             {
@@ -1097,17 +1340,11 @@
               "name": "executor",
               "address": "J3Dy6qyUZQNM4AR9bQzEZpK6xnGf1WtXjft3AjyLPRyE",
               "writable": false,
-              "signer": true
-            },
-            {
-              "name": "token_program",
-              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-              "writable": false,
               "signer": false
             },
             {
-              "name": "token_2022_program",
-              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "name": "futarchy_authority",
+              "address": "BaB9ca66ecS1bBwe8T3KrhAppJA6d52m7yRxMX5h3mDe",
               "writable": false,
               "signer": false
             }
@@ -1146,8 +1383,26 @@
                 "signer": false
               },
               {
-                "name": "custody_token_account",
-                "address": "48E7W42Enqvir1qCLFNJKoiJPgM7fTmGedS8DyWcYr2Z",
+                "name": "owner_token_account",
+                "address": "3ZZqmUz3hFgDwDqoC1qtL61uDdDzPM42VED4SDZiSExF",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "fee_recipient",
+                "address": "3tAC628aexhyUNFqsemYoY9CE3PAbUR9pprYakMvXnen",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "executor_token_account",
+                "address": "f8pzt4F9x2mmntKb8z7wSqvHGHbvfZCpnentQ3Wqrkc",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "futarchy_authority",
+                "address": "5dBpcMfCwQ6z7KxvVb8zdXNSpsAsWpwvAiWuzJJt85es",
                 "writable": false,
                 "signer": false
               },
@@ -1167,7 +1422,7 @@
                 "name": "executor",
                 "address": "6yiSPuU8R4WCPEMA8DC5Ktz5Z3c5QYvJCnU8BqRvmFC4",
                 "writable": false,
-                "signer": true
+                "signer": false
               }
             ],
             "remainingAccounts": []
@@ -1204,21 +1459,21 @@
                 "signer": false
               },
               {
-                "name": "custody_token_account",
-                "address": "7RHwE76Xv5sAeQqsEFVeLJwmHsvwi6WiruwEgo2LnbJ6",
-                "writable": true,
+                "name": "owner_token_account",
+                "address": "AgU5mVzZo8mtQqUKTsCJXYxgkoVJ9t6mfVi4thLLzhGi",
+                "writable": false,
                 "signer": false
               },
               {
                 "name": "executor_token_account",
                 "address": "7BtjcFQGb6BP95eX2yVXXyUVcp63JXLJsbsersf77Ri1",
-                "writable": true,
+                "writable": false,
                 "signer": false
               },
               {
-                "name": "owner_token_account",
-                "address": "AgU5mVzZo8mtQqUKTsCJXYxgkoVJ9t6mfVi4thLLzhGi",
-                "writable": true,
+                "name": "fee_recipient",
+                "address": "GRUyDxx3UBhgbzmMRszn68rV8NieNNM2C2siN4RBczzq",
+                "writable": false,
                 "signer": false
               },
               {
@@ -1231,17 +1486,11 @@
                 "name": "executor",
                 "address": "J3Dy6qyUZQNM4AR9bQzEZpK6xnGf1WtXjft3AjyLPRyE",
                 "writable": false,
-                "signer": true
-              },
-              {
-                "name": "token_program",
-                "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-                "writable": false,
                 "signer": false
               },
               {
-                "name": "token_2022_program",
-                "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+                "name": "futarchy_authority",
+                "address": "BaB9ca66ecS1bBwe8T3KrhAppJA6d52m7yRxMX5h3mDe",
                 "writable": false,
                 "signer": false
               }
@@ -1249,7 +1498,7 @@
             "remainingAccounts": []
           }
         ],
-        "paritySha256": "76cc07b47a733aeb56e1e1a42a222298792512298e6543b93f368da5fb32e142"
+        "paritySha256": "91cb19b5749e0a967c87ad3ba71692511731d9e72cdfb871525c1f115e7badea"
       }
     },
     {
@@ -1259,12 +1508,12 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-protocol_revenue_auction_settle",
-          "protocolRevision": "devnet-1",
+          "protocolRevision": "pr45-5a9abcb3",
           "action": "protocol_revenue_auction_settle",
           "jobKind": "auction_bid",
           "market": "23uE62bbfpdBoJE1ByN1TiSkMEYsDkt9pDS2huKSmkXF",
           "target": "H5yohzgtfbQHh2Bjtu4K5g5gtSdsVRQNzr5PA1U5kkuK",
-          "observedSlot": 1006,
+          "observedSlot": 1009,
           "expectedStateHash": "abe716b990ecc81e493f4d06004bcaf4f7b5b73d09f8ba9095892a086d9027df"
         },
         "primary": {
@@ -1368,7 +1617,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "fc64ca51a9ab2350e8b93cf894f76819ab301b2d4fe5937283069c3700789753"
+        "paritySha256": "9055c26d0bb5f7351e74fde16c0fe45fd1093bcc6a1269c46156ae2e9e6ce974"
       }
     },
     {
@@ -1378,12 +1627,12 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-eligible_proposal_queue",
-          "protocolRevision": "devnet-1",
+          "protocolRevision": "pr45-5a9abcb3",
           "action": "eligible_proposal_queue",
           "jobKind": "lifecycle",
           "market": "Cu5Jhb1STfGExWRWKxroE1CwxoGRkbMjbSxoVTJNQ7bU",
           "target": "8LFEVRt47qZAcRpLReSgQmLMMnbbq14Dg47iskJ6hmu",
-          "observedSlot": 1007,
+          "observedSlot": 1010,
           "expectedStateHash": "3da1c4f3231db3a4f6cdc3a55deb237311b8297922eeb7254d235b1c1c794a98"
         },
         "primary": {
@@ -1439,7 +1688,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "7c326fbcf19160d91a16194ad8de8d3a6798b3e4eef8316ed8b170cca47cb451"
+        "paritySha256": "13cf466839256fd2eff4056a90e9471f549e8b2a47c0eeb179e27893403f8744"
       }
     },
     {
@@ -1449,12 +1698,12 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-eligible_proposal_execute",
-          "protocolRevision": "devnet-1",
+          "protocolRevision": "pr45-5a9abcb3",
           "action": "eligible_proposal_execute",
           "jobKind": "lifecycle",
           "market": "9QyWxynPcNbwqLzga6ZioAL9GcA8DpEFxvkWEaGQtfzJ",
           "target": "46hHx23qoLbib8miSTQCapmTjZ44cfkru91WfBuzjzt2",
-          "observedSlot": 1008,
+          "observedSlot": 1011,
           "expectedStateHash": "832ab78c25e91229d5f74ac2b8331e73dc56f6f0fd9012c71185a4d3167488f6"
         },
         "primary": {
@@ -1468,6 +1717,18 @@
               "name": "market",
               "address": "FzfZzW7eN9WKFdGNvPxNg9jngqMmEsUzFCENG6ReiTZr",
               "writable": true,
+              "signer": false
+            },
+            {
+              "name": "base_mint",
+              "address": "38WGopLu5vMKz4527Wm1k9huBXqYREuDDJAnZUJZZewG",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "quote_mint",
+              "address": "5m63JDRAoq2u19Vf9JpJpcjqtf1dg8UMGxR88xVenQfj",
+              "writable": false,
               "signer": false
             },
             {
@@ -1492,7 +1753,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "9b12ad2037e67fb8541086ccc02710d6ae0fa79145c13cf7793211dc225174a4"
+        "paritySha256": "4bb8765d0e9fc3059326fb99264739987ed2e736af4abce43a968af5ae74ee4b"
       }
     }
   ],
@@ -1510,31 +1771,43 @@
           "jobKind": "lending_liquidation_trigger",
           "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
           "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
-          "observedSlot": 1000,
+          "observedSlot": 1003,
           "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
         },
         "primary": {
-          "specificationKey": "dusk:start_liquidation_auction",
+          "specificationKey": "dusk:observe_liquidation",
           "program": "dusk",
           "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-          "instructionName": "start_liquidation_auction",
-          "dataHex": "20d273353a03e178",
+          "instructionName": "observe_liquidation",
+          "dataHex": "8e9fbdd4f53c367100",
           "accounts": [
             {
               "name": "market",
-              "address": "56DyBpq4ugr4xap3kywqerhB7XhtBYe5j76Rdv1T1yAu",
+              "address": "2a3FzVTuZ8ssUHS78iDiwCkTYm6uVEVncF58LEY3ywmT",
               "writable": true,
               "signer": false
             },
             {
-              "name": "borrow_position",
-              "address": "81frbvapZnaokojy1yUFBBw4cWZex1KxnUo6ji5sukgw",
-              "writable": true,
+              "name": "collateral_mint",
+              "address": "4TA3NuzmmK9gCgzLJYtF8uBJYdJuGaBczzAjVTh7QqHd",
+              "writable": false,
               "signer": false
             },
             {
-              "name": "debt_asset_mint",
-              "address": "4obC3NyC8f5aykNfodTwQe3uw7eb9JTgbZdkP6jyGmxv",
+              "name": "debt_mint",
+              "address": "CJD7MAJG6BWZDkQnzyscrWEL2cf6DQbrVsJyeJt1ZZDa",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "CqHGWs2Jh9oySfNbjxBQaSuF1CTw2qVhShZV5Pfu2isB",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
               "writable": false,
               "signer": false
             }
@@ -1542,7 +1815,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "1d0f4ef908f896fab75724747a231f9bd77dc95b305d2836a873e37f1ff8942e"
+        "paritySha256": "3ba0dfb781adfb8d79544edddb3460cda8d96a01583825506466bb1da1767a67"
       }
     },
     {
@@ -1553,36 +1826,48 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_liquidation_trigger",
-          "protocolRevision": "devnet-1",
+          "protocolRevision": "pr45-5a9abcb3",
           "action": "lending_liquidation_trigger",
           "jobKind": "take_profit",
           "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
           "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
-          "observedSlot": 1000,
+          "observedSlot": 1003,
           "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
         },
         "primary": {
-          "specificationKey": "dusk:start_liquidation_auction",
+          "specificationKey": "dusk:observe_liquidation",
           "program": "dusk",
           "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-          "instructionName": "start_liquidation_auction",
-          "dataHex": "20d273353a03e178",
+          "instructionName": "observe_liquidation",
+          "dataHex": "8e9fbdd4f53c367100",
           "accounts": [
             {
               "name": "market",
-              "address": "56DyBpq4ugr4xap3kywqerhB7XhtBYe5j76Rdv1T1yAu",
+              "address": "2a3FzVTuZ8ssUHS78iDiwCkTYm6uVEVncF58LEY3ywmT",
               "writable": true,
               "signer": false
             },
             {
-              "name": "borrow_position",
-              "address": "81frbvapZnaokojy1yUFBBw4cWZex1KxnUo6ji5sukgw",
-              "writable": true,
+              "name": "collateral_mint",
+              "address": "4TA3NuzmmK9gCgzLJYtF8uBJYdJuGaBczzAjVTh7QqHd",
+              "writable": false,
               "signer": false
             },
             {
-              "name": "debt_asset_mint",
-              "address": "4obC3NyC8f5aykNfodTwQe3uw7eb9JTgbZdkP6jyGmxv",
+              "name": "debt_mint",
+              "address": "CJD7MAJG6BWZDkQnzyscrWEL2cf6DQbrVsJyeJt1ZZDa",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "CqHGWs2Jh9oySfNbjxBQaSuF1CTw2qVhShZV5Pfu2isB",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
               "writable": false,
               "signer": false
             }
@@ -1590,7 +1875,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "1d0f4ef908f896fab75724747a231f9bd77dc95b305d2836a873e37f1ff8942e"
+        "paritySha256": "3ba0dfb781adfb8d79544edddb3460cda8d96a01583825506466bb1da1767a67"
       }
     },
     {
@@ -1601,36 +1886,48 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_liquidation_trigger",
-          "protocolRevision": "devnet-1",
+          "protocolRevision": "pr45-5a9abcb3",
           "action": "lending_liquidation_trigger",
           "jobKind": "lending_liquidation_trigger",
           "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
           "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
-          "observedSlot": 1000,
+          "observedSlot": 1003,
           "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
         },
         "primary": {
-          "specificationKey": "dusk:start_liquidation_auction",
+          "specificationKey": "dusk:observe_liquidation",
           "program": "dusk",
           "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
           "instructionName": "execute_parameter_proposal",
-          "dataHex": "20d273353a03e178",
+          "dataHex": "8e9fbdd4f53c367100",
           "accounts": [
             {
               "name": "market",
-              "address": "56DyBpq4ugr4xap3kywqerhB7XhtBYe5j76Rdv1T1yAu",
+              "address": "2a3FzVTuZ8ssUHS78iDiwCkTYm6uVEVncF58LEY3ywmT",
               "writable": true,
               "signer": false
             },
             {
-              "name": "borrow_position",
-              "address": "81frbvapZnaokojy1yUFBBw4cWZex1KxnUo6ji5sukgw",
-              "writable": true,
+              "name": "collateral_mint",
+              "address": "4TA3NuzmmK9gCgzLJYtF8uBJYdJuGaBczzAjVTh7QqHd",
+              "writable": false,
               "signer": false
             },
             {
-              "name": "debt_asset_mint",
-              "address": "4obC3NyC8f5aykNfodTwQe3uw7eb9JTgbZdkP6jyGmxv",
+              "name": "debt_mint",
+              "address": "CJD7MAJG6BWZDkQnzyscrWEL2cf6DQbrVsJyeJt1ZZDa",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "CqHGWs2Jh9oySfNbjxBQaSuF1CTw2qVhShZV5Pfu2isB",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
               "writable": false,
               "signer": false
             }
@@ -1638,7 +1935,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "1d0f4ef908f896fab75724747a231f9bd77dc95b305d2836a873e37f1ff8942e"
+        "paritySha256": "3ba0dfb781adfb8d79544edddb3460cda8d96a01583825506466bb1da1767a67"
       }
     },
     {
@@ -1649,36 +1946,48 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_liquidation_trigger",
-          "protocolRevision": "devnet-1",
+          "protocolRevision": "pr45-5a9abcb3",
           "action": "lending_liquidation_trigger",
           "jobKind": "lending_liquidation_trigger",
           "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
           "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
-          "observedSlot": 1000,
+          "observedSlot": 1003,
           "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
         },
         "primary": {
-          "specificationKey": "dusk:start_liquidation_auction",
+          "specificationKey": "dusk:observe_liquidation",
           "program": "dusk",
           "programId": "8gwTnSCDgmoTj9rh8vpsToF6MzGi7aGrSCwfXWXDyJAm",
-          "instructionName": "start_liquidation_auction",
-          "dataHex": "20d273353a03e178",
+          "instructionName": "observe_liquidation",
+          "dataHex": "8e9fbdd4f53c367100",
           "accounts": [
             {
               "name": "market",
-              "address": "56DyBpq4ugr4xap3kywqerhB7XhtBYe5j76Rdv1T1yAu",
+              "address": "2a3FzVTuZ8ssUHS78iDiwCkTYm6uVEVncF58LEY3ywmT",
               "writable": true,
               "signer": false
             },
             {
-              "name": "borrow_position",
-              "address": "81frbvapZnaokojy1yUFBBw4cWZex1KxnUo6ji5sukgw",
-              "writable": true,
+              "name": "collateral_mint",
+              "address": "4TA3NuzmmK9gCgzLJYtF8uBJYdJuGaBczzAjVTh7QqHd",
+              "writable": false,
               "signer": false
             },
             {
-              "name": "debt_asset_mint",
-              "address": "4obC3NyC8f5aykNfodTwQe3uw7eb9JTgbZdkP6jyGmxv",
+              "name": "debt_mint",
+              "address": "CJD7MAJG6BWZDkQnzyscrWEL2cf6DQbrVsJyeJt1ZZDa",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "CqHGWs2Jh9oySfNbjxBQaSuF1CTw2qVhShZV5Pfu2isB",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
               "writable": false,
               "signer": false
             }
@@ -1686,7 +1995,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "1d0f4ef908f896fab75724747a231f9bd77dc95b305d2836a873e37f1ff8942e"
+        "paritySha256": "3ba0dfb781adfb8d79544edddb3460cda8d96a01583825506466bb1da1767a67"
       }
     },
     {
@@ -1697,20 +2006,20 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_liquidation_trigger",
-          "protocolRevision": "devnet-1",
+          "protocolRevision": "pr45-5a9abcb3",
           "action": "lending_liquidation_trigger",
           "jobKind": "lending_liquidation_trigger",
           "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
           "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
-          "observedSlot": 1000,
+          "observedSlot": 1003,
           "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
         },
         "primary": {
-          "specificationKey": "dusk:start_liquidation_auction",
+          "specificationKey": "dusk:observe_liquidation",
           "program": "dusk",
           "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-          "instructionName": "start_liquidation_auction",
-          "dataHex": "20d273353a03e178",
+          "instructionName": "observe_liquidation",
+          "dataHex": "8e9fbdd4f53c367100",
           "accounts": [
             {
               "name": "market",
@@ -1719,14 +2028,26 @@
               "signer": false
             },
             {
-              "name": "borrow_position",
-              "address": "81frbvapZnaokojy1yUFBBw4cWZex1KxnUo6ji5sukgw",
-              "writable": true,
+              "name": "collateral_mint",
+              "address": "4TA3NuzmmK9gCgzLJYtF8uBJYdJuGaBczzAjVTh7QqHd",
+              "writable": false,
               "signer": false
             },
             {
-              "name": "debt_asset_mint",
-              "address": "4obC3NyC8f5aykNfodTwQe3uw7eb9JTgbZdkP6jyGmxv",
+              "name": "debt_mint",
+              "address": "CJD7MAJG6BWZDkQnzyscrWEL2cf6DQbrVsJyeJt1ZZDa",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "CqHGWs2Jh9oySfNbjxBQaSuF1CTw2qVhShZV5Pfu2isB",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
               "writable": false,
               "signer": false
             }
@@ -1734,7 +2055,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "1d0f4ef908f896fab75724747a231f9bd77dc95b305d2836a873e37f1ff8942e"
+        "paritySha256": "3ba0dfb781adfb8d79544edddb3460cda8d96a01583825506466bb1da1767a67"
       }
     },
     {
@@ -1745,36 +2066,48 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_liquidation_trigger",
-          "protocolRevision": "devnet-1",
+          "protocolRevision": "pr45-5a9abcb3",
           "action": "lending_liquidation_trigger",
           "jobKind": "lending_liquidation_trigger",
           "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
           "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
-          "observedSlot": 1000,
+          "observedSlot": 1003,
           "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
         },
         "primary": {
-          "specificationKey": "dusk:start_liquidation_auction",
+          "specificationKey": "dusk:observe_liquidation",
           "program": "dusk",
           "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-          "instructionName": "start_liquidation_auction",
-          "dataHex": "00d273353a03e178",
+          "instructionName": "observe_liquidation",
+          "dataHex": "009fbdd4f53c367100",
           "accounts": [
             {
               "name": "market",
-              "address": "56DyBpq4ugr4xap3kywqerhB7XhtBYe5j76Rdv1T1yAu",
+              "address": "2a3FzVTuZ8ssUHS78iDiwCkTYm6uVEVncF58LEY3ywmT",
               "writable": true,
               "signer": false
             },
             {
-              "name": "borrow_position",
-              "address": "81frbvapZnaokojy1yUFBBw4cWZex1KxnUo6ji5sukgw",
-              "writable": true,
+              "name": "collateral_mint",
+              "address": "4TA3NuzmmK9gCgzLJYtF8uBJYdJuGaBczzAjVTh7QqHd",
+              "writable": false,
               "signer": false
             },
             {
-              "name": "debt_asset_mint",
-              "address": "4obC3NyC8f5aykNfodTwQe3uw7eb9JTgbZdkP6jyGmxv",
+              "name": "debt_mint",
+              "address": "CJD7MAJG6BWZDkQnzyscrWEL2cf6DQbrVsJyeJt1ZZDa",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "CqHGWs2Jh9oySfNbjxBQaSuF1CTw2qVhShZV5Pfu2isB",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
               "writable": false,
               "signer": false
             }
@@ -1782,7 +2115,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "1d0f4ef908f896fab75724747a231f9bd77dc95b305d2836a873e37f1ff8942e"
+        "paritySha256": "3ba0dfb781adfb8d79544edddb3460cda8d96a01583825506466bb1da1767a67"
       }
     },
     {
@@ -1793,12 +2126,12 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-eligible_proposal_queue",
-          "protocolRevision": "devnet-1",
+          "protocolRevision": "pr45-5a9abcb3",
           "action": "eligible_proposal_queue",
           "jobKind": "lifecycle",
           "market": "Cu5Jhb1STfGExWRWKxroE1CwxoGRkbMjbSxoVTJNQ7bU",
           "target": "8LFEVRt47qZAcRpLReSgQmLMMnbbq14Dg47iskJ6hmu",
-          "observedSlot": 1007,
+          "observedSlot": 1010,
           "expectedStateHash": "3da1c4f3231db3a4f6cdc3a55deb237311b8297922eeb7254d235b1c1c794a98"
         },
         "primary": {
@@ -1848,7 +2181,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "7c326fbcf19160d91a16194ad8de8d3a6798b3e4eef8316ed8b170cca47cb451"
+        "paritySha256": "13cf466839256fd2eff4056a90e9471f549e8b2a47c0eeb179e27893403f8744"
       }
     },
     {
@@ -1859,36 +2192,48 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_liquidation_trigger",
-          "protocolRevision": "devnet-1",
+          "protocolRevision": "pr45-5a9abcb3",
           "action": "lending_liquidation_trigger",
           "jobKind": "lending_liquidation_trigger",
           "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
           "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
-          "observedSlot": 1000,
+          "observedSlot": 1003,
           "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
         },
         "primary": {
-          "specificationKey": "dusk:start_liquidation_auction",
+          "specificationKey": "dusk:observe_liquidation",
           "program": "dusk",
           "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-          "instructionName": "start_liquidation_auction",
-          "dataHex": "20d273353a03e178",
+          "instructionName": "observe_liquidation",
+          "dataHex": "8e9fbdd4f53c367100",
           "accounts": [
             {
-              "name": "borrow_position",
-              "address": "81frbvapZnaokojy1yUFBBw4cWZex1KxnUo6ji5sukgw",
-              "writable": true,
+              "name": "collateral_mint",
+              "address": "4TA3NuzmmK9gCgzLJYtF8uBJYdJuGaBczzAjVTh7QqHd",
+              "writable": false,
               "signer": false
             },
             {
               "name": "market",
-              "address": "56DyBpq4ugr4xap3kywqerhB7XhtBYe5j76Rdv1T1yAu",
+              "address": "2a3FzVTuZ8ssUHS78iDiwCkTYm6uVEVncF58LEY3ywmT",
               "writable": true,
               "signer": false
             },
             {
-              "name": "debt_asset_mint",
-              "address": "4obC3NyC8f5aykNfodTwQe3uw7eb9JTgbZdkP6jyGmxv",
+              "name": "debt_mint",
+              "address": "CJD7MAJG6BWZDkQnzyscrWEL2cf6DQbrVsJyeJt1ZZDa",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "CqHGWs2Jh9oySfNbjxBQaSuF1CTw2qVhShZV5Pfu2isB",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
               "writable": false,
               "signer": false
             }
@@ -1896,7 +2241,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "1d0f4ef908f896fab75724747a231f9bd77dc95b305d2836a873e37f1ff8942e"
+        "paritySha256": "3ba0dfb781adfb8d79544edddb3460cda8d96a01583825506466bb1da1767a67"
       }
     },
     {
@@ -1907,36 +2252,48 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_liquidation_trigger",
-          "protocolRevision": "devnet-1",
+          "protocolRevision": "pr45-5a9abcb3",
           "action": "lending_liquidation_trigger",
           "jobKind": "lending_liquidation_trigger",
           "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
           "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
-          "observedSlot": 1000,
+          "observedSlot": 1003,
           "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
         },
         "primary": {
-          "specificationKey": "dusk:start_liquidation_auction",
+          "specificationKey": "dusk:observe_liquidation",
           "program": "dusk",
           "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-          "instructionName": "start_liquidation_auction",
-          "dataHex": "20d273353a03e178",
+          "instructionName": "observe_liquidation",
+          "dataHex": "8e9fbdd4f53c367100",
           "accounts": [
             {
               "name": "market",
-              "address": "56DyBpq4ugr4xap3kywqerhB7XhtBYe5j76Rdv1T1yAu",
+              "address": "2a3FzVTuZ8ssUHS78iDiwCkTYm6uVEVncF58LEY3ywmT",
               "writable": false,
               "signer": false
             },
             {
-              "name": "borrow_position",
-              "address": "81frbvapZnaokojy1yUFBBw4cWZex1KxnUo6ji5sukgw",
-              "writable": true,
+              "name": "collateral_mint",
+              "address": "4TA3NuzmmK9gCgzLJYtF8uBJYdJuGaBczzAjVTh7QqHd",
+              "writable": false,
               "signer": false
             },
             {
-              "name": "debt_asset_mint",
-              "address": "4obC3NyC8f5aykNfodTwQe3uw7eb9JTgbZdkP6jyGmxv",
+              "name": "debt_mint",
+              "address": "CJD7MAJG6BWZDkQnzyscrWEL2cf6DQbrVsJyeJt1ZZDa",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "event_authority",
+              "address": "CqHGWs2Jh9oySfNbjxBQaSuF1CTw2qVhShZV5Pfu2isB",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "program",
+              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
               "writable": false,
               "signer": false
             }
@@ -1944,7 +2301,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "1d0f4ef908f896fab75724747a231f9bd77dc95b305d2836a873e37f1ff8942e"
+        "paritySha256": "3ba0dfb781adfb8d79544edddb3460cda8d96a01583825506466bb1da1767a67"
       }
     },
     {
@@ -1955,103 +2312,91 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_liquidation_bid",
-          "protocolRevision": "devnet-1",
+          "protocolRevision": "pr45-5a9abcb3",
           "action": "lending_liquidation_bid",
           "jobKind": "lending_liquidation_bid",
           "market": "FyVqcLFgZPoQ827oQwvnvNLnggyWNkgZdMsrPVx5xERy",
           "target": "27bfjCo21T9FVcWEztc7UzBTTYofz9FaKWGeSNCmMMWn",
-          "observedSlot": 1001,
+          "observedSlot": 1004,
           "expectedStateHash": "429989957924ba760b86f69ccbd6edbb42ba39e80a49a07385d2b5b1302f4a7a"
         },
         "primary": {
-          "specificationKey": "dusk:fill_liquidation_auction",
+          "specificationKey": "dusk:begin_flash_liquidation",
           "program": "dusk",
           "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-          "instructionName": "fill_liquidation_auction",
-          "dataHex": "17767c65bf022c93e8030000000000008403000000000000",
+          "instructionName": "begin_flash_liquidation",
+          "dataHex": "12f22f2acb2d62fc070707070707070707070707070707070707070707070707070707070707070700e8030000000000004c040000000000008403000000000000000100",
           "accounts": [
             {
               "name": "market",
-              "address": "GHYDrEbkiQVY1Fpu4dWs3VuodXhjC3Y9QTuc7Ueoepps",
+              "address": "DR24ARsc5brWnGRwS2NFfiPqGBwxEUbxYfJ11uT3P1HG",
               "writable": true,
               "signer": false
             },
             {
-              "name": "futarchy_authority",
-              "address": "ALRHuY39zLqpgwURzwUGDhESHAzkExd7sH7JDufgLMv7",
-              "writable": false,
-              "signer": false
-            },
-            {
-              "name": "position_owner",
-              "address": "86azDDF9UK5MvyEDjGtgjMuSSagfgcqvdXN1Rd7728mu",
-              "writable": true,
-              "signer": false
-            },
-            {
-              "name": "liquidator",
-              "address": "FjBJCK9hHS2nVeMKAdAttJV4sV4AcCKoPiXdLRXKjQsm",
+              "name": "buyer",
+              "address": "C8zUkm8VXJhR1pAG9y2EUPr5KbgZPq4yqjuaPAyvTaD1",
               "writable": true,
               "signer": true
             },
             {
-              "name": "debt_asset_mint",
-              "address": "ErYjaoThCjABv3LVMfYoTVd4HNXCELGaqGxgLjsXU1UD",
+              "name": "collateral_mint",
+              "address": "UXEWvJL94UpDgikQ3sQCcGWbYo1WiuM9vtdx8wStd57",
               "writable": false,
               "signer": false
             },
             {
-              "name": "collateral_asset_mint",
-              "address": "DRwMPqq9hq3zeLf3piB4DhHHLpo3eBvZeezS2DoXAMPz",
+              "name": "debt_mint",
+              "address": "8eR3czCf3Na8RG32Bd1NTnqnoJ2bphpByDtKa7ESzgoN",
               "writable": false,
+              "signer": false
+            },
+            {
+              "name": "collateral_vault",
+              "address": "G94P6XFQtesJZN5GZLhnZcWhAZgPwWyR6TkTuEDBeqxk",
+              "writable": true,
               "signer": false
             },
             {
               "name": "reserve_vault",
-              "address": "DrGD3sb2CpJ2sKPCoQyuTKgWAVwmiLsi933i7nwRMM7g",
+              "address": "B673NEtCBrEmceoNzFtUWt1tSibMgy2gwZT82eurPqZX",
               "writable": true,
               "signer": false
             },
             {
               "name": "interest_vault",
-              "address": "GfNxx8UTAT7wPGNr1KAox6YmJFAiErzdx1V9LDRogw5h",
-              "writable": true,
-              "signer": false
-            },
-            {
-              "name": "collateral_vault",
-              "address": "FWJgyJn76HQLLz9udVJwxk1S51zZTzWh8SSSZ9vxjHQ1",
+              "address": "F8useDHoZnJ3Cr18Ho2DwNbvSHapGA3z2xc55e9tDGmX",
               "writable": true,
               "signer": false
             },
             {
               "name": "insurance_vault",
-              "address": "6TbAooRBT1ALXri3H6nC18BMhrLMWnDiVkCBMymvvgpt",
+              "address": "Deue1abr17KNvgYLxQKoCL5AHTM3srEBePXutEQKko5",
               "writable": true,
               "signer": false
             },
             {
-              "name": "collateral_insurance_vault",
-              "address": "DnNUXdmnvx4bQATNUBJbHuosf1izF4zvmrmHkMG2a7NL",
+              "name": "buyer_collateral_account",
+              "address": "Qyax1tKfaajGJaqv9RSvEU1nun2FSTt6wzMhvp2gu6W",
               "writable": true,
               "signer": false
             },
             {
-              "name": "liquidator_debt_account",
-              "address": "VbuovNNyfzaSYrJVGcd4LhCSswEeACE2wgCsYEUDaKV",
+              "name": "buyer_refund_account",
+              "address": "4bRkhzdTY9sCrvKRzidSEnsn8Vkoy2U3ZrpoE8e68hfL",
               "writable": true,
               "signer": false
             },
             {
-              "name": "liquidator_collateral_account",
-              "address": "87VoPPKhBd9ny1PUqFEcUeetykahQLhVCtANRRFbetdj",
+              "name": "owner_debt_account",
+              "address": "CAchHwpxvk5wPHRTT9Peo2Z4oMMnL1Yfj8GUZcFpZyaf",
               "writable": true,
               "signer": false
             },
             {
-              "name": "borrow_position",
-              "address": "3EGegqypjMbQYTqbphkopj9HsiBeMYLtPejMwQgT1Bm5",
-              "writable": true,
+              "name": "futarchy_authority",
+              "address": "DVeAv65S2XwaVU5JZk2JikfWLacTuu6ZvSYpjuasFzyq",
+              "writable": false,
               "signer": false
             },
             {
@@ -2067,8 +2412,38 @@
               "signer": false
             },
             {
+              "name": "debt_token_program",
+              "address": "BSmwsJ3GRvgyUEsmozQwM6MsXRKkzunTQyRM7qwmeuNw",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "session",
+              "address": "7bDRmQHDKno9pQnCxQ8VfXQ3kF6ArjdjZmzbaFRAznxA",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "repayment_vault",
+              "address": "G4dbtUT81s1XUXdyUwvHbGXFU3iUvFo8znuZ248vCkCv",
+              "writable": true,
+              "signer": false
+            },
+            {
+              "name": "instructions",
+              "address": "Sysvar1nstructions1111111111111111111111111",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "system_program",
+              "address": "11111111111111111111111111111111",
+              "writable": false,
+              "signer": false
+            },
+            {
               "name": "event_authority",
-              "address": "Fgv9Gx15oxmvgu9WBpfBtmUYUg4vZR8p3WqkzsRAFCaF",
+              "address": "51Q7zsXX1B9Tctp6afJfNMTc9Cte4atGTXiAkBQ6oz7J",
               "writable": false,
               "signer": false
             },
@@ -2082,7 +2457,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "02b2b920450dcd9037b0d68de9f37d6c1643fe85669e370cbee936d3ad16f93c"
+        "paritySha256": "8fb4823a76d68982e8b799710c579e8557b480e5295a7167e21128376da557f2"
       }
     },
     {
@@ -2093,12 +2468,12 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-delegated_close_take_profit",
-          "protocolRevision": "devnet-1",
+          "protocolRevision": "pr45-5a9abcb3",
           "action": "delegated_close_take_profit",
           "jobKind": "take_profit",
           "market": "3JSi3jkznPd3X6fCfd62EceVZmTkatZnCsxvmJYTgiwh",
           "target": "ueKqkxyA2nLLjeC5CJ4DYWDmRJLaLtC1YEBvusAg5Qp",
-          "observedSlot": 1004,
+          "observedSlot": 1007,
           "expectedStateHash": "c5ec654bd0f8f5e73267fa823d0005ec18978d781c14a0786704a800ba2c436f"
         },
         "primary": {
@@ -2106,7 +2481,7 @@
           "program": "dusk",
           "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
           "instructionName": "delegated_close_leverage",
-          "dataHex": "0eda6299a413308b0020030000000000001000000005236f00df83c11f0700000000000000100000009ce0eefa5fe5eb3b07000000000000000800",
+          "dataHex": "0eda6299a413308b00200300000000000010271000000005236f00df83c11f0700000000000000100000009ce0eefa5fe5eb3b07000000000000000b00",
           "accounts": [
             {
               "name": "market",
@@ -2243,8 +2618,26 @@
               "signer": false
             },
             {
-              "name": "custody_token_account",
-              "address": "4gBtewv9gnQbTeyAjgH1d4i9KSbooAgjxfr7rL5JWsaM",
+              "name": "owner_token_account",
+              "address": "GAQc7XJQCPKk85MewJpqf478rSB4khECdtECwDbSwfew",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "fee_recipient",
+              "address": "3ur8SzMfzjfFcWj8HKnbX2tyqGsBA5ZKMdmdeVfzbFHn",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "executor_token_account",
+              "address": "51KqcxvXaBdf8M1UpSk1eqLGG3GW6Rz1jmwKBaBfeCwc",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "futarchy_authority",
+              "address": "DsRK4Qib94ciyZk8TzgW2Cj6EDKwxnkyofzHi5fmLAuw",
               "writable": false,
               "signer": false
             },
@@ -2264,7 +2657,7 @@
               "name": "executor",
               "address": "J2fzcjF8LUK2eNdUdyDaYWvgKcsvApEC3xmDjFuxiirW",
               "writable": false,
-              "signer": true
+              "signer": false
             },
             {
               "name": "order",
@@ -2291,21 +2684,21 @@
               "signer": false
             },
             {
-              "name": "custody_token_account",
-              "address": "BSMsAHurWNki32zo4P2ZRMVmgmNxxomJspRNPptjp8yU",
-              "writable": true,
+              "name": "owner_token_account",
+              "address": "7RxaqvL4CACEbyBfmB7yoaGdr89CbEpyLDbeWoNzCLxx",
+              "writable": false,
               "signer": false
             },
             {
               "name": "executor_token_account",
               "address": "8NaB3pYZCsyTMjT6y7tdQEUVV3NesQJuxZGTP7oJWJcx",
-              "writable": true,
+              "writable": false,
               "signer": false
             },
             {
-              "name": "owner_token_account",
-              "address": "7RxaqvL4CACEbyBfmB7yoaGdr89CbEpyLDbeWoNzCLxx",
-              "writable": true,
+              "name": "fee_recipient",
+              "address": "Bz2UCxRq5JaJMLGc6eoez3oSDPzqf7s8pfMDMZUbj1yt",
+              "writable": false,
               "signer": false
             },
             {
@@ -2318,17 +2711,11 @@
               "name": "executor",
               "address": "GD4K9WpAVxPUMmkYdNn2wksFYwSz7qXq8hVyFqRLZxu8",
               "writable": false,
-              "signer": true
-            },
-            {
-              "name": "token_program",
-              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-              "writable": false,
               "signer": false
             },
             {
-              "name": "token_2022_program",
-              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "name": "futarchy_authority",
+              "address": "8ggMuJ9vcayPFK3ZmKBfoz9NBeKgACfVXCqk95T49f7",
               "writable": false,
               "signer": false
             }
@@ -2367,8 +2754,26 @@
                 "signer": false
               },
               {
-                "name": "custody_token_account",
-                "address": "4gBtewv9gnQbTeyAjgH1d4i9KSbooAgjxfr7rL5JWsaM",
+                "name": "owner_token_account",
+                "address": "GAQc7XJQCPKk85MewJpqf478rSB4khECdtECwDbSwfew",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "fee_recipient",
+                "address": "3ur8SzMfzjfFcWj8HKnbX2tyqGsBA5ZKMdmdeVfzbFHn",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "executor_token_account",
+                "address": "51KqcxvXaBdf8M1UpSk1eqLGG3GW6Rz1jmwKBaBfeCwc",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "futarchy_authority",
+                "address": "DsRK4Qib94ciyZk8TzgW2Cj6EDKwxnkyofzHi5fmLAuw",
                 "writable": false,
                 "signer": false
               },
@@ -2388,7 +2793,7 @@
                 "name": "executor",
                 "address": "J2fzcjF8LUK2eNdUdyDaYWvgKcsvApEC3xmDjFuxiirW",
                 "writable": false,
-                "signer": true
+                "signer": false
               }
             ],
             "remainingAccounts": []
@@ -2425,21 +2830,21 @@
                 "signer": false
               },
               {
-                "name": "custody_token_account",
-                "address": "BSMsAHurWNki32zo4P2ZRMVmgmNxxomJspRNPptjp8yU",
-                "writable": true,
+                "name": "owner_token_account",
+                "address": "7RxaqvL4CACEbyBfmB7yoaGdr89CbEpyLDbeWoNzCLxx",
+                "writable": false,
                 "signer": false
               },
               {
                 "name": "executor_token_account",
                 "address": "8NaB3pYZCsyTMjT6y7tdQEUVV3NesQJuxZGTP7oJWJcx",
-                "writable": true,
+                "writable": false,
                 "signer": false
               },
               {
-                "name": "owner_token_account",
-                "address": "7RxaqvL4CACEbyBfmB7yoaGdr89CbEpyLDbeWoNzCLxx",
-                "writable": true,
+                "name": "fee_recipient",
+                "address": "Bz2UCxRq5JaJMLGc6eoez3oSDPzqf7s8pfMDMZUbj1yt",
+                "writable": false,
                 "signer": false
               },
               {
@@ -2452,17 +2857,11 @@
                 "name": "executor",
                 "address": "GD4K9WpAVxPUMmkYdNn2wksFYwSz7qXq8hVyFqRLZxu8",
                 "writable": false,
-                "signer": true
-              },
-              {
-                "name": "token_program",
-                "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-                "writable": false,
                 "signer": false
               },
               {
-                "name": "token_2022_program",
-                "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+                "name": "futarchy_authority",
+                "address": "8ggMuJ9vcayPFK3ZmKBfoz9NBeKgACfVXCqk95T49f7",
                 "writable": false,
                 "signer": false
               }
@@ -2470,7 +2869,7 @@
             "remainingAccounts": []
           }
         ],
-        "paritySha256": "79637f5ed0ec27249261459b103c1f1366dfdc3f7ae6dc7e26b528112e31d7d2"
+        "paritySha256": "7b4be38c35bd18de228622b50909a5c0f5acd34e655dc7fb67eab943e02df04f"
       }
     },
     {
@@ -2481,12 +2880,12 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-delegated_close_take_profit",
-          "protocolRevision": "devnet-1",
+          "protocolRevision": "pr45-5a9abcb3",
           "action": "delegated_close_take_profit",
           "jobKind": "take_profit",
           "market": "3JSi3jkznPd3X6fCfd62EceVZmTkatZnCsxvmJYTgiwh",
           "target": "ueKqkxyA2nLLjeC5CJ4DYWDmRJLaLtC1YEBvusAg5Qp",
-          "observedSlot": 1004,
+          "observedSlot": 1007,
           "expectedStateHash": "c5ec654bd0f8f5e73267fa823d0005ec18978d781c14a0786704a800ba2c436f"
         },
         "primary": {
@@ -2494,7 +2893,7 @@
           "program": "dusk",
           "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
           "instructionName": "delegated_close_leverage",
-          "dataHex": "0eda6299a413308b0020030000000000001000000005236f00df83c11f0700000000000000100000009ce0eefa5fe5eb3b07000000000000000800",
+          "dataHex": "0eda6299a413308b00200300000000000010271000000005236f00df83c11f0700000000000000100000009ce0eefa5fe5eb3b07000000000000000b00",
           "accounts": [
             {
               "name": "market",
@@ -2637,8 +3036,26 @@
               "signer": false
             },
             {
-              "name": "custody_token_account",
-              "address": "4gBtewv9gnQbTeyAjgH1d4i9KSbooAgjxfr7rL5JWsaM",
+              "name": "owner_token_account",
+              "address": "GAQc7XJQCPKk85MewJpqf478rSB4khECdtECwDbSwfew",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "fee_recipient",
+              "address": "3ur8SzMfzjfFcWj8HKnbX2tyqGsBA5ZKMdmdeVfzbFHn",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "executor_token_account",
+              "address": "51KqcxvXaBdf8M1UpSk1eqLGG3GW6Rz1jmwKBaBfeCwc",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "futarchy_authority",
+              "address": "DsRK4Qib94ciyZk8TzgW2Cj6EDKwxnkyofzHi5fmLAuw",
               "writable": false,
               "signer": false
             },
@@ -2658,7 +3075,7 @@
               "name": "executor",
               "address": "J2fzcjF8LUK2eNdUdyDaYWvgKcsvApEC3xmDjFuxiirW",
               "writable": false,
-              "signer": true
+              "signer": false
             },
             {
               "name": "order",
@@ -2685,21 +3102,21 @@
               "signer": false
             },
             {
-              "name": "custody_token_account",
-              "address": "BSMsAHurWNki32zo4P2ZRMVmgmNxxomJspRNPptjp8yU",
-              "writable": true,
+              "name": "owner_token_account",
+              "address": "7RxaqvL4CACEbyBfmB7yoaGdr89CbEpyLDbeWoNzCLxx",
+              "writable": false,
               "signer": false
             },
             {
               "name": "executor_token_account",
               "address": "8NaB3pYZCsyTMjT6y7tdQEUVV3NesQJuxZGTP7oJWJcx",
-              "writable": true,
+              "writable": false,
               "signer": false
             },
             {
-              "name": "owner_token_account",
-              "address": "7RxaqvL4CACEbyBfmB7yoaGdr89CbEpyLDbeWoNzCLxx",
-              "writable": true,
+              "name": "fee_recipient",
+              "address": "Bz2UCxRq5JaJMLGc6eoez3oSDPzqf7s8pfMDMZUbj1yt",
+              "writable": false,
               "signer": false
             },
             {
@@ -2712,17 +3129,11 @@
               "name": "executor",
               "address": "GD4K9WpAVxPUMmkYdNn2wksFYwSz7qXq8hVyFqRLZxu8",
               "writable": false,
-              "signer": true
-            },
-            {
-              "name": "token_program",
-              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-              "writable": false,
               "signer": false
             },
             {
-              "name": "token_2022_program",
-              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "name": "futarchy_authority",
+              "address": "8ggMuJ9vcayPFK3ZmKBfoz9NBeKgACfVXCqk95T49f7",
               "writable": false,
               "signer": false
             }
@@ -2761,21 +3172,21 @@
                 "signer": false
               },
               {
-                "name": "custody_token_account",
-                "address": "BSMsAHurWNki32zo4P2ZRMVmgmNxxomJspRNPptjp8yU",
-                "writable": true,
+                "name": "owner_token_account",
+                "address": "7RxaqvL4CACEbyBfmB7yoaGdr89CbEpyLDbeWoNzCLxx",
+                "writable": false,
                 "signer": false
               },
               {
                 "name": "executor_token_account",
                 "address": "8NaB3pYZCsyTMjT6y7tdQEUVV3NesQJuxZGTP7oJWJcx",
-                "writable": true,
+                "writable": false,
                 "signer": false
               },
               {
-                "name": "owner_token_account",
-                "address": "7RxaqvL4CACEbyBfmB7yoaGdr89CbEpyLDbeWoNzCLxx",
-                "writable": true,
+                "name": "fee_recipient",
+                "address": "Bz2UCxRq5JaJMLGc6eoez3oSDPzqf7s8pfMDMZUbj1yt",
+                "writable": false,
                 "signer": false
               },
               {
@@ -2788,17 +3199,11 @@
                 "name": "executor",
                 "address": "GD4K9WpAVxPUMmkYdNn2wksFYwSz7qXq8hVyFqRLZxu8",
                 "writable": false,
-                "signer": true
-              },
-              {
-                "name": "token_program",
-                "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-                "writable": false,
                 "signer": false
               },
               {
-                "name": "token_2022_program",
-                "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+                "name": "futarchy_authority",
+                "address": "8ggMuJ9vcayPFK3ZmKBfoz9NBeKgACfVXCqk95T49f7",
                 "writable": false,
                 "signer": false
               }
@@ -2837,8 +3242,26 @@
                 "signer": false
               },
               {
-                "name": "custody_token_account",
-                "address": "4gBtewv9gnQbTeyAjgH1d4i9KSbooAgjxfr7rL5JWsaM",
+                "name": "owner_token_account",
+                "address": "GAQc7XJQCPKk85MewJpqf478rSB4khECdtECwDbSwfew",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "fee_recipient",
+                "address": "3ur8SzMfzjfFcWj8HKnbX2tyqGsBA5ZKMdmdeVfzbFHn",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "executor_token_account",
+                "address": "51KqcxvXaBdf8M1UpSk1eqLGG3GW6Rz1jmwKBaBfeCwc",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "futarchy_authority",
+                "address": "DsRK4Qib94ciyZk8TzgW2Cj6EDKwxnkyofzHi5fmLAuw",
                 "writable": false,
                 "signer": false
               },
@@ -2858,13 +3281,13 @@
                 "name": "executor",
                 "address": "J2fzcjF8LUK2eNdUdyDaYWvgKcsvApEC3xmDjFuxiirW",
                 "writable": false,
-                "signer": true
+                "signer": false
               }
             ],
             "remainingAccounts": []
           }
         ],
-        "paritySha256": "79637f5ed0ec27249261459b103c1f1366dfdc3f7ae6dc7e26b528112e31d7d2"
+        "paritySha256": "7b4be38c35bd18de228622b50909a5c0f5acd34e655dc7fb67eab943e02df04f"
       }
     },
     {
@@ -2875,12 +3298,12 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-delegated_close_stop_loss",
-          "protocolRevision": "devnet-1",
+          "protocolRevision": "pr45-5a9abcb3",
           "action": "delegated_close_stop_loss",
           "jobKind": "stop_loss",
           "market": "8PB15EEhUh5AQoMyQKorgGGNiNLYTHkW3NZQchDuRGLh",
           "target": "EF66W9mqDSy9zQSp18uVLREq2oDckFVF4LG8Jiq1H7yo",
-          "observedSlot": 1005,
+          "observedSlot": 1008,
           "expectedStateHash": "3d00b50b67ffe7cc357414195444e84b13a4633e8177d5d7e58289150a8d46dc"
         },
         "primary": {
@@ -2888,7 +3311,7 @@
           "program": "dusk",
           "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
           "instructionName": "delegated_close_leverage",
-          "dataHex": "0eda6299a413308b00200300000000000010000000f63e52e8a8c7794e0700000000000000100000009ce0eefa5fe5eb3b07000000000000000800",
+          "dataHex": "0eda6299a413308b002003000000000000102710000000f63e52e8a8c7794e0700000000000000100000009ce0eefa5fe5eb3b07000000000000000b00",
           "accounts": [
             {
               "name": "market",
@@ -3031,8 +3454,26 @@
               "signer": false
             },
             {
-              "name": "custody_token_account",
-              "address": "48E7W42Enqvir1qCLFNJKoiJPgM7fTmGedS8DyWcYr2Z",
+              "name": "owner_token_account",
+              "address": "3ZZqmUz3hFgDwDqoC1qtL61uDdDzPM42VED4SDZiSExF",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "fee_recipient",
+              "address": "3tAC628aexhyUNFqsemYoY9CE3PAbUR9pprYakMvXnen",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "executor_token_account",
+              "address": "f8pzt4F9x2mmntKb8z7wSqvHGHbvfZCpnentQ3Wqrkc",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "futarchy_authority",
+              "address": "5dBpcMfCwQ6z7KxvVb8zdXNSpsAsWpwvAiWuzJJt85es",
               "writable": false,
               "signer": false
             },
@@ -3052,7 +3493,7 @@
               "name": "executor",
               "address": "6yiSPuU8R4WCPEMA8DC5Ktz5Z3c5QYvJCnU8BqRvmFC4",
               "writable": false,
-              "signer": true
+              "signer": false
             },
             {
               "name": "order",
@@ -3079,21 +3520,21 @@
               "signer": false
             },
             {
-              "name": "custody_token_account",
-              "address": "7RHwE76Xv5sAeQqsEFVeLJwmHsvwi6WiruwEgo2LnbJ6",
-              "writable": true,
+              "name": "owner_token_account",
+              "address": "AgU5mVzZo8mtQqUKTsCJXYxgkoVJ9t6mfVi4thLLzhGi",
+              "writable": false,
               "signer": false
             },
             {
               "name": "executor_token_account",
               "address": "7BtjcFQGb6BP95eX2yVXXyUVcp63JXLJsbsersf77Ri1",
-              "writable": true,
+              "writable": false,
               "signer": false
             },
             {
-              "name": "owner_token_account",
-              "address": "AgU5mVzZo8mtQqUKTsCJXYxgkoVJ9t6mfVi4thLLzhGi",
-              "writable": true,
+              "name": "fee_recipient",
+              "address": "GRUyDxx3UBhgbzmMRszn68rV8NieNNM2C2siN4RBczzq",
+              "writable": false,
               "signer": false
             },
             {
@@ -3106,17 +3547,11 @@
               "name": "executor",
               "address": "J3Dy6qyUZQNM4AR9bQzEZpK6xnGf1WtXjft3AjyLPRyE",
               "writable": false,
-              "signer": true
-            },
-            {
-              "name": "token_program",
-              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-              "writable": false,
               "signer": false
             },
             {
-              "name": "token_2022_program",
-              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "name": "futarchy_authority",
+              "address": "BaB9ca66ecS1bBwe8T3KrhAppJA6d52m7yRxMX5h3mDe",
               "writable": false,
               "signer": false
             }
@@ -3155,8 +3590,26 @@
                 "signer": false
               },
               {
-                "name": "custody_token_account",
-                "address": "48E7W42Enqvir1qCLFNJKoiJPgM7fTmGedS8DyWcYr2Z",
+                "name": "owner_token_account",
+                "address": "3ZZqmUz3hFgDwDqoC1qtL61uDdDzPM42VED4SDZiSExF",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "fee_recipient",
+                "address": "3tAC628aexhyUNFqsemYoY9CE3PAbUR9pprYakMvXnen",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "executor_token_account",
+                "address": "f8pzt4F9x2mmntKb8z7wSqvHGHbvfZCpnentQ3Wqrkc",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "futarchy_authority",
+                "address": "5dBpcMfCwQ6z7KxvVb8zdXNSpsAsWpwvAiWuzJJt85es",
                 "writable": false,
                 "signer": false
               },
@@ -3176,7 +3629,7 @@
                 "name": "executor",
                 "address": "6yiSPuU8R4WCPEMA8DC5Ktz5Z3c5QYvJCnU8BqRvmFC4",
                 "writable": false,
-                "signer": true
+                "signer": false
               }
             ],
             "remainingAccounts": []
@@ -3213,21 +3666,21 @@
                 "signer": false
               },
               {
-                "name": "custody_token_account",
-                "address": "7RHwE76Xv5sAeQqsEFVeLJwmHsvwi6WiruwEgo2LnbJ6",
-                "writable": true,
+                "name": "owner_token_account",
+                "address": "AgU5mVzZo8mtQqUKTsCJXYxgkoVJ9t6mfVi4thLLzhGi",
+                "writable": false,
                 "signer": false
               },
               {
                 "name": "executor_token_account",
                 "address": "7BtjcFQGb6BP95eX2yVXXyUVcp63JXLJsbsersf77Ri1",
-                "writable": true,
+                "writable": false,
                 "signer": false
               },
               {
-                "name": "owner_token_account",
-                "address": "AgU5mVzZo8mtQqUKTsCJXYxgkoVJ9t6mfVi4thLLzhGi",
-                "writable": true,
+                "name": "fee_recipient",
+                "address": "GRUyDxx3UBhgbzmMRszn68rV8NieNNM2C2siN4RBczzq",
+                "writable": false,
                 "signer": false
               },
               {
@@ -3240,17 +3693,11 @@
                 "name": "executor",
                 "address": "J3Dy6qyUZQNM4AR9bQzEZpK6xnGf1WtXjft3AjyLPRyE",
                 "writable": false,
-                "signer": true
-              },
-              {
-                "name": "token_program",
-                "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-                "writable": false,
                 "signer": false
               },
               {
-                "name": "token_2022_program",
-                "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+                "name": "futarchy_authority",
+                "address": "BaB9ca66ecS1bBwe8T3KrhAppJA6d52m7yRxMX5h3mDe",
                 "writable": false,
                 "signer": false
               }
@@ -3258,7 +3705,7 @@
             "remainingAccounts": []
           }
         ],
-        "paritySha256": "76cc07b47a733aeb56e1e1a42a222298792512298e6543b93f368da5fb32e142"
+        "paritySha256": "91cb19b5749e0a967c87ad3ba71692511731d9e72cdfb871525c1f115e7badea"
       }
     },
     {
@@ -3269,12 +3716,12 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-delegated_close_stop_loss",
-          "protocolRevision": "devnet-1",
+          "protocolRevision": "pr45-5a9abcb3",
           "action": "delegated_close_stop_loss",
           "jobKind": "stop_loss",
           "market": "8PB15EEhUh5AQoMyQKorgGGNiNLYTHkW3NZQchDuRGLh",
           "target": "EF66W9mqDSy9zQSp18uVLREq2oDckFVF4LG8Jiq1H7yo",
-          "observedSlot": 1005,
+          "observedSlot": 1008,
           "expectedStateHash": "3d00b50b67ffe7cc357414195444e84b13a4633e8177d5d7e58289150a8d46dc"
         },
         "primary": {
@@ -3282,7 +3729,7 @@
           "program": "dusk",
           "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
           "instructionName": "delegated_close_leverage",
-          "dataHex": "0eda6299a413308b00200300000000000010000000f63e52e8a8c7794e0700000000000000100000009ce0eefa5fe5eb3b07000000000000000800",
+          "dataHex": "0eda6299a413308b002003000000000000102710000000f63e52e8a8c7794e0700000000000000100000009ce0eefa5fe5eb3b07000000000000000b00",
           "accounts": [
             {
               "name": "market",
@@ -3425,8 +3872,26 @@
               "signer": false
             },
             {
-              "name": "custody_token_account",
-              "address": "48E7W42Enqvir1qCLFNJKoiJPgM7fTmGedS8DyWcYr2Z",
+              "name": "owner_token_account",
+              "address": "3ZZqmUz3hFgDwDqoC1qtL61uDdDzPM42VED4SDZiSExF",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "fee_recipient",
+              "address": "3tAC628aexhyUNFqsemYoY9CE3PAbUR9pprYakMvXnen",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "executor_token_account",
+              "address": "f8pzt4F9x2mmntKb8z7wSqvHGHbvfZCpnentQ3Wqrkc",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "futarchy_authority",
+              "address": "5dBpcMfCwQ6z7KxvVb8zdXNSpsAsWpwvAiWuzJJt85es",
               "writable": false,
               "signer": false
             },
@@ -3446,7 +3911,7 @@
               "name": "executor",
               "address": "6yiSPuU8R4WCPEMA8DC5Ktz5Z3c5QYvJCnU8BqRvmFC4",
               "writable": false,
-              "signer": true
+              "signer": false
             },
             {
               "name": "order",
@@ -3473,21 +3938,21 @@
               "signer": false
             },
             {
-              "name": "custody_token_account",
-              "address": "7RHwE76Xv5sAeQqsEFVeLJwmHsvwi6WiruwEgo2LnbJ6",
-              "writable": true,
+              "name": "owner_token_account",
+              "address": "AgU5mVzZo8mtQqUKTsCJXYxgkoVJ9t6mfVi4thLLzhGi",
+              "writable": false,
               "signer": false
             },
             {
               "name": "executor_token_account",
               "address": "7BtjcFQGb6BP95eX2yVXXyUVcp63JXLJsbsersf77Ri1",
-              "writable": true,
+              "writable": false,
               "signer": false
             },
             {
-              "name": "owner_token_account",
-              "address": "AgU5mVzZo8mtQqUKTsCJXYxgkoVJ9t6mfVi4thLLzhGi",
-              "writable": true,
+              "name": "fee_recipient",
+              "address": "GRUyDxx3UBhgbzmMRszn68rV8NieNNM2C2siN4RBczzq",
+              "writable": false,
               "signer": false
             },
             {
@@ -3500,17 +3965,11 @@
               "name": "executor",
               "address": "J3Dy6qyUZQNM4AR9bQzEZpK6xnGf1WtXjft3AjyLPRyE",
               "writable": false,
-              "signer": true
-            },
-            {
-              "name": "token_program",
-              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-              "writable": false,
               "signer": false
             },
             {
-              "name": "token_2022_program",
-              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+              "name": "futarchy_authority",
+              "address": "BaB9ca66ecS1bBwe8T3KrhAppJA6d52m7yRxMX5h3mDe",
               "writable": false,
               "signer": false
             }
@@ -3549,8 +4008,26 @@
                 "signer": false
               },
               {
-                "name": "custody_token_account",
-                "address": "48E7W42Enqvir1qCLFNJKoiJPgM7fTmGedS8DyWcYr2Z",
+                "name": "owner_token_account",
+                "address": "3ZZqmUz3hFgDwDqoC1qtL61uDdDzPM42VED4SDZiSExF",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "fee_recipient",
+                "address": "3tAC628aexhyUNFqsemYoY9CE3PAbUR9pprYakMvXnen",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "executor_token_account",
+                "address": "f8pzt4F9x2mmntKb8z7wSqvHGHbvfZCpnentQ3Wqrkc",
+                "writable": false,
+                "signer": false
+              },
+              {
+                "name": "futarchy_authority",
+                "address": "5dBpcMfCwQ6z7KxvVb8zdXNSpsAsWpwvAiWuzJJt85es",
                 "writable": false,
                 "signer": false
               },
@@ -3570,7 +4047,7 @@
                 "name": "executor",
                 "address": "6yiSPuU8R4WCPEMA8DC5Ktz5Z3c5QYvJCnU8BqRvmFC4",
                 "writable": false,
-                "signer": true
+                "signer": false
               }
             ],
             "remainingAccounts": []
@@ -3607,21 +4084,21 @@
                 "signer": false
               },
               {
-                "name": "custody_token_account",
-                "address": "7RHwE76Xv5sAeQqsEFVeLJwmHsvwi6WiruwEgo2LnbJ6",
-                "writable": true,
+                "name": "owner_token_account",
+                "address": "AgU5mVzZo8mtQqUKTsCJXYxgkoVJ9t6mfVi4thLLzhGi",
+                "writable": false,
                 "signer": false
               },
               {
                 "name": "executor_token_account",
                 "address": "7BtjcFQGb6BP95eX2yVXXyUVcp63JXLJsbsersf77Ri1",
-                "writable": true,
+                "writable": false,
                 "signer": false
               },
               {
-                "name": "owner_token_account",
-                "address": "AgU5mVzZo8mtQqUKTsCJXYxgkoVJ9t6mfVi4thLLzhGi",
-                "writable": true,
+                "name": "fee_recipient",
+                "address": "GRUyDxx3UBhgbzmMRszn68rV8NieNNM2C2siN4RBczzq",
+                "writable": false,
                 "signer": false
               },
               {
@@ -3634,17 +4111,11 @@
                 "name": "executor",
                 "address": "J3Dy6qyUZQNM4AR9bQzEZpK6xnGf1WtXjft3AjyLPRyE",
                 "writable": false,
-                "signer": true
-              },
-              {
-                "name": "token_program",
-                "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-                "writable": false,
                 "signer": false
               },
               {
-                "name": "token_2022_program",
-                "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+                "name": "futarchy_authority",
+                "address": "BaB9ca66ecS1bBwe8T3KrhAppJA6d52m7yRxMX5h3mDe",
                 "writable": false,
                 "signer": false
               }
@@ -3652,7 +4123,7 @@
             "remainingAccounts": []
           }
         ],
-        "paritySha256": "76cc07b47a733aeb56e1e1a42a222298792512298e6543b93f368da5fb32e142"
+        "paritySha256": "91cb19b5749e0a967c87ad3ba71692511731d9e72cdfb871525c1f115e7badea"
       }
     },
     {
@@ -3663,12 +4134,12 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-eligible_proposal_execute",
-          "protocolRevision": "devnet-1",
+          "protocolRevision": "pr45-5a9abcb3",
           "action": "eligible_proposal_execute",
           "jobKind": "lifecycle",
           "market": "9QyWxynPcNbwqLzga6ZioAL9GcA8DpEFxvkWEaGQtfzJ",
           "target": "46hHx23qoLbib8miSTQCapmTjZ44cfkru91WfBuzjzt2",
-          "observedSlot": 1008,
+          "observedSlot": 1011,
           "expectedStateHash": "832ab78c25e91229d5f74ac2b8331e73dc56f6f0fd9012c71185a4d3167488f6"
         },
         "primary": {
@@ -3682,6 +4153,18 @@
               "name": "market",
               "address": "FzfZzW7eN9WKFdGNvPxNg9jngqMmEsUzFCENG6ReiTZr",
               "writable": true,
+              "signer": false
+            },
+            {
+              "name": "base_mint",
+              "address": "38WGopLu5vMKz4527Wm1k9huBXqYREuDDJAnZUJZZewG",
+              "writable": false,
+              "signer": false
+            },
+            {
+              "name": "quote_mint",
+              "address": "5m63JDRAoq2u19Vf9JpJpcjqtf1dg8UMGxR88xVenQfj",
+              "writable": false,
               "signer": false
             },
             {

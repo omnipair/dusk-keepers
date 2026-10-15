@@ -18,7 +18,7 @@ the prior observation is not used for prioritization. Each liquidation attempt
 must still pass its own fresh mint/Clock reads. An unrelated monitor failure
 does not block other service profiles.
 
-The lending-trigger and leverage profiles prioritize markets with final-notice
+All four liquidation profiles prioritize markets with final-notice
 mints, then continue their ordinary candidate scan. They do not cache a healthy
 position across scans. Before re-signing an evaluated attempt they re-read both
 mints and Clock, at a slot no older than their initial read. A changed fingerprint
@@ -70,32 +70,23 @@ A canceled or rescheduled fee requires the same full recheck and can remove
 eligibility. Clear stale route/payment estimates. The authority can also cancel
 only after a completed early liquidation; that borrower penalty risk remains.
 
-## Deployment compatibility: not completed by monitoring
+## Candidate migration and release status
 
-**The frozen protocol lock in this branch targets the older deployed auction
-interface. It does not contain #45's flash/emergency instruction contracts.**
-This change adds monitoring and fresh-fee checks to those existing callers. It
-does not silently change the pinned deployment, remove live-release gates, or
-claim that legacy auction/leverage instructions execute #45's mitigation.
+The candidate lock now pins #45 at `5a9abcb3`. Native Rust callers use
+`observe_liquidation`, authoritative previews, atomic begin/settle and emergency
+execution. Old liquidation-auction callers have been removed. Independent
+TypeScript builders cover the same account layout, quotes and instruction bytes;
+the TypeScript service remains shadow-only.
 
-Before enabling a keeper against the eventual #45 program:
+[The migration runbook](flash-liquidation-migration.md) lists execution modes,
+operator limits, PostgreSQL recovery, fixture coverage and release checks.
+Final-notice liquidation is exercised against the pinned binary. Shared fee
+vectors cover ordinary/final notice, activation, cancellation, rescheduling,
+rate/cap rounding and epoch changes. These are local tests, not evidence of a
+live notice-window response or a guarantee that every route is profitable.
 
-1. Capture the final Dusk/delegate binaries, IDLs, SDK and source fingerprint in a
-   candidate lock. Generate instruction/layout/account-resolution contracts from
-   those IDLs; do not hand-edit the manifests. Candidate testing is non-signing.
-2. Migrate the lending and leverage callers to `observeLiquidation`,
-   `previewFlashLiquidation`, paired begin/settle, and emergency preview/execution.
-   Use the SDK `DuskLiquidations` builders as the TypeScript integration boundary;
-   Rust needs its native equivalent and shared contract fixtures. Old auction
-   completion does not count as covering the new paths.
-3. Exercise both borrowing and leverage with a current 3% fee and scheduled 100%
-   uncapped fee: ordinary notice, final notice, activation. Verify exact payment,
-   current-fee collateral receipt, confirmed debt reduction, cancellation,
-   rescheduling, restart, RPC failure and epoch rollover between quote and signing.
-   Include a missed-window case that reaches the authorized loss waterfall.
-4. After the coordinated devnet upgrade, attest deployed artifacts, freeze the
-   matching lock and pass the live-release gate. Retain database/lease/signing
-   policies. Do not claim deployed coverage until these checks actually pass.
-
-These rollout tasks remain explicit. Monitoring is useful now, but it cannot
-substitute for the new executor or guarantee economically profitable cleanup.
+Before enabling the eventual release, capture its final artifacts, verify the
+actual upgraded program and freeze that matching lock through the release gate.
+Run devnet notice-window and restart checks after that separately authorized
+upgrade. Preserve the loss waterfall for missed windows; do not bypass program
+health checks, payment floors or insurance limits to force cleanup.

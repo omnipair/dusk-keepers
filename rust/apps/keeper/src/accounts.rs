@@ -106,7 +106,6 @@ impl MarketAccounts {
         if debt_is_base {
             OrientedMarket {
                 collateral_collateral_vault: self.quote_collateral_vault,
-                collateral_insurance_vault: self.quote_insurance_vault,
                 collateral_mint: self.quote_mint,
                 collateral_reserve_vault: self.quote_reserve_vault,
                 debt_interest_vault: self.base_interest_vault,
@@ -117,7 +116,6 @@ impl MarketAccounts {
         } else {
             OrientedMarket {
                 collateral_collateral_vault: self.base_collateral_vault,
-                collateral_insurance_vault: self.base_insurance_vault,
                 collateral_mint: self.base_mint,
                 collateral_reserve_vault: self.base_reserve_vault,
                 debt_interest_vault: self.quote_interest_vault,
@@ -142,7 +140,6 @@ pub struct OrientedMarket {
     pub debt_interest_vault: [u8; 32],
     pub debt_insurance_vault: [u8; 32],
     pub collateral_collateral_vault: [u8; 32],
-    pub collateral_insurance_vault: [u8; 32],
 }
 
 /// Derive an associated token account.
@@ -336,8 +333,8 @@ mod tests {
             market.quote_insurance_vault
         );
         assert_ne!(
-            base_debt.collateral_insurance_vault,
-            quote_debt.collateral_insurance_vault
+            base_debt.collateral_reserve_vault,
+            quote_debt.collateral_reserve_vault
         );
     }
 

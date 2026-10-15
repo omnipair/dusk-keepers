@@ -13,7 +13,15 @@
   "scripts": {
     "check": "node scripts/validate-repo.mjs",
     "test": "node --experimental-strip-types --test typescript/tests/*.test.ts",
-    "keeper:ts:check": "node --experimental-strip-types typescript/apps/keeper/src/index.ts --check"
+    "keeper:ts:check": "node --experimental-strip-types typescript/apps/keeper/src/index.ts --check",
+    "typecheck": "tsc --noEmit --allowImportingTsExtensions --target ES2022 --module NodeNext --moduleResolution NodeNext --skipLibCheck typescript/packages/dusk-adapter/src/index.ts"
+  },
+  "devDependencies": {
+    "@coral-xyz/anchor": "0.31.1",
+    "@solana/spl-token": "0.4.14",
+    "@solana/web3.js": "1.98.4",
+    "@types/node": "24.19.2",
+    "litesvm": "0.8.0",
+    "typescript": "5.9.3"
   }
 }
-

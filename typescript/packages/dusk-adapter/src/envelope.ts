@@ -5,6 +5,9 @@ import { assertLiveReady, type ProtocolLock } from "./protocol-lock.ts";
 export type ProgramName = "dusk" | "leverage_delegate";
 
 export type JobAction =
+  | "flash_liquidation_settle"
+  | "flash_liquidation_preview"
+  | "emergency_liquidation_preview"
   | "lending_liquidation_trigger"
   | "lending_liquidation_bid"
   | "lending_liquidation_floor_settle"
@@ -400,8 +403,8 @@ function decodeDelegatedCpiPayload(data: Buffer): {
   after: Buffer;
   beforeAccountsLength: number;
 } {
-  if (data.length < 27) throw invalidDelegatedData();
-  let cursor = 17;
+  if (data.length < 29) throw invalidDelegatedData();
+  let cursor = 19;
   const before = readVector(data, cursor);
   cursor = before.next;
   const after = readVector(data, cursor);

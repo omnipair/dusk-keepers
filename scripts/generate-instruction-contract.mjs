@@ -1,3 +1,4 @@
+import { flattenAccounts } from "./idl-accounts.mjs";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
@@ -7,25 +8,28 @@ const contractPath = new URL("protocol/keeper-instructions.v1.json", root);
 const fixturesPath = new URL("fixtures/conformance/v1/instruction-envelope-cases.json", root);
 
 const actionDefinitions = [
+  { action: "flash_liquidation_settle", jobKind: "lending_liquidation_bid", primary: ["dusk", "settle_flash_liquidation"] },
+  { action: "flash_liquidation_preview", jobKind: "lending_liquidation_bid", primary: ["dusk", "preview_flash_liquidation"] },
+  { action: "emergency_liquidation_preview", jobKind: "lending_liquidation_settle", primary: ["dusk", "preview_emergency_liquidation"] },
   {
     action: "lending_liquidation_trigger",
     jobKind: "lending_liquidation_trigger",
-    primary: ["dusk", "start_liquidation_auction"],
+    primary: ["dusk", "observe_liquidation"],
   },
   {
     action: "lending_liquidation_bid",
     jobKind: "lending_liquidation_bid",
-    primary: ["dusk", "fill_liquidation_auction"],
+    primary: ["dusk", "begin_flash_liquidation"],
   },
   {
     action: "lending_liquidation_floor_settle",
     jobKind: "lending_liquidation_settle",
-    primary: ["dusk", "backstop_liquidation_auction"],
+    primary: ["dusk", "emergency_liquidation"],
   },
   {
     action: "leverage_liquidation",
     jobKind: "leverage_liquidation",
-    primary: ["dusk", "liquidate_leverage_position"],
+    primary: ["dusk", "observe_liquidation"],
   },
   {
     action: "delegated_close_take_profit",
@@ -103,16 +107,15 @@ async function buildContract() {
       anchorDiscriminator,
       `${key}: IDL discriminator differs from Anchor global discriminator`,
     );
-    for (const account of instruction.accounts) {
-      assert.ok(!account.accounts, `${key}: nested account groups require explicit flattening`);
-    }
+    const accounts = flattenAccounts(instruction.accounts);
+    assert.equal(new Set(accounts.map(a => a.name)).size, accounts.length, `${key}: ambiguous flattened accounts`);
     return {
       key,
       program,
       programId: source.pinned.programId,
       instructionName,
       discriminatorHex: Buffer.from(instruction.discriminator).toString("hex"),
-      accounts: instruction.accounts.map((account) => ({
+      accounts: accounts.map((account) => ({
         name: account.name,
         writable: account.writable === true,
         signer: account.signer === true,
@@ -172,18 +175,17 @@ function discriminator(specification) {
 function directInstructionData(specification) {
   const prefix = discriminator(specification);
   switch (specification.instructionName) {
-    case "start_liquidation_auction":
     case "queue_parameter_proposal":
     case "execute_parameter_proposal":
-      return prefix;
-    case "fill_liquidation_auction":
-      return Buffer.concat([prefix, encodeU64(1_000), encodeU64(900)]);
-    // One argument, not four: the backstop pays the caller a bounty and takes
-    // its loss parameters from market state rather than from the caller.
-    case "backstop_liquidation_auction":
-      return Buffer.concat([prefix, encodeU64(100)]);
-    case "liquidate_leverage_position":
-      return Buffer.concat([prefix, Buffer.from([0])]);
+    case "settle_flash_liquidation": return prefix;
+    case "observe_liquidation": return Buffer.concat([prefix, Buffer.from([0])]);
+    case "preview_flash_liquidation":
+    case "preview_emergency_liquidation":
+      return Buffer.concat([prefix, Buffer.from([0]), encodeU64(1000), Buffer.from([0])]);
+    case "begin_flash_liquidation":
+      return Buffer.concat([prefix, Buffer.alloc(32, 7), Buffer.from([0]), encodeU64(1000), encodeU64(1100), encodeU64(900), Buffer.from([0]), encodeU16(1)]);
+    case "emergency_liquidation":
+      return Buffer.concat([prefix, Buffer.from([0]), encodeU64(1000), Buffer.from([0]), encodeU64(1), encodeU64(900)]);
     case "settle_protocol_auction":
       return Buffer.concat([prefix, Buffer.from([0, 0]), encodeU64(1_000), encodeU64(950)]);
     case "before_take_profit":
@@ -275,6 +277,7 @@ function buildValidEnvelope(contract, actionContract, index) {
       discriminator(primarySpec),
       Buffer.from([0]),
       encodeU64(800),
+      encodeU16(10000),
       encodeVector(before),
       encodeVector(after),
       encodeU16(hooks[0].accounts.length),
