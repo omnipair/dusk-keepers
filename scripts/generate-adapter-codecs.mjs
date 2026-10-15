@@ -1,3 +1,4 @@
+import { flattenAccounts } from "./idl-accounts.mjs";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
@@ -12,6 +13,9 @@ const EDWARDS_D = mod(-121665n * modInverse(121666n));
 const SQRT_MINUS_ONE = modPow(2n, (FIELD_MODULUS - 1n) / 4n);
 
 const inputNames = new Map([
+ ["leverage_position.owner", "owner"], ["leverage_position.namespace_authority", "namespaceAuthority"],
+ ["args.position", "position"], ["session.position", "position"], ["accounts.debt_mint", "debtMint"],
+
   ["market.base_side.asset_mint", "baseAssetMint"],
   ["market.quote_side.asset_mint", "quoteAssetMint"],
   ["market.params_hash", "paramsHash"],
@@ -54,10 +58,11 @@ function seedEncoding(idl, instruction, seed) {
   if (seed.kind === "account") {
     const [rootAccount, ...fieldPath] = seed.path.split(".");
     assert.ok(
-      instruction.accounts.some((account) => account.name === rootAccount),
+      [...instruction.accounts, ...flattenAccounts(instruction.accounts)].some((account) => account.name === rootAccount),
       `${instruction.name}:${seed.path}: seed account is absent`,
     );
-    type = seed.account
+    type = instruction.accounts.find(a => a.name === rootAccount)?.accounts
+      ? "pubkey" : seed.account
       ? descendType(idl, { defined: seed.account }, fieldPath)
       : "pubkey";
   } else if (seed.kind === "arg") {
@@ -110,7 +115,7 @@ function buildResolutionManifest(lock, contract, idls) {
     );
     assert.ok(instruction, `${specification.key}: instruction missing from pinned IDL`);
 
-    for (const account of instruction.accounts) {
+    for (const account of flattenAccounts(instruction.accounts)) {
       let staticAddress = account.address ?? null;
       let staticSource = account.address ? "idl_fixed_address" : null;
       if (!staticAddress && account.name === "program") {
@@ -200,25 +205,15 @@ function encodeVector(bytes) {
 
 function wireToIdlArguments(specificationKey, argumentsValue) {
   switch (specificationKey) {
-    case "dusk:start_liquidation_auction":
     case "dusk:queue_parameter_proposal":
     case "dusk:execute_parameter_proposal":
-      return {};
-    case "dusk:fill_liquidation_auction":
-      return {
-        args: {
-          repay_amount: argumentsValue.repayAmount,
-          min_collateral_out: argumentsValue.minCollateralOut,
-        },
-      };
-    case "dusk:backstop_liquidation_auction":
-      return {
-        args: {
-          min_caller_bounty_out: argumentsValue.minCallerBountyOut,
-        },
-      };
-    case "dusk:liquidate_leverage_position":
-      return { args: { debt_asset: argumentsValue.debtAsset } };
+    case "dusk:settle_flash_liquidation": return {};
+    case "dusk:observe_liquidation": return { debt_asset: argumentsValue.debtAsset };
+    case "dusk:preview_flash_liquidation":
+    case "dusk:preview_emergency_liquidation":
+    case "dusk:begin_flash_liquidation":
+    case "dusk:emergency_liquidation":
+      return { args: Object.fromEntries(Object.entries(argumentsValue).map(([k,v]) => [k.replace(/[A-Z]/g, c => "_"+c.toLowerCase()),v])) };
     case "dusk:delegated_close_leverage":
       return {
         args: {
@@ -252,6 +247,8 @@ function wireToIdlArguments(specificationKey, argumentsValue) {
 
 function encodeIdlType(idl, type, value, path) {
   if (typeof type === "string") {
+    if (type === "bool") { assert.equal(typeof value, "boolean"); return Buffer.from([value ? 1 : 0]); }
+    if (type === "pubkey") { const bytes = base58Decode(value); assert.equal(bytes.length,32); return bytes; }
     if (type === "u8") {
       assert.ok(Number.isInteger(value) && value >= 0 && value <= 0xff, `${path}: invalid u8`);
       return Buffer.from([value]);
@@ -385,13 +382,12 @@ function buildEncodingCases(contract, idls) {
   ).toString("hex");
 
   const argumentsByKey = {
-    "dusk:start_liquidation_auction": {},
-    "dusk:fill_liquidation_auction": {
-      repayAmount: "18446744073709551615",
-      minCollateralOut: "0",
-    },
-    "dusk:backstop_liquidation_auction": { minCallerBountyOut: "100" },
-    "dusk:liquidate_leverage_position": { debtAsset: 1 },
+    "dusk:observe_liquidation": { debtAsset: 1 },
+    "dusk:preview_flash_liquidation": { debtAsset: 0, maxRepayment: "18446744073709551615", full: false },
+    "dusk:preview_emergency_liquidation": { debtAsset: 1, collateralDebit: "1000", full: true },
+    "dusk:begin_flash_liquidation": { position: deterministicPubkey("flash-position"), debtAsset: 1, maxRepayment: "1000", maxPayment: "1100", minCollateralCredit: "900", full: false, settleIndex: 3 },
+    "dusk:settle_flash_liquidation": {},
+    "dusk:emergency_liquidation": { debtAsset: 0, collateralDebit: "1000", full: false, minRewardCredit: "1", minSwapOutput: "900" },
     "dusk:delegated_close_leverage": {
       debtAsset: 0,
       minAmountOut: "800",
@@ -611,25 +607,25 @@ function buildFixtureBundle(contract, manifest, idls) {
       },
       {
         name: "u64 overflow",
-        specificationKey: "dusk:fill_liquidation_auction",
-        arguments: { repayAmount: "18446744073709551616", minCollateralOut: "0" },
+        specificationKey: "dusk:preview_flash_liquidation",
+        arguments: { debtAsset: 0, full: false, maxRepayment: "18446744073709551616",  },
         expectedError: "invalid_arguments",
       },
       {
         name: "negative u64",
-        specificationKey: "dusk:fill_liquidation_auction",
-        arguments: { repayAmount: "-1", minCollateralOut: "0" },
+        specificationKey: "dusk:preview_flash_liquidation",
+        arguments: { debtAsset: 0, full: false, maxRepayment: "-1",  },
         expectedError: "invalid_arguments",
       },
       {
         name: "non-canonical u64",
-        specificationKey: "dusk:fill_liquidation_auction",
-        arguments: { repayAmount: "+1", minCollateralOut: "0" },
+        specificationKey: "dusk:preview_flash_liquidation",
+        arguments: { debtAsset: 0, full: false, maxRepayment: "+1",  },
         expectedError: "invalid_arguments",
       },
       {
         name: "u8 overflow",
-        specificationKey: "dusk:liquidate_leverage_position",
+        specificationKey: "dusk:observe_liquidation",
         arguments: { debtAsset: 256 },
         expectedError: "invalid_arguments",
       },

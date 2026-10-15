@@ -107,6 +107,9 @@ for (const fixture of lifecycleFixtures.cases) {
 }
 
 test("shared health fixture matches the TypeScript provenance model", async () => {
+  const lockStatusFromRepository = JSON.parse(
+    await readFile(new URL("../../protocol.lock.json", import.meta.url), "utf8"),
+  ).status as string;
   const health = JSON.parse(
     await readFile(new URL("../../fixtures/conformance/v1/health-provenance.json", import.meta.url), "utf8"),
   ) as HealthProvenance;
@@ -117,10 +120,6 @@ test("shared health fixture matches the TypeScript provenance model", async () =
   assert.equal(health.protocol.lockStatus, lockStatusFromRepository);
   assert.equal(health.dependencies.signer, "disabled");
 });
-
-const lockStatusFromRepository = JSON.parse(
-  await readFile(new URL("../../protocol.lock.json", import.meta.url), "utf8"),
-).status as string;
 
 test("captured protocol lock cannot enable live execution", async () => {
   const raw = JSON.parse(

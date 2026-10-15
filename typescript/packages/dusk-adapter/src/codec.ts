@@ -1,26 +1,7 @@
+import { decodePubkey } from "./resolution.ts";
 import { createHash } from "node:crypto";
 
 import type { InstructionContract } from "./envelope.ts";
-
-export interface FillLiquidationAuctionArgs {
-  readonly repayAmount: bigint;
-  readonly minCollateralOut: bigint;
-}
-
-/**
- * The backstop's only argument.
- *
- * It does not take loss bounds: how much insurance is drawn and how much loss
- * is socialized are decided by market state, not by whoever calls. The caller
- * only states the bounty it will accept.
- */
-export interface BackstopLiquidationAuctionArgs {
-  readonly minCallerBountyOut: bigint;
-}
-
-export interface LiquidateLeveragePositionArgs {
-  readonly debtAsset: number;
-}
 
 export interface DelegatedCpiArgs {
   readonly beforeIxData: Uint8Array;
@@ -51,19 +32,49 @@ export interface SettleProtocolAuctionArgs {
 }
 
 export type KeeperInstructionArguments =
-  | { readonly specificationKey: "dusk:start_liquidation_auction" }
   | {
-      readonly specificationKey: "dusk:fill_liquidation_auction";
-      readonly arguments: FillLiquidationAuctionArgs;
+      readonly specificationKey: "dusk:observe_liquidation";
+      readonly arguments: { readonly debtAsset: number };
     }
   | {
-      readonly specificationKey: "dusk:backstop_liquidation_auction";
-      readonly arguments: BackstopLiquidationAuctionArgs;
+      readonly specificationKey: "dusk:preview_flash_liquidation";
+      readonly arguments: {
+        readonly debtAsset: number;
+        readonly maxRepayment: bigint;
+        readonly full: boolean;
+      };
     }
   | {
-      readonly specificationKey: "dusk:liquidate_leverage_position";
-      readonly arguments: LiquidateLeveragePositionArgs;
+      readonly specificationKey: "dusk:preview_emergency_liquidation";
+      readonly arguments: {
+        readonly debtAsset: number;
+        readonly collateralDebit: bigint;
+        readonly full: boolean;
+      };
     }
+  | {
+      readonly specificationKey: "dusk:begin_flash_liquidation";
+      readonly arguments: {
+        readonly position: Uint8Array;
+        readonly debtAsset: number;
+        readonly maxRepayment: bigint;
+        readonly maxPayment: bigint;
+        readonly minCollateralCredit: bigint;
+        readonly full: boolean;
+        readonly settleIndex: number;
+      };
+    }
+  | {
+      readonly specificationKey: "dusk:emergency_liquidation";
+      readonly arguments: {
+        readonly debtAsset: number;
+        readonly collateralDebit: bigint;
+        readonly full: boolean;
+        readonly minRewardCredit: bigint;
+        readonly minSwapOutput: bigint;
+      };
+    }
+  | { readonly specificationKey: "dusk:settle_flash_liquidation" }
   | {
       readonly specificationKey: "dusk:delegated_close_leverage";
       readonly arguments: DelegatedCloseLeverageArgs;
@@ -115,7 +126,8 @@ export function encodeKeeperInstruction(
       `${request.specificationKey}: instruction is absent from the pinned contract`,
     );
   }
-  const [expectedProgram, expectedName, unexpectedPart] = request.specificationKey.split(":");
+  const [expectedProgram, expectedName, unexpectedPart] =
+    request.specificationKey.split(":");
   if (
     unexpectedPart !== undefined ||
     specification.program !== expectedProgram ||
@@ -126,7 +138,11 @@ export function encodeKeeperInstruction(
       `${request.specificationKey}: contract instruction identity differs`,
     );
   }
-  const discriminator = exactHex(specification.discriminatorHex, 8, "contract_mismatch");
+  const discriminator = exactHex(
+    specification.discriminatorHex,
+    8,
+    "contract_mismatch",
+  );
   const anchorDiscriminator = createHash("sha256")
     .update(`global:${specification.instructionName}`)
     .digest()
@@ -140,19 +156,40 @@ export function encodeKeeperInstruction(
 
   const writer = new BorshWriter();
   switch (request.specificationKey) {
-    case "dusk:start_liquidation_auction":
+    case "dusk:observe_liquidation":
+      writer.u8(request.arguments.debtAsset);
+      break;
+    case "dusk:preview_flash_liquidation":
+      writer.u8(request.arguments.debtAsset);
+      writer.u64(request.arguments.maxRepayment);
+      writer.u8(request.arguments.full ? 1 : 0);
+      break;
+    case "dusk:preview_emergency_liquidation":
+      writer.u8(request.arguments.debtAsset);
+      writer.u64(request.arguments.collateralDebit);
+      writer.u8(request.arguments.full ? 1 : 0);
+      break;
+    case "dusk:begin_flash_liquidation":
+      writer.raw(request.arguments.position);
+      writer.u8(request.arguments.debtAsset);
+      writer.u64(request.arguments.maxRepayment);
+      writer.u64(request.arguments.maxPayment);
+      writer.u64(request.arguments.minCollateralCredit);
+      writer.u8(request.arguments.full ? 1 : 0);
+      writer.u16(request.arguments.settleIndex);
+      break;
+    case "dusk:emergency_liquidation":
+      writer.u8(request.arguments.debtAsset);
+      writer.u64(request.arguments.collateralDebit);
+      writer.u8(request.arguments.full ? 1 : 0);
+      writer.u64(request.arguments.minRewardCredit);
+      writer.u64(request.arguments.minSwapOutput);
+      break;
+    case "dusk:settle_flash_liquidation":
+      break;
+
     case "dusk:queue_parameter_proposal":
     case "dusk:execute_parameter_proposal":
-      break;
-    case "dusk:fill_liquidation_auction":
-      writer.u64(request.arguments.repayAmount);
-      writer.u64(request.arguments.minCollateralOut);
-      break;
-    case "dusk:backstop_liquidation_auction":
-      writer.u64(request.arguments.minCallerBountyOut);
-      break;
-    case "dusk:liquidate_leverage_position":
-      writer.u8(request.arguments.debtAsset);
       break;
     case "dusk:delegated_close_leverage":
       writer.u8(request.arguments.debtAsset);
@@ -168,8 +205,12 @@ export function encodeKeeperInstruction(
       writer.u64(request.arguments.orderId);
       break;
     case "dusk:settle_protocol_auction":
-      writer.u8(enumOrdinal(request.arguments.lane, ["fee", "buyback"], "lane"));
-      writer.u8(enumOrdinal(request.arguments.source, ["swap", "interest"], "source"));
+      writer.u8(
+        enumOrdinal(request.arguments.lane, ["fee", "buyback"], "lane"),
+      );
+      writer.u8(
+        enumOrdinal(request.arguments.source, ["swap", "interest"], "source"),
+      );
       writer.u64(request.arguments.soldAmount);
       writer.u64(request.arguments.maxPaymentAmount);
       break;
@@ -183,34 +224,106 @@ export function parseKeeperInstructionArguments(
 ): KeeperInstructionArguments {
   const argumentsValue = requireRecord(value);
   switch (specificationKey) {
-    case "dusk:start_liquidation_auction":
+    case "dusk:observe_liquidation":
+      requireKeys(argumentsValue, ["debtAsset"]);
+      return {
+        specificationKey,
+        arguments: {
+          debtAsset: unsignedNumber(
+            argumentsValue.debtAsset,
+            0xff,
+            "debt_asset",
+          ),
+        },
+      };
+    case "dusk:preview_flash_liquidation":
+      requireKeys(argumentsValue, ["debtAsset", "maxRepayment", "full"]);
+      return {
+        specificationKey,
+        arguments: {
+          debtAsset: unsignedNumber(
+            argumentsValue.debtAsset,
+            0xff,
+            "debt_asset",
+          ),
+          maxRepayment: decimalU64(argumentsValue.maxRepayment),
+          full: booleanValue(argumentsValue.full),
+        },
+      };
+    case "dusk:preview_emergency_liquidation":
+      requireKeys(argumentsValue, ["debtAsset", "collateralDebit", "full"]);
+      return {
+        specificationKey,
+        arguments: {
+          debtAsset: unsignedNumber(
+            argumentsValue.debtAsset,
+            0xff,
+            "debt_asset",
+          ),
+          collateralDebit: decimalU64(argumentsValue.collateralDebit),
+          full: booleanValue(argumentsValue.full),
+        },
+      };
+    case "dusk:begin_flash_liquidation":
+      requireKeys(argumentsValue, [
+        "position",
+        "debtAsset",
+        "maxRepayment",
+        "maxPayment",
+        "minCollateralCredit",
+        "full",
+        "settleIndex",
+      ]);
+      return {
+        specificationKey,
+        arguments: {
+          position: pubkeyValue(argumentsValue.position),
+          debtAsset: unsignedNumber(
+            argumentsValue.debtAsset,
+            0xff,
+            "debt_asset",
+          ),
+          maxRepayment: decimalU64(argumentsValue.maxRepayment),
+          maxPayment: decimalU64(argumentsValue.maxPayment),
+          minCollateralCredit: decimalU64(argumentsValue.minCollateralCredit),
+          full: booleanValue(argumentsValue.full),
+          settleIndex: unsignedNumber(
+            argumentsValue.settleIndex,
+            0xffff,
+            "settle_index",
+          ),
+        },
+      };
+    case "dusk:emergency_liquidation":
+      requireKeys(argumentsValue, [
+        "debtAsset",
+        "collateralDebit",
+        "full",
+        "minRewardCredit",
+        "minSwapOutput",
+      ]);
+      return {
+        specificationKey,
+        arguments: {
+          debtAsset: unsignedNumber(
+            argumentsValue.debtAsset,
+            0xff,
+            "debt_asset",
+          ),
+          collateralDebit: decimalU64(argumentsValue.collateralDebit),
+          full: booleanValue(argumentsValue.full),
+          minRewardCredit: decimalU64(argumentsValue.minRewardCredit),
+          minSwapOutput: decimalU64(argumentsValue.minSwapOutput),
+        },
+      };
+    case "dusk:settle_flash_liquidation":
+      requireKeys(argumentsValue, []);
+      return { specificationKey };
+
     case "dusk:queue_parameter_proposal":
     case "dusk:execute_parameter_proposal":
       requireKeys(argumentsValue, []);
       return { specificationKey };
-    case "dusk:fill_liquidation_auction":
-      requireKeys(argumentsValue, ["repayAmount", "minCollateralOut"]);
-      return {
-        specificationKey,
-        arguments: {
-          repayAmount: decimalU64(argumentsValue.repayAmount),
-          minCollateralOut: decimalU64(argumentsValue.minCollateralOut),
-        },
-      };
-    case "dusk:backstop_liquidation_auction":
-      requireKeys(argumentsValue, ["minCallerBountyOut"]);
-      return {
-        specificationKey,
-        arguments: {
-          minCallerBountyOut: decimalU64(argumentsValue.minCallerBountyOut),
-        },
-      };
-    case "dusk:liquidate_leverage_position":
-      requireKeys(argumentsValue, ["debtAsset"]);
-      return {
-        specificationKey,
-        arguments: { debtAsset: unsignedNumber(argumentsValue.debtAsset, 0xff, "debtAsset") },
-      };
     case "dusk:delegated_close_leverage":
       requireKeys(argumentsValue, [
         "debtAsset",
@@ -223,7 +336,11 @@ export function parseKeeperInstructionArguments(
       return {
         specificationKey,
         arguments: {
-          debtAsset: unsignedNumber(argumentsValue.debtAsset, 0xff, "debtAsset"),
+          debtAsset: unsignedNumber(
+            argumentsValue.debtAsset,
+            0xff,
+            "debtAsset",
+          ),
           closeBps: unsignedNumber(argumentsValue.closeBps, 0xffff, "closeBps"),
           minAmountOut: decimalU64(argumentsValue.minAmountOut),
           delegated: {
@@ -246,12 +363,21 @@ export function parseKeeperInstructionArguments(
         arguments: { orderId: decimalU64(argumentsValue.orderId) },
       };
     case "dusk:settle_protocol_auction":
-      requireKeys(argumentsValue, ["lane", "source", "soldAmount", "maxPaymentAmount"]);
+      requireKeys(argumentsValue, [
+        "lane",
+        "source",
+        "soldAmount",
+        "maxPaymentAmount",
+      ]);
       return {
         specificationKey,
         arguments: {
           lane: enumValue(argumentsValue.lane, ["fee", "buyback"], "lane"),
-          source: enumValue(argumentsValue.source, ["swap", "interest"], "source"),
+          source: enumValue(
+            argumentsValue.source,
+            ["swap", "interest"],
+            "source",
+          ),
           soldAmount: decimalU64(argumentsValue.soldAmount),
           maxPaymentAmount: decimalU64(argumentsValue.maxPaymentAmount),
         },
@@ -269,11 +395,20 @@ export function encodeKeeperInstructionJson(
   specificationKey: string,
   value: unknown,
 ): Uint8Array {
-  return encodeKeeperInstruction(contract, parseKeeperInstructionArguments(specificationKey, value));
+  return encodeKeeperInstruction(
+    contract,
+    parseKeeperInstructionArguments(specificationKey, value),
+  );
 }
 
 class BorshWriter {
   readonly #chunks: Buffer[] = [];
+
+  raw(value: Uint8Array): void {
+    if (value.length !== 32)
+      throw encodingError("invalid_arguments", "pubkey length");
+    this.#chunks.push(Buffer.from(value));
+  }
 
   u8(value: number): void {
     this.#unsigned(value, 0xff, 1, "u8");
@@ -289,7 +424,10 @@ class BorshWriter {
 
   u64(value: bigint): void {
     if (value < 0n || value > 0xffff_ffff_ffff_ffffn) {
-      throw encodingError("invalid_arguments", "u64 value is outside its Borsh range");
+      throw encodingError(
+        "invalid_arguments",
+        "u64 value is outside its Borsh range",
+      );
     }
     const output = Buffer.alloc(8);
     output.writeBigUInt64LE(value);
@@ -298,7 +436,10 @@ class BorshWriter {
 
   bytes(value: Uint8Array): void {
     if (value.byteLength > 0xffff_ffff) {
-      throw encodingError("invalid_arguments", "Borsh byte vector exceeds u32 length");
+      throw encodingError(
+        "invalid_arguments",
+        "Borsh byte vector exceeds u32 length",
+      );
     }
     this.u32(value.byteLength);
     this.#chunks.push(Buffer.from(value));
@@ -308,9 +449,17 @@ class BorshWriter {
     return Buffer.concat(this.#chunks);
   }
 
-  #unsigned(value: number, maximum: number, width: 1 | 2 | 4, label: string): void {
+  #unsigned(
+    value: number,
+    maximum: number,
+    width: 1 | 2 | 4,
+    label: string,
+  ): void {
     if (!Number.isSafeInteger(value) || value < 0 || value > maximum) {
-      throw encodingError("invalid_arguments", `${label} value is outside its Borsh range`);
+      throw encodingError(
+        "invalid_arguments",
+        `${label} value is outside its Borsh range`,
+      );
     }
     const output = Buffer.alloc(width);
     if (width === 1) output.writeUInt8(value);
@@ -322,29 +471,44 @@ class BorshWriter {
 
 function requireRecord(value: unknown): Record<string, unknown> {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    throw encodingError("invalid_arguments", "instruction arguments must be an object");
+    throw encodingError(
+      "invalid_arguments",
+      "instruction arguments must be an object",
+    );
   }
   return value as Record<string, unknown>;
 }
 
-function requireKeys(value: Record<string, unknown>, expected: readonly string[]): void {
+function requireKeys(
+  value: Record<string, unknown>,
+  expected: readonly string[],
+): void {
   const actual = Object.keys(value).sort();
   const wanted = [...expected].sort();
-  if (actual.length !== wanted.length || actual.some((entry, index) => entry !== wanted[index])) {
-    throw encodingError("invalid_arguments", "instruction argument fields do not match the IDL");
+  if (
+    actual.length !== wanted.length ||
+    actual.some((entry, index) => entry !== wanted[index])
+  ) {
+    throw encodingError(
+      "invalid_arguments",
+      "instruction argument fields do not match the IDL",
+    );
   }
 }
 
 function decimalU64(value: unknown): bigint {
-  if (
-    typeof value !== "string" ||
-    !/^(?:0|[1-9][0-9]*)$/.test(value)
-  ) {
-    throw encodingError("invalid_arguments", "u64 values must use canonical decimal strings");
+  if (typeof value !== "string" || !/^(?:0|[1-9][0-9]*)$/.test(value)) {
+    throw encodingError(
+      "invalid_arguments",
+      "u64 values must use canonical decimal strings",
+    );
   }
   const parsed = BigInt(value);
   if (parsed > 0xffff_ffff_ffff_ffffn) {
-    throw encodingError("invalid_arguments", "u64 value is outside its Borsh range");
+    throw encodingError(
+      "invalid_arguments",
+      "u64 value is outside its Borsh range",
+    );
   }
   return parsed;
 }
@@ -356,7 +520,10 @@ function unsignedNumber(value: unknown, maximum: number, name: string): number {
     value < 0 ||
     value > maximum
   ) {
-    throw encodingError("invalid_arguments", `${name} is outside its unsigned integer range`);
+    throw encodingError(
+      "invalid_arguments",
+      `${name} is outside its unsigned integer range`,
+    );
   }
   return value as number;
 }
@@ -368,7 +535,10 @@ function enumOrdinal<const T extends string>(
 ): number {
   const ordinal = allowed.indexOf(value);
   if (ordinal < 0) {
-    throw encodingError("invalid_arguments", `${name} is not a pinned IDL enum variant`);
+    throw encodingError(
+      "invalid_arguments",
+      `${name} is not a pinned IDL enum variant`,
+    );
   }
   return ordinal;
 }
@@ -379,14 +549,20 @@ function enumValue<const T extends string>(
   name: string,
 ): T {
   if (typeof value !== "string" || !allowed.includes(value as T)) {
-    throw encodingError("invalid_arguments", `${name} is not a pinned IDL enum variant`);
+    throw encodingError(
+      "invalid_arguments",
+      `${name} is not a pinned IDL enum variant`,
+    );
   }
   return value as T;
 }
 
 function variableHex(value: unknown): Buffer {
   if (typeof value !== "string") {
-    throw encodingError("invalid_arguments", "byte vectors must use lowercase hex strings");
+    throw encodingError(
+      "invalid_arguments",
+      "byte vectors must use lowercase hex strings",
+    );
   }
   return exactHex(value, null, "invalid_arguments");
 }
@@ -396,8 +572,14 @@ function exactHex(
   bytes: number | null,
   code: InstructionEncodingErrorCode,
 ): Buffer {
-  if (!/^(?:[0-9a-f]{2})*$/.test(value) || (bytes !== null && value.length !== bytes * 2)) {
-    throw encodingError(code, "value is not the expected even-length lowercase hex");
+  if (
+    !/^(?:[0-9a-f]{2})*$/.test(value) ||
+    (bytes !== null && value.length !== bytes * 2)
+  ) {
+    throw encodingError(
+      code,
+      "value is not the expected even-length lowercase hex",
+    );
   }
   return Buffer.from(value, "hex");
 }
@@ -407,4 +589,20 @@ function encodingError(
   message: string,
 ): InstructionEncodingError {
   return new InstructionEncodingError(code, message);
+}
+
+function booleanValue(value: unknown): boolean {
+  if (typeof value !== "boolean")
+    throw encodingError("invalid_arguments", "expected bool");
+  return value;
+}
+function pubkeyValue(value: unknown): Uint8Array {
+  try {
+    if (typeof value !== "string") throw new Error();
+    const bytes = decodePubkey(value, "invalid_seed_value");
+    if (bytes.length !== 32) throw new Error();
+    return bytes;
+  } catch {
+    throw encodingError("invalid_arguments", "expected pubkey");
+  }
 }

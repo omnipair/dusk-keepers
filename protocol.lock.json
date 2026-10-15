@@ -1,15 +1,14 @@
 {
   "$schema": "./protocol/schemas/protocol-lock.schema.json",
   "schemaVersion": 1,
-  "revision": "devnet-1",
-  "status": "frozen",
-  "generatedAt": "2026-08-31T00:00:00Z",
+  "revision": "pr45-5a9abcb3",
+  "status": "captured",
+  "generatedAt": "2026-10-16T00:00:00Z",
   "source": {
     "repository": "https://github.com/omnipair/dusk",
-    "branch": "feat/optimizations",
-    "note": "Devnet deployment; program keypairs and address registry in ~/.config/omnipair/dusk-devnet. Binary attested from chain (upgradeable loader programdata). Re-pinned 2026-09-02: the original binary was replaced during hLP drift instrumentation and the only copy of it was a scratch file that did not survive, so it could not be restored. What is deployed now is a clean local anchor build at opt-level z (no debug features), and this hash attests that. source.worktreeFingerprintSha256 covers programs/ and is reproduced by scripts/compute-worktree-fingerprint.mjs.",
-    "gitCommit": "dd7fb53150163ed5b0bf3ae14fea9f2b47aa0d15",
-    "worktreeFingerprintSha256": "17930e6f96af5f4595803fe14e8e716c70750b77f3ca8a8ed5b13d074eb30b2b"
+    "branch": "fix/benchmark-replay-owner",
+    "gitCommit": "5a9abcb342aa3b1afa284b3a9613c4fa0afdebb0",
+    "worktreeFingerprintSha256": "f9fe97b49ae91d696208c4628289b224ec5b074b62a1069b0604c0281bd058db"
   },
   "toolchain": {
     "anchor": "0.31.1",
@@ -23,40 +22,36 @@
       "name": "dusk",
       "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "binary": {
-        "path": "chain:devnet:JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-        "sha256": "7183cdb29659e47e54f0a34e3f23ad2b82743941216b606f4480c55304bc2d36"
+        "path": "artifacts/dusk.so",
+        "sha256": "71f317dff4d9e01ff3510cff444ecb82189910335316c6411e54bb8ac87192b6"
       },
       "idl": {
         "path": "artifacts/dusk.json",
-        "sha256": "7be629ec9f677bbd96324a4463fee336eeb2c9099aa3534138983424a535dfda"
+        "sha256": "87b6764662192fe85d8c60e6b777fc846f8f657bf8860fd81a94fa5c3bb99246"
       }
     },
     {
       "name": "leverage_delegate",
       "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
       "binary": {
-        "path": "chain:devnet:AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
-        "sha256": "afe03f80ee2289f4c74195539b6d30489fb5eef93d0927760506438d3050e2b2"
+        "path": "artifacts/leverage_delegate.so",
+        "sha256": "38d38778d233567a83993733a4b885c13af4bcd55cb64bfaa080b10ab64f459e"
       },
       "idl": {
         "path": "artifacts/leverage_delegate.json",
-        "sha256": "d0a5997fba913d78c31f585abb068b7048fe302b35f50e3d5a246680400c7d81"
+        "sha256": "901ff9e41ca9b5c860e7fc6183cf0e9a4c0476488545bcfd02332cad5a470dd1"
       }
     }
   ],
   "sdk": {
     "path": "artifacts/dusk-sdk.tgz",
-    "sha256": "67180063bfb2ce6f3c1c47df42732f3fc92d6426be0692a87b203f18322458b1"
+    "sha256": "7c1d8d55189866bddad24c4e8aab082697d3958e904a41dc05179fb4851eff5f"
   },
   "compatibility": {
-    "accountLayoutFingerprintSha256": "2f91ab01643fec77707e2c98f646b5f9f295c81ea686dd671147f60048a24e7c",
-    "instructionFingerprintSha256": "b8984b5b276843b347fcafcdeaa34686e12179f2473719e80f7d697bf2ce5579",
-    "eventFingerprintSha256": "2aa5a08fe6cf597a0b5de184b9f37661ba8b4bc477e7a2a05620f8f0632a2038",
-    "errorFingerprintSha256": "70e7c5e33d917eaa9fb4cd193d8b2b6d10cdd43737ea98b46abdc8e9a8978b63",
-    "pdaFingerprintSha256": "f98c2a184bcc7047c14100306d2eae8f93746ac008ff83b90ee8d8d52c133c82"
-  },
-  "cluster": {
-    "name": "devnet",
-    "genesisHash": "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG"
+    "accountLayoutFingerprintSha256": "3d1f5c96bd801071c9d59dc263ccad3347e80c163571387abf848d92653c3880",
+    "instructionFingerprintSha256": "6f743a890784ef23747b7e2601cb92d7dc0e7886c40d9a3239c147b680a1ef21",
+    "eventFingerprintSha256": "4ead76500bf47c5e204d5b0b609602f663e9888145c02c4198233370742bc5f9",
+    "errorFingerprintSha256": "569c0a6e131dc4041c8d8e59a22005babf8bb5f0c759c0f361e964882b91dcc6",
+    "pdaFingerprintSha256": "86cd015bcf7e5c051a72a7f7256291f416a1e0c86c865d6965df4f1d25e853a0"
   }
 }

@@ -94,7 +94,7 @@ impl RpcClient {
         }
     }
 
-    fn call<T: for<'de> Deserialize<'de>>(
+    pub(crate) fn call<T: for<'de> Deserialize<'de>>(
         &self,
         method: &str,
         params: serde_json::Value,
@@ -353,35 +353,6 @@ impl RpcClient {
             ]),
         )
     }
-
-    pub fn signature_confirmed(&self, signature: &str) -> Result<bool, DiscoveryError> {
-        #[derive(Deserialize)]
-        struct Value {
-            value: Vec<Option<Status>>,
-        }
-        #[derive(Deserialize)]
-        struct Status {
-            #[serde(rename = "confirmationStatus")]
-            confirmation_status: Option<String>,
-            err: Option<serde_json::Value>,
-        }
-        let response: Value = self.call(
-            "getSignatureStatuses",
-            serde_json::json!([[signature], { "searchTransactionHistory": true }]),
-        )?;
-        Ok(response
-            .value
-            .first()
-            .and_then(|entry| entry.as_ref())
-            .is_some_and(|status| {
-                status.err.is_none()
-                    && matches!(
-                        status.confirmation_status.as_deref(),
-                        Some("confirmed" | "finalized")
-                    )
-            }))
-    }
-
     pub fn lamports(&self, address: &str) -> Result<u64, DiscoveryError> {
         #[derive(Deserialize)]
         struct Value {
@@ -411,7 +382,7 @@ fn decode_base58_key(encoded: &str) -> Result<[u8; 32], DiscoveryError> {
 }
 
 /// Standard-alphabet base64 with padding, the encoding the RPC returns.
-fn decode_base64(input: &str) -> Option<Vec<u8>> {
+pub(crate) fn decode_base64(input: &str) -> Option<Vec<u8>> {
     const ALPHABET: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     let mut lookup = [255_u8; 256];
     for (index, byte) in ALPHABET.iter().enumerate() {

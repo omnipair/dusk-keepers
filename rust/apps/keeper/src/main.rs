@@ -20,29 +20,30 @@ use dusk_adapter::{
 
 mod accounts;
 mod arbitrageur;
-mod bidder;
 mod discovery;
 mod execute;
-mod leverage;
+mod fee_notice;
+mod flash;
+mod flash_cli;
+mod flash_journal;
+mod flash_runtime;
 mod lifecycle;
-mod settler;
 mod signer;
 mod transaction;
 
 use arbitrageur::{ArbitragePolicy, ArbitrageurJob};
-use bidder::{BidPolicy, BidderJob};
 use discovery::{Observation, RpcClient, observe};
-use execute::TriggerJob;
 use keeper_core::OutcomeStatus;
-use leverage::LeverageJob;
+
 use lifecycle::LifecycleJob;
-use settler::{SettlePolicy, SettlerJob};
 use signer::{LocalKeypair, TransactionSigner};
 
 /// What the last discovery pass saw, shared with the health endpoint.
 #[derive(Clone, Debug, Default)]
 struct Snapshot {
     observation: Observation,
+    fee_notices: Option<fee_notice::NoticeMonitor>,
+    fee_notice_error: Option<String>,
     error: Option<String>,
     passes: u64,
     /// Execution counters. Sent is deliberately separate from evaluated: on a
@@ -138,6 +139,9 @@ impl Config {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
+    if env::args().any(|a| a == "--flash-plan") {
+        return flash_cli::run();
+    }
     let config = Config::from_environment()?;
     let lock = ProtocolLock::read(&config.protocol_lock)?;
 
@@ -171,23 +175,15 @@ fn main() -> Result<(), Box<dyn Error>> {
     // A profile that signs needs a key; one that does not must never have
     // one. The sentinel is the whole reason this is a per-profile decision
     // rather than a global switch.
-    let executor: Option<LocalKeypair> = if config.profile == "sentinel" {
+    let executor: Option<Box<dyn TransactionSigner>> = if config.profile == "sentinel" {
         None
+    } else if config.mode == Mode::Shadow {
+        let public = env::var("KEEPER_SHADOW_PUBLIC_KEY")
+            .ok()
+            .and_then(|p| accounts::decode_key(&p));
+        public.map(|key| Box::new(signer::ShadowIdentity(key)) as Box<dyn TransactionSigner>)
     } else {
-        match load_signer() {
-            Ok(keypair) => {
-                println!("keeper signer={}", keypair.public_key_base58());
-                Some(keypair)
-            }
-            // Absent in shadow mode is expected; absent in live mode is not,
-            // and refusing to start is better than running as a keeper that
-            // silently never acts.
-            Err(error) if config.mode == Mode::Shadow => {
-                println!("keeper signer=none ({error})");
-                None
-            }
-            Err(error) => return Err(Box::new(error)),
-        }
+        Some(Box::new(load_signer()?))
     };
 
     let contract = match std::fs::read_to_string(&config.instruction_contract) {
@@ -261,6 +257,34 @@ fn main() -> Result<(), Box<dyn Error>> {
                     }
                 }
 
+                if let Some(layout) = layout.as_ref() {
+                    match fee_notice::monitor(&client, &dusk_program_id, layout) {
+                        Ok(notices) => {
+                            if !notices.final_notice_mints.is_empty() {
+                                println!(
+                                    "fee_notice_final epoch={} mints={} action=recheck_all_positions",
+                                    notices.epoch,
+                                    notices.final_notice_mints.len()
+                                );
+                            }
+                            if let Ok(mut current) = shared.lock() {
+                                current.fee_notices = Some(notices);
+                                current.fee_notice_error = None;
+                            }
+                        }
+                        Err(error) => {
+                            if let Ok(mut current) = shared.lock() {
+                                current.fee_notice_error = Some(error.to_string());
+                            }
+                        }
+                    }
+                } else {
+                    if let Ok(mut current) = shared.lock() {
+                        current.fee_notice_error =
+                            Some("fee notice monitor needs the pinned account layout".into());
+                    }
+                }
+
                 if let (Some(signer), Some(contract), Some(layout), Some(resolver)) = (
                     executor.as_ref(),
                     contract.as_ref(),
@@ -272,7 +296,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                         contract,
                         layout,
                         resolver,
-                        signer,
+                        signer.as_ref(),
                         &profile,
                         program_id_key,
                         max_sends,
@@ -282,6 +306,23 @@ fn main() -> Result<(), Box<dyn Error>> {
                     );
                 }
 
+                if env::args().any(|a| a == "--once") {
+                    let current = shared.lock().expect("snapshot lock");
+                    println!(
+                        "keeper_once evaluated={} detail={:?} error={:?}",
+                        current.evaluated, current.last_skip_detail, current.last_execution_error
+                    );
+                    std::process::exit(
+                        if current.error.is_some()
+                            || current.fee_notice_error.is_some()
+                            || current.last_execution_error.is_some()
+                        {
+                            1
+                        } else {
+                            0
+                        },
+                    );
+                }
                 thread::sleep(Duration::from_millis(interval));
             }
         });
@@ -317,104 +358,6 @@ fn decode_program_id(encoded: &str) -> Result<[u8; 32], Box<dyn Error>> {
     Ok(key)
 }
 
-/// Fill any auction the trigger profile has opened.
-///
-/// Candidate discovery is shared with the trigger — the same positions, read
-/// the same way — but the two profiles want opposite halves of it: the trigger
-/// wants positions with no auction running, the bidder wants the ones that
-/// have one.
-fn bid_pass(
-    trigger: &TriggerJob<'_>,
-    contract: &InstructionContract,
-    layout: &AccountLayoutManifest,
-    resolver: &DeterministicAccountResolver,
-    signer: &LocalKeypair,
-    dry_run: bool,
-) -> Result<Vec<execute::AttemptReport>, execute::ExecutionError> {
-    let Some(policy) = bid_policy() else {
-        // A bidder with no declared price is not a conservative bidder, it is
-        // one that will accept anything. It declines to run instead.
-        return Ok(Vec::new());
-    };
-    let bidder = BidderJob {
-        client: trigger.client,
-        contract,
-        dry_run,
-        layout,
-        policy,
-        resolver,
-        signer,
-    };
-    let mut reports = Vec::new();
-    for position in bidder.candidates(trigger.all_positions()?) {
-        reports.push(bidder.attempt(&position)?);
-    }
-    Ok(reports)
-}
-
-/// The bidder's economic bounds, all required.
-///
-/// There is no default that is right for every market: these encode what the
-/// operator believes the collateral is worth, which the keeper has no
-/// independent source for. Guessing on the operator's behalf would mean
-/// guessing with the operator's money.
-fn bid_policy() -> Option<BidPolicy> {
-    Some(BidPolicy {
-        max_repay: env::var("KEEPER_BID_MAX_REPAY").ok()?.parse().ok()?,
-        min_collateral_bps: env::var("KEEPER_BID_MIN_COLLATERAL_BPS")
-            .ok()?
-            .parse()
-            .ok()?,
-        slippage_bps: env::var("KEEPER_BID_SLIPPAGE_BPS")
-            .ok()
-            .and_then(|value| value.parse().ok())
-            .unwrap_or(50),
-    })
-}
-
-/// Settle any auction that has run its course.
-fn settle_pass(
-    trigger: &TriggerJob<'_>,
-    contract: &InstructionContract,
-    layout: &AccountLayoutManifest,
-    resolver: &DeterministicAccountResolver,
-    signer: &LocalKeypair,
-    dry_run: bool,
-) -> Result<Vec<execute::AttemptReport>, execute::ExecutionError> {
-    let Some(policy) = settle_policy() else {
-        return Ok(Vec::new());
-    };
-    let settler = SettlerJob {
-        client: trigger.client,
-        contract,
-        dry_run,
-        layout,
-        policy,
-        resolver,
-        signer,
-    };
-    let mut reports = Vec::new();
-    for position in settler.candidates(trigger.all_positions()?) {
-        reports.push(settler.attempt(&position)?);
-    }
-    Ok(reports)
-}
-
-/// What the settler will accept for calling the backstop.
-///
-/// Required rather than defaulted, for the same reason the bidder's bounds
-/// are: the floor encodes what the operator thinks the work is worth, and a
-/// settler that accepts anything will settle at a loss.
-fn settle_policy() -> Option<SettlePolicy> {
-    Some(SettlePolicy {
-        min_bounty: env::var("KEEPER_SETTLE_MIN_BOUNTY").ok()?.parse().ok()?,
-        slippage_bps: env::var("KEEPER_SETTLE_SLIPPAGE_BPS")
-            .ok()
-            .and_then(|value| value.parse().ok())
-            .unwrap_or(50),
-    })
-}
-
 /// How much revenue the arbitrageur will buy, and at what tolerance.
 ///
 /// Required rather than defaulted, like the other spending profiles: the
@@ -442,7 +385,7 @@ fn run_execution_pass(
     contract: &InstructionContract,
     layout: &AccountLayoutManifest,
     resolver: &DeterministicAccountResolver,
-    signer: &LocalKeypair,
+    signer: &dyn TransactionSigner,
     profile: &str,
     program_id: [u8; 32],
     max_sends_per_pass: usize,
@@ -470,25 +413,43 @@ fn run_execution_pass(
         }
     }
 
-    let job = TriggerJob {
-        client,
-        confirmation_attempts: 8,
-        confirmation_interval: Duration::from_millis(1_500),
-        contract,
-        dry_run,
-        layout,
-        max_sends_per_pass,
-        program_id,
-        signer,
-    };
-
+    // Priority is discovery data only; every attempted action still simulates
+    // and revalidates the current mint/Clock snapshot before re-signing.
+    let priority_markets: std::collections::BTreeSet<_> = shared
+        .lock()
+        .ok()
+        .and_then(|snapshot| {
+            snapshot
+                .fee_notice_error
+                .is_none()
+                .then(|| snapshot.fee_notices.clone())
+                .flatten()
+        })
+        .map(|notice| {
+            notice
+                .final_notice_markets
+                .into_iter()
+                .filter_map(|key| accounts::decode_key(&key))
+                .collect()
+        })
+        .unwrap_or_default();
     // Which job a service runs is its profile, not a flag: one service, one
     // wallet, one thing it is allowed to do. A profile with no job here does
     // nothing rather than falling back to something it was not deployed for.
     let outcome = match profile {
-        "lending-bidder" => bid_pass(&job, contract, layout, resolver, signer, dry_run),
-        "lending-settler" => settle_pass(&job, contract, layout, resolver, signer, dry_run),
-        "lending-trigger" => job.run_pass(),
+        "lending-bidder" | "lending-settler" | "lending-trigger" | "leverage" => {
+            flash_runtime::FlashJob {
+                client,
+                layout,
+                contract,
+                signer,
+                dry_run,
+                profile,
+                max_sends: max_sends_per_pass,
+                priority_markets: &priority_markets,
+            }
+            .run_pass()
+        }
         "auction-arbitrage" => match arbitrage_policy() {
             None => Ok(Vec::new()),
             Some(policy) => ArbitrageurJob {
@@ -504,17 +465,6 @@ fn run_execution_pass(
             }
             .run_pass(),
         },
-        "leverage" => LeverageJob {
-            client,
-            contract,
-            dry_run,
-            layout,
-            max_sends_per_pass,
-            program_id,
-            resolver,
-            signer,
-        }
-        .run_pass(),
         "lifecycle" => LifecycleJob {
             client,
             contract,
@@ -640,6 +590,11 @@ fn respond(
     );
     let reasons = serde_json::to_string(&snapshot.last_reasons).unwrap_or_else(|_| "{}".to_owned());
     let observed = format!("{observed},\"lastReasons\":{reasons}");
+    let notices = serde_json::to_string(&snapshot.fee_notices).unwrap_or_else(|_| "null".into());
+    let observed = format!(
+        "{observed},\"feeNotices\":{notices},\"feeNoticeError\":{}",
+        optional_json(snapshot.fee_notice_error.as_deref())
+    );
     let (status, body) = match path {
         // Liveness is about the process; readiness is about whether this
         // keeper can currently see the chain, so a discovery failure fails
@@ -651,7 +606,11 @@ fn respond(
             ),
         ),
         "/readyz" => {
-            let blocked = snapshot.error.as_deref();
+            let blocked = snapshot
+                .error
+                .as_deref()
+                .or(snapshot.fee_notice_error.as_deref())
+                .or(snapshot.last_execution_error.as_deref());
             match blocked {
                 Some(reason) => (
                     "503 Service Unavailable",

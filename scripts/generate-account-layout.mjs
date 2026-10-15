@@ -32,7 +32,8 @@ const WANTED = {
     "quote_collateral",
     "base_referral_partner",
     "quote_referral_partner",
-    "auction_debt_asset",
+    "fixed_base_shares", "fixed_quote_shares", "active_liquidation_session",
+    "base_distress.active", "base_distress.started_at", "quote_distress.active", "quote_distress.started_at",
   ],
   Market: [
     "ylp_mint",
@@ -63,7 +64,7 @@ const WANTED = {
     "params_hash",
     "last_update_slot",
   ],
-  LeveragePosition: ["owner", "market", "position_id", "debt_asset"],
+  LeveragePosition: ["owner", "market", "position_id", "debt_asset", "namespace_authority", "referral_partner", "collateral_amount", "debt_shares", "active_liquidation_session", "distress.active", "distress.started_at"],
   // Only the fields ahead of `update`, which is a data-carrying enum and so
   // gives everything after it no fixed offset. The lifecycle keeper does not
   // need the rest: whether a proposal may be queued or executed is the

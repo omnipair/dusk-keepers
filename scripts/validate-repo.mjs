@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import {compatibilityFingerprints} from "./compatibility-fingerprints.mjs";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 
@@ -67,9 +68,8 @@ if (lock.status !== "draft") {
     await verifyArtifact(program.idl, `${program.name}.idl`);
   }
   await verifyArtifact(lock.sdk, "sdk");
-  for (const [name, hash] of Object.entries(lock.compatibility)) {
-    assert.match(hash, /^[0-9a-f]{64}$/, `compatibility.${name}: missing fingerprint`);
-  }
+  const idls = await Promise.all(lock.programs.map(program => readJson(program.idl.path)));
+  assert.deepEqual(lock.compatibility, compatibilityFingerprints(idls), "IDL compatibility fingerprint mismatch");
 }
 
 const bundle = await readJson("fixtures/conformance/v1/scheduler-cases.json");
@@ -174,8 +174,8 @@ assert.match(migration, /submitted_unknown/);
 const instructionContract = await readJson("protocol/keeper-instructions.v1.json");
 assert.equal(instructionContract.schemaVersion, 1);
 assert.equal(instructionContract.protocolRevision, lock.revision);
-assert.equal(instructionContract.actions.length, 9);
-assert.equal(instructionContract.instructions.length, 11);
+assert.equal(instructionContract.actions.length, 12);
+assert.equal(instructionContract.instructions.length, 13);
 assert.equal(
   new Set(instructionContract.instructions.map((instruction) => instruction.key)).size,
   instructionContract.instructions.length,

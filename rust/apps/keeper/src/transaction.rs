@@ -13,7 +13,7 @@
 use std::{error::Error, fmt};
 
 /// An account reference in an instruction, before the message is compiled.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct AccountMeta {
     pub pubkey: [u8; 32],
     pub is_signer: bool,
@@ -46,7 +46,7 @@ impl AccountMeta {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct Instruction {
     pub program_id: [u8; 32],
     pub accounts: Vec<AccountMeta>,
@@ -213,6 +213,96 @@ pub fn base64(input: &[u8]) -> String {
         });
     }
     output
+}
+
+/// Compile a v0 message against an already validated, active lookup table.
+/// Invoked program IDs and signers always remain in the static key list.
+pub fn compile_v0_message(
+    fee_payer: [u8; 32],
+    instructions: &[Instruction],
+    recent_blockhash: [u8; 32],
+    table: [u8; 32],
+    addresses: &[[u8; 32]],
+) -> Result<Vec<u8>, TransactionError> {
+    let legacy = compile_message(fee_payer, instructions, recent_blockhash)?;
+    let mut offset = 3;
+    let mut count = 0usize;
+    let mut shift = 0;
+    loop {
+        let byte = legacy[offset];
+        offset += 1;
+        count |= ((byte & 127) as usize) << shift;
+        if byte & 128 == 0 {
+            break;
+        }
+        shift += 7;
+    }
+    let keys: Vec<[u8; 32]> = legacy[offset..offset + count * 32]
+        .chunks_exact(32)
+        .map(|c| c.try_into().unwrap())
+        .collect();
+    let signers = legacy[0] as usize;
+    let ro_signers = legacy[1] as usize;
+    let ro_others = legacy[2] as usize;
+    let programs: Vec<_> = instructions.iter().map(|i| i.program_id).collect();
+    let mut statics = Vec::new();
+    let mut writable = Vec::new();
+    let mut readonly = Vec::new();
+    for (index, k) in keys.iter().enumerate() {
+        let writable_flag = if index < signers {
+            index < signers - ro_signers
+        } else {
+            index < count - ro_others
+        };
+        if index >= signers
+            && !programs.contains(k)
+            && let Some(i) = addresses.iter().position(|a| a == k)
+        {
+            let i =
+                u8::try_from(i).map_err(|_| TransactionError::TooManyAccounts(addresses.len()))?;
+            if writable_flag {
+                writable.push((i, *k));
+            } else {
+                readonly.push((i, *k));
+            }
+            continue;
+        }
+        statics.push(*k);
+    }
+    let all: Vec<_> = statics
+        .iter()
+        .copied()
+        .chain(writable.iter().map(|(_, k)| *k))
+        .chain(readonly.iter().map(|(_, k)| *k))
+        .collect();
+    let mut out = vec![
+        0x80,
+        signers as u8,
+        ro_signers as u8,
+        (ro_others - readonly.len()) as u8,
+    ];
+    push_compact_u16(&mut out, statics.len() as u16);
+    for k in statics {
+        out.extend(k);
+    }
+    out.extend(recent_blockhash);
+    push_compact_u16(&mut out, instructions.len() as u16);
+    for ix in instructions {
+        out.push(all.iter().position(|k| *k == ix.program_id).unwrap() as u8);
+        push_compact_u16(&mut out, ix.accounts.len() as u16);
+        for a in &ix.accounts {
+            out.push(all.iter().position(|k| *k == a.pubkey).unwrap() as u8);
+        }
+        push_compact_u16(&mut out, ix.data.len() as u16);
+        out.extend(&ix.data);
+    }
+    out.push(1);
+    out.extend(table);
+    push_compact_u16(&mut out, writable.len() as u16);
+    out.extend(writable.iter().map(|(i, _)| i));
+    push_compact_u16(&mut out, readonly.len() as u16);
+    out.extend(readonly.iter().map(|(i, _)| i));
+    Ok(out)
 }
 
 #[cfg(test)]

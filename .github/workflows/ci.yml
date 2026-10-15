@@ -27,16 +27,34 @@ jobs:
         with:
           node-version: 24
       - run: node scripts/validate-repo.mjs
+      - run: npm ci
+      - run: cargo build --locked
+      - run: npm run typecheck
       - run: npm test
       - run: npm run keeper:ts:check
 
   rust:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: keeper_test
+          POSTGRES_PASSWORD: disposable_ci_only
+          POSTGRES_DB: keeper_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U keeper_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - run: cargo fmt --all --check
       - run: cargo clippy --locked --workspace --all-targets -- -D warnings
       - run: cargo test --locked --workspace
+      - name: Durable submission and restart recovery
+        env:
+          KEEPER_TEST_DATABASE_URL: postgresql://keeper_test:disposable_ci_only@127.0.0.1:5432/keeper_test
+        run: cargo test --locked -p dusk-keeper flash_journal -- --ignored
 
   containers:
     runs-on: ubuntu-latest
