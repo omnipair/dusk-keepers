@@ -258,6 +258,7 @@ pub fn classify_simulation_failure(detail: &str) -> (ReasonCode, Option<Expected
 }
 
 pub struct TriggerJob<'a> {
+    pub priority_markets: &'a std::collections::BTreeSet<[u8; 32]>,
     pub client: &'a RpcClient,
     pub contract: &'a InstructionContract,
     pub program_id: [u8; 32],
@@ -355,6 +356,11 @@ impl TriggerJob<'_> {
     ) -> Result<AttemptReport, ExecutionError> {
         let position_key = bs58::encode(position.address).into_string();
         let mint_key = bs58::encode(debt_mint).into_string();
+        let fee_mints = [
+            bs58::encode(debt_mint).into_string(),
+            bs58::encode(collateral_mint).into_string(),
+        ];
+        let fees = crate::fee_notice::read_fees(self.client, &fee_mints, 0)?;
         let instruction = self.trigger_instruction(position, debt_mint, collateral_mint)?;
         let blockhash = self.client.latest_blockhash()?;
         let message = compile_message(self.signer.public_key(), &[instruction], blockhash)
@@ -384,6 +390,19 @@ impl TriggerJob<'_> {
                 reason: ReasonCode::ShadowMode,
                 signature: None,
                 status: OutcomeStatus::Skipped,
+            });
+        }
+
+        let refreshed = crate::fee_notice::read_fees(self.client, &fee_mints, fees.slot)?;
+        if fees.fingerprint != refreshed.fingerprint {
+            return Ok(AttemptReport {
+                debt_mint: mint_key,
+                position: position_key,
+                detail: Some("mint fees or epoch changed; re-evaluate next pass".into()),
+                race: None,
+                reason: ReasonCode::SimulationRejected,
+                signature: None,
+                status: OutcomeStatus::RetryableFailure,
             });
         }
 
@@ -465,7 +484,9 @@ impl TriggerJob<'_> {
         // not change within a pass.
         let mut markets: std::collections::BTreeMap<[u8; 32], MarketMints> =
             std::collections::BTreeMap::new();
-        for position in self.candidates()? {
+        let mut candidates = self.candidates()?;
+        candidates.sort_by_key(|position| !self.priority_markets.contains(&position.market));
+        for position in candidates {
             let position_key = bs58::encode(position.address).into_string();
             let mints = match markets.entry(position.market) {
                 std::collections::btree_map::Entry::Occupied(entry) => *entry.get(),

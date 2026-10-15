@@ -94,7 +94,7 @@ impl RpcClient {
         }
     }
 
-    fn call<T: for<'de> Deserialize<'de>>(
+    pub(crate) fn call<T: for<'de> Deserialize<'de>>(
         &self,
         method: &str,
         params: serde_json::Value,
@@ -411,7 +411,7 @@ fn decode_base58_key(encoded: &str) -> Result<[u8; 32], DiscoveryError> {
 }
 
 /// Standard-alphabet base64 with padding, the encoding the RPC returns.
-fn decode_base64(input: &str) -> Option<Vec<u8>> {
+pub(crate) fn decode_base64(input: &str) -> Option<Vec<u8>> {
     const ALPHABET: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     let mut lookup = [255_u8; 256];
     for (index, byte) in ALPHABET.iter().enumerate() {

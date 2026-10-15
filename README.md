@@ -54,3 +54,12 @@ hashes are real and validated, while both adapters still reject live mode. Move
 it to `frozen` only through
 [`docs/runbooks/protocol-upgrade.md`](docs/runbooks/protocol-upgrade.md) after the
 full Surfpool and cross-runtime gates pass.
+
+## Mutable transfer-fee notice handling
+
+See [the #287160 monitor and rollout runbook](docs/transfer-fee-notice.md). The
+monitor watches epoch transitions and both market mints; final-notice markets
+receive priority and changed fees invalidate pending attempts. The current
+frozen lock still targets the older deployed interface. #45 flash/emergency
+execution requires a coordinated artifact re-pin and caller migration before
+this can be described as deployed notice-window liquidation coverage.

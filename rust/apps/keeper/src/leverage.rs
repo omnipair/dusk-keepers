@@ -82,6 +82,7 @@ impl LeveragePositionRecord {
 }
 
 pub struct LeverageJob<'a> {
+    pub priority_markets: &'a std::collections::BTreeSet<[u8; 32]>,
     pub client: &'a RpcClient,
     pub contract: &'a InstructionContract,
     pub layout: &'a AccountLayoutManifest,
@@ -248,6 +249,11 @@ impl LeverageJob<'_> {
     ) -> Result<AttemptReport, ExecutionError> {
         let position_key = bs58::encode(position.address).into_string();
         let side = if debt_is_base { "base" } else { "quote" };
+        let fee_mints = [
+            bs58::encode(market.base_mint).into_string(),
+            bs58::encode(market.quote_mint).into_string(),
+        ];
+        let fees = crate::fee_notice::read_fees(self.client, &fee_mints, 0)?;
         let encoded = self.encode(self.liquidate_instruction(position, market, debt_is_base)?)?;
 
         if let Some(detail) = self.client.simulate(&encoded)? {
@@ -272,6 +278,19 @@ impl LeverageJob<'_> {
                 reason: ReasonCode::ShadowMode,
                 signature: None,
                 status: OutcomeStatus::Skipped,
+            });
+        }
+
+        let refreshed = crate::fee_notice::read_fees(self.client, &fee_mints, fees.slot)?;
+        if fees.fingerprint != refreshed.fingerprint {
+            return Ok(AttemptReport {
+                debt_mint: side.to_owned(),
+                position: position_key,
+                detail: Some("mint fees or epoch changed; re-evaluate next pass".into()),
+                race: None,
+                reason: ReasonCode::SimulationRejected,
+                signature: None,
+                status: OutcomeStatus::RetryableFailure,
             });
         }
 
@@ -307,7 +326,9 @@ impl LeverageJob<'_> {
         let mut sent = 0_usize;
         let mut markets: BTreeMap<[u8; 32], MarketAccounts> = BTreeMap::new();
 
-        for position in self.candidates()? {
+        let mut candidates = self.candidates()?;
+        candidates.sort_by_key(|position| !self.priority_markets.contains(&position.market));
+        for position in candidates {
             let market = match markets.entry(position.market) {
                 std::collections::btree_map::Entry::Occupied(entry) => *entry.get(),
                 std::collections::btree_map::Entry::Vacant(entry) => {

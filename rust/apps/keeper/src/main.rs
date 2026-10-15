@@ -23,6 +23,7 @@ mod arbitrageur;
 mod bidder;
 mod discovery;
 mod execute;
+mod fee_notice;
 mod leverage;
 mod lifecycle;
 mod settler;
@@ -43,6 +44,8 @@ use signer::{LocalKeypair, TransactionSigner};
 #[derive(Clone, Debug, Default)]
 struct Snapshot {
     observation: Observation,
+    fee_notices: Option<fee_notice::NoticeMonitor>,
+    fee_notice_error: Option<String>,
     error: Option<String>,
     passes: u64,
     /// Execution counters. Sent is deliberately separate from evaluated: on a
@@ -261,6 +264,34 @@ fn main() -> Result<(), Box<dyn Error>> {
                     }
                 }
 
+                if let Some(layout) = layout.as_ref() {
+                    match fee_notice::monitor(&client, &dusk_program_id, layout) {
+                        Ok(notices) => {
+                            if !notices.final_notice_mints.is_empty() {
+                                println!(
+                                    "fee_notice_final epoch={} mints={} action=recheck_all_positions",
+                                    notices.epoch,
+                                    notices.final_notice_mints.len()
+                                );
+                            }
+                            if let Ok(mut current) = shared.lock() {
+                                current.fee_notices = Some(notices);
+                                current.fee_notice_error = None;
+                            }
+                        }
+                        Err(error) => {
+                            if let Ok(mut current) = shared.lock() {
+                                current.fee_notice_error = Some(error.to_string());
+                            }
+                        }
+                    }
+                } else {
+                    if let Ok(mut current) = shared.lock() {
+                        current.fee_notice_error =
+                            Some("fee notice monitor needs the pinned account layout".into());
+                    }
+                }
+
                 if let (Some(signer), Some(contract), Some(layout), Some(resolver)) = (
                     executor.as_ref(),
                     contract.as_ref(),
@@ -470,7 +501,28 @@ fn run_execution_pass(
         }
     }
 
+    // Priority is discovery data only; every attempted action still simulates
+    // and revalidates the current mint/Clock snapshot before re-signing.
+    let priority_markets: std::collections::BTreeSet<_> = shared
+        .lock()
+        .ok()
+        .and_then(|snapshot| {
+            snapshot
+                .fee_notice_error
+                .is_none()
+                .then(|| snapshot.fee_notices.clone())
+                .flatten()
+        })
+        .map(|notice| {
+            notice
+                .final_notice_markets
+                .into_iter()
+                .filter_map(|key| accounts::decode_key(&key))
+                .collect()
+        })
+        .unwrap_or_default();
     let job = TriggerJob {
+        priority_markets: &priority_markets,
         client,
         confirmation_attempts: 8,
         confirmation_interval: Duration::from_millis(1_500),
@@ -506,6 +558,7 @@ fn run_execution_pass(
             .run_pass(),
         },
         "leverage" => LeverageJob {
+            priority_markets: &priority_markets,
             client,
             contract,
             dry_run,
@@ -641,6 +694,11 @@ fn respond(
     );
     let reasons = serde_json::to_string(&snapshot.last_reasons).unwrap_or_else(|_| "{}".to_owned());
     let observed = format!("{observed},\"lastReasons\":{reasons}");
+    let notices = serde_json::to_string(&snapshot.fee_notices).unwrap_or_else(|_| "null".into());
+    let observed = format!(
+        "{observed},\"feeNotices\":{notices},\"feeNoticeError\":{}",
+        optional_json(snapshot.fee_notice_error.as_deref())
+    );
     let (status, body) = match path {
         // Liveness is about the process; readiness is about whether this
         // keeper can currently see the chain, so a discovery failure fails
@@ -652,7 +710,10 @@ fn respond(
             ),
         ),
         "/readyz" => {
-            let blocked = snapshot.error.as_deref();
+            let blocked = snapshot
+                .error
+                .as_deref()
+                .or(snapshot.fee_notice_error.as_deref());
             match blocked {
                 Some(reason) => (
                     "503 Service Unavailable",
