@@ -1,9 +1,9 @@
 {
   "$schema": "./schemas/account-layout.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "pr45-5a9abcb3",
+  "protocolRevision": "pr45-1bce17ba",
   "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-  "idlSha256": "87b6764662192fe85d8c60e6b777fc846f8f657bf8860fd81a94fa5c3bb99246",
+  "idlSha256": "fe864001fc97720cb9e6144e4827ea285cbb8b23bf9ef568524313cd965b9d0c",
   "accounts": [
     {
       "name": "BorrowPosition",
@@ -83,7 +83,7 @@
     },
     {
       "name": "Market",
-      "sizeWithDiscriminator": 2965,
+      "sizeWithDiscriminator": 3224,
       "fields": [
         {
           "path": "ylp_mint",
@@ -117,107 +117,107 @@
         },
         {
           "path": "quote_side.asset_mint",
-          "offset": 546,
+          "offset": 594,
           "size": 32
         },
         {
           "path": "quote_side.asset_decimals",
-          "offset": 578,
+          "offset": 626,
           "size": 1
         },
         {
           "path": "quote_side.reserve_vault",
-          "offset": 611,
+          "offset": 659,
           "size": 32
         },
         {
           "path": "quote_side.collateral_vault",
-          "offset": 643,
+          "offset": 691,
           "size": 32
         },
         {
           "path": "quote_side.interest_vault",
-          "offset": 675,
+          "offset": 723,
           "size": 32
         },
         {
           "path": "base_side.reserves.live_reserve",
-          "offset": 202,
+          "offset": 210,
           "size": 8
         },
         {
           "path": "quote_side.reserves.live_reserve",
-          "offset": 707,
+          "offset": 763,
           "size": 8
         },
         {
           "path": "base_hlp_vault.ylp_vault",
-          "offset": 1799,
+          "offset": 2000,
           "size": 32
         },
         {
           "path": "quote_hlp_vault.ylp_vault",
-          "offset": 2183,
+          "offset": 2400,
           "size": 32
         },
         {
           "path": "base_hlp_vault.hlp_supply",
-          "offset": 1879,
+          "offset": 2080,
           "size": 8
         },
         {
           "path": "base_hlp_vault.debt_principal",
-          "offset": 1871,
+          "offset": 2072,
           "size": 8
         },
         {
           "path": "quote_hlp_vault.debt_principal",
-          "offset": 2255,
+          "offset": 2472,
           "size": 8
         },
         {
           "path": "base_hlp_vault.debt_shares",
-          "offset": 1855,
+          "offset": 2056,
           "size": 16
         },
         {
           "path": "quote_hlp_vault.debt_shares",
-          "offset": 2239,
+          "offset": 2456,
           "size": 16
         },
         {
           "path": "quote_hlp_vault.hlp_supply",
-          "offset": 2263,
+          "offset": 2480,
           "size": 8
         },
         {
           "path": "base_hlp_vault.residual_exposure",
-          "offset": 1887,
+          "offset": 2088,
           "size": 16
         },
         {
           "path": "quote_hlp_vault.residual_exposure",
-          "offset": 2271,
+          "offset": 2488,
           "size": 16
         },
         {
           "path": "insurance.base_vault",
-          "offset": 2655,
+          "offset": 2888,
           "size": 32
         },
         {
           "path": "insurance.quote_vault",
-          "offset": 2687,
+          "offset": 2920,
           "size": 32
         },
         {
           "path": "params_hash",
-          "offset": 2803,
+          "offset": 3054,
           "size": 32
         },
         {
           "path": "last_update_slot",
-          "offset": 2955,
+          "offset": 3206,
           "size": 8
         }
       ]

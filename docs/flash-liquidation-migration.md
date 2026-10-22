@@ -1,7 +1,11 @@
 # Flash/emergency keeper migration to Dusk #45
 
-**Candidate:** `pr45-5a9abcb3`, source commit
-`5a9abcb342aa3b1afa284b3a9613c4fa0afdebb0`. Lock status: `captured`.
+**Candidate:** `pr45-1bce17ba`, source commit
+`1bce17ba8735d2e515f2288d0e3d036df7041e3a`. Lock status: `captured`.
+
+This capture includes #52's `fund_interest` and hLP flash ABI and no longer
+includes `rescue_hlp`. The automated keeper jobs here still cover borrowing and
+leverage; hLP flash and terminal closeout need a separate execution profile.
 No deployment or production activation is part of this change.
 
 ## Service behavior

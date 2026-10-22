@@ -1,19 +1,19 @@
 {
   "$schema": "./schemas/instruction-contract.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "pr45-5a9abcb3",
+  "protocolRevision": "pr45-1bce17ba",
   "programs": [
     {
       "name": "dusk",
       "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "idlPath": "artifacts/dusk.json",
-      "idlSha256": "87b6764662192fe85d8c60e6b777fc846f8f657bf8860fd81a94fa5c3bb99246"
+      "idlSha256": "fe864001fc97720cb9e6144e4827ea285cbb8b23bf9ef568524313cd965b9d0c"
     },
     {
       "name": "leverage_delegate",
       "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
       "idlPath": "artifacts/leverage_delegate.json",
-      "idlSha256": "901ff9e41ca9b5c860e7fc6183cf0e9a4c0476488545bcfd02332cad5a470dd1"
+      "idlSha256": "539960dc9e02dd62add9a19f2b06d8522c796908d5da7ebcadb787441a58ec0c"
     }
   ],
   "actions": [

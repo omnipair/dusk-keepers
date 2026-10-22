@@ -3,9 +3,14 @@
 Production-oriented keeper runtimes for Dusk, pinned to one protocol snapshot and
 verified with the same conformance fixtures in Rust and TypeScript.
 
-The candidate interface is Dusk PR #45 at `5a9abcb3`. Rust implements borrowing
+The candidate interface is Dusk PR #45 at `1bce17ba`. Rust implements borrowing
 and leverage observation, atomic flash fills and emergency settlement. TypeScript
 provides independent plan/quote codecs and a shadow reference runtime.
+
+The captured program and SDK also contain the hLP flash interface merged from
+PR #52. This keeper does not yet automate hLP flash recovery or terminal closeout;
+its execution profiles remain borrowing and leverage. The lock stays captured
+until the deployed program and release artifacts are verified separately.
 
 The lock remains **captured** and defaults to **shadow mode**. Local tests execute
 the pinned program binaries; they do not attest a deployed program. Nothing in

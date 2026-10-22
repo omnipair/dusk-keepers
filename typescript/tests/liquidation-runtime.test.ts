@@ -19,7 +19,11 @@ const layout = JSON.parse(
 for (const [file, profile, expected] of [
   ["01-flash-BorrowPosition.json", "lending-bidder", "flash"],
   ["02-emergency-BorrowPosition.json", "lending-settler", "emergency"],
-  ["05-flash-LeveragePosition.json", "leverage", "flash"],
+  // The final-notice case recovers on the next second's health check; the keeper
+  // must clear its distress episode instead of submitting a stale flash fill.
+  ["05-flash-LeveragePosition.json", "leverage", "observe"],
+  // This separate case remains liquidatable after the observation commits.
+  ["07-flash-LeveragePosition.json", "leverage", "flash"],
   ["03-emergency-LeveragePosition.json", "leverage", "emergency"],
 ] as const) {
   test(`native ${profile} completes discovery, observation, quote and simulation via RPC`, async () => {
