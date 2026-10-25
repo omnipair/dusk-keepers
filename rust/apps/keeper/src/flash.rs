@@ -503,9 +503,38 @@ pub fn token_amount(data: &[u8]) -> Option<u64> {
 /// Inventory-funded external settlement: the keeper buys collateral with its
 /// own debt tokens. The required escrow credit is grossed up at the live fee.
 pub fn inventory_payment(c: &Context, s: &Snapshot, net: u64) -> Result<(Instruction, u64)> {
-    let mint = s.account(c.named["debt_mint"])?;
+    inventory_payment_for(
+        s,
+        InventoryPaymentAccounts {
+            buyer: c.buyer,
+            token_program: c.debt_token,
+            mint: c.named["debt_mint"],
+            source: c.named["buyer_refund_account"],
+            destination: c.named["repayment_vault"],
+        },
+        c.epoch,
+        net,
+    )
+}
+
+#[derive(Clone, Copy, Debug)]
+pub struct InventoryPaymentAccounts {
+    pub buyer: [u8; 32],
+    pub token_program: [u8; 32],
+    pub mint: [u8; 32],
+    pub source: [u8; 32],
+    pub destination: [u8; 32],
+}
+
+pub fn inventory_payment_for(
+    s: &Snapshot,
+    accounts: InventoryPaymentAccounts,
+    epoch: u64,
+    net: u64,
+) -> Result<(Instruction, u64)> {
+    let mint = s.account(accounts.mint)?;
     let fee = decode_mint_fees(&mint.owner, &mint.data)?;
-    let credit = |gross| fee.map_or(gross, |f| f.credit(c.epoch, gross, false, false));
+    let credit = |gross| fee.map_or(gross, |f| f.credit(epoch, gross, false, false));
     if credit(u64::MAX) < net {
         return Err("payment cannot be grossed up".into());
     }
@@ -523,12 +552,12 @@ pub fn inventory_payment(c: &Context, s: &Snapshot, net: u64) -> Result<(Instruc
     data.push(*mint.data.get(44).ok_or("mint decimals")?);
     Ok((
         Instruction {
-            program_id: c.debt_token,
+            program_id: accounts.token_program,
             accounts: vec![
-                AccountMeta::writable(c.named["buyer_refund_account"]),
-                AccountMeta::readonly(c.named["debt_mint"]),
-                AccountMeta::writable(c.named["repayment_vault"]),
-                AccountMeta::signer(c.buyer),
+                AccountMeta::writable(accounts.source),
+                AccountMeta::readonly(accounts.mint),
+                AccountMeta::writable(accounts.destination),
+                AccountMeta::signer(accounts.buyer),
             ],
             data,
         },

@@ -1,12 +1,12 @@
 # Flash/emergency keeper migration to Dusk #45
 
-**Candidate:** `pr45-1bce17ba`, source commit
-`1bce17ba8735d2e515f2288d0e3d036df7041e3a`. Lock status: `captured`.
+**Candidate:** `pr45-938e3d1f`, source commit
+`938e3d1fad25223852ac7c0a2ebed3b0203d04f8`. Lock status: `captured`.
 
 This capture includes #52's `fund_interest` and hLP flash ABI and no longer
-includes `rescue_hlp`. The automated keeper jobs here still cover borrowing and
-leverage; hLP flash and terminal closeout need a separate execution profile.
-No deployment or production activation is part of this change.
+includes `rescue_hlp`. The separate `hlp-recovery` profile automates vault-wide
+flash repair and terminal closeout. No deployment or production activation is
+part of this change.
 
 ## Service behavior
 
@@ -16,6 +16,7 @@ No deployment or production activation is part of this change.
 | `lending-bidder` | Observe when needed, preview ordinary borrowing fills and settle an atomic pair. |
 | `lending-settler` | Observe when needed, preview permitted emergency partial/full borrowing settlement. |
 | `leverage` | Observe, try ordinary leverage fills, then permitted emergency settlement. |
+| `hlp-recovery` | Preview both market-wide hLP vaults, attempt an inventory-funded atomic flash repair, then use terminal close only when a full quote permits it. |
 
 Existing profile names remain stable for service configuration. Auction instructions
 for these positions are gone; protocol revenue auctions remain a separate service.
@@ -47,6 +48,11 @@ with no acceptable sampled route are explicitly reported as unfilled.
 - **Emergency:** uses #45's internal EMA price/smoothed-depth settlement, normal
   fees, authoritative reward and loss-waterfall quote. Same-position locks and
   the emergency gate remain program-enforced.
+- **hLP recovery:** the keeper supplies the borrowed token from bounded inventory
+  and receives the target token quoted by the program. It verifies the complete
+  begin/payment/settle transaction, the closed session, an empty isolated payment
+  vault, wallet debit/credit bounds and changed market state. A full terminal
+  close has separate insurance, socialized-loss and bounty limits.
 
 The native and TypeScript builders also accept externally supplied route
 instructions between begin and settle. The service currently implements the two
@@ -76,6 +82,12 @@ Use market-scoped workers when assets have different units/economics.
 | `KEEPER_FLASH_MAX_PAYMENT_DEBIT` | Required maximum gross wallet debit in inventory mode. |
 | `KEEPER_FLASH_MIN_COLLATERAL_CREDIT` | Required minimum net seized collateral in inventory mode. |
 | `KEEPER_LIQUIDATION_LOOKUP_TABLE` | Optional active, warmed-up LUT for transaction account compression. Needed when the plan exceeds the 1,232-byte packet limit. |
+| `KEEPER_HLP_MARKET` | Required single market public key for an `hlp-recovery` worker. |
+| `KEEPER_HLP_MAX_PAYMENT_DEBIT` | Maximum gross borrowed-token debit from the hLP keeper wallet. |
+| `KEEPER_HLP_MIN_COLLATERAL_CREDIT` | Minimum net target-token credit for a flash repair. |
+| `KEEPER_HLP_MAX_INSURANCE_DRAW` | Maximum insurance draw the worker authorizes for a full hLP settlement. |
+| `KEEPER_HLP_MAX_SOCIALIZED_LOSS` | Maximum principal loss the worker authorizes for a full hLP settlement. |
+| `KEEPER_HLP_MIN_BOUNTY_OUT` | Minimum borrowed-token bounty for the terminal-close fallback. |
 
 No default economic thresholds are guessed. Missing limits fail visibly.
 Associated token accounts are prepared before the atomic pair when necessary.
@@ -86,8 +98,9 @@ local/shadow diagnostics without starting a permanent worker.
 ## Durable execution and restart
 
 For an authorized frozen release, apply
-`deploy/postgres/migrations/0002_flash_attempts.sql` to the keeper database before
-starting the migrated workers. This is an additive migration with separate
+`deploy/postgres/migrations/0002_flash_attempts.sql` and then
+`deploy/postgres/migrations/0003_hlp_recovery_job.sql` to the keeper database
+before starting the migrated workers. These are additive migrations with separate
 `keeper_flash_work` and `keeper_flash_events` tables. Do not apply it to the Dusk
 indexer database. Remote database connections require validated TLS.
 
@@ -125,8 +138,9 @@ KEEPER_TEST_DATABASE_URL='postgresql://localhost/keeper_test' \
 The tests cover native/TypeScript byte and PDA parity; strict return decoding;
 borrowing and leverage; both debt sides; current/pending capped transfer fees;
 internal and inventory settlement; concentrated pools and active hLP; emergency
-partial/full loss accounting; preserved repayment donations; underpayment and
-missing-settle rollback; native RPC discovery/observation/fill; and PostgreSQL
+partial/full loss accounting; preserved repayment donations; hLP partial/full
+bank execution and terminal close; underpayment and missing-settle rollback;
+native RPC discovery/observation/fill; and PostgreSQL
 lease contention, pending-signature restart, and finalized-absence reconciliation.
 
 `fixtures/litesvm` are disposable bank states captured from the exact protocol
@@ -135,6 +149,7 @@ Signature verification is disabled only in local bank tests. To reproduce them:
 
 ```sh
 node scripts/capture-liquidation-fixtures.mjs /path/to/exact-clean-dusk-checkout
+node scripts/capture-hlp-fixtures.mjs /path/to/exact-clean-dusk-checkout
 ```
 
 To capture a later candidate, first rebuild Dusk, delegate and packed SDK from

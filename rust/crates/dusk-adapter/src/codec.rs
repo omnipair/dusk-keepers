@@ -88,6 +88,54 @@ struct EmergencyLiquidationWire {
 }
 
 #[derive(Clone, Debug, BorshSerialize, Eq, PartialEq)]
+pub struct PreviewHlpFlashArgs {
+    pub target_asset: u8,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct PreviewHlpFlashWire {
+    target_asset: u8,
+}
+#[derive(Clone, Debug, BorshSerialize, Eq, PartialEq)]
+pub struct BeginHlpFlashArgs {
+    pub target_asset: u8,
+    pub max_payment: u64,
+    pub allow_full: bool,
+    pub max_insurance_draw: u64,
+    pub max_socialized_loss: u64,
+    pub max_collateral_debit: u64,
+    pub min_collateral_credit: u64,
+    pub settle_index: u16,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct BeginHlpFlashWire {
+    target_asset: u8,
+    max_payment: String,
+    allow_full: bool,
+    max_insurance_draw: String,
+    max_socialized_loss: String,
+    max_collateral_debit: String,
+    min_collateral_credit: String,
+    settle_index: u16,
+}
+#[derive(Clone, Debug, BorshSerialize, Eq, PartialEq)]
+pub struct CloseInsolventHlpArgs {
+    pub target_asset: u8,
+    pub max_insurance_draw: u64,
+    pub max_socialized_loss: u64,
+    pub min_caller_bounty_out: u64,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct CloseInsolventHlpWire {
+    target_asset: u8,
+    max_insurance_draw: String,
+    max_socialized_loss: String,
+    min_caller_bounty_out: String,
+}
+
+#[derive(Clone, Debug, BorshSerialize, Eq, PartialEq)]
 pub struct DelegatedCpiArgs {
     pub before_ix_data: Vec<u8>,
     pub after_ix_data: Vec<u8>,
@@ -137,6 +185,10 @@ pub enum KeeperInstructionArguments {
     BeginFlashLiquidation(BeginFlashLiquidationArgs),
     EmergencyLiquidation(EmergencyLiquidationArgs),
     SettleFlashLiquidation,
+    PreviewHlpFlash(PreviewHlpFlashArgs),
+    BeginHlpFlash(BeginHlpFlashArgs),
+    SettleHlpFlash,
+    CloseInsolventHlp(CloseInsolventHlpArgs),
 
     DelegatedCloseLeverage(DelegatedCloseLeverageArgs),
     BeforeTakeProfit(ExecuteOrderArgs),
@@ -156,6 +208,10 @@ impl KeeperInstructionArguments {
             Self::BeginFlashLiquidation(_) => "dusk:begin_flash_liquidation",
             Self::EmergencyLiquidation(_) => "dusk:emergency_liquidation",
             Self::SettleFlashLiquidation => "dusk:settle_flash_liquidation",
+            Self::PreviewHlpFlash(_) => "dusk:preview_hlp_flash",
+            Self::BeginHlpFlash(_) => "dusk:begin_hlp_flash",
+            Self::SettleHlpFlash => "dusk:settle_hlp_flash",
+            Self::CloseInsolventHlp(_) => "dusk:close_insolvent_hlp",
 
             Self::DelegatedCloseLeverage(_) => "dusk:delegated_close_leverage",
             Self::BeforeTakeProfit(_) => "leverage_delegate:before_take_profit",
@@ -175,6 +231,10 @@ impl KeeperInstructionArguments {
             Self::BeginFlashLiquidation(value) => borsh::to_vec(value),
             Self::EmergencyLiquidation(value) => borsh::to_vec(value),
             Self::SettleFlashLiquidation => return Ok(Vec::new()),
+            Self::PreviewHlpFlash(value) => borsh::to_vec(value),
+            Self::BeginHlpFlash(value) => borsh::to_vec(value),
+            Self::SettleHlpFlash => return Ok(Vec::new()),
+            Self::CloseInsolventHlp(value) => borsh::to_vec(value),
 
             Self::QueueParameterProposal | Self::ExecuteParameterProposal => return Ok(Vec::new()),
             Self::DelegatedCloseLeverage(value) => borsh::to_vec(value),
@@ -313,6 +373,44 @@ pub fn parse_keeper_instruction_arguments(
         "dusk:settle_flash_liquidation" => {
             parse_empty(value)?;
             Ok(KeeperInstructionArguments::SettleFlashLiquidation)
+        }
+        "dusk:preview_hlp_flash" => {
+            let wire: PreviewHlpFlashWire = parse_wire(value)?;
+            Ok(KeeperInstructionArguments::PreviewHlpFlash(
+                PreviewHlpFlashArgs {
+                    target_asset: wire.target_asset,
+                },
+            ))
+        }
+        "dusk:begin_hlp_flash" => {
+            let wire: BeginHlpFlashWire = parse_wire(value)?;
+            Ok(KeeperInstructionArguments::BeginHlpFlash(
+                BeginHlpFlashArgs {
+                    target_asset: wire.target_asset,
+                    max_payment: decimal_u64(&wire.max_payment)?,
+                    allow_full: wire.allow_full,
+                    max_insurance_draw: decimal_u64(&wire.max_insurance_draw)?,
+                    max_socialized_loss: decimal_u64(&wire.max_socialized_loss)?,
+                    max_collateral_debit: decimal_u64(&wire.max_collateral_debit)?,
+                    min_collateral_credit: decimal_u64(&wire.min_collateral_credit)?,
+                    settle_index: wire.settle_index,
+                },
+            ))
+        }
+        "dusk:settle_hlp_flash" => {
+            parse_empty(value)?;
+            Ok(KeeperInstructionArguments::SettleHlpFlash)
+        }
+        "dusk:close_insolvent_hlp" => {
+            let wire: CloseInsolventHlpWire = parse_wire(value)?;
+            Ok(KeeperInstructionArguments::CloseInsolventHlp(
+                CloseInsolventHlpArgs {
+                    target_asset: wire.target_asset,
+                    max_insurance_draw: decimal_u64(&wire.max_insurance_draw)?,
+                    max_socialized_loss: decimal_u64(&wire.max_socialized_loss)?,
+                    min_caller_bounty_out: decimal_u64(&wire.min_caller_bounty_out)?,
+                },
+            ))
         }
 
         "dusk:delegated_close_leverage" => {

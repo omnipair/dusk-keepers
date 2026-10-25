@@ -13,7 +13,7 @@
           "market": "market:meta-usdc",
           "target": "position:a",
           "observedSlot": 12,
-          "protocolRevision": "pr45-1bce17ba",
+          "protocolRevision": "pr45-938e3d1f",
           "expectedStateHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         },
         {
@@ -23,7 +23,7 @@
           "market": "market:meta-usdc",
           "target": "obligation:b",
           "observedSlot": 10,
-          "protocolRevision": "pr45-1bce17ba",
+          "protocolRevision": "pr45-938e3d1f",
           "expectedStateHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
         },
         {
@@ -33,7 +33,7 @@
           "market": "market:meta-usdc",
           "target": "position:c",
           "observedSlot": 11,
-          "protocolRevision": "pr45-1bce17ba",
+          "protocolRevision": "pr45-938e3d1f",
           "expectedStateHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
         }
       ],
@@ -50,7 +50,7 @@
           "market": "market:meta-usdc",
           "target": "position:d",
           "observedSlot": 20,
-          "protocolRevision": "pr45-1bce17ba",
+          "protocolRevision": "pr45-938e3d1f",
           "expectedStateHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
         },
         {
@@ -60,7 +60,7 @@
           "market": "market:meta-usdc",
           "target": "position:d",
           "observedSlot": 19,
-          "protocolRevision": "pr45-1bce17ba",
+          "protocolRevision": "pr45-938e3d1f",
           "expectedStateHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
         }
       ],
@@ -77,7 +77,7 @@
           "market": "market:meta-usdc",
           "target": "position:e",
           "observedSlot": 30,
-          "protocolRevision": "pr45-1bce17ba",
+          "protocolRevision": "pr45-938e3d1f",
           "expectedStateHash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         },
         {
@@ -87,7 +87,7 @@
           "market": "market:meta-usdc",
           "target": "position:e",
           "observedSlot": 31,
-          "protocolRevision": "pr45-1bce17ba",
+          "protocolRevision": "pr45-938e3d1f",
           "expectedStateHash": "1111111111111111111111111111111111111111111111111111111111111111"
         },
         {
@@ -97,7 +97,7 @@
           "market": "market:meta-usdc",
           "target": "position:locked",
           "observedSlot": 32,
-          "protocolRevision": "pr45-1bce17ba",
+          "protocolRevision": "pr45-938e3d1f",
           "expectedStateHash": "2222222222222222222222222222222222222222222222222222222222222222"
         }
       ],

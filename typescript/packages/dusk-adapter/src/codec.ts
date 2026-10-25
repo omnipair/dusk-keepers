@@ -76,6 +76,33 @@ export type KeeperInstructionArguments =
     }
   | { readonly specificationKey: "dusk:settle_flash_liquidation" }
   | {
+      readonly specificationKey: "dusk:preview_hlp_flash";
+      readonly arguments: { readonly targetAsset: number };
+    }
+  | {
+      readonly specificationKey: "dusk:begin_hlp_flash";
+      readonly arguments: {
+        readonly targetAsset: number;
+        readonly maxPayment: bigint;
+        readonly allowFull: boolean;
+        readonly maxInsuranceDraw: bigint;
+        readonly maxSocializedLoss: bigint;
+        readonly maxCollateralDebit: bigint;
+        readonly minCollateralCredit: bigint;
+        readonly settleIndex: number;
+      };
+    }
+  | { readonly specificationKey: "dusk:settle_hlp_flash" }
+  | {
+      readonly specificationKey: "dusk:close_insolvent_hlp";
+      readonly arguments: {
+        readonly targetAsset: number;
+        readonly maxInsuranceDraw: bigint;
+        readonly maxSocializedLoss: bigint;
+        readonly minCallerBountyOut: bigint;
+      };
+    }
+  | {
       readonly specificationKey: "dusk:delegated_close_leverage";
       readonly arguments: DelegatedCloseLeverageArgs;
     }
@@ -186,6 +213,27 @@ export function encodeKeeperInstruction(
       writer.u64(request.arguments.minSwapOutput);
       break;
     case "dusk:settle_flash_liquidation":
+      break;
+    case "dusk:preview_hlp_flash":
+      writer.u8(request.arguments.targetAsset);
+      break;
+    case "dusk:begin_hlp_flash":
+      writer.u8(request.arguments.targetAsset);
+      writer.u64(request.arguments.maxPayment);
+      writer.u8(request.arguments.allowFull ? 1 : 0);
+      writer.u64(request.arguments.maxInsuranceDraw);
+      writer.u64(request.arguments.maxSocializedLoss);
+      writer.u64(request.arguments.maxCollateralDebit);
+      writer.u64(request.arguments.minCollateralCredit);
+      writer.u16(request.arguments.settleIndex);
+      break;
+    case "dusk:settle_hlp_flash":
+      break;
+    case "dusk:close_insolvent_hlp":
+      writer.u8(request.arguments.targetAsset);
+      writer.u64(request.arguments.maxInsuranceDraw);
+      writer.u64(request.arguments.maxSocializedLoss);
+      writer.u64(request.arguments.minCallerBountyOut);
       break;
 
     case "dusk:queue_parameter_proposal":
@@ -319,6 +367,57 @@ export function parseKeeperInstructionArguments(
     case "dusk:settle_flash_liquidation":
       requireKeys(argumentsValue, []);
       return { specificationKey };
+    case "dusk:preview_hlp_flash":
+      requireKeys(argumentsValue, ["targetAsset"]);
+      return {
+        specificationKey,
+        arguments: {
+          targetAsset: unsignedNumber(argumentsValue.targetAsset, 0xff, "targetAsset"),
+        },
+      };
+    case "dusk:begin_hlp_flash":
+      requireKeys(argumentsValue, [
+        "targetAsset",
+        "maxPayment",
+        "allowFull",
+        "maxInsuranceDraw",
+        "maxSocializedLoss",
+        "maxCollateralDebit",
+        "minCollateralCredit",
+        "settleIndex",
+      ]);
+      return {
+        specificationKey,
+        arguments: {
+          targetAsset: unsignedNumber(argumentsValue.targetAsset, 0xff, "targetAsset"),
+          maxPayment: decimalU64(argumentsValue.maxPayment),
+          allowFull: booleanValue(argumentsValue.allowFull),
+          maxInsuranceDraw: decimalU64(argumentsValue.maxInsuranceDraw),
+          maxSocializedLoss: decimalU64(argumentsValue.maxSocializedLoss),
+          maxCollateralDebit: decimalU64(argumentsValue.maxCollateralDebit),
+          minCollateralCredit: decimalU64(argumentsValue.minCollateralCredit),
+          settleIndex: unsignedNumber(argumentsValue.settleIndex, 0xffff, "settleIndex"),
+        },
+      };
+    case "dusk:settle_hlp_flash":
+      requireKeys(argumentsValue, []);
+      return { specificationKey };
+    case "dusk:close_insolvent_hlp":
+      requireKeys(argumentsValue, [
+        "targetAsset",
+        "maxInsuranceDraw",
+        "maxSocializedLoss",
+        "minCallerBountyOut",
+      ]);
+      return {
+        specificationKey,
+        arguments: {
+          targetAsset: unsignedNumber(argumentsValue.targetAsset, 0xff, "targetAsset"),
+          maxInsuranceDraw: decimalU64(argumentsValue.maxInsuranceDraw),
+          maxSocializedLoss: decimalU64(argumentsValue.maxSocializedLoss),
+          minCallerBountyOut: decimalU64(argumentsValue.minCallerBountyOut),
+        },
+      };
 
     case "dusk:queue_parameter_proposal":
     case "dusk:execute_parameter_proposal":

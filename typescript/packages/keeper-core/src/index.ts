@@ -3,6 +3,7 @@ export type JobKind =
   | "lending_liquidation_trigger"
   | "lending_liquidation_bid"
   | "lending_liquidation_settle"
+  | "hlp_recovery"
   | "stop_loss"
   | "take_profit"
   | "auction_bid"
@@ -31,6 +32,7 @@ const priorities: Readonly<Record<JobKind, number>> = {
   lending_liquidation_trigger: 490,
   lending_liquidation_bid: 200,
   lending_liquidation_settle: 500,
+  hlp_recovery: 500,
   stop_loss: 400,
   take_profit: 300,
   auction_bid: 200,

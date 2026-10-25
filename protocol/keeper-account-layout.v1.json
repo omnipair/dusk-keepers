@@ -1,13 +1,13 @@
 {
   "$schema": "./schemas/account-layout.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "pr45-1bce17ba",
+  "protocolRevision": "pr45-938e3d1f",
   "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-  "idlSha256": "fe864001fc97720cb9e6144e4827ea285cbb8b23bf9ef568524313cd965b9d0c",
+  "idlSha256": "83393e1a28d65b26f2e5098966d3d9ccd9778c99b814807d6adea1381152deb3",
   "accounts": [
     {
       "name": "BorrowPosition",
-      "sizeWithDiscriminator": 332,
+      "sizeWithDiscriminator": 348,
       "fields": [
         {
           "path": "owner",
@@ -56,34 +56,34 @@
         },
         {
           "path": "active_liquidation_session",
-          "offset": 240,
+          "offset": 256,
           "size": 32
         },
         {
           "path": "base_distress.active",
-          "offset": 272,
+          "offset": 288,
           "size": 1
         },
         {
           "path": "base_distress.started_at",
-          "offset": 273,
+          "offset": 289,
           "size": 8
         },
         {
           "path": "quote_distress.active",
-          "offset": 289,
+          "offset": 305,
           "size": 1
         },
         {
           "path": "quote_distress.started_at",
-          "offset": 290,
+          "offset": 306,
           "size": 8
         }
       ]
     },
     {
       "name": "Market",
-      "sizeWithDiscriminator": 3224,
+      "sizeWithDiscriminator": 3128,
       "fields": [
         {
           "path": "ylp_mint",
@@ -117,27 +117,27 @@
         },
         {
           "path": "quote_side.asset_mint",
-          "offset": 594,
+          "offset": 586,
           "size": 32
         },
         {
           "path": "quote_side.asset_decimals",
-          "offset": 626,
+          "offset": 618,
           "size": 1
         },
         {
           "path": "quote_side.reserve_vault",
-          "offset": 659,
+          "offset": 651,
           "size": 32
         },
         {
           "path": "quote_side.collateral_vault",
-          "offset": 691,
+          "offset": 683,
           "size": 32
         },
         {
           "path": "quote_side.interest_vault",
-          "offset": 723,
+          "offset": 715,
           "size": 32
         },
         {
@@ -147,77 +147,77 @@
         },
         {
           "path": "quote_side.reserves.live_reserve",
-          "offset": 763,
+          "offset": 755,
           "size": 8
         },
         {
           "path": "base_hlp_vault.ylp_vault",
-          "offset": 2000,
+          "offset": 1952,
           "size": 32
         },
         {
           "path": "quote_hlp_vault.ylp_vault",
-          "offset": 2400,
+          "offset": 2344,
           "size": 32
         },
         {
           "path": "base_hlp_vault.hlp_supply",
-          "offset": 2080,
+          "offset": 2032,
           "size": 8
         },
         {
           "path": "base_hlp_vault.debt_principal",
-          "offset": 2072,
+          "offset": 2024,
           "size": 8
         },
         {
           "path": "quote_hlp_vault.debt_principal",
-          "offset": 2472,
+          "offset": 2416,
           "size": 8
         },
         {
           "path": "base_hlp_vault.debt_shares",
-          "offset": 2056,
+          "offset": 2008,
           "size": 16
         },
         {
           "path": "quote_hlp_vault.debt_shares",
-          "offset": 2456,
+          "offset": 2400,
           "size": 16
         },
         {
           "path": "quote_hlp_vault.hlp_supply",
-          "offset": 2480,
+          "offset": 2424,
           "size": 8
         },
         {
           "path": "base_hlp_vault.residual_exposure",
-          "offset": 2088,
+          "offset": 2040,
           "size": 16
         },
         {
           "path": "quote_hlp_vault.residual_exposure",
-          "offset": 2488,
+          "offset": 2432,
           "size": 16
         },
         {
           "path": "insurance.base_vault",
-          "offset": 2888,
+          "offset": 2816,
           "size": 32
         },
         {
           "path": "insurance.quote_vault",
-          "offset": 2920,
+          "offset": 2848,
           "size": 32
         },
         {
           "path": "params_hash",
-          "offset": 3054,
+          "offset": 2966,
           "size": 32
         },
         {
           "path": "last_update_slot",
-          "offset": 3206,
+          "offset": 3118,
           "size": 8
         }
       ]

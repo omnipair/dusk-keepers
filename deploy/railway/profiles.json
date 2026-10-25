@@ -39,6 +39,15 @@
       "signingRequired": true
     },
     {
+      "name": "dusk-hlp-recovery",
+      "profile": "hlp-recovery",
+      "jobKinds": ["hlp_recovery"],
+      "liveRuntime": "rust",
+      "shadowRuntime": "typescript",
+      "walletRole": "hlp_recovery",
+      "signingRequired": true
+    },
+    {
       "name": "dusk-auction-arbitrageur",
       "profile": "auction-arbitrage",
       "jobKinds": ["auction_bid"],

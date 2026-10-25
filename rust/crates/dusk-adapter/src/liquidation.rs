@@ -51,6 +51,17 @@ pub struct FlashLiquidationQuote {
     pub rates: LiquidationRates,
 }
 #[derive(Clone, Debug, BorshDeserialize, BorshSerialize, PartialEq, Eq)]
+pub struct HlpFlashQuote {
+    pub target_asset: u8,
+    pub collateral_debit: u64,
+    pub collateral_credit: u64,
+    pub borrowed_claim: u64,
+    pub payment: u64,
+    pub reserve_credit: u64,
+    pub discount_bps: u16,
+    pub full: bool,
+}
+#[derive(Clone, Debug, BorshDeserialize, BorshSerialize, PartialEq, Eq)]
 pub struct EmergencyLiquidationQuote {
     pub reference_price_nad: u64,
     pub reference_depth_nad: u128,

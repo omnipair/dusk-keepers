@@ -27,6 +27,7 @@ mod flash;
 mod flash_cli;
 mod flash_journal;
 mod flash_runtime;
+mod hlp_flash;
 mod lifecycle;
 mod signer;
 mod transaction;
@@ -437,7 +438,7 @@ fn run_execution_pass(
     // wallet, one thing it is allowed to do. A profile with no job here does
     // nothing rather than falling back to something it was not deployed for.
     let outcome = match profile {
-        "lending-bidder" | "lending-settler" | "lending-trigger" | "leverage" => {
+        "lending-bidder" | "lending-settler" | "lending-trigger" | "leverage" | "hlp-recovery" => {
             flash_runtime::FlashJob {
                 client,
                 layout,

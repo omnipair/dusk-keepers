@@ -32,6 +32,26 @@ const actionDefinitions = [
     primary: ["dusk", "observe_liquidation"],
   },
   {
+    action: "hlp_flash_preview",
+    jobKind: "hlp_recovery",
+    primary: ["dusk", "preview_hlp_flash"],
+  },
+  {
+    action: "hlp_flash_begin",
+    jobKind: "hlp_recovery",
+    primary: ["dusk", "begin_hlp_flash"],
+  },
+  {
+    action: "hlp_flash_settle",
+    jobKind: "hlp_recovery",
+    primary: ["dusk", "settle_hlp_flash"],
+  },
+  {
+    action: "hlp_insolvent_close",
+    jobKind: "hlp_recovery",
+    primary: ["dusk", "close_insolvent_hlp"],
+  },
+  {
     action: "delegated_close_take_profit",
     jobKind: "take_profit",
     primary: ["dusk", "delegated_close_leverage"],
@@ -178,6 +198,22 @@ function directInstructionData(specification) {
     case "queue_parameter_proposal":
     case "execute_parameter_proposal":
     case "settle_flash_liquidation": return prefix;
+    case "settle_hlp_flash": return prefix;
+    case "preview_hlp_flash": return Buffer.concat([prefix, Buffer.from([0])]);
+    case "begin_hlp_flash":
+      return Buffer.concat([
+        prefix,
+        Buffer.from([0]),
+        encodeU64(1_000),
+        Buffer.from([0]),
+        encodeU64(500),
+        encodeU64(250),
+        encodeU64(1_100),
+        encodeU64(900),
+        encodeU16(4),
+      ]);
+    case "close_insolvent_hlp":
+      return Buffer.concat([prefix, Buffer.from([0]), encodeU64(500), encodeU64(250), encodeU64(1)]);
     case "observe_liquidation": return Buffer.concat([prefix, Buffer.from([0])]);
     case "preview_flash_liquidation":
     case "preview_emergency_liquidation":

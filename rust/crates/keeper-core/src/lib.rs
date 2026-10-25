@@ -14,6 +14,7 @@ pub enum JobKind {
     LendingLiquidationTrigger,
     LendingLiquidationBid,
     LendingLiquidationSettle,
+    HlpRecovery,
     StopLoss,
     TakeProfit,
     AuctionBid,
@@ -24,7 +25,7 @@ pub enum JobKind {
 impl JobKind {
     pub const fn priority(self) -> u16 {
         match self {
-            Self::LeverageLiquidation | Self::LendingLiquidationSettle => 500,
+            Self::LeverageLiquidation | Self::LendingLiquidationSettle | Self::HlpRecovery => 500,
             Self::LendingLiquidationTrigger => 490,
             Self::StopLoss => 400,
             Self::TakeProfit => 300,

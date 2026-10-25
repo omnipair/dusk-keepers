@@ -15,6 +15,7 @@ const SQRT_MINUS_ONE = modPow(2n, (FIELD_MODULUS - 1n) / 4n);
 const inputNames = new Map([
  ["leverage_position.owner", "owner"], ["leverage_position.namespace_authority", "namespaceAuthority"],
  ["args.position", "position"], ["session.position", "position"], ["accounts.debt_mint", "debtMint"],
+ ["session", "session"],
 
   ["market.base_side.asset_mint", "baseAssetMint"],
   ["market.quote_side.asset_mint", "quoteAssetMint"],
@@ -144,14 +145,19 @@ function buildResolutionManifest(lock, contract, idls) {
       }
 
       if (!account.pda) continue;
-      const key = `${specification.program}:${account.name}`;
+      const baseKey = `${specification.program}:${account.name}`;
       const normalized = account.pda.seeds.map((seed) => normalizeSeed(idl, instruction, seed));
       const usage = {
         instructionKey: specification.key,
         accountName: account.name,
         idlSeedPaths: account.pda.seeds.map(rawSeedPath),
       };
-      const existing = recipes.get(key);
+      let key = baseKey;
+      let existing = recipes.get(key);
+      if (existing && JSON.stringify(existing.seeds) !== JSON.stringify(normalized)) {
+        key = `${baseKey}:${instruction.name}`;
+        existing = recipes.get(key);
+      }
       if (existing) {
         assert.deepEqual(existing.seeds, normalized, `${key}: inconsistent IDL PDA recipe`);
         existing.usages.push(usage);
@@ -208,11 +214,15 @@ function wireToIdlArguments(specificationKey, argumentsValue) {
     case "dusk:queue_parameter_proposal":
     case "dusk:execute_parameter_proposal":
     case "dusk:settle_flash_liquidation": return {};
+    case "dusk:settle_hlp_flash": return {};
+    case "dusk:preview_hlp_flash": return { target_asset: argumentsValue.targetAsset };
     case "dusk:observe_liquidation": return { debt_asset: argumentsValue.debtAsset };
     case "dusk:preview_flash_liquidation":
     case "dusk:preview_emergency_liquidation":
     case "dusk:begin_flash_liquidation":
     case "dusk:emergency_liquidation":
+    case "dusk:begin_hlp_flash":
+    case "dusk:close_insolvent_hlp":
       return { args: Object.fromEntries(Object.entries(argumentsValue).map(([k,v]) => [k.replace(/[A-Z]/g, c => "_"+c.toLowerCase()),v])) };
     case "dusk:delegated_close_leverage":
       return {
@@ -388,6 +398,24 @@ function buildEncodingCases(contract, idls) {
     "dusk:begin_flash_liquidation": { position: deterministicPubkey("flash-position"), debtAsset: 1, maxRepayment: "1000", maxPayment: "1100", minCollateralCredit: "900", full: false, settleIndex: 3 },
     "dusk:settle_flash_liquidation": {},
     "dusk:emergency_liquidation": { debtAsset: 0, collateralDebit: "1000", full: false, minRewardCredit: "1", minSwapOutput: "900" },
+    "dusk:preview_hlp_flash": { targetAsset: 0 },
+    "dusk:begin_hlp_flash": {
+      targetAsset: 1,
+      maxPayment: "1100",
+      allowFull: false,
+      maxInsuranceDraw: "500",
+      maxSocializedLoss: "250",
+      maxCollateralDebit: "1200",
+      minCollateralCredit: "900",
+      settleIndex: 4,
+    },
+    "dusk:settle_hlp_flash": {},
+    "dusk:close_insolvent_hlp": {
+      targetAsset: 0,
+      maxInsuranceDraw: "500",
+      maxSocializedLoss: "250",
+      minCallerBountyOut: "1",
+    },
     "dusk:delegated_close_leverage": {
       debtAsset: 0,
       minAmountOut: "800",

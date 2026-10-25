@@ -19,9 +19,9 @@ const layout = JSON.parse(
 for (const [file, profile, expected] of [
   ["01-flash-BorrowPosition.json", "lending-bidder", "flash"],
   ["02-emergency-BorrowPosition.json", "lending-settler", "emergency"],
-  // The final-notice case recovers on the next second's health check; the keeper
-  // must clear its distress episode instead of submitting a stale flash fill.
-  ["05-flash-LeveragePosition.json", "leverage", "observe"],
+  // This final-notice position remains liquidatable after the observation is
+  // committed, so the next pass must build the fresh flash settlement.
+  ["05-flash-LeveragePosition.json", "leverage", "flash"],
   // This separate case remains liquidatable after the observation commits.
   ["07-flash-LeveragePosition.json", "leverage", "flash"],
   ["03-emergency-LeveragePosition.json", "leverage", "emergency"],

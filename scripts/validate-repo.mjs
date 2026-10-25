@@ -147,6 +147,7 @@ for (const requiredProfile of [
   "lending-trigger",
   "lending-bidder",
   "lending-settler",
+  "hlp-recovery",
   "sentinel",
 ]) {
   assert.ok(
@@ -174,8 +175,8 @@ assert.match(migration, /submitted_unknown/);
 const instructionContract = await readJson("protocol/keeper-instructions.v1.json");
 assert.equal(instructionContract.schemaVersion, 1);
 assert.equal(instructionContract.protocolRevision, lock.revision);
-assert.equal(instructionContract.actions.length, 12);
-assert.equal(instructionContract.instructions.length, 13);
+assert.equal(instructionContract.actions.length, 16);
+assert.equal(instructionContract.instructions.length, 17);
 assert.equal(
   new Set(instructionContract.instructions.map((instruction) => instruction.key)).size,
   instructionContract.instructions.length,
