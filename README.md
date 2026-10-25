@@ -3,7 +3,7 @@
 Production-oriented keeper runtimes for Dusk, pinned to one protocol snapshot and
 verified with the same conformance fixtures in Rust and TypeScript.
 
-The candidate interface is Dusk PR #45 at `938e3d1f`. Rust implements borrowing,
+The candidate interface is Dusk PR #45 at `296263d0`. Rust implements borrowing,
 leverage and hLP observation, atomic flash fills, emergency settlement and hLP
 terminal close. TypeScript provides independent protocol codecs and shadow
 reference checks.
@@ -11,12 +11,13 @@ reference checks.
 The `hlp-recovery` profile checks both market-wide hLP vaults. It first attempts
 the program-quoted atomic flash repair with explicit wallet and collateral
 bounds, then permits terminal close only when the quote authorizes a full
-settlement. The lock stays captured until the deployed program and release
-artifacts are verified separately.
+settlement. The devnet program bytes are verified against the captured
+artifacts. The lock stays captured so this PR remains shadow-only until the
+separately reviewed live-release gate freezes it.
 
 The lock remains **captured** and defaults to **shadow mode**. Local tests execute
-the pinned program binaries; they do not attest a deployed program. Nothing in
-this migration deploys, freezes the lock, or enables signing on that candidate.
+the exact binaries deployed on devnet. Nothing in this migration freezes the
+lock or enables signing on that candidate.
 See [the flash migration runbook](docs/flash-liquidation-migration.md).
 
 ## What is here

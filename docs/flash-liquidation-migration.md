@@ -1,7 +1,7 @@
 # Flash/emergency keeper migration to Dusk #45
 
-**Candidate:** `pr45-938e3d1f`, source commit
-`938e3d1fad25223852ac7c0a2ebed3b0203d04f8`. Lock status: `captured`.
+**Candidate:** `devnet-2026-10-25-296263d`, source commit
+`296263d0f4f34478b2701c32e337550a26aa3c4b`. Lock status: `captured`.
 
 This capture includes #52's `fund_interest` and hLP flash ABI and no longer
 includes `rescue_hlp`. The separate `hlp-recovery` profile automates vault-wide

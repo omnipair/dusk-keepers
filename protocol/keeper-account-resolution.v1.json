@@ -1,7 +1,7 @@
 {
   "$schema": "./schemas/account-resolution-manifest.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "pr45-938e3d1f",
+  "protocolRevision": "devnet-2026-10-25-296263d",
   "programs": [
     {
       "name": "dusk",
