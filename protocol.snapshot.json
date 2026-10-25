@@ -181,7 +181,7 @@
       "Native keeper transaction builders and durable runtime ports are intentionally not implemented yet."
     ]
   },
-  "supersededBy": "protocol.lock.json: pr45-5a9abcb3",
+  "supersededBy": "protocol.lock.json: devnet-2026-10-26-cd6f1ec",
   "historicalOnly": true,
   "note": "Historical Local Snapshot 0 manifest. Its program/SDK paths have since been repinned; use protocol.lock.json for active artifact hashes and docs/flash-liquidation-migration.md for candidate coverage."
 }

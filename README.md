@@ -3,7 +3,7 @@
 Production-oriented keeper runtimes for Dusk, pinned to one protocol snapshot and
 verified with the same conformance fixtures in Rust and TypeScript.
 
-The candidate interface is Dusk PR #45 at `bc09061b`. Rust implements borrowing,
+The candidate interface is Dusk PR #45 at `cd6f1ec0`. Rust implements borrowing,
 leverage and hLP observation, atomic flash fills, emergency settlement and hLP
 terminal close. TypeScript provides independent protocol codecs and shadow
 reference checks.
@@ -73,5 +73,6 @@ full Surfpool and cross-runtime gates pass.
 See [the #287160 monitor and rollout runbook](docs/transfer-fee-notice.md). The
 monitor watches epoch transitions and both market mints; final-notice markets
 receive priority and changed fees invalidate pending attempts. The native
-callers now use the pinned #45 flash/emergency interface. Deployment attestation,
-the frozen release lock, and post-upgrade verification remain release steps.
+callers now use the pinned #45 flash/emergency interface. The deployed payloads
+and upgrade slots are recorded in the flash migration runbook. The frozen release
+lock and keeper service activation remain separate release steps.

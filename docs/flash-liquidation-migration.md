@@ -1,12 +1,32 @@
 # Flash/emergency keeper migration to Dusk #45
 
-**Candidate:** `devnet-2026-10-26-bc09061`, source commit
-`bc09061b6ca1d3db8d526cc372eb66cd688e36cd`. Lock status: `captured`.
+**Candidate:** `devnet-2026-10-26-cd6f1ec`, source commit
+`cd6f1ec0e074082b9c191b0ec741477037aa9eb3`. Lock status: `captured`.
 
 This capture includes #52's `fund_interest` and hLP flash ABI and no longer
 includes `rescue_hlp`. The separate `hlp-recovery` profile automates vault-wide
-flash repair and terminal closeout. No deployment or production activation is
-part of this change.
+flash repair and terminal closeout. This pin follows the completed devnet program
+upgrade; keeper services remain in shadow mode pending the frozen release gate.
+
+## Verified devnet deployment
+
+The upgradeable-loader metadata and downloaded program payloads match this capture:
+
+| Program | Program ID | Upgrade slot | Payload SHA-256 |
+| --- | --- | --- | --- |
+| Dusk | `JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X` | `515117115` | `b0f04cd524f967df97abc4d73c5b0ab8a8f17f1204ab1aa4b9054152e344ed78` |
+| Leverage delegate | `AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv` | `515117216` | `4c1f7e1b326ff91d34d87edc888dee38bfde44058be50df3bb7ecdbe11845e1f` |
+
+Dusk's 3,507,624 payload bytes match `artifacts/dusk.so`; its program-data
+allocation has another 10,928 bytes, verified to be zero. The delegate's 1,149,896
+payload bytes match `artifacts/leverage_delegate.so` with no trailing padding.
+Both IDLs, the SDK archive and all five IDL compatibility fingerprints are
+unchanged from `bc09061b`. The SDK remains `2.14.2-devnet.20261025`, SHA-256
+`186c3d85c5a733da446c6f00301fefd0f36170336f1d8f4fdc9807ffc8c16d8c`.
+
+This revision includes the position-principal/share-burn and frozen hLP yield
+accounting fixes. Bank fixtures were recaptured from the exact source commit and
+execute the deployed payloads locally.
 
 ## Service behavior
 

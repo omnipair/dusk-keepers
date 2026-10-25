@@ -1,7 +1,7 @@
 {
   "$schema": "./schemas/instruction-contract.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "devnet-2026-10-26-bc09061",
+  "protocolRevision": "devnet-2026-10-26-cd6f1ec",
   "programs": [
     {
       "name": "dusk",
