@@ -280,9 +280,11 @@ impl FlashJob<'_> {
         let max_socialized_loss = required_u64("KEEPER_HLP_MAX_SOCIALIZED_LOSS")?;
         let max_payment_debit = required_u64("KEEPER_HLP_MAX_PAYMENT_DEBIT")?;
         let min_collateral_credit = required_u64("KEEPER_HLP_MIN_COLLATERAL_CREDIT")?;
-        let mut flash_error = None;
-        match self.preview_hlp(&context, &snapshot) {
-            Ok(Some(quote)) => {
+        let recovered = try_hlp_recovery(
+            || {
+                let Some(quote) = self.preview_hlp(&context, &snapshot)? else {
+                    return Ok(None);
+                };
                 let (instructions, gross_payment) = context.flash_plan(
                     self.contract,
                     &snapshot,
@@ -296,58 +298,50 @@ impl FlashJob<'_> {
                     .and_then(Option::as_ref)
                     .and_then(|account| flash::token_amount(&account.data))
                     .unwrap_or(0);
-                if gross_payment <= max_payment_debit
-                    && gross_payment <= buyer_payment_balance
-                    && quote.collateral_credit >= min_collateral_credit
-                {
-                    match self.hlp_flash_meets_bounds(
+                if gross_payment > max_payment_debit
+                    || gross_payment > buyer_payment_balance
+                    || quote.collateral_credit < min_collateral_credit
+                    || !self.hlp_flash_meets_bounds(
                         &context,
                         &snapshot,
                         &instructions,
                         max_payment_debit,
                         min_collateral_credit,
-                    ) {
-                        Ok(true) => {
-                            return self
-                                .submit_hlp(
-                                    &context,
-                                    &snapshot,
-                                    if quote.full {
-                                        "hlp_flash_full"
-                                    } else {
-                                        "hlp_flash"
-                                    },
-                                    instructions,
-                                    true,
-                                )
-                                .map(Some);
-                        }
-                        Ok(false) => {}
-                        Err(error) => flash_error = Some(error),
-                    }
+                    )?
+                {
+                    return Ok(None);
                 }
-            }
-            Ok(None) => {}
-            Err(error) => flash_error = Some(error),
-        }
-
-        // Terminal recovery has no buyer payment leg and remains valid when a
-        // transfer-fee schedule or empty buyer inventory makes flash recovery
-        // impossible. Its own simulation is the authoritative eligibility and
-        // loss-bound check, so it must not depend on a successful flash quote.
-        let close = context.close_insolvent(
-            self.contract,
-            max_insurance_draw,
-            max_socialized_loss,
-            required_u64("KEEPER_HLP_MIN_BOUNTY_OUT")?,
+                Ok(Some((
+                    if quote.full {
+                        "hlp_flash_full"
+                    } else {
+                        "hlp_flash"
+                    },
+                    instructions,
+                )))
+            },
+            || {
+                // Terminal recovery has no buyer payment leg. Its simulation
+                // independently checks eligibility and the configured loss bounds.
+                let close = context.close_insolvent(
+                    self.contract,
+                    max_insurance_draw,
+                    max_socialized_loss,
+                    required_u64("KEEPER_HLP_MIN_BOUNTY_OUT")?,
+                )?;
+                if self.hlp_close_meets_bounds(&context, &snapshot, &close)? {
+                    Ok(Some(("hlp_close_full", close)))
+                } else {
+                    Ok(None)
+                }
+            },
         )?;
-        if self.hlp_close_meets_bounds(&context, &snapshot, &close)? {
+        if let Some((action, instructions)) = recovered {
+            // Submission errors may mean an unknown landed transaction. Never
+            // select another recovery after starting the durable submit path.
             return self
-                .submit_hlp(&context, &snapshot, "hlp_close_full", close, true)
+                .submit_hlp(&context, &snapshot, action, instructions, true)
                 .map(Some);
-        }
-        if let Some(error) = flash_error {
-            return Err(error);
         }
         Ok(Some((
             None,
@@ -846,22 +840,26 @@ impl FlashJob<'_> {
             c.flash(
                 self.contract,
                 q,
-                repayment,
-                flash::resources()?,
-                vec![payment],
-                false,
-                0,
+                flash::FlashPlanOptions {
+                    max_repayment: repayment,
+                    prefix: flash::resources()?,
+                    route: vec![payment],
+                    internal: false,
+                    min_buyer_credit: 0,
+                },
             )
             .map(Some)
         } else {
             c.flash(
                 self.contract,
                 q,
-                repayment,
-                flash::resources()?,
-                vec![],
-                true,
-                min_profit,
+                flash::FlashPlanOptions {
+                    max_repayment: repayment,
+                    prefix: flash::resources()?,
+                    route: vec![],
+                    internal: true,
+                    min_buyer_credit: min_profit,
+                },
             )
             .map(Some)
         }
@@ -1100,6 +1098,22 @@ fn state_hash(s: &Snapshot, epoch: u64) -> Result<String> {
     ))
 }
 
+// A failed quote, payment gross-up, or flash simulation must still permit
+// terminal hLP recovery. Preserve that error if terminal recovery is unavailable.
+fn try_hlp_recovery<T>(
+    flash: impl FnOnce() -> Result<Option<T>>,
+    terminal: impl FnOnce() -> Result<Option<T>>,
+) -> Result<Option<T>> {
+    let flash_result = flash();
+    if let Ok(Some(value)) = flash_result {
+        return Ok(Some(value));
+    }
+    if let Some(value) = terminal()? {
+        return Ok(Some(value));
+    }
+    flash_result
+}
+
 // Financial bounds are expected during size probing. ABI, account, invariant,
 // and arithmetic failures must remain visible instead of looking unprofitable.
 fn expected_bound_rejection(value: &serde_json::Value) -> bool {
@@ -1207,6 +1221,32 @@ mod tests {
         value["value"]["logs"][2] = serde_json::json!("Program log: Right: 1000000000");
         assert!(!zero_share_probe(&value));
         assert!(!expected_bound_rejection(&value));
+    }
+
+    #[test]
+    fn terminal_recovery_survives_flash_plan_construction_failure() {
+        let calls = std::cell::RefCell::new(Vec::new());
+        let recovered = try_hlp_recovery(
+            || {
+                calls.borrow_mut().push("flash plan");
+                Err("payment cannot be grossed up".into())
+            },
+            || {
+                calls.borrow_mut().push("terminal simulation");
+                Ok(Some("hlp_close_full"))
+            },
+        )
+        .unwrap();
+        assert_eq!(recovered, Some("hlp_close_full"));
+        assert_eq!(*calls.borrow(), ["flash plan", "terminal simulation"]);
+        assert_eq!(
+            try_hlp_recovery::<()>(|| Err("invalid flash quote".into()), || Ok(None)),
+            Err("invalid flash quote".into())
+        );
+        assert_eq!(
+            try_hlp_recovery(|| Ok(Some("hlp_flash")), || panic!("already filled")),
+            Ok(Some("hlp_flash"))
+        );
     }
 
     #[test]

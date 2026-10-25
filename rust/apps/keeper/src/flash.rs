@@ -17,6 +17,13 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
 type Result<T> = std::result::Result<T, String>;
+pub struct FlashPlanOptions {
+    pub max_repayment: u64,
+    pub prefix: Vec<Instruction>,
+    pub route: Vec<Instruction>,
+    pub internal: bool,
+    pub min_buyer_credit: u64,
+}
 pub fn key(v: &str) -> Result<[u8; 32]> {
     decode_key(v).ok_or_else(|| "invalid public key".into())
 }
@@ -429,12 +436,15 @@ impl Context {
         &self,
         c: &InstructionContract,
         q: &FlashLiquidationQuote,
-        max_repayment: u64,
-        prefix: Vec<Instruction>,
-        route: Vec<Instruction>,
-        internal: bool,
-        min_buyer_credit: u64,
+        options: FlashPlanOptions,
     ) -> Result<Vec<Instruction>> {
+        let FlashPlanOptions {
+            max_repayment,
+            prefix,
+            route,
+            internal,
+            min_buyer_credit,
+        } = options;
         if internal && !route.is_empty() {
             return Err("internal settlement cannot carry an external route".into());
         }

@@ -81,11 +81,13 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
             Some("flash") => c.flash(
                 &contract,
                 &FlashLiquidationQuote::try_from_slice(&quote)?,
-                max,
-                crate::flash::resources()?,
-                serde_json::from_value(v["route"].clone()).unwrap_or_default(),
-                v["internal"].as_bool().unwrap_or(true),
-                v["minBuyerCredit"].as_str().unwrap_or("0").parse()?,
+                crate::flash::FlashPlanOptions {
+                    max_repayment: max,
+                    prefix: crate::flash::resources()?,
+                    route: serde_json::from_value(v["route"].clone()).unwrap_or_default(),
+                    internal: v["internal"].as_bool().unwrap_or(true),
+                    min_buyer_credit: v["minBuyerCredit"].as_str().unwrap_or("0").parse()?,
+                },
             )?,
             Some("emergency") => {
                 let mut i = crate::flash::resources()?;
