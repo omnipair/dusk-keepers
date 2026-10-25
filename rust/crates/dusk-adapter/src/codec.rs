@@ -55,6 +55,7 @@ pub struct BeginFlashLiquidationArgs {
     pub max_repayment: u64,
     pub max_payment: u64,
     pub min_collateral_credit: u64,
+    pub min_buyer_credit: u64,
     pub full: bool,
     pub settle_index: u16,
 }
@@ -66,6 +67,7 @@ struct BeginFlashLiquidationWire {
     max_repayment: String,
     max_payment: String,
     min_collateral_credit: String,
+    min_buyer_credit: String,
     full: bool,
     settle_index: u16,
 }
@@ -353,6 +355,7 @@ pub fn parse_keeper_instruction_arguments(
                     max_repayment: decimal_u64(&wire.max_repayment)?,
                     max_payment: decimal_u64(&wire.max_payment)?,
                     min_collateral_credit: decimal_u64(&wire.min_collateral_credit)?,
+                    min_buyer_credit: decimal_u64(&wire.min_buyer_credit)?,
                     full: wire.full,
                     settle_index: wire.settle_index,
                 },

@@ -1,14 +1,14 @@
 {
   "$schema": "./protocol/schemas/protocol-lock.schema.json",
   "schemaVersion": 1,
-  "revision": "devnet-2026-10-25-296263d",
+  "revision": "devnet-2026-10-26-bc09061",
   "status": "captured",
-  "generatedAt": "2026-10-25T15:07:28.564Z",
+  "generatedAt": "2026-10-25T21:19:17.049Z",
   "source": {
     "repository": "https://github.com/omnipair/dusk",
     "branch": "fix/benchmark-replay-owner",
-    "gitCommit": "296263d0f4f34478b2701c32e337550a26aa3c4b",
-    "worktreeFingerprintSha256": "7402e5cad63210ee34a56a5f5270561fb6bd5fe5dfbc411ddcd12104b425ab21"
+    "gitCommit": "bc09061b6ca1d3db8d526cc372eb66cd688e36cd",
+    "worktreeFingerprintSha256": "067612e2d56710a0aa7eaea1b1141a342465128a796aff9b00ae7fea242efdf3"
   },
   "toolchain": {
     "anchor": "0.31.1",
@@ -23,11 +23,11 @@
       "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "binary": {
         "path": "artifacts/dusk.so",
-        "sha256": "b604aeb48e991c3ed8ac4ac707f42425fa049c31ddbfb2055d3d936b1f7b1541"
+        "sha256": "31b35f45bcc38b97f599a3d92d9db875ef8c12c00637c85db4c790b8474c1755"
       },
       "idl": {
         "path": "artifacts/dusk.json",
-        "sha256": "83393e1a28d65b26f2e5098966d3d9ccd9778c99b814807d6adea1381152deb3"
+        "sha256": "574f9a347a2ecf2f85fa6d9f981fb474b1300f2e9cca5ae0ca0158da113019eb"
       }
     },
     {
@@ -45,13 +45,13 @@
   ],
   "sdk": {
     "path": "artifacts/dusk-sdk.tgz",
-    "sha256": "36c99b7a475b0c6b449445c747a40a75ed5b7a97a0262c61f9bdf1a0c80e35ea"
+    "sha256": "186c3d85c5a733da446c6f00301fefd0f36170336f1d8f4fdc9807ffc8c16d8c"
   },
   "compatibility": {
-    "accountLayoutFingerprintSha256": "a26225918712da63a3804b6cc89d7de3413d8c0ea0968a1b16fc0630495aff0b",
-    "instructionFingerprintSha256": "e6b4a594f037e65ee34baaec88d5c984084d1f76a4fe98acf47eda0058df1cdd",
-    "eventFingerprintSha256": "2c2d23c75a6d98e0b3a3b132bcebbc4cc6ec890c379794413facda9b8fb11ced",
+    "accountLayoutFingerprintSha256": "172109189feeb8f21753802fc4a2752cd4ef821ab452fa4dcdd9358adaea1d5c",
+    "instructionFingerprintSha256": "dc4ab7843b8510f6fc1660c2b244c6b9990aae475f77e4d8ed9909e566934978",
+    "eventFingerprintSha256": "00c711e86a809bc1b2bfbb298ce8ec0364e5b07779c5b389826a14a332df7199",
     "errorFingerprintSha256": "569c0a6e131dc4041c8d8e59a22005babf8bb5f0c759c0f361e964882b91dcc6",
-    "pdaFingerprintSha256": "e82efac06402412108b690ec94b8d72ca25299701c0d8c62342b08aed44dc17b"
+    "pdaFingerprintSha256": "9fb3d63555aba971eb888651cc9d8fc4dcf98b0ac23e4016588afdc81175438d"
   }
 }

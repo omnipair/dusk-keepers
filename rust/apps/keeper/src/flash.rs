@@ -433,6 +433,7 @@ impl Context {
         prefix: Vec<Instruction>,
         route: Vec<Instruction>,
         internal: bool,
+        min_buyer_credit: u64,
     ) -> Result<Vec<Instruction>> {
         if internal && !route.is_empty() {
             return Err("internal settlement cannot carry an external route".into());
@@ -447,6 +448,7 @@ impl Context {
                 max_repayment,
                 max_payment: q.payment,
                 min_collateral_credit: q.collateral_credit,
+                min_buyer_credit: if internal { min_buyer_credit } else { 0 },
                 full: q.full,
                 settle_index,
             }),

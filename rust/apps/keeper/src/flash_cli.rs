@@ -85,6 +85,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
                 crate::flash::resources()?,
                 serde_json::from_value(v["route"].clone()).unwrap_or_default(),
                 v["internal"].as_bool().unwrap_or(true),
+                v["minBuyerCredit"].as_str().unwrap_or("0").parse()?,
             )?,
             Some("emergency") => {
                 let mut i = crate::flash::resources()?;

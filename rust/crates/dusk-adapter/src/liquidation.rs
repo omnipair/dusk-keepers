@@ -12,7 +12,44 @@ impl LiquidationHealth {
         self.debt > 0
             && (self.collateral_value as u128)
                 * (10_000u128.saturating_sub(self.maintenance_bps as u128))
-                < self.debt as u128 * 10_000
+                <= self.debt as u128 * 10_000
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::LiquidationHealth;
+
+    #[test]
+    fn exact_maintenance_boundary_is_eligible_like_the_program() {
+        assert!(
+            LiquidationHealth {
+                collateral_value: 100,
+                debt: 90,
+                maintenance_bps: 1_000,
+            }
+            .eligible()
+        );
+    }
+
+    #[test]
+    fn debt_free_and_healthy_positions_are_not_eligible() {
+        assert!(
+            !LiquidationHealth {
+                collateral_value: 100,
+                debt: 0,
+                maintenance_bps: 1_000,
+            }
+            .eligible()
+        );
+        assert!(
+            !LiquidationHealth {
+                collateral_value: 100,
+                debt: 89,
+                maintenance_bps: 1_000,
+            }
+            .eligible()
+        );
     }
 }
 #[derive(Clone, Debug, BorshDeserialize, BorshSerialize, PartialEq, Eq)]

@@ -39,15 +39,12 @@ impl Journal {
         rpc: &RpcClient,
         revision: &str,
     ) -> Result<Vec<(String, Option<String>, String)>, String> {
-        let rows=self.client.query("SELECT work_key,position,debt_asset,signature,observed_slot,last_valid_height FROM keeper_flash_work WHERE revision=$1 AND outcome IN ('reserved','submitted_unknown') ORDER BY created_at LIMIT 100",&[&revision]).map_err(|e|e.to_string())?;
+        let rows=self.client.query("SELECT work_key,position,debt_asset FROM keeper_flash_work WHERE revision=$1 AND outcome IN ('reserved','submitted_unknown') ORDER BY created_at LIMIT 100",&[&revision]).map_err(|e|e.to_string())?;
         let mut outcomes = Vec::new();
         for row in rows {
             let work: String = row.get(0);
             let position: String = row.get(1);
             let side: i16 = row.get(2);
-            let sig: Option<String> = row.get(3);
-            let slot: i64 = row.get(4);
-            let height: i64 = row.get(5);
             let lock_key = format!("{revision}:{position}:{side}");
             let locked: bool = self
                 .client
@@ -60,15 +57,23 @@ impl Journal {
             if !locked {
                 continue;
             }
-            let result = (|| -> Result<Option<String>, String> {
-                // A different worker may have reconciled the row before this lock.
-                let pending:bool=self.client.query_one("SELECT outcome IN ('reserved','submitted_unknown') FROM keeper_flash_work WHERE work_key=$1",&[&work]).map_err(|e|e.to_string())?.get(0);
-                if !pending {
+            let result = (|| -> Result<Option<(Option<String>, String)>, String> {
+                // The discovery row was read before the advisory lock. Re-read every
+                // field used for the decision after acquiring it: a submitter may
+                // have persisted its signature while recovery waited for the lock.
+                let Some(current)=self.client.query_opt("SELECT outcome,signature,observed_slot,last_valid_height FROM keeper_flash_work WHERE work_key=$1",&[&work]).map_err(|e|e.to_string())? else {
+                    return Ok(None);
+                };
+                let outcome: String = current.get(0);
+                if outcome != "reserved" && outcome != "submitted_unknown" {
                     return Ok(None);
                 }
+                let sig: Option<String> = current.get(1);
+                let slot: i64 = current.get(2);
+                let height: i64 = current.get(3);
                 let Some(sig) = sig.as_ref() else {
                     self.finish(&work, "abandoned_before_submission", &serde_json::json!({}))?;
-                    return Ok(Some("abandoned_before_submission".into()));
+                    return Ok(Some((None, "abandoned_before_submission".into())));
                 };
                 let statuses: serde_json::Value = rpc
                     .call(
@@ -78,7 +83,8 @@ impl Journal {
                     .map_err(|e| e.to_string())?;
                 let status = &statuses["value"][0];
                 if status["confirmationStatus"] == "finalized" {
-                    return self.finish_receipt(&work, sig, rpc).map(Some);
+                    let outcome = self.finish_receipt(&work, sig, rpc)?;
+                    return Ok(Some((Some(sig.clone()), outcome)));
                 }
                 let final_height: u64 = rpc
                     .call(
@@ -122,7 +128,8 @@ impl Journal {
                             .ok_or("archival history is incomplete; refusing replacement")?;
                         checked += 1;
                         if signatures.iter().any(|s| s.as_str() == Some(sig)) {
-                            return self.finish_receipt(&work, sig, rpc).map(Some);
+                            let outcome = self.finish_receipt(&work, sig, rpc)?;
+                            return Ok(Some((Some(sig.clone()), outcome)));
                         }
                     }
                 }
@@ -133,7 +140,7 @@ impl Journal {
                     return Err("finalized history coverage unavailable".into());
                 }
                 self.finish(&work,"expired_absent",&serde_json::json!({"startSlot":start,"finalizedSlot":final_slot,"finalizedBlockHeight":final_height,"checkedBlocks":checked}))?;
-                Ok(Some("expired_absent".into()))
+                Ok(Some((Some(sig.clone()), "expired_absent".into())))
             })();
             self.client
                 .execute(
@@ -141,8 +148,8 @@ impl Journal {
                     &[&lock_key],
                 )
                 .map_err(|e| e.to_string())?;
-            if let Some(outcome) = result? {
-                outcomes.push((position, sig, outcome));
+            if let Some((signature, outcome)) = result? {
+                outcomes.push((position, signature, outcome));
             }
         }
         Ok(outcomes)

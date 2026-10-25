@@ -395,7 +395,7 @@ function buildEncodingCases(contract, idls) {
     "dusk:observe_liquidation": { debtAsset: 1 },
     "dusk:preview_flash_liquidation": { debtAsset: 0, maxRepayment: "18446744073709551615", full: false },
     "dusk:preview_emergency_liquidation": { debtAsset: 1, collateralDebit: "1000", full: true },
-    "dusk:begin_flash_liquidation": { position: deterministicPubkey("flash-position"), debtAsset: 1, maxRepayment: "1000", maxPayment: "1100", minCollateralCredit: "900", full: false, settleIndex: 3 },
+    "dusk:begin_flash_liquidation": { position: deterministicPubkey("flash-position"), debtAsset: 1, maxRepayment: "1000", maxPayment: "1100", minCollateralCredit: "900", minBuyerCredit: "25", full: false, settleIndex: 3 },
     "dusk:settle_flash_liquidation": {},
     "dusk:emergency_liquidation": { debtAsset: 0, collateralDebit: "1000", full: false, minRewardCredit: "1", minSwapOutput: "900" },
     "dusk:preview_hlp_flash": { targetAsset: 0 },

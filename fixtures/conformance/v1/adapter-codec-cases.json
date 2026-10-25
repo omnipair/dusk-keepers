@@ -49,11 +49,12 @@
         "maxRepayment": "1000",
         "maxPayment": "1100",
         "minCollateralCredit": "900",
+        "minBuyerCredit": "25",
         "full": false,
         "settleIndex": 3
       },
-      "argumentLayoutSha256": "dcfaeab98371e9493a40b339d2bda9ebc366bc4e60b402030a8dbd2e4994dba7",
-      "expectedDataHex": "12f22f2acb2d62fcc975db2caeb015a2fef7e82d1164730c71d712bec0fa84c2cf1b00f06bb1345301e8030000000000004c040000000000008403000000000000000300"
+      "argumentLayoutSha256": "e20d21aa0c3dcc6995e6a12a4df59f1015d17f3168923d596b0145d5e72feea0",
+      "expectedDataHex": "12f22f2acb2d62fcc975db2caeb015a2fef7e82d1164730c71d712bec0fa84c2cf1b00f06bb1345301e8030000000000004c0400000000000084030000000000001900000000000000000300"
     },
     {
       "name": "dusk emergency_liquidation",

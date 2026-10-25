@@ -42,19 +42,12 @@ impl FlashJob<'_> {
                 .recover(self.client, &self.contract.protocol_revision)
                 .map_err(ExecutionError::Assembly)?
             {
+                let (status, reason) = recovered_submission_status(&outcome);
                 reports.push(AttemptReport {
                     position,
                     debt_mint: String::new(),
-                    status: if outcome == "executed" {
-                        OutcomeStatus::Executed
-                    } else {
-                        OutcomeStatus::Skipped
-                    },
-                    reason: if outcome == "executed" {
-                        ReasonCode::Confirmed
-                    } else {
-                        ReasonCode::BlockhashExpired
-                    },
+                    status,
+                    reason,
                     race: None,
                     signature,
                     detail: Some(outcome),
@@ -283,56 +276,78 @@ impl FlashJob<'_> {
                 .submit_hlp(&context, &snapshot, "prepare_hlp_accounts", setup, false)
                 .map(Some);
         }
-        let Some(quote) = self.preview_hlp(&context, &snapshot)? else {
-            return Ok(None);
-        };
         let max_insurance_draw = required_u64("KEEPER_HLP_MAX_INSURANCE_DRAW")?;
         let max_socialized_loss = required_u64("KEEPER_HLP_MAX_SOCIALIZED_LOSS")?;
         let max_payment_debit = required_u64("KEEPER_HLP_MAX_PAYMENT_DEBIT")?;
         let min_collateral_credit = required_u64("KEEPER_HLP_MIN_COLLATERAL_CREDIT")?;
-        let (instructions, gross_payment) = context.flash_plan(
+        let mut flash_error = None;
+        match self.preview_hlp(&context, &snapshot) {
+            Ok(Some(quote)) => {
+                let (instructions, gross_payment) = context.flash_plan(
+                    self.contract,
+                    &snapshot,
+                    &quote,
+                    max_insurance_draw,
+                    max_socialized_loss,
+                )?;
+                let buyer_payment_balance = snapshot
+                    .accounts
+                    .get(&address(context.named["buyer_refund_account"]))
+                    .and_then(Option::as_ref)
+                    .and_then(|account| flash::token_amount(&account.data))
+                    .unwrap_or(0);
+                if gross_payment <= max_payment_debit
+                    && gross_payment <= buyer_payment_balance
+                    && quote.collateral_credit >= min_collateral_credit
+                {
+                    match self.hlp_flash_meets_bounds(
+                        &context,
+                        &snapshot,
+                        &instructions,
+                        max_payment_debit,
+                        min_collateral_credit,
+                    ) {
+                        Ok(true) => {
+                            return self
+                                .submit_hlp(
+                                    &context,
+                                    &snapshot,
+                                    if quote.full {
+                                        "hlp_flash_full"
+                                    } else {
+                                        "hlp_flash"
+                                    },
+                                    instructions,
+                                    true,
+                                )
+                                .map(Some);
+                        }
+                        Ok(false) => {}
+                        Err(error) => flash_error = Some(error),
+                    }
+                }
+            }
+            Ok(None) => {}
+            Err(error) => flash_error = Some(error),
+        }
+
+        // Terminal recovery has no buyer payment leg and remains valid when a
+        // transfer-fee schedule or empty buyer inventory makes flash recovery
+        // impossible. Its own simulation is the authoritative eligibility and
+        // loss-bound check, so it must not depend on a successful flash quote.
+        let close = context.close_insolvent(
             self.contract,
-            &snapshot,
-            &quote,
             max_insurance_draw,
             max_socialized_loss,
+            required_u64("KEEPER_HLP_MIN_BOUNTY_OUT")?,
         )?;
-        if gross_payment <= max_payment_debit
-            && quote.collateral_credit >= min_collateral_credit
-            && self.hlp_flash_meets_bounds(
-                &context,
-                &snapshot,
-                &instructions,
-                max_payment_debit,
-                min_collateral_credit,
-            )?
-        {
+        if self.hlp_close_meets_bounds(&context, &snapshot, &close)? {
             return self
-                .submit_hlp(
-                    &context,
-                    &snapshot,
-                    if quote.full {
-                        "hlp_flash_full"
-                    } else {
-                        "hlp_flash"
-                    },
-                    instructions,
-                    true,
-                )
+                .submit_hlp(&context, &snapshot, "hlp_close_full", close, true)
                 .map(Some);
         }
-        if quote.full {
-            let close = context.close_insolvent(
-                self.contract,
-                max_insurance_draw,
-                max_socialized_loss,
-                required_u64("KEEPER_HLP_MIN_BOUNTY_OUT")?,
-            )?;
-            if self.hlp_close_meets_bounds(&context, &snapshot, &close)? {
-                return self
-                    .submit_hlp(&context, &snapshot, "hlp_close_full", close, true)
-                    .map(Some);
-            }
+        if let Some(error) = flash_error {
+            return Err(error);
         }
         Ok(Some((
             None,
@@ -741,7 +756,7 @@ impl FlashJob<'_> {
                     &s,
                     c.preview_flash(self.contract, repay, false)?,
                 )? {
-                    let Some(ixs) = self.flash_plan(&c, &s, &q, repay)? else {
+                    let Some(ixs) = self.flash_plan(&c, &s, &q, repay, min_profit)? else {
                         continue;
                     };
                     if self.profitable(&c, &s, &ixs, min_profit, q.full)? {
@@ -757,7 +772,7 @@ impl FlashJob<'_> {
                     &s,
                     c.preview_flash(self.contract, cap, true)?,
                 )?
-                && let Some(ixs) = self.flash_plan(&c, &s, &q, cap)?
+                && let Some(ixs) = self.flash_plan(&c, &s, &q, cap, min_profit)?
                 && self.profitable(&c, &s, &ixs, min_profit, q.full)?
             {
                 return self
@@ -819,6 +834,7 @@ impl FlashJob<'_> {
         s: &Snapshot,
         q: &FlashLiquidationQuote,
         repayment: u64,
+        min_profit: u64,
     ) -> Result<Option<Vec<Instruction>>> {
         if self.inventory_mode()? {
             let (payment, gross) = flash::inventory_payment(c, s, q.payment)?;
@@ -834,6 +850,7 @@ impl FlashJob<'_> {
                 flash::resources()?,
                 vec![payment],
                 false,
+                0,
             )
             .map(Some)
         } else {
@@ -844,6 +861,7 @@ impl FlashJob<'_> {
                 flash::resources()?,
                 vec![],
                 true,
+                min_profit,
             )
             .map(Some)
         }
@@ -1016,6 +1034,23 @@ impl FlashJob<'_> {
         ))
     }
 }
+
+fn recovered_submission_status(outcome: &str) -> (OutcomeStatus, ReasonCode) {
+    match outcome {
+        "executed" => (OutcomeStatus::Executed, ReasonCode::Confirmed),
+        "failed" => (
+            OutcomeStatus::RetryableFailure,
+            ReasonCode::SimulationRejected,
+        ),
+        "expired_absent" | "abandoned_before_submission" => {
+            (OutcomeStatus::Skipped, ReasonCode::BlockhashExpired)
+        }
+        _ => (
+            OutcomeStatus::RetryableFailure,
+            ReasonCode::ConfirmationUnknown,
+        ),
+    }
+}
 pub fn slices(cap: u64) -> Vec<u64> {
     let mut out = vec![];
     let mut value = cap;
@@ -1172,5 +1207,20 @@ mod tests {
         value["value"]["logs"][2] = serde_json::json!("Program log: Right: 1000000000");
         assert!(!zero_share_probe(&value));
         assert!(!expected_bound_rejection(&value));
+    }
+
+    #[test]
+    fn finalized_failure_is_not_reported_as_expired() {
+        assert_eq!(
+            recovered_submission_status("failed"),
+            (
+                OutcomeStatus::RetryableFailure,
+                ReasonCode::SimulationRejected
+            )
+        );
+        assert_eq!(
+            recovered_submission_status("expired_absent"),
+            (OutcomeStatus::Skipped, ReasonCode::BlockhashExpired)
+        );
     }
 }

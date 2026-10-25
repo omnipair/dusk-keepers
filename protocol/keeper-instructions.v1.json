@@ -1,13 +1,13 @@
 {
   "$schema": "./schemas/instruction-contract.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "devnet-2026-10-25-296263d",
+  "protocolRevision": "devnet-2026-10-26-bc09061",
   "programs": [
     {
       "name": "dusk",
       "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "idlPath": "artifacts/dusk.json",
-      "idlSha256": "83393e1a28d65b26f2e5098966d3d9ccd9778c99b814807d6adea1381152deb3"
+      "idlSha256": "574f9a347a2ecf2f85fa6d9f981fb474b1300f2e9cca5ae0ca0158da113019eb"
     },
     {
       "name": "leverage_delegate",

@@ -329,6 +329,7 @@ export function buildFlashPlan(
     prefix?: NativeInstruction[];
     route?: NativeInstruction[];
     internal?: boolean;
+    minBuyerCredit?: string;
   } = {},
 ): NativeInstruction[] {
   const prefix = options.prefix ?? liquidationResources(),
@@ -348,6 +349,7 @@ export function buildFlashPlan(
       maxRepayment,
       maxPayment: quote.payment,
       minCollateralCredit: quote.collateralCredit,
+      minBuyerCredit: internal ? options.minBuyerCredit ?? "0" : "0",
       full: quote.full,
       settleIndex,
     },

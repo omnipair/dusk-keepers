@@ -219,7 +219,7 @@ function directInstructionData(specification) {
     case "preview_emergency_liquidation":
       return Buffer.concat([prefix, Buffer.from([0]), encodeU64(1000), Buffer.from([0])]);
     case "begin_flash_liquidation":
-      return Buffer.concat([prefix, Buffer.alloc(32, 7), Buffer.from([0]), encodeU64(1000), encodeU64(1100), encodeU64(900), Buffer.from([0]), encodeU16(1)]);
+      return Buffer.concat([prefix, Buffer.alloc(32, 7), Buffer.from([0]), encodeU64(1000), encodeU64(1100), encodeU64(900), encodeU64(25), Buffer.from([0]), encodeU16(1)]);
     case "emergency_liquidation":
       return Buffer.concat([prefix, Buffer.from([0]), encodeU64(1000), Buffer.from([0]), encodeU64(1), encodeU64(900)]);
     case "settle_protocol_auction":

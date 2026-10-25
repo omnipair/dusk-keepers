@@ -3,7 +3,7 @@
 Production-oriented keeper runtimes for Dusk, pinned to one protocol snapshot and
 verified with the same conformance fixtures in Rust and TypeScript.
 
-The candidate interface is Dusk PR #45 at `296263d0`. Rust implements borrowing,
+The candidate interface is Dusk PR #45 at `bc09061b`. Rust implements borrowing,
 leverage and hLP observation, atomic flash fills, emergency settlement and hLP
 terminal close. TypeScript provides independent protocol codecs and shadow
 reference checks.

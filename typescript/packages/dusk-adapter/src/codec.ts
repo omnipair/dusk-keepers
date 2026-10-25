@@ -60,6 +60,7 @@ export type KeeperInstructionArguments =
         readonly maxRepayment: bigint;
         readonly maxPayment: bigint;
         readonly minCollateralCredit: bigint;
+        readonly minBuyerCredit: bigint;
         readonly full: boolean;
         readonly settleIndex: number;
       };
@@ -202,6 +203,7 @@ export function encodeKeeperInstruction(
       writer.u64(request.arguments.maxRepayment);
       writer.u64(request.arguments.maxPayment);
       writer.u64(request.arguments.minCollateralCredit);
+      writer.u64(request.arguments.minBuyerCredit);
       writer.u8(request.arguments.full ? 1 : 0);
       writer.u16(request.arguments.settleIndex);
       break;
@@ -319,6 +321,7 @@ export function parseKeeperInstructionArguments(
         "maxRepayment",
         "maxPayment",
         "minCollateralCredit",
+        "minBuyerCredit",
         "full",
         "settleIndex",
       ]);
@@ -334,6 +337,7 @@ export function parseKeeperInstructionArguments(
           maxRepayment: decimalU64(argumentsValue.maxRepayment),
           maxPayment: decimalU64(argumentsValue.maxPayment),
           minCollateralCredit: decimalU64(argumentsValue.minCollateralCredit),
+          minBuyerCredit: decimalU64(argumentsValue.minBuyerCredit),
           full: booleanValue(argumentsValue.full),
           settleIndex: unsignedNumber(
             argumentsValue.settleIndex,
