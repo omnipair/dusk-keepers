@@ -1,6 +1,6 @@
 # Captured protocol artifacts
 
-`protocol.lock.json` is the active authority: Dusk #45 at `cd6f1ec0`, status
+`protocol.lock.json` is the active authority: Dusk #45 at `9c981263`, status
 **captured**. It pins the current Dusk/delegate binaries, IDLs, SDK archive and
 IDL compatibility fingerprints. Validation rehashes these artifacts and computes
 the compatibility fingerprints from their IDLs.
