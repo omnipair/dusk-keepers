@@ -1,7 +1,7 @@
 # Flash/emergency keeper migration to Dusk #45
 
 **Candidate:** `devnet-2026-10-26-cd6f1ec`, source commit
-`9c981263e0aa0f003fd0e96e3f004c927fcf01a4`. Lock status: `captured`.
+`77877d576018fd2bd8191d13f05534b0484e2282`. Lock status: `captured`.
 
 This capture includes #52's `fund_interest` and hLP flash ABI and no longer
 includes `rescue_hlp`. The separate `hlp-recovery` profile automates vault-wide
@@ -14,11 +14,11 @@ The upgradeable-loader metadata and downloaded program payloads match this captu
 
 | Program | Program ID | Upgrade slot | Payload SHA-256 |
 | --- | --- | --- | --- |
-| Dusk | `JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X` | `515387473` | `cf80baeecd12ab3438cd347deaa19dde8b830f36d54f08a55d5aab572914fe7d` |
+| Dusk | `JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X` | `515502278` | `21e3f3c4dd3e0e5b4fad85f69e0bae702b1209ab4fe1820f6bc86e81408d07ed` |
 | Leverage delegate | `AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv` | `515117216` | `4c1f7e1b326ff91d34d87edc888dee38bfde44058be50df3bb7ecdbe11845e1f` |
 
-Dusk's 3,519,760 payload bytes match `artifacts/dusk.so`; its program-data
-allocation has another 9,032 bytes, verified to be zero. The delegate's 1,149,896
+Dusk's 3,519,968 payload bytes match `artifacts/dusk.so`; its program-data
+allocation has another 8,824 bytes, verified to be zero. The delegate's 1,149,896
 payload bytes match `artifacts/leverage_delegate.so` with no trailing padding.
 Both IDLs, the SDK archive and all five IDL compatibility fingerprints are
 unchanged from `bc09061b`. The SDK remains `2.14.2-devnet.20261025`, SHA-256
@@ -28,8 +28,9 @@ This revision includes the position-principal/share-burn and frozen hLP yield
 accounting fixes. Bank fixtures were recaptured from the exact source commit and
 execute the deployed payloads locally.
 
-The 27 October compatible repair upgrade bounds emergency recovery proofs and
-restores concentrated reseeding after the final external yLP exit. Only the
+The 27 October compatible repair sequence bounds emergency recovery proofs,
+restores concentrated reseeding after the final external yLP exit, and permits
+drained-market read previews. Only the
 Dusk executable changed. The delegate remains the previously deployed
 `cd6f1ec0` artifact, and its source/interface was not modified by the repair.
 The event revision and SDK archive remain unchanged. All lending and hLP bank
