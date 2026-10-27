@@ -3,12 +3,12 @@
   "schemaVersion": 1,
   "revision": "devnet-2026-10-26-cd6f1ec",
   "status": "captured",
-  "generatedAt": "2026-10-26T16:16:26.233Z",
+  "generatedAt": "2026-10-26T23:51:27.878Z",
   "source": {
     "repository": "https://github.com/omnipair/dusk",
     "branch": "fix/benchmark-replay-owner",
-    "gitCommit": "9c981263e0aa0f003fd0e96e3f004c927fcf01a4",
-    "worktreeFingerprintSha256": "ef45cd9ebe203ad3fe08068e620dd068274f9bb67cd5af2ad193ba40baa677ea"
+    "gitCommit": "77877d576018fd2bd8191d13f05534b0484e2282",
+    "worktreeFingerprintSha256": "9e2edb10082253a2511b0e11119b1748fdcd3e09ead452964da4884956d8ae83"
   },
   "toolchain": {
     "anchor": "0.31.1",
@@ -23,7 +23,7 @@
       "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "binary": {
         "path": "artifacts/dusk.so",
-        "sha256": "cf80baeecd12ab3438cd347deaa19dde8b830f36d54f08a55d5aab572914fe7d"
+        "sha256": "21e3f3c4dd3e0e5b4fad85f69e0bae702b1209ab4fe1820f6bc86e81408d07ed"
       },
       "idl": {
         "path": "artifacts/dusk.json",
