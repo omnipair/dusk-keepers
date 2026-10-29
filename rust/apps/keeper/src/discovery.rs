@@ -88,6 +88,7 @@ impl RpcClient {
         Self {
             endpoint: endpoint.into(),
             agent: ureq::AgentBuilder::new()
+                .timeout_connect(timeout)
                 .timeout_read(timeout)
                 .timeout_write(timeout)
                 .build(),
@@ -105,12 +106,30 @@ impl RpcClient {
             "method": method,
             "params": params,
         });
-        let response = self
-            .agent
-            .post(&self.endpoint)
-            .set("content-type", "application/json")
-            .send_json(body)
-            .map_err(|error| DiscoveryError::Transport(error.to_string()))?;
+        // A provider can close a reused TLS connection before responding.
+        // Retry the identical RPC request only; submitted transactions retain
+        // their exact bytes/signature and still use journal reconciliation.
+        let mut attempt = 0;
+        let response = loop {
+            match self
+                .agent
+                .post(&self.endpoint)
+                .set("content-type", "application/json")
+                .send_json(body.clone())
+            {
+                Ok(response) => break response,
+                Err(ureq::Error::Transport(_)) if attempt < 2 => {
+                    attempt += 1;
+                    std::thread::sleep(Duration::from_millis(100 * attempt));
+                }
+                Err(ureq::Error::Transport(error)) => {
+                    return Err(DiscoveryError::Transport(format!("{:?}", error.kind())));
+                }
+                Err(ureq::Error::Status(status, _)) => {
+                    return Err(DiscoveryError::Transport(format!("HTTP {status}")));
+                }
+            }
+        };
         let envelope: RpcEnvelope<T> = response
             .into_json()
             .map_err(|error| DiscoveryError::Malformed(error.to_string()))?;
@@ -435,5 +454,37 @@ mod tests {
         let borrow = account_discriminator("BorrowPosition");
         assert_ne!(market, borrow);
         assert_eq!(market, account_discriminator("Market"));
+    }
+
+    #[test]
+    fn rpc_recovers_when_a_provider_closes_before_responding() {
+        use std::{
+            io::{Read, Write},
+            net::TcpListener,
+        };
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let endpoint = format!("http://{}", listener.local_addr().unwrap());
+        let server = std::thread::spawn(move || {
+            let (first, _) = listener.accept().unwrap();
+            drop(first);
+            let (mut stream, _) = listener.accept().unwrap();
+            let mut request = [0; 4096];
+            assert!(stream.read(&mut request).unwrap() > 0);
+            let body = r#"{"jsonrpc":"2.0","id":1,"result":123}"#;
+            write!(
+                stream,
+                "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+                body.len(),
+                body
+            )
+            .unwrap();
+        });
+        assert_eq!(
+            RpcClient::new(endpoint, Duration::from_secs(2))
+                .slot()
+                .unwrap(),
+            123
+        );
+        server.join().unwrap();
     }
 }

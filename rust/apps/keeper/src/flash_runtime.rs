@@ -67,6 +67,15 @@ impl FlashJob<'_> {
             .layout
             .reader(kind)
             .map_err(|e| ExecutionError::Assembly(e.to_string()))?;
+        let active_markets: BTreeSet<_> = self
+            .client
+            .program_accounts(program, account_discriminator("Market"))?
+            .into_iter()
+            .filter_map(|(address, data)| {
+                crate::accounts::MarketAccounts::decode(self.layout, address, &data)
+                    .map(|_| address)
+            })
+            .collect();
         let mut positions = self
             .client
             .program_accounts(program, account_discriminator(kind))?;
@@ -78,6 +87,12 @@ impl FlashJob<'_> {
         });
         let mut attempted = 0;
         for (position, data) in positions {
+            let market = reader
+                .pubkey("market", &data)
+                .map_err(|e| ExecutionError::Assembly(e.to_string()))?;
+            if !active_markets.contains(&market) {
+                continue;
+            }
             let sides = if kind == "LeveragePosition" {
                 vec![
                     reader

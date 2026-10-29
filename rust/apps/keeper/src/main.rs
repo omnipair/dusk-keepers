@@ -51,6 +51,8 @@ struct Snapshot {
     /// healthy market the first climbs and the second does not, and an
     /// operator needs to see that the keeper is working rather than idle.
     evaluated: u64,
+    execution_passes: u64,
+    execution_configured: bool,
     sent: u64,
     last_signature: Option<String>,
     last_execution_error: Option<String>,
@@ -292,6 +294,10 @@ fn main() -> Result<(), Box<dyn Error>> {
                     layout.as_ref(),
                     resolver.as_ref(),
                 ) {
+                    if let Ok(mut current) = shared.lock() {
+                        current.execution_configured = true;
+                        current.execution_passes += 1;
+                    }
                     run_execution_pass(
                         &client,
                         contract,
@@ -589,6 +595,10 @@ fn respond(
         "{observed},\"lastSkipDetail\":{}",
         optional_json(snapshot.last_skip_detail.as_deref())
     );
+    let observed = format!(
+        "{observed},\"executionConfigured\":{},\"executionPasses\":{}",
+        snapshot.execution_configured, snapshot.execution_passes
+    );
     let reasons = serde_json::to_string(&snapshot.last_reasons).unwrap_or_else(|_| "{}".to_owned());
     let observed = format!("{observed},\"lastReasons\":{reasons}");
     let notices = serde_json::to_string(&snapshot.fee_notices).unwrap_or_else(|_| "null".into());
@@ -611,7 +621,12 @@ fn respond(
                 .error
                 .as_deref()
                 .or(snapshot.fee_notice_error.as_deref())
-                .or(snapshot.last_execution_error.as_deref());
+                .or(snapshot.last_execution_error.as_deref())
+                .or_else(|| {
+                    (profile != "sentinel" && !snapshot.execution_configured).then_some(
+                        "execution is not configured; shadow profiles require a public identity",
+                    )
+                });
             match blocked {
                 Some(reason) => (
                     "503 Service Unavailable",
