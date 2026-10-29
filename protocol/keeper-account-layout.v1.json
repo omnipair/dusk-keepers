@@ -1,13 +1,13 @@
 {
   "$schema": "./schemas/account-layout.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "devnet-1",
+  "protocolRevision": "devnet-2026-10-26-cd6f1ec",
   "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-  "idlSha256": "7be629ec9f677bbd96324a4463fee336eeb2c9099aa3534138983424a535dfda",
+  "idlSha256": "574f9a347a2ecf2f85fa6d9f981fb474b1300f2e9cca5ae0ca0158da113019eb",
   "accounts": [
     {
       "name": "BorrowPosition",
-      "sizeWithDiscriminator": 266,
+      "sizeWithDiscriminator": 348,
       "fields": [
         {
           "path": "owner",
@@ -45,19 +45,59 @@
           "size": 32
         },
         {
-          "path": "auction_debt_asset",
-          "offset": 240,
+          "path": "fixed_base_shares",
+          "offset": 208,
+          "size": 16
+        },
+        {
+          "path": "fixed_quote_shares",
+          "offset": 224,
+          "size": 16
+        },
+        {
+          "path": "active_liquidation_session",
+          "offset": 256,
+          "size": 32
+        },
+        {
+          "path": "base_distress.active",
+          "offset": 288,
           "size": 1
+        },
+        {
+          "path": "base_distress.started_at",
+          "offset": 289,
+          "size": 8
+        },
+        {
+          "path": "quote_distress.active",
+          "offset": 305,
+          "size": 1
+        },
+        {
+          "path": "quote_distress.started_at",
+          "offset": 306,
+          "size": 8
         }
       ]
     },
     {
       "name": "Market",
-      "sizeWithDiscriminator": 2917,
+      "sizeWithDiscriminator": 3128,
       "fields": [
         {
           "path": "ylp_mint",
           "offset": 9,
+          "size": 32
+        },
+        {
+          "path": "base_side.hlp_mint",
+          "offset": 74,
+          "size": 32
+        },
+        {
+          "path": "quote_side.hlp_mint",
+          "offset": 619,
           "size": 32
         },
         {
@@ -87,114 +127,114 @@
         },
         {
           "path": "quote_side.asset_mint",
-          "offset": 546,
+          "offset": 586,
           "size": 32
         },
         {
           "path": "quote_side.asset_decimals",
-          "offset": 578,
+          "offset": 618,
           "size": 1
         },
         {
           "path": "quote_side.reserve_vault",
-          "offset": 611,
+          "offset": 651,
           "size": 32
         },
         {
           "path": "quote_side.collateral_vault",
-          "offset": 643,
+          "offset": 683,
           "size": 32
         },
         {
           "path": "quote_side.interest_vault",
-          "offset": 675,
+          "offset": 715,
           "size": 32
         },
         {
           "path": "base_side.reserves.live_reserve",
-          "offset": 202,
+          "offset": 210,
           "size": 8
         },
         {
           "path": "quote_side.reserves.live_reserve",
-          "offset": 707,
+          "offset": 755,
           "size": 8
         },
         {
           "path": "base_hlp_vault.ylp_vault",
-          "offset": 1751,
+          "offset": 1952,
           "size": 32
         },
         {
           "path": "quote_hlp_vault.ylp_vault",
-          "offset": 2135,
+          "offset": 2344,
           "size": 32
         },
         {
           "path": "base_hlp_vault.hlp_supply",
-          "offset": 1831,
+          "offset": 2032,
           "size": 8
         },
         {
           "path": "base_hlp_vault.debt_principal",
-          "offset": 1823,
+          "offset": 2024,
           "size": 8
         },
         {
           "path": "quote_hlp_vault.debt_principal",
-          "offset": 2207,
+          "offset": 2416,
           "size": 8
         },
         {
           "path": "base_hlp_vault.debt_shares",
-          "offset": 1807,
+          "offset": 2008,
           "size": 16
         },
         {
           "path": "quote_hlp_vault.debt_shares",
-          "offset": 2191,
+          "offset": 2400,
           "size": 16
         },
         {
           "path": "quote_hlp_vault.hlp_supply",
-          "offset": 2215,
+          "offset": 2424,
           "size": 8
         },
         {
           "path": "base_hlp_vault.residual_exposure",
-          "offset": 1839,
+          "offset": 2040,
           "size": 16
         },
         {
           "path": "quote_hlp_vault.residual_exposure",
-          "offset": 2223,
+          "offset": 2432,
           "size": 16
         },
         {
           "path": "insurance.base_vault",
-          "offset": 2607,
+          "offset": 2816,
           "size": 32
         },
         {
           "path": "insurance.quote_vault",
-          "offset": 2639,
+          "offset": 2848,
           "size": 32
         },
         {
           "path": "params_hash",
-          "offset": 2755,
+          "offset": 2966,
           "size": 32
         },
         {
           "path": "last_update_slot",
-          "offset": 2907,
+          "offset": 3118,
           "size": 8
         }
       ]
     },
     {
       "name": "LeveragePosition",
-      "sizeWithDiscriminator": 220,
+      "sizeWithDiscriminator": 345,
       "fields": [
         {
           "path": "owner",
@@ -208,13 +248,48 @@
         },
         {
           "path": "position_id",
-          "offset": 72,
+          "offset": 104,
           "size": 32
         },
         {
           "path": "debt_asset",
-          "offset": 138,
+          "offset": 170,
           "size": 1
+        },
+        {
+          "path": "namespace_authority",
+          "offset": 72,
+          "size": 32
+        },
+        {
+          "path": "referral_partner",
+          "offset": 136,
+          "size": 32
+        },
+        {
+          "path": "collateral_amount",
+          "offset": 171,
+          "size": 8
+        },
+        {
+          "path": "debt_shares",
+          "offset": 247,
+          "size": 16
+        },
+        {
+          "path": "active_liquidation_session",
+          "offset": 295,
+          "size": 32
+        },
+        {
+          "path": "distress.active",
+          "offset": 327,
+          "size": 1
+        },
+        {
+          "path": "distress.started_at",
+          "offset": 328,
+          "size": 8
         }
       ]
     },
@@ -222,6 +297,11 @@
       "name": "FutarchyAuthority",
       "sizeWithDiscriminator": 395,
       "fields": [
+        {
+          "path": "recipients.futarchy_treasury",
+          "offset": 41,
+          "size": 32
+        },
         {
           "path": "fee_auction.accepted_mint",
           "offset": 153,

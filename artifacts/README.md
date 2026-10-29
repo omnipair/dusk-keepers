@@ -1,13 +1,23 @@
-# Frozen protocol artifacts
+# Captured protocol artifacts
 
-Local Snapshot 0 contains immutable copies of the two program binaries, IDLs,
-generated types, packed Dusk SDK, source patch, source/integration Git bundles,
-and dependency locks. Exact runtime artifact SHA-256 values are recorded in
-`protocol.lock.json`; full capture provenance is in `protocol.snapshot.json`.
+`protocol.lock.json` is the active authority: Dusk #45 at `9c981263`, status
+**captured**. It pins the current Dusk/delegate binaries, IDLs, SDK archive and
+IDL compatibility fingerprints. Validation rehashes these artifacts and computes
+the compatibility fingerprints from their IDLs.
 
-Do not hand-edit generated artifacts. Regeneration creates a new protocol revision
-and must follow the protocol-upgrade runbook.
+`protocol.snapshot.json`, old Git bundles, patches, dependency locks and generated
+types describe the historical Local Snapshot 0 capture. They are retained for
+history and are not the source or interface of this candidate. Current generated
+interfaces are in the packed SDK and current instruction/layout manifests.
 
-Program keypairs are intentionally excluded. A successful deployment must verify
-the executable at the declared program ID and match its program-data hash to the
-corresponding bundled `.so`.
+`dusk-devnet-current.so` matches the current `dusk.so` payload byte for byte.
+The hash-named devnet binaries are historical payloads retained for reference.
+The current Dusk and delegate payloads were compared against devnet program data;
+the upgrade slots, payload hashes and allocation padding are recorded in
+`docs/flash-liquidation-migration.md`.
+
+Use `scripts/capture-protocol.mjs` for a candidate re-pin after rebuilding from a
+clean checkout. Follow `docs/flash-liquidation-migration.md` for bank fixtures and
+verification. Neither capture nor local execution freezes or deploys a program.
+Program keypairs are excluded. Keeper activation still requires the frozen-lock
+release gate even after deployed bytes have been verified.

@@ -1,15 +1,14 @@
 {
   "$schema": "./protocol/schemas/protocol-lock.schema.json",
   "schemaVersion": 1,
-  "revision": "devnet-1",
-  "status": "frozen",
-  "generatedAt": "2026-08-31T00:00:00Z",
+  "revision": "devnet-2026-10-26-cd6f1ec",
+  "status": "captured",
+  "generatedAt": "2026-10-26T23:51:27.878Z",
   "source": {
     "repository": "https://github.com/omnipair/dusk",
-    "branch": "feat/optimizations",
-    "note": "Devnet deployment; program keypairs and address registry in ~/.config/omnipair/dusk-devnet. Binary attested from chain (upgradeable loader programdata). Re-pinned 2026-09-02: the original binary was replaced during hLP drift instrumentation and the only copy of it was a scratch file that did not survive, so it could not be restored. What is deployed now is a clean local anchor build at opt-level z (no debug features), and this hash attests that. source.worktreeFingerprintSha256 covers programs/ and is reproduced by scripts/compute-worktree-fingerprint.mjs.",
-    "gitCommit": "dd7fb53150163ed5b0bf3ae14fea9f2b47aa0d15",
-    "worktreeFingerprintSha256": "17930e6f96af5f4595803fe14e8e716c70750b77f3ca8a8ed5b13d074eb30b2b"
+    "branch": "fix/benchmark-replay-owner",
+    "gitCommit": "77877d576018fd2bd8191d13f05534b0484e2282",
+    "worktreeFingerprintSha256": "9e2edb10082253a2511b0e11119b1748fdcd3e09ead452964da4884956d8ae83"
   },
   "toolchain": {
     "anchor": "0.31.1",
@@ -23,40 +22,36 @@
       "name": "dusk",
       "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "binary": {
-        "path": "chain:devnet:JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-        "sha256": "7183cdb29659e47e54f0a34e3f23ad2b82743941216b606f4480c55304bc2d36"
+        "path": "artifacts/dusk.so",
+        "sha256": "21e3f3c4dd3e0e5b4fad85f69e0bae702b1209ab4fe1820f6bc86e81408d07ed"
       },
       "idl": {
         "path": "artifacts/dusk.json",
-        "sha256": "7be629ec9f677bbd96324a4463fee336eeb2c9099aa3534138983424a535dfda"
+        "sha256": "574f9a347a2ecf2f85fa6d9f981fb474b1300f2e9cca5ae0ca0158da113019eb"
       }
     },
     {
       "name": "leverage_delegate",
       "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
       "binary": {
-        "path": "chain:devnet:AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
-        "sha256": "afe03f80ee2289f4c74195539b6d30489fb5eef93d0927760506438d3050e2b2"
+        "path": "artifacts/leverage_delegate.so",
+        "sha256": "4c1f7e1b326ff91d34d87edc888dee38bfde44058be50df3bb7ecdbe11845e1f"
       },
       "idl": {
         "path": "artifacts/leverage_delegate.json",
-        "sha256": "d0a5997fba913d78c31f585abb068b7048fe302b35f50e3d5a246680400c7d81"
+        "sha256": "59acc8a10b41c235156e593017b1e88dd6657fd192df4a1f1c0cc4275a1dd658"
       }
     }
   ],
   "sdk": {
     "path": "artifacts/dusk-sdk.tgz",
-    "sha256": "67180063bfb2ce6f3c1c47df42732f3fc92d6426be0692a87b203f18322458b1"
+    "sha256": "186c3d85c5a733da446c6f00301fefd0f36170336f1d8f4fdc9807ffc8c16d8c"
   },
   "compatibility": {
-    "accountLayoutFingerprintSha256": "2f91ab01643fec77707e2c98f646b5f9f295c81ea686dd671147f60048a24e7c",
-    "instructionFingerprintSha256": "b8984b5b276843b347fcafcdeaa34686e12179f2473719e80f7d697bf2ce5579",
-    "eventFingerprintSha256": "2aa5a08fe6cf597a0b5de184b9f37661ba8b4bc477e7a2a05620f8f0632a2038",
-    "errorFingerprintSha256": "70e7c5e33d917eaa9fb4cd193d8b2b6d10cdd43737ea98b46abdc8e9a8978b63",
-    "pdaFingerprintSha256": "f98c2a184bcc7047c14100306d2eae8f93746ac008ff83b90ee8d8d52c133c82"
-  },
-  "cluster": {
-    "name": "devnet",
-    "genesisHash": "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG"
+    "accountLayoutFingerprintSha256": "172109189feeb8f21753802fc4a2752cd4ef821ab452fa4dcdd9358adaea1d5c",
+    "instructionFingerprintSha256": "dc4ab7843b8510f6fc1660c2b244c6b9990aae475f77e4d8ed9909e566934978",
+    "eventFingerprintSha256": "00c711e86a809bc1b2bfbb298ce8ec0364e5b07779c5b389826a14a332df7199",
+    "errorFingerprintSha256": "569c0a6e131dc4041c8d8e59a22005babf8bb5f0c759c0f361e964882b91dcc6",
+    "pdaFingerprintSha256": "9fb3d63555aba971eb888651cc9d8fc4dcf98b0ac23e4016588afdc81175438d"
   }
 }

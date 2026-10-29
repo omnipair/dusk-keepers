@@ -5,7 +5,7 @@
     {
       "name": "dusk-leverage-keeper",
       "profile": "leverage",
-      "jobKinds": ["leverage_liquidation", "stop_loss", "take_profit"],
+      "jobKinds": ["leverage_liquidation", "stop_loss", "take_profit", "limit_entry", "hlp_order"],
       "liveRuntime": "rust",
       "shadowRuntime": "typescript",
       "walletRole": "leverage_executor",
@@ -36,6 +36,15 @@
       "liveRuntime": "rust",
       "shadowRuntime": "typescript",
       "walletRole": "lending_settler",
+      "signingRequired": true
+    },
+    {
+      "name": "dusk-hlp-recovery",
+      "profile": "hlp-recovery",
+      "jobKinds": ["hlp_recovery"],
+      "liveRuntime": "rust",
+      "shadowRuntime": "typescript",
+      "walletRole": "hlp_recovery",
       "signingRequired": true
     },
     {

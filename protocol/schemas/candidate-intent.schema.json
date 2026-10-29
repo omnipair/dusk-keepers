@@ -22,8 +22,11 @@
         "lending_liquidation_trigger",
         "lending_liquidation_bid",
         "lending_liquidation_settle",
+        "hlp_recovery",
         "stop_loss",
         "take_profit",
+        "limit_entry",
+        "hlp_order",
         "auction_bid",
         "lifecycle",
         "sentinel"

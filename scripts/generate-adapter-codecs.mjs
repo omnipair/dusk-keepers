@@ -1,17 +1,32 @@
+import { flattenAccounts } from "./idl-accounts.mjs";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 
 const root = new URL("../", import.meta.url);
-const manifestPath = new URL("protocol/keeper-account-resolution.v1.json", root);
-const fixturesPath = new URL("fixtures/conformance/v1/adapter-codec-cases.json", root);
+const manifestPath = new URL(
+  "protocol/keeper-account-resolution.v1.json",
+  root,
+);
+const fixturesPath = new URL(
+  "fixtures/conformance/v1/adapter-codec-cases.json",
+  root,
+);
 const PDA_MARKER = Buffer.from("ProgramDerivedAddress", "utf8");
-const BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+const BASE58_ALPHABET =
+  "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 const FIELD_MODULUS = (1n << 255n) - 19n;
 const EDWARDS_D = mod(-121665n * modInverse(121666n));
 const SQRT_MINUS_ONE = modPow(2n, (FIELD_MODULUS - 1n) / 4n);
 
 const inputNames = new Map([
+  ["leverage_position.owner", "owner"],
+  ["leverage_position.namespace_authority", "namespaceAuthority"],
+  ["args.position", "position"],
+  ["session.position", "position"],
+  ["accounts.debt_mint", "debtMint"],
+  ["session", "session"],
+
   ["market.base_side.asset_mint", "baseAssetMint"],
   ["market.quote_side.asset_mint", "quoteAssetMint"],
   ["market.params_hash", "paramsHash"],
@@ -24,6 +39,7 @@ const inputNames = new Map([
   ["order.owner", "owner"],
   ["args.order_id", "orderId"],
   ["order", "order"],
+  ["order.target_hlp_mint", "targetHlpMint"],
 ]);
 
 async function readJson(path) {
@@ -41,8 +57,14 @@ function descendType(idl, type, path) {
     const name = definedName(current);
     assert.ok(name, `cannot traverse ${fieldName} through non-struct IDL type`);
     const definition = idl.types.find((entry) => entry.name === name);
-    assert.equal(definition?.type.kind, "struct", `${name}: seed path requires a struct`);
-    const field = definition.type.fields.find((entry) => entry.name === fieldName);
+    assert.equal(
+      definition?.type.kind,
+      "struct",
+      `${name}: seed path requires a struct`,
+    );
+    const field = definition.type.fields.find(
+      (entry) => entry.name === fieldName,
+    );
     assert.ok(field, `${name}.${fieldName}: seed field is absent from IDL`);
     current = field.type;
   }
@@ -54,19 +76,30 @@ function seedEncoding(idl, instruction, seed) {
   if (seed.kind === "account") {
     const [rootAccount, ...fieldPath] = seed.path.split(".");
     assert.ok(
-      instruction.accounts.some((account) => account.name === rootAccount),
+      [...instruction.accounts, ...flattenAccounts(instruction.accounts)].some(
+        (account) => account.name === rootAccount,
+      ),
       `${instruction.name}:${seed.path}: seed account is absent`,
     );
-    type = seed.account
-      ? descendType(idl, { defined: seed.account }, fieldPath)
-      : "pubkey";
+    type = instruction.accounts.find((a) => a.name === rootAccount)?.accounts
+      ? "pubkey"
+      : seed.account
+        ? descendType(idl, { defined: seed.account }, fieldPath)
+        : "pubkey";
   } else if (seed.kind === "arg") {
     const [argumentName, ...fieldPath] = seed.path.split(".");
-    const argument = instruction.args.find((entry) => entry.name === argumentName);
-    assert.ok(argument, `${instruction.name}:${seed.path}: seed argument is absent`);
+    const argument = instruction.args.find(
+      (entry) => entry.name === argumentName,
+    );
+    assert.ok(
+      argument,
+      `${instruction.name}:${seed.path}: seed argument is absent`,
+    );
     type = descendType(idl, argument.type, fieldPath);
   } else {
-    throw new Error(`${instruction.name}: unsupported IDL seed kind ${seed.kind}`);
+    throw new Error(
+      `${instruction.name}: unsupported IDL seed kind ${seed.kind}`,
+    );
   }
 
   if (type === "pubkey") return "pubkey";
@@ -79,18 +112,30 @@ function seedEncoding(idl, instruction, seed) {
   ) {
     return "bytes32";
   }
-  throw new Error(`${instruction.name}:${seed.path}: unsupported seed type ${JSON.stringify(type)}`);
+  throw new Error(
+    `${instruction.name}:${seed.path}: unsupported seed type ${JSON.stringify(type)}`,
+  );
 }
 
 function normalizeSeed(idl, instruction, seed) {
   if (seed.kind === "const") {
     const bytes = Buffer.from(seed.value);
-    assert.ok(bytes.length > 0 && bytes.length <= 32, `${instruction.name}: invalid const seed`);
+    assert.ok(
+      bytes.length > 0 && bytes.length <= 32,
+      `${instruction.name}: invalid const seed`,
+    );
     return { kind: "const", valueHex: bytes.toString("hex") };
   }
   const name = inputNames.get(seed.path);
-  assert.ok(name, `${instruction.name}:${seed.path}: seed input needs an explicit stable name`);
-  return { kind: "input", name, encoding: seedEncoding(idl, instruction, seed) };
+  assert.ok(
+    name,
+    `${instruction.name}:${seed.path}: seed input needs an explicit stable name`,
+  );
+  return {
+    kind: "input",
+    name,
+    encoding: seedEncoding(idl, instruction, seed),
+  };
 }
 
 function rawSeedPath(seed) {
@@ -108,9 +153,12 @@ function buildResolutionManifest(lock, contract, idls) {
     const instruction = idl.instructions.find(
       (entry) => entry.name === specification.instructionName,
     );
-    assert.ok(instruction, `${specification.key}: instruction missing from pinned IDL`);
+    assert.ok(
+      instruction,
+      `${specification.key}: instruction missing from pinned IDL`,
+    );
 
-    for (const account of instruction.accounts) {
+    for (const account of flattenAccounts(instruction.accounts)) {
       let staticAddress = account.address ?? null;
       let staticSource = account.address ? "idl_fixed_address" : null;
       if (!staticAddress && account.name === "program") {
@@ -120,12 +168,22 @@ function buildResolutionManifest(lock, contract, idls) {
       if (!staticAddress && account.name === "delegated_program") {
         const cpiPrograms = new Set(
           contract.actions
-            .filter((action) => action.primaryInstructionKey === specification.key)
+            .filter(
+              (action) => action.primaryInstructionKey === specification.key,
+            )
             .flatMap((action) => action.cpiInstructionKeys)
-            .map((key) => contract.instructions.find((entry) => entry.key === key)?.programId),
+            .map(
+              (key) =>
+                contract.instructions.find((entry) => entry.key === key)
+                  ?.programId,
+            ),
         );
         cpiPrograms.delete(undefined);
-        assert.equal(cpiPrograms.size, 1, `${specification.key}: ambiguous delegated program`);
+        assert.equal(
+          cpiPrograms.size,
+          1,
+          `${specification.key}: ambiguous delegated program`,
+        );
         staticAddress = [...cpiPrograms][0];
         staticSource = "action_cpi_program";
       }
@@ -139,16 +197,30 @@ function buildResolutionManifest(lock, contract, idls) {
       }
 
       if (!account.pda) continue;
-      const key = `${specification.program}:${account.name}`;
-      const normalized = account.pda.seeds.map((seed) => normalizeSeed(idl, instruction, seed));
+      const baseKey = `${specification.program}:${account.name}`;
+      const normalized = account.pda.seeds.map((seed) =>
+        normalizeSeed(idl, instruction, seed),
+      );
       const usage = {
         instructionKey: specification.key,
         accountName: account.name,
         idlSeedPaths: account.pda.seeds.map(rawSeedPath),
       };
-      const existing = recipes.get(key);
+      let key = baseKey;
+      let existing = recipes.get(key);
+      if (
+        existing &&
+        JSON.stringify(existing.seeds) !== JSON.stringify(normalized)
+      ) {
+        key = `${baseKey}:${instruction.name}`;
+        existing = recipes.get(key);
+      }
       if (existing) {
-        assert.deepEqual(existing.seeds, normalized, `${key}: inconsistent IDL PDA recipe`);
+        assert.deepEqual(
+          existing.seeds,
+          normalized,
+          `${key}: inconsistent IDL PDA recipe`,
+        );
         existing.usages.push(usage);
       } else {
         recipes.set(key, {
@@ -200,25 +272,30 @@ function encodeVector(bytes) {
 
 function wireToIdlArguments(specificationKey, argumentsValue) {
   switch (specificationKey) {
-    case "dusk:start_liquidation_auction":
     case "dusk:queue_parameter_proposal":
     case "dusk:execute_parameter_proposal":
+    case "dusk:settle_flash_liquidation":
       return {};
-    case "dusk:fill_liquidation_auction":
+    case "dusk:settle_hlp_flash":
+      return {};
+    case "dusk:preview_hlp_flash":
+      return { target_asset: argumentsValue.targetAsset };
+    case "dusk:observe_liquidation":
+      return { debt_asset: argumentsValue.debtAsset };
+    case "dusk:preview_flash_liquidation":
+    case "dusk:preview_emergency_liquidation":
+    case "dusk:begin_flash_liquidation":
+    case "dusk:emergency_liquidation":
+    case "dusk:begin_hlp_flash":
+    case "dusk:close_insolvent_hlp":
       return {
-        args: {
-          repay_amount: argumentsValue.repayAmount,
-          min_collateral_out: argumentsValue.minCollateralOut,
-        },
+        args: Object.fromEntries(
+          Object.entries(argumentsValue).map(([k, v]) => [
+            k.replace(/[A-Z]/g, (c) => "_" + c.toLowerCase()),
+            v,
+          ]),
+        ),
       };
-    case "dusk:backstop_liquidation_auction":
-      return {
-        args: {
-          min_caller_bounty_out: argumentsValue.minCallerBountyOut,
-        },
-      };
-    case "dusk:liquidate_leverage_position":
-      return { args: { debt_asset: argumentsValue.debtAsset } };
     case "dusk:delegated_close_leverage":
       return {
         args: {
@@ -235,7 +312,15 @@ function wireToIdlArguments(specificationKey, argumentsValue) {
     case "leverage_delegate:before_take_profit":
     case "leverage_delegate:before_stop_loss":
     case "leverage_delegate:after_close_order":
+    case "leverage_delegate:execute_hlp_order":
       return { args: { order_id: argumentsValue.orderId } };
+    case "leverage_delegate:execute_leverage_entry_order":
+      return {
+        args: {
+          order_id: argumentsValue.orderId,
+          min_owner_refund_out: argumentsValue.minOwnerRefundOut,
+        },
+      };
     case "dusk:settle_protocol_auction":
       return {
         args: {
@@ -252,32 +337,59 @@ function wireToIdlArguments(specificationKey, argumentsValue) {
 
 function encodeIdlType(idl, type, value, path) {
   if (typeof type === "string") {
+    if (type === "bool") {
+      assert.equal(typeof value, "boolean");
+      return Buffer.from([value ? 1 : 0]);
+    }
+    if (type === "pubkey") {
+      const bytes = base58Decode(value);
+      assert.equal(bytes.length, 32);
+      return bytes;
+    }
     if (type === "u8") {
-      assert.ok(Number.isInteger(value) && value >= 0 && value <= 0xff, `${path}: invalid u8`);
+      assert.ok(
+        Number.isInteger(value) && value >= 0 && value <= 0xff,
+        `${path}: invalid u8`,
+      );
       return Buffer.from([value]);
     }
     if (type === "u16") {
-      assert.ok(Number.isInteger(value) && value >= 0 && value <= 0xffff, `${path}: invalid u16`);
+      assert.ok(
+        Number.isInteger(value) && value >= 0 && value <= 0xffff,
+        `${path}: invalid u16`,
+      );
       return encodeU16(value);
     }
     if (type === "u32") {
-      assert.ok(Number.isInteger(value) && value >= 0 && value <= 0xffff_ffff, `${path}: invalid u32`);
+      assert.ok(
+        Number.isInteger(value) && value >= 0 && value <= 0xffff_ffff,
+        `${path}: invalid u32`,
+      );
       return encodeU32(value);
     }
     if (type === "u64") return encodeU64(value);
     if (type === "bytes") {
-      assert.ok(Buffer.isBuffer(value), `${path}: IDL bytes value must be a Buffer`);
+      assert.ok(
+        Buffer.isBuffer(value),
+        `${path}: IDL bytes value must be a Buffer`,
+      );
       return encodeVector(value);
     }
     throw new Error(`${path}: unsupported golden-vector IDL scalar ${type}`);
   }
 
   const name = definedName(type);
-  assert.ok(name, `${path}: unsupported golden-vector IDL type ${JSON.stringify(type)}`);
+  assert.ok(
+    name,
+    `${path}: unsupported golden-vector IDL type ${JSON.stringify(type)}`,
+  );
   const definition = idl.types.find((entry) => entry.name === name);
   assert.ok(definition, `${path}: missing IDL type ${name}`);
   if (definition.type.kind === "struct") {
-    assert.ok(value && typeof value === "object", `${path}: struct value must be an object`);
+    assert.ok(
+      value && typeof value === "object",
+      `${path}: struct value must be an object`,
+    );
     assert.deepEqual(
       Object.keys(value).sort(),
       definition.type.fields.map((field) => field.name).sort(),
@@ -285,18 +397,34 @@ function encodeIdlType(idl, type, value, path) {
     );
     return Buffer.concat(
       definition.type.fields.map((field) =>
-        encodeIdlType(idl, field.type, value[field.name], `${path}.${field.name}`),
+        encodeIdlType(
+          idl,
+          field.type,
+          value[field.name],
+          `${path}.${field.name}`,
+        ),
       ),
     );
   }
   if (definition.type.kind === "enum") {
-    const ordinal = definition.type.variants.findIndex((variant) => variant.name === value);
-    assert.notEqual(ordinal, -1, `${path}: enum variant differs from pinned IDL`);
-    assert.ok(!definition.type.variants[ordinal].fields, `${path}: data enums are unsupported`);
+    const ordinal = definition.type.variants.findIndex(
+      (variant) => variant.name === value,
+    );
+    assert.notEqual(
+      ordinal,
+      -1,
+      `${path}: enum variant differs from pinned IDL`,
+    );
+    assert.ok(
+      !definition.type.variants[ordinal].fields,
+      `${path}: data enums are unsupported`,
+    );
     assert.ok(ordinal <= 0xff, `${path}: enum ordinal exceeds one byte`);
     return Buffer.from([ordinal]);
   }
-  throw new Error(`${path}: unsupported IDL definition kind ${definition.type.kind}`);
+  throw new Error(
+    `${path}: unsupported IDL definition kind ${definition.type.kind}`,
+  );
 }
 
 function encodeIdlArguments(idl, instruction, values) {
@@ -307,7 +435,12 @@ function encodeIdlArguments(idl, instruction, values) {
   );
   return Buffer.concat(
     instruction.args.map((argument) =>
-      encodeIdlType(idl, argument.type, values[argument.name], `${instruction.name}.${argument.name}`),
+      encodeIdlType(
+        idl,
+        argument.type,
+        values[argument.name],
+        `${instruction.name}.${argument.name}`,
+      ),
     ),
   );
 }
@@ -316,7 +449,10 @@ function normalizeIdlType(idl, type, visited = new Set()) {
   if (typeof type === "string") return type;
   const name = definedName(type);
   if (!name) return type;
-  assert.ok(!visited.has(name), `${name}: recursive instruction argument type is unsupported`);
+  assert.ok(
+    !visited.has(name),
+    `${name}: recursive instruction argument type is unsupported`,
+  );
   const definition = idl.types.find((entry) => entry.name === name);
   assert.ok(definition, `${name}: missing IDL type`);
   const nextVisited = new Set(visited).add(name);
@@ -336,7 +472,9 @@ function normalizeIdlType(idl, type, visited = new Set()) {
       })),
     };
   }
-  throw new Error(`${name}: unsupported IDL argument definition kind ${definition.type.kind}`);
+  throw new Error(
+    `${name}: unsupported IDL argument definition kind ${definition.type.kind}`,
+  );
 }
 
 function argumentLayoutSha256(idl, instruction) {
@@ -347,14 +485,27 @@ function argumentLayoutSha256(idl, instruction) {
   return createHash("sha256").update(JSON.stringify(layout)).digest("hex");
 }
 
-function referenceInstructionData(contract, idls, specificationKey, argumentsValue) {
-  const specification = contract.instructions.find((entry) => entry.key === specificationKey);
-  assert.ok(specification, `${specificationKey}: specification missing from contract`);
+function referenceInstructionData(
+  contract,
+  idls,
+  specificationKey,
+  argumentsValue,
+) {
+  const specification = contract.instructions.find(
+    (entry) => entry.key === specificationKey,
+  );
+  assert.ok(
+    specification,
+    `${specificationKey}: specification missing from contract`,
+  );
   const idl = idls.get(specification.program);
   const instruction = idl.instructions.find(
     (entry) => entry.name === specification.instructionName,
   );
-  assert.ok(instruction, `${specificationKey}: instruction missing from pinned IDL`);
+  assert.ok(
+    instruction,
+    `${specificationKey}: instruction missing from pinned IDL`,
+  );
   return Buffer.concat([
     Buffer.from(specification.discriminatorHex, "hex"),
     encodeIdlArguments(
@@ -385,13 +536,58 @@ function buildEncodingCases(contract, idls) {
   ).toString("hex");
 
   const argumentsByKey = {
-    "dusk:start_liquidation_auction": {},
-    "dusk:fill_liquidation_auction": {
-      repayAmount: "18446744073709551615",
-      minCollateralOut: "0",
+    "leverage_delegate:execute_hlp_order": { orderId: "7" },
+    "leverage_delegate:execute_leverage_entry_order": {
+      orderId: "7",
+      minOwnerRefundOut: "0",
     },
-    "dusk:backstop_liquidation_auction": { minCallerBountyOut: "100" },
-    "dusk:liquidate_leverage_position": { debtAsset: 1 },
+    "dusk:observe_liquidation": { debtAsset: 1 },
+    "dusk:preview_flash_liquidation": {
+      debtAsset: 0,
+      maxRepayment: "18446744073709551615",
+      full: false,
+    },
+    "dusk:preview_emergency_liquidation": {
+      debtAsset: 1,
+      collateralDebit: "1000",
+      full: true,
+    },
+    "dusk:begin_flash_liquidation": {
+      position: deterministicPubkey("flash-position"),
+      debtAsset: 1,
+      maxRepayment: "1000",
+      maxPayment: "1100",
+      minCollateralCredit: "900",
+      minBuyerCredit: "25",
+      full: false,
+      settleIndex: 3,
+    },
+    "dusk:settle_flash_liquidation": {},
+    "dusk:emergency_liquidation": {
+      debtAsset: 0,
+      collateralDebit: "1000",
+      full: false,
+      minRewardCredit: "1",
+      minSwapOutput: "900",
+    },
+    "dusk:preview_hlp_flash": { targetAsset: 0 },
+    "dusk:begin_hlp_flash": {
+      targetAsset: 1,
+      maxPayment: "1100",
+      allowFull: false,
+      maxInsuranceDraw: "500",
+      maxSocializedLoss: "250",
+      maxCollateralDebit: "1200",
+      minCollateralCredit: "900",
+      settleIndex: 4,
+    },
+    "dusk:settle_hlp_flash": {},
+    "dusk:close_insolvent_hlp": {
+      targetAsset: 0,
+      maxInsuranceDraw: "500",
+      maxSocializedLoss: "250",
+      minCallerBountyOut: "1",
+    },
     "dusk:delegated_close_leverage": {
       debtAsset: 0,
       minAmountOut: "800",
@@ -413,12 +609,18 @@ function buildEncodingCases(contract, idls) {
 
   return contract.instructions.map((specification) => {
     const argumentsValue = argumentsByKey[specification.key];
-    assert.ok(argumentsValue, `${specification.key}: missing golden argument vector`);
+    assert.ok(
+      argumentsValue,
+      `${specification.key}: missing golden argument vector`,
+    );
     const idl = idls.get(specification.program);
     const instruction = idl.instructions.find(
       (entry) => entry.name === specification.instructionName,
     );
-    assert.ok(instruction, `${specification.key}: instruction missing from pinned IDL`);
+    assert.ok(
+      instruction,
+      `${specification.key}: instruction missing from pinned IDL`,
+    );
     return {
       name: specification.key.replace(":", " "),
       specificationKey: specification.key,
@@ -449,13 +651,25 @@ function base58Encode(bytes) {
     }
   }
   let result = "";
-  for (let index = 0; index < bytes.length - 1 && bytes[index] === 0; index += 1) result += "1";
-  return result + digits.reverse().map((digit) => BASE58_ALPHABET[digit]).join("");
+  for (
+    let index = 0;
+    index < bytes.length - 1 && bytes[index] === 0;
+    index += 1
+  )
+    result += "1";
+  return (
+    result +
+    digits
+      .reverse()
+      .map((digit) => BASE58_ALPHABET[digit])
+      .join("")
+  );
 }
 
 function base58Decode(value) {
   let leadingZeros = 0;
-  while (leadingZeros < value.length && value[leadingZeros] === "1") leadingZeros += 1;
+  while (leadingZeros < value.length && value[leadingZeros] === "1")
+    leadingZeros += 1;
   const bytes = [];
   for (const character of value.slice(leadingZeros)) {
     const digit = BASE58_ALPHABET.indexOf(character);
@@ -471,7 +685,10 @@ function base58Decode(value) {
       carry >>= 8;
     }
   }
-  return Buffer.concat([Buffer.alloc(leadingZeros), Buffer.from(bytes.reverse())]);
+  return Buffer.concat([
+    Buffer.alloc(leadingZeros),
+    Buffer.from(bytes.reverse()),
+  ]);
 }
 
 function mod(value) {
@@ -517,13 +734,20 @@ function isEd25519Point(bytes) {
 
 function findProgramAddress(seeds, programId) {
   const program = base58Decode(programId);
-  assert.equal(program.length, 32, `${programId}: program ID must decode to 32 bytes`);
+  assert.equal(
+    program.length,
+    32,
+    `${programId}: program ID must decode to 32 bytes`,
+  );
   assert.ok(seeds.length < 16, "PDA recipe leaves no room for a bump seed");
-  for (const seed of seeds) assert.ok(seed.length <= 32, "PDA seed exceeds 32 bytes");
+  for (const seed of seeds)
+    assert.ok(seed.length <= 32, "PDA seed exceeds 32 bytes");
 
   for (let bump = 255; bump >= 0; bump -= 1) {
     const digest = createHash("sha256")
-      .update(Buffer.concat([...seeds, Buffer.from([bump]), program, PDA_MARKER]))
+      .update(
+        Buffer.concat([...seeds, Buffer.from([bump]), program, PDA_MARKER]),
+      )
       .digest();
     if (!isEd25519Point(digest)) return { address: base58Encode(digest), bump };
   }
@@ -539,11 +763,15 @@ function fixtureInput(recipeKey, seed) {
     case "pubkey":
       return deterministicPubkey(`${recipeKey}:${seed.name}`);
     case "bytes32":
-      return createHash("sha256").update(`${recipeKey}:${seed.name}`).digest("hex");
+      return createHash("sha256")
+        .update(`${recipeKey}:${seed.name}`)
+        .digest("hex");
     case "u64_le":
       return "72623859790382856";
     default:
-      throw new Error(`${recipeKey}:${seed.name}: unsupported fixture encoding`);
+      throw new Error(
+        `${recipeKey}:${seed.name}: unsupported fixture encoding`,
+      );
   }
 }
 
@@ -595,8 +823,13 @@ function buildFixtureBundle(contract, manifest, idls) {
   const eventAuthority = pdaCases.find(
     (entry) => entry.recipeKey === "dusk:event_authority",
   );
-  const order = pdaCases.find((entry) => entry.recipeKey === "leverage_delegate:order");
-  assert.ok(market && eventAuthority && order, "required negative-test PDA recipes are absent");
+  const order = pdaCases.find(
+    (entry) => entry.recipeKey === "leverage_delegate:order",
+  );
+  assert.ok(
+    market && eventAuthority && order,
+    "required negative-test PDA recipes are absent",
+  );
 
   return {
     $schema: "../../../protocol/schemas/adapter-codec-fixture.schema.json",
@@ -611,25 +844,29 @@ function buildFixtureBundle(contract, manifest, idls) {
       },
       {
         name: "u64 overflow",
-        specificationKey: "dusk:fill_liquidation_auction",
-        arguments: { repayAmount: "18446744073709551616", minCollateralOut: "0" },
+        specificationKey: "dusk:preview_flash_liquidation",
+        arguments: {
+          debtAsset: 0,
+          full: false,
+          maxRepayment: "18446744073709551616",
+        },
         expectedError: "invalid_arguments",
       },
       {
         name: "negative u64",
-        specificationKey: "dusk:fill_liquidation_auction",
-        arguments: { repayAmount: "-1", minCollateralOut: "0" },
+        specificationKey: "dusk:preview_flash_liquidation",
+        arguments: { debtAsset: 0, full: false, maxRepayment: "-1" },
         expectedError: "invalid_arguments",
       },
       {
         name: "non-canonical u64",
-        specificationKey: "dusk:fill_liquidation_auction",
-        arguments: { repayAmount: "+1", minCollateralOut: "0" },
+        specificationKey: "dusk:preview_flash_liquidation",
+        arguments: { debtAsset: 0, full: false, maxRepayment: "+1" },
         expectedError: "invalid_arguments",
       },
       {
         name: "u8 overflow",
-        specificationKey: "dusk:liquidate_leverage_position",
+        specificationKey: "dusk:observe_liquidation",
         arguments: { debtAsset: 256 },
         expectedError: "invalid_arguments",
       },
@@ -725,7 +962,8 @@ async function main() {
   const lock = await readJson("protocol.lock.json");
   const contract = await readJson("protocol/keeper-instructions.v1.json");
   const idls = new Map();
-  for (const program of lock.programs) idls.set(program.name, await readJson(program.idl.path));
+  for (const program of lock.programs)
+    idls.set(program.name, await readJson(program.idl.path));
 
   const manifest = buildResolutionManifest(lock, contract, idls);
   const fixtures = buildFixtureBundle(contract, manifest, idls);
@@ -738,8 +976,16 @@ async function main() {
     return;
   }
 
-  assert.equal(await readFile(manifestPath, "utf8"), formatted(manifest), "account resolution manifest is stale");
-  assert.equal(await readFile(fixturesPath, "utf8"), formatted(fixtures), "adapter codec fixtures are stale");
+  assert.equal(
+    await readFile(manifestPath, "utf8"),
+    formatted(manifest),
+    "account resolution manifest is stale",
+  );
+  assert.equal(
+    await readFile(fixturesPath, "utf8"),
+    formatted(fixtures),
+    "adapter codec fixtures are stale",
+  );
   console.log(
     `verified ${fixtures.encodingCases.length} encoding, ${fixtures.pdaCases.length} PDA, and ${fixtures.staticAccountCases.length} static-account vectors`,
   );

@@ -20,10 +20,19 @@ pub enum ProgramName {
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum JobAction {
+    LimitEntryExecute,
+    HlpOrderExecute,
+    FlashLiquidationSettle,
+    FlashLiquidationPreview,
+    EmergencyLiquidationPreview,
     LendingLiquidationTrigger,
     LendingLiquidationBid,
     LendingLiquidationFloorSettle,
     LeverageLiquidation,
+    HlpFlashPreview,
+    HlpFlashBegin,
+    HlpFlashSettle,
+    HlpInsolventClose,
     DelegatedCloseTakeProfit,
     DelegatedCloseStopLoss,
     ProtocolRevenueAuctionSettle,
@@ -38,8 +47,11 @@ pub enum JobKind {
     LendingLiquidationTrigger,
     LendingLiquidationBid,
     LendingLiquidationSettle,
+    HlpRecovery,
     StopLoss,
     TakeProfit,
+    LimitEntry,
+    HlpOrder,
     AuctionBid,
     Lifecycle,
     Sentinel,
@@ -487,10 +499,10 @@ impl EnvelopeValidator {
 fn decode_delegated_cpi_payload(
     data: &[u8],
 ) -> Result<(Vec<u8>, Vec<u8>, usize), EnvelopeValidationError> {
-    if data.len() < 8 + 1 + 8 + 4 + 4 + 2 {
+    if data.len() < 8 + 1 + 8 + 2 + 4 + 4 + 2 {
         return Err(invalid_delegated_data());
     }
-    let mut cursor = 8 + 1 + 8;
+    let mut cursor = 8 + 1 + 8 + 2;
     let before = read_vector(data, &mut cursor)?;
     let after = read_vector(data, &mut cursor)?;
     let end = cursor.checked_add(2).ok_or_else(invalid_delegated_data)?;

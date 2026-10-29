@@ -3,11 +3,22 @@
 Production-oriented keeper runtimes for Dusk, pinned to one protocol snapshot and
 verified with the same conformance fixtures in Rust and TypeScript.
 
-This repository is a scaffold. It deliberately defaults to **shadow mode**. The
-Local Snapshot 0 artifacts are captured and hash-verified, but the lock remains
-`captured` until the complete Surfpool matrix passes. Live execution additionally
-requires a real executor implementation. No signer material belongs in this
-repository or in plaintext environment variables.
+The candidate interface is Dusk PR #45 at `cd6f1ec0`. Rust implements borrowing,
+leverage and hLP observation, atomic flash fills, emergency settlement and hLP
+terminal close. TypeScript provides independent protocol codecs and shadow
+reference checks.
+
+The `hlp-recovery` profile checks both market-wide hLP vaults. It first attempts
+the program-quoted atomic flash repair with explicit wallet and collateral
+bounds, then permits terminal close only when the quote authorizes a full
+settlement. The devnet program bytes are verified against the captured
+artifacts. The lock stays captured so this PR remains shadow-only until the
+separately reviewed live-release gate freezes it.
+
+The lock remains **captured** and defaults to **shadow mode**. Local tests execute
+the exact binaries deployed on devnet. Nothing in this migration freezes the
+lock or enables signing on that candidate.
+See [the flash migration runbook](docs/flash-liquidation-migration.md).
 
 ## What is here
 
@@ -15,7 +26,7 @@ repository or in plaintext environment variables.
 - `protocol/keeper-instructions.v1.json`: mechanically generated critical-instruction contract pinned to both IDLs.
 - `protocol/keeper-account-resolution.v1.json`: generated static-account and PDA seed manifest.
 - `fixtures/`: golden inputs shared by the Rust and TypeScript test suites.
-- `rust/`: the first live-runtime target; currently a safe, non-signing skeleton.
+- `rust/`: native execution, fresh RPC evaluation and durable PostgreSQL submission/recovery.
 - `typescript/`: the shadow/reference runtime and future lifecycle workers.
 - `deploy/railway/`: separate Railway service profiles and hardened container builds.
 - `docs/`: architecture, threat model, upgrade process, and operational runbooks.
@@ -27,17 +38,18 @@ the canonical protocol client.
 ## Start here
 
 ```bash
+npm ci
 node scripts/validate-repo.mjs
+cargo build --locked
 cargo test --locked --workspace
+npm run typecheck
 npm test
+npm run keeper:ts:check
 ```
 
-All three commands are designed to run without a local validator. Rust dependency
-resolution can run offline after the two small serialization crates are cached:
-
-```bash
-cargo test --locked --workspace --offline
-```
+Node tests invoke the native planner and execute its transactions in LiteSVM;
+build the Rust binary first. Recovery tests also use a disposable PostgreSQL 16
+instance (see the runbook). No public validator or funded wallet is needed.
 
 Instruction contract drift is fail-fast. Regenerate only after intentionally
 changing the pinned protocol snapshot:
@@ -45,6 +57,7 @@ changing the pinned protocol snapshot:
 ```bash
 node scripts/generate-instruction-contract.mjs --write
 node scripts/generate-adapter-codecs.mjs --write
+node scripts/generate-account-layout.mjs --write
 ```
 
 ## Safety state
@@ -54,3 +67,12 @@ hashes are real and validated, while both adapters still reject live mode. Move
 it to `frozen` only through
 [`docs/runbooks/protocol-upgrade.md`](docs/runbooks/protocol-upgrade.md) after the
 full Surfpool and cross-runtime gates pass.
+
+## Mutable transfer-fee notice handling
+
+See [the #287160 monitor and rollout runbook](docs/transfer-fee-notice.md). The
+monitor watches epoch transitions and both market mints; final-notice markets
+receive priority and changed fees invalidate pending attempts. The native
+callers now use the pinned #45 flash/emergency interface. The deployed payloads
+and upgrade slots are recorded in the flash migration runbook. The frozen release
+lock and keeper service activation remain separate release steps.

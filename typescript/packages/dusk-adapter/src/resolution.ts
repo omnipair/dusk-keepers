@@ -306,7 +306,7 @@ export class DeterministicAccountResolver {
   }
 }
 
-function findProgramAddress(seeds: readonly Buffer[], programId: string): ResolvedPda {
+export function findProgramAddress(seeds: readonly Buffer[], programId: string): ResolvedPda {
   if (seeds.length >= 16 || seeds.some((seed) => seed.length > 32)) {
     throw resolutionError(
       "invalid_seed_value",
@@ -383,7 +383,7 @@ function base58Encode(bytes: Buffer): string {
   return output + digits.reverse().map((digit) => BASE58_ALPHABET[digit]).join("");
 }
 
-function decodePubkey(
+export function decodePubkey(
   value: string,
   errorCode: "invalid_seed_value" | "invalid_program_id",
 ): Buffer {

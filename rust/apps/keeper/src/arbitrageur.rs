@@ -25,9 +25,9 @@ use keeper_core::{OutcomeStatus, ReasonCode};
 
 use crate::{
     accounts::{AccountAssembler, MarketAccounts, associated_token_account, decode_key},
-    bidder::token_amount,
     discovery::{RpcClient, account_discriminator},
     execute::{AttemptReport, ExecutionError, classify_simulation_failure},
+    flash::token_amount,
     signer::TransactionSigner,
     transaction::{Instruction, base64, compile_message, serialize_transaction},
 };

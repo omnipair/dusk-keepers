@@ -14,24 +14,127 @@ use sha2::{Digest, Sha256};
 use crate::InstructionContract;
 
 #[derive(Clone, Debug, BorshSerialize, Eq, PartialEq)]
-pub struct FillLiquidationAuctionArgs {
-    pub repay_amount: u64,
-    pub min_collateral_out: u64,
+pub struct ObserveLiquidationArgs {
+    pub debt_asset: u8,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct ObserveLiquidationWire {
+    debt_asset: u8,
+}
+#[derive(Clone, Debug, BorshSerialize, Eq, PartialEq)]
+pub struct PreviewFlashLiquidationArgs {
+    pub debt_asset: u8,
+    pub max_repayment: u64,
+    pub full: bool,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct PreviewFlashLiquidationWire {
+    debt_asset: u8,
+    max_repayment: String,
+    full: bool,
+}
+#[derive(Clone, Debug, BorshSerialize, Eq, PartialEq)]
+pub struct PreviewEmergencyLiquidationArgs {
+    pub debt_asset: u8,
+    pub collateral_debit: u64,
+    pub full: bool,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct PreviewEmergencyLiquidationWire {
+    debt_asset: u8,
+    collateral_debit: String,
+    full: bool,
+}
+#[derive(Clone, Debug, BorshSerialize, Eq, PartialEq)]
+pub struct BeginFlashLiquidationArgs {
+    pub position: [u8; 32],
+    pub debt_asset: u8,
+    pub max_repayment: u64,
+    pub max_payment: u64,
+    pub min_collateral_credit: u64,
+    pub min_buyer_credit: u64,
+    pub full: bool,
+    pub settle_index: u16,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct BeginFlashLiquidationWire {
+    position: String,
+    debt_asset: u8,
+    max_repayment: String,
+    max_payment: String,
+    min_collateral_credit: String,
+    min_buyer_credit: String,
+    full: bool,
+    settle_index: u16,
+}
+#[derive(Clone, Debug, BorshSerialize, Eq, PartialEq)]
+pub struct EmergencyLiquidationArgs {
+    pub debt_asset: u8,
+    pub collateral_debit: u64,
+    pub full: bool,
+    pub min_reward_credit: u64,
+    pub min_swap_output: u64,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct EmergencyLiquidationWire {
+    debt_asset: u8,
+    collateral_debit: String,
+    full: bool,
+    min_reward_credit: String,
+    min_swap_output: String,
 }
 
 #[derive(Clone, Debug, BorshSerialize, Eq, PartialEq)]
-/// The backstop's only argument.
-///
-/// It does not take loss bounds: how much insurance is drawn and how much loss
-/// is socialized are decided by market state, not by whoever calls. The caller
-/// only states the bounty it will accept.
-pub struct BackstopLiquidationAuctionArgs {
+pub struct PreviewHlpFlashArgs {
+    pub target_asset: u8,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct PreviewHlpFlashWire {
+    target_asset: u8,
+}
+#[derive(Clone, Debug, BorshSerialize, Eq, PartialEq)]
+pub struct BeginHlpFlashArgs {
+    pub target_asset: u8,
+    pub max_payment: u64,
+    pub allow_full: bool,
+    pub max_insurance_draw: u64,
+    pub max_socialized_loss: u64,
+    pub max_collateral_debit: u64,
+    pub min_collateral_credit: u64,
+    pub settle_index: u16,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct BeginHlpFlashWire {
+    target_asset: u8,
+    max_payment: String,
+    allow_full: bool,
+    max_insurance_draw: String,
+    max_socialized_loss: String,
+    max_collateral_debit: String,
+    min_collateral_credit: String,
+    settle_index: u16,
+}
+#[derive(Clone, Debug, BorshSerialize, Eq, PartialEq)]
+pub struct CloseInsolventHlpArgs {
+    pub target_asset: u8,
+    pub max_insurance_draw: u64,
+    pub max_socialized_loss: u64,
     pub min_caller_bounty_out: u64,
 }
-
-#[derive(Clone, Debug, BorshSerialize, Eq, PartialEq)]
-pub struct LiquidateLeveragePositionArgs {
-    pub debt_asset: u8,
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct CloseInsolventHlpWire {
+    target_asset: u8,
+    max_insurance_draw: String,
+    max_socialized_loss: String,
+    min_caller_bounty_out: String,
 }
 
 #[derive(Clone, Debug, BorshSerialize, Eq, PartialEq)]
@@ -56,6 +159,19 @@ pub struct ExecuteOrderArgs {
     pub order_id: u64,
 }
 
+#[derive(Clone, Debug, BorshSerialize, Eq, PartialEq)]
+pub struct ExecuteEntryOrderArgs {
+    pub order_id: u64,
+    pub min_owner_refund_out: u64,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct ExecuteEntryOrderWire {
+    order_id: String,
+    min_owner_refund_out: String,
+}
+
 #[derive(Clone, Copy, Debug, BorshSerialize, Eq, PartialEq)]
 pub enum ProtocolAuctionLane {
     Fee,
@@ -78,14 +194,23 @@ pub struct SettleProtocolAuctionArgs {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum KeeperInstructionArguments {
-    StartLiquidationAuction,
-    FillLiquidationAuction(FillLiquidationAuctionArgs),
-    BackstopLiquidationAuction(BackstopLiquidationAuctionArgs),
-    LiquidateLeveragePosition(LiquidateLeveragePositionArgs),
+    ObserveLiquidation(ObserveLiquidationArgs),
+    PreviewFlashLiquidation(PreviewFlashLiquidationArgs),
+    PreviewEmergencyLiquidation(PreviewEmergencyLiquidationArgs),
+    BeginFlashLiquidation(BeginFlashLiquidationArgs),
+    EmergencyLiquidation(EmergencyLiquidationArgs),
+    SettleFlashLiquidation,
+    PreviewHlpFlash(PreviewHlpFlashArgs),
+    BeginHlpFlash(BeginHlpFlashArgs),
+    SettleHlpFlash,
+    CloseInsolventHlp(CloseInsolventHlpArgs),
+
     DelegatedCloseLeverage(DelegatedCloseLeverageArgs),
     BeforeTakeProfit(ExecuteOrderArgs),
     AfterCloseOrder(ExecuteOrderArgs),
     BeforeStopLoss(ExecuteOrderArgs),
+    ExecuteHlpOrder(ExecuteOrderArgs),
+    ExecuteEntryOrder(ExecuteEntryOrderArgs),
     SettleProtocolAuction(SettleProtocolAuctionArgs),
     QueueParameterProposal,
     ExecuteParameterProposal,
@@ -94,14 +219,23 @@ pub enum KeeperInstructionArguments {
 impl KeeperInstructionArguments {
     pub fn specification_key(&self) -> &'static str {
         match self {
-            Self::StartLiquidationAuction => "dusk:start_liquidation_auction",
-            Self::FillLiquidationAuction(_) => "dusk:fill_liquidation_auction",
-            Self::BackstopLiquidationAuction(_) => "dusk:backstop_liquidation_auction",
-            Self::LiquidateLeveragePosition(_) => "dusk:liquidate_leverage_position",
+            Self::ObserveLiquidation(_) => "dusk:observe_liquidation",
+            Self::PreviewFlashLiquidation(_) => "dusk:preview_flash_liquidation",
+            Self::PreviewEmergencyLiquidation(_) => "dusk:preview_emergency_liquidation",
+            Self::BeginFlashLiquidation(_) => "dusk:begin_flash_liquidation",
+            Self::EmergencyLiquidation(_) => "dusk:emergency_liquidation",
+            Self::SettleFlashLiquidation => "dusk:settle_flash_liquidation",
+            Self::PreviewHlpFlash(_) => "dusk:preview_hlp_flash",
+            Self::BeginHlpFlash(_) => "dusk:begin_hlp_flash",
+            Self::SettleHlpFlash => "dusk:settle_hlp_flash",
+            Self::CloseInsolventHlp(_) => "dusk:close_insolvent_hlp",
+
             Self::DelegatedCloseLeverage(_) => "dusk:delegated_close_leverage",
             Self::BeforeTakeProfit(_) => "leverage_delegate:before_take_profit",
             Self::AfterCloseOrder(_) => "leverage_delegate:after_close_order",
             Self::BeforeStopLoss(_) => "leverage_delegate:before_stop_loss",
+            Self::ExecuteHlpOrder(_) => "leverage_delegate:execute_hlp_order",
+            Self::ExecuteEntryOrder(_) => "leverage_delegate:execute_leverage_entry_order",
             Self::SettleProtocolAuction(_) => "dusk:settle_protocol_auction",
             Self::QueueParameterProposal => "dusk:queue_parameter_proposal",
             Self::ExecuteParameterProposal => "dusk:execute_parameter_proposal",
@@ -110,16 +244,24 @@ impl KeeperInstructionArguments {
 
     fn borsh_bytes(&self) -> Result<Vec<u8>, InstructionEncodingError> {
         let result = match self {
-            Self::StartLiquidationAuction
-            | Self::QueueParameterProposal
-            | Self::ExecuteParameterProposal => return Ok(Vec::new()),
-            Self::FillLiquidationAuction(value) => borsh::to_vec(value),
-            Self::BackstopLiquidationAuction(value) => borsh::to_vec(value),
-            Self::LiquidateLeveragePosition(value) => borsh::to_vec(value),
+            Self::ObserveLiquidation(value) => borsh::to_vec(value),
+            Self::PreviewFlashLiquidation(value) => borsh::to_vec(value),
+            Self::PreviewEmergencyLiquidation(value) => borsh::to_vec(value),
+            Self::BeginFlashLiquidation(value) => borsh::to_vec(value),
+            Self::EmergencyLiquidation(value) => borsh::to_vec(value),
+            Self::SettleFlashLiquidation => return Ok(Vec::new()),
+            Self::PreviewHlpFlash(value) => borsh::to_vec(value),
+            Self::BeginHlpFlash(value) => borsh::to_vec(value),
+            Self::SettleHlpFlash => return Ok(Vec::new()),
+            Self::CloseInsolventHlp(value) => borsh::to_vec(value),
+
+            Self::QueueParameterProposal | Self::ExecuteParameterProposal => return Ok(Vec::new()),
             Self::DelegatedCloseLeverage(value) => borsh::to_vec(value),
             Self::BeforeTakeProfit(value)
             | Self::AfterCloseOrder(value)
-            | Self::BeforeStopLoss(value) => borsh::to_vec(value),
+            | Self::BeforeStopLoss(value)
+            | Self::ExecuteHlpOrder(value) => borsh::to_vec(value),
+            Self::ExecuteEntryOrder(value) => borsh::to_vec(value),
             Self::SettleProtocolAuction(value) => borsh::to_vec(value),
         };
         result.map_err(|error| {
@@ -186,35 +328,113 @@ pub fn parse_keeper_instruction_arguments(
     value: Value,
 ) -> Result<KeeperInstructionArguments, InstructionEncodingError> {
     match specification_key {
-        "dusk:start_liquidation_auction" => {
-            parse_empty(value)?;
-            Ok(KeeperInstructionArguments::StartLiquidationAuction)
-        }
-        "dusk:fill_liquidation_auction" => {
-            let wire: FillWire = parse_wire(value)?;
-            Ok(KeeperInstructionArguments::FillLiquidationAuction(
-                FillLiquidationAuctionArgs {
-                    repay_amount: decimal_u64(&wire.repay_amount)?,
-                    min_collateral_out: decimal_u64(&wire.min_collateral_out)?,
-                },
-            ))
-        }
-        "dusk:backstop_liquidation_auction" => {
-            let wire: BackstopWire = parse_wire(value)?;
-            Ok(KeeperInstructionArguments::BackstopLiquidationAuction(
-                BackstopLiquidationAuctionArgs {
-                    min_caller_bounty_out: decimal_u64(&wire.min_caller_bounty_out)?,
-                },
-            ))
-        }
-        "dusk:liquidate_leverage_position" => {
-            let wire: LiquidateWire = parse_wire(value)?;
-            Ok(KeeperInstructionArguments::LiquidateLeveragePosition(
-                LiquidateLeveragePositionArgs {
+        "dusk:observe_liquidation" => {
+            let wire: ObserveLiquidationWire = parse_wire(value)?;
+            Ok(KeeperInstructionArguments::ObserveLiquidation(
+                ObserveLiquidationArgs {
                     debt_asset: wire.debt_asset,
                 },
             ))
         }
+        "dusk:preview_flash_liquidation" => {
+            let wire: PreviewFlashLiquidationWire = parse_wire(value)?;
+            Ok(KeeperInstructionArguments::PreviewFlashLiquidation(
+                PreviewFlashLiquidationArgs {
+                    debt_asset: wire.debt_asset,
+                    max_repayment: decimal_u64(&wire.max_repayment)?,
+                    full: wire.full,
+                },
+            ))
+        }
+        "dusk:preview_emergency_liquidation" => {
+            let wire: PreviewEmergencyLiquidationWire = parse_wire(value)?;
+            Ok(KeeperInstructionArguments::PreviewEmergencyLiquidation(
+                PreviewEmergencyLiquidationArgs {
+                    debt_asset: wire.debt_asset,
+                    collateral_debit: decimal_u64(&wire.collateral_debit)?,
+                    full: wire.full,
+                },
+            ))
+        }
+        "dusk:begin_flash_liquidation" => {
+            let wire: BeginFlashLiquidationWire = parse_wire(value)?;
+            Ok(KeeperInstructionArguments::BeginFlashLiquidation(
+                BeginFlashLiquidationArgs {
+                    position: bs58::decode(&wire.position)
+                        .into_vec()
+                        .ok()
+                        .and_then(|v| v.try_into().ok())
+                        .ok_or_else(|| {
+                            InstructionEncodingError::new(
+                                InstructionEncodingErrorCode::InvalidArguments,
+                                "position must be a pubkey",
+                            )
+                        })?,
+                    debt_asset: wire.debt_asset,
+                    max_repayment: decimal_u64(&wire.max_repayment)?,
+                    max_payment: decimal_u64(&wire.max_payment)?,
+                    min_collateral_credit: decimal_u64(&wire.min_collateral_credit)?,
+                    min_buyer_credit: decimal_u64(&wire.min_buyer_credit)?,
+                    full: wire.full,
+                    settle_index: wire.settle_index,
+                },
+            ))
+        }
+        "dusk:emergency_liquidation" => {
+            let wire: EmergencyLiquidationWire = parse_wire(value)?;
+            Ok(KeeperInstructionArguments::EmergencyLiquidation(
+                EmergencyLiquidationArgs {
+                    debt_asset: wire.debt_asset,
+                    collateral_debit: decimal_u64(&wire.collateral_debit)?,
+                    full: wire.full,
+                    min_reward_credit: decimal_u64(&wire.min_reward_credit)?,
+                    min_swap_output: decimal_u64(&wire.min_swap_output)?,
+                },
+            ))
+        }
+        "dusk:settle_flash_liquidation" => {
+            parse_empty(value)?;
+            Ok(KeeperInstructionArguments::SettleFlashLiquidation)
+        }
+        "dusk:preview_hlp_flash" => {
+            let wire: PreviewHlpFlashWire = parse_wire(value)?;
+            Ok(KeeperInstructionArguments::PreviewHlpFlash(
+                PreviewHlpFlashArgs {
+                    target_asset: wire.target_asset,
+                },
+            ))
+        }
+        "dusk:begin_hlp_flash" => {
+            let wire: BeginHlpFlashWire = parse_wire(value)?;
+            Ok(KeeperInstructionArguments::BeginHlpFlash(
+                BeginHlpFlashArgs {
+                    target_asset: wire.target_asset,
+                    max_payment: decimal_u64(&wire.max_payment)?,
+                    allow_full: wire.allow_full,
+                    max_insurance_draw: decimal_u64(&wire.max_insurance_draw)?,
+                    max_socialized_loss: decimal_u64(&wire.max_socialized_loss)?,
+                    max_collateral_debit: decimal_u64(&wire.max_collateral_debit)?,
+                    min_collateral_credit: decimal_u64(&wire.min_collateral_credit)?,
+                    settle_index: wire.settle_index,
+                },
+            ))
+        }
+        "dusk:settle_hlp_flash" => {
+            parse_empty(value)?;
+            Ok(KeeperInstructionArguments::SettleHlpFlash)
+        }
+        "dusk:close_insolvent_hlp" => {
+            let wire: CloseInsolventHlpWire = parse_wire(value)?;
+            Ok(KeeperInstructionArguments::CloseInsolventHlp(
+                CloseInsolventHlpArgs {
+                    target_asset: wire.target_asset,
+                    max_insurance_draw: decimal_u64(&wire.max_insurance_draw)?,
+                    max_socialized_loss: decimal_u64(&wire.max_socialized_loss)?,
+                    min_caller_bounty_out: decimal_u64(&wire.min_caller_bounty_out)?,
+                },
+            ))
+        }
+
         "dusk:delegated_close_leverage" => {
             let wire: DelegatedCloseWire = parse_wire(value)?;
             Ok(KeeperInstructionArguments::DelegatedCloseLeverage(
@@ -238,6 +458,18 @@ pub fn parse_keeper_instruction_arguments(
         }
         "leverage_delegate:before_stop_loss" => {
             parse_order(value).map(KeeperInstructionArguments::BeforeStopLoss)
+        }
+        "leverage_delegate:execute_hlp_order" => {
+            parse_order(value).map(KeeperInstructionArguments::ExecuteHlpOrder)
+        }
+        "leverage_delegate:execute_leverage_entry_order" => {
+            let wire: ExecuteEntryOrderWire = parse_wire(value)?;
+            Ok(KeeperInstructionArguments::ExecuteEntryOrder(
+                ExecuteEntryOrderArgs {
+                    order_id: decimal_u64(&wire.order_id)?,
+                    min_owner_refund_out: decimal_u64(&wire.min_owner_refund_out)?,
+                },
+            ))
         }
         "dusk:settle_protocol_auction" => {
             let wire: SettleProtocolWire = parse_wire(value)?;
@@ -304,25 +536,6 @@ impl From<ProtocolRevenueSourceWire> for ProtocolRevenueSource {
             ProtocolRevenueSourceWire::Interest => Self::Interest,
         }
     }
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct FillWire {
-    repay_amount: String,
-    min_collateral_out: String,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct BackstopWire {
-    min_caller_bounty_out: String,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct LiquidateWire {
-    debt_asset: u8,
 }
 
 #[derive(Deserialize)]
@@ -507,7 +720,7 @@ mod tests {
     fn native_borsh_encoding_matches_every_shared_golden_vector() {
         let fixtures: FixtureBundle =
             serde_json::from_str(FIXTURES).expect("adapter codec fixtures must parse");
-        assert_eq!(fixtures.encoding_cases.len(), 11);
+        assert_eq!(fixtures.encoding_cases.len(), contract().instructions.len());
         for fixture in fixtures.encoding_cases {
             let encoded = encode_keeper_instruction_json(
                 &contract(),
@@ -537,10 +750,15 @@ mod tests {
     #[test]
     fn rejects_a_discriminator_drift_in_the_contract() {
         let mut contract = contract();
-        contract.instructions[0].discriminator_hex = "00".repeat(8);
+        contract
+            .instructions
+            .iter_mut()
+            .find(|s| s.key == "dusk:settle_flash_liquidation")
+            .unwrap()
+            .discriminator_hex = "00".repeat(8);
         let error = encode_keeper_instruction(
             &contract,
-            &KeeperInstructionArguments::StartLiquidationAuction,
+            &KeeperInstructionArguments::SettleFlashLiquidation,
         )
         .expect_err("a contract mismatch must fail closed");
         assert_eq!(error.code, InstructionEncodingErrorCode::ContractMismatch);

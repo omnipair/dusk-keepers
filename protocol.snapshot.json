@@ -73,26 +73,73 @@
     ]
   },
   "locks": {
-    "cargo": { "path": "artifacts/dusk-Cargo.lock", "sha256": "9dd0d77fe356bf32251feeb1f5b766bf772df7cd0d5e5cb0ee74ad014bce7fe2" },
-    "yarn": { "path": "artifacts/dusk-yarn.lock", "sha256": "63531ab030c743740c988ea22ee11693e5d02e0d4e3e899fdefb09c9b3f5bc37" },
-    "npm": { "path": "artifacts/dusk-package-lock.json", "sha256": "14a2fef3d8bec879d9dfc2bd685ff0e7fdf1486e856608487cdf7fad5bf7546f" }
+    "cargo": {
+      "path": "artifacts/dusk-Cargo.lock",
+      "sha256": "9dd0d77fe356bf32251feeb1f5b766bf772df7cd0d5e5cb0ee74ad014bce7fe2"
+    },
+    "yarn": {
+      "path": "artifacts/dusk-yarn.lock",
+      "sha256": "63531ab030c743740c988ea22ee11693e5d02e0d4e3e899fdefb09c9b3f5bc37"
+    },
+    "npm": {
+      "path": "artifacts/dusk-package-lock.json",
+      "sha256": "14a2fef3d8bec879d9dfc2bd685ff0e7fdf1486e856608487cdf7fad5bf7546f"
+    }
   },
   "programs": [
     {
       "name": "dusk",
       "programId": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
-      "binary": { "path": "artifacts/dusk.so", "bytes": 2930464, "sha256": "48d39d5726e27d6cbb5bbaa3dd26e7d7ec914849bc9b36c7f364f95b943a31d1" },
-      "idl": { "path": "artifacts/dusk.json", "bytes": 328928, "sha256": "5e67579b6dbec5620a5578844cd56c44458a3167095d8db2e85fd76643d5473f", "semanticSha256": "479c4a8c3075c3987e3c18a594fc880bc5c684fda09175563257c91a5cd1376e" },
-      "typescriptType": { "path": "artifacts/dusk.ts", "bytes": 326853, "sha256": "5d677ac7c05150269c85577dafc65c0024a6b8f9afab684a580c2217ef463a9d" },
-      "counts": { "instructions": 53, "accounts": 10, "types": 136, "events": 35, "errors": 132 }
+      "binary": {
+        "path": "artifacts/dusk.so",
+        "bytes": 2930464,
+        "sha256": "48d39d5726e27d6cbb5bbaa3dd26e7d7ec914849bc9b36c7f364f95b943a31d1"
+      },
+      "idl": {
+        "path": "artifacts/dusk.json",
+        "bytes": 328928,
+        "sha256": "5e67579b6dbec5620a5578844cd56c44458a3167095d8db2e85fd76643d5473f",
+        "semanticSha256": "479c4a8c3075c3987e3c18a594fc880bc5c684fda09175563257c91a5cd1376e"
+      },
+      "typescriptType": {
+        "path": "artifacts/dusk.ts",
+        "bytes": 326853,
+        "sha256": "5d677ac7c05150269c85577dafc65c0024a6b8f9afab684a580c2217ef463a9d"
+      },
+      "counts": {
+        "instructions": 53,
+        "accounts": 10,
+        "types": 136,
+        "events": 35,
+        "errors": 132
+      }
     },
     {
       "name": "leverage_delegate",
       "programId": "EPGF9iFrbGnhWgC3To9rC9vxinEYuDHaz4RXgLPvuRkp",
-      "binary": { "path": "artifacts/leverage_delegate.so", "bytes": 605048, "sha256": "763942b752424248cbbdea5b704354eaf0f875564b0b67ed8df8dc3728432f92" },
-      "idl": { "path": "artifacts/leverage_delegate.json", "bytes": 52257, "sha256": "948b9475071daa318cbc9f0e3cc2f8d150191a4ec3dc54e63a661ea489cc5f4a", "semanticSha256": "efd82edafd991693cc5bc319de0ccd41f4033ae3d55c262f749d3a552d9f5631" },
-      "typescriptType": { "path": "artifacts/leverage_delegate.ts", "bytes": 51976, "sha256": "975d3db39818d99c375dfeb90247fbf2e11948ec9a83756ca5b3250b67f1a16f" },
-      "counts": { "instructions": 6, "accounts": 4, "types": 26, "events": 0, "errors": 6 }
+      "binary": {
+        "path": "artifacts/leverage_delegate.so",
+        "bytes": 605048,
+        "sha256": "763942b752424248cbbdea5b704354eaf0f875564b0b67ed8df8dc3728432f92"
+      },
+      "idl": {
+        "path": "artifacts/leverage_delegate.json",
+        "bytes": 52257,
+        "sha256": "948b9475071daa318cbc9f0e3cc2f8d150191a4ec3dc54e63a661ea489cc5f4a",
+        "semanticSha256": "efd82edafd991693cc5bc319de0ccd41f4033ae3d55c262f749d3a552d9f5631"
+      },
+      "typescriptType": {
+        "path": "artifacts/leverage_delegate.ts",
+        "bytes": 51976,
+        "sha256": "975d3db39818d99c375dfeb90247fbf2e11948ec9a83756ca5b3250b67f1a16f"
+      },
+      "counts": {
+        "instructions": 6,
+        "accounts": 4,
+        "types": 26,
+        "events": 0,
+        "errors": 6
+      }
     }
   ],
   "sdk": {
@@ -133,5 +180,8 @@
       "Complete LiteSVM compute baselines and the two-market Surfpool E2E matrix have not run against this snapshot.",
       "Native keeper transaction builders and durable runtime ports are intentionally not implemented yet."
     ]
-  }
+  },
+  "supersededBy": "protocol.lock.json: devnet-2026-10-26-cd6f1ec",
+  "historicalOnly": true,
+  "note": "Historical Local Snapshot 0 manifest. Its program/SDK paths have since been repinned; use protocol.lock.json for active artifact hashes and docs/flash-liquidation-migration.md for candidate coverage."
 }

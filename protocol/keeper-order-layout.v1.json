@@ -1,0 +1,152 @@
+{
+  "$schema": "./schemas/account-layout.schema.json",
+  "schemaVersion": 1,
+  "protocolRevision": "devnet-2026-10-26-cd6f1ec",
+  "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+  "idlSha256": "59acc8a10b41c235156e593017b1e88dd6657fd192df4a1f1c0cc4275a1dd658",
+  "accounts": [
+    {
+      "name": "LeverageOrder",
+      "sizeWithDiscriminator": 380,
+      "fields": [
+        {
+          "path": "owner",
+          "offset": 8,
+          "size": 32
+        },
+        {
+          "path": "market",
+          "offset": 40,
+          "size": 32
+        },
+        {
+          "path": "position",
+          "offset": 72,
+          "size": 32
+        },
+        {
+          "path": "order_id",
+          "offset": 112,
+          "size": 8
+        },
+        {
+          "path": "kind",
+          "offset": 120,
+          "size": 1
+        },
+        {
+          "path": "close_bps",
+          "offset": 129,
+          "size": 2
+        }
+      ]
+    },
+    {
+      "name": "LeverageEntryOrder",
+      "minimumSize": 257,
+      "fields": [
+        {
+          "path": "owner",
+          "offset": 8,
+          "size": 32
+        },
+        {
+          "path": "market",
+          "offset": 40,
+          "size": 32
+        },
+        {
+          "path": "position",
+          "offset": 72,
+          "size": 32
+        },
+        {
+          "path": "position_id",
+          "offset": 104,
+          "size": 32
+        },
+        {
+          "path": "debt_mint",
+          "offset": 136,
+          "size": 32
+        },
+        {
+          "path": "collateral_mint",
+          "offset": 168,
+          "size": 32
+        },
+        {
+          "path": "order_id",
+          "offset": 200,
+          "size": 8
+        },
+        {
+          "path": "debt_asset",
+          "offset": 208,
+          "size": 1
+        },
+        {
+          "path": "margin_amount",
+          "offset": 209,
+          "size": 8
+        },
+        {
+          "path": "executor_bounty",
+          "offset": 217,
+          "size": 8
+        },
+        {
+          "path": "expiry_unix_timestamp",
+          "offset": 249,
+          "size": 8
+        }
+      ]
+    },
+    {
+      "name": "HlpOrder",
+      "sizeWithDiscriminator": 171,
+      "fields": [
+        {
+          "path": "owner",
+          "offset": 8,
+          "size": 32
+        },
+        {
+          "path": "market",
+          "offset": 40,
+          "size": 32
+        },
+        {
+          "path": "target_hlp_mint",
+          "offset": 72,
+          "size": 32
+        },
+        {
+          "path": "custody_hlp_account",
+          "offset": 104,
+          "size": 32
+        },
+        {
+          "path": "order_id",
+          "offset": 136,
+          "size": 8
+        },
+        {
+          "path": "kind",
+          "offset": 144,
+          "size": 1
+        },
+        {
+          "path": "status",
+          "offset": 145,
+          "size": 1
+        },
+        {
+          "path": "hlp_amount",
+          "offset": 146,
+          "size": 8
+        }
+      ]
+    }
+  ]
+}

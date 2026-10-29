@@ -1,82 +1,220 @@
 {
   "$schema": "./schemas/account-resolution-manifest.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "devnet-1",
+  "protocolRevision": "devnet-2026-10-26-cd6f1ec",
   "programs": [
     {
       "name": "dusk",
       "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-      "idlSha256": "7be629ec9f677bbd96324a4463fee336eeb2c9099aa3534138983424a535dfda"
+      "idlSha256": "574f9a347a2ecf2f85fa6d9f981fb474b1300f2e9cca5ae0ca0158da113019eb"
     },
     {
       "name": "leverage_delegate",
       "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
-      "idlSha256": "d0a5997fba913d78c31f585abb068b7048fe302b35f50e3d5a246680400c7d81"
+      "idlSha256": "59acc8a10b41c235156e593017b1e88dd6657fd192df4a1f1c0cc4275a1dd658"
     }
   ],
   "staticAccounts": [
     {
-      "instructionKey": "dusk:fill_liquidation_auction",
-      "accountName": "token_program",
-      "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-      "source": "idl_fixed_address"
-    },
-    {
-      "instructionKey": "dusk:fill_liquidation_auction",
-      "accountName": "token_2022_program",
-      "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
-      "source": "idl_fixed_address"
-    },
-    {
-      "instructionKey": "dusk:fill_liquidation_auction",
-      "accountName": "program",
-      "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-      "source": "instruction_program"
-    },
-    {
-      "instructionKey": "dusk:backstop_liquidation_auction",
+      "instructionKey": "leverage_delegate:execute_leverage_entry_order",
       "accountName": "instructions_sysvar",
       "address": "Sysvar1nstructions1111111111111111111111111",
       "source": "idl_fixed_address"
     },
     {
-      "instructionKey": "dusk:backstop_liquidation_auction",
+      "instructionKey": "leverage_delegate:execute_leverage_entry_order",
+      "accountName": "dusk_program",
+      "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+      "source": "idl_fixed_address"
+    },
+    {
+      "instructionKey": "leverage_delegate:execute_leverage_entry_order",
       "accountName": "token_program",
       "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
       "source": "idl_fixed_address"
     },
     {
-      "instructionKey": "dusk:backstop_liquidation_auction",
+      "instructionKey": "leverage_delegate:execute_leverage_entry_order",
       "accountName": "token_2022_program",
       "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
       "source": "idl_fixed_address"
     },
     {
-      "instructionKey": "dusk:backstop_liquidation_auction",
+      "instructionKey": "leverage_delegate:execute_leverage_entry_order",
+      "accountName": "system_program",
+      "address": "11111111111111111111111111111111",
+      "source": "idl_fixed_address"
+    },
+    {
+      "instructionKey": "leverage_delegate:execute_hlp_order",
+      "accountName": "dusk_program",
+      "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+      "source": "idl_fixed_address"
+    },
+    {
+      "instructionKey": "leverage_delegate:execute_hlp_order",
+      "accountName": "token_program",
+      "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "source": "idl_fixed_address"
+    },
+    {
+      "instructionKey": "leverage_delegate:execute_hlp_order",
+      "accountName": "token_2022_program",
+      "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "source": "idl_fixed_address"
+    },
+    {
+      "instructionKey": "dusk:settle_flash_liquidation",
+      "accountName": "token_program",
+      "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "source": "idl_fixed_address"
+    },
+    {
+      "instructionKey": "dusk:settle_flash_liquidation",
+      "accountName": "token_2022_program",
+      "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "source": "idl_fixed_address"
+    },
+    {
+      "instructionKey": "dusk:settle_flash_liquidation",
+      "accountName": "instructions",
+      "address": "Sysvar1nstructions1111111111111111111111111",
+      "source": "idl_fixed_address"
+    },
+    {
+      "instructionKey": "dusk:settle_flash_liquidation",
       "accountName": "program",
       "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "source": "instruction_program"
     },
     {
-      "instructionKey": "dusk:liquidate_leverage_position",
-      "accountName": "instructions_sysvar",
-      "address": "Sysvar1nstructions1111111111111111111111111",
-      "source": "idl_fixed_address"
+      "instructionKey": "dusk:observe_liquidation",
+      "accountName": "program",
+      "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+      "source": "instruction_program"
     },
     {
-      "instructionKey": "dusk:liquidate_leverage_position",
+      "instructionKey": "dusk:begin_flash_liquidation",
       "accountName": "token_program",
       "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
       "source": "idl_fixed_address"
     },
     {
-      "instructionKey": "dusk:liquidate_leverage_position",
+      "instructionKey": "dusk:begin_flash_liquidation",
       "accountName": "token_2022_program",
       "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
       "source": "idl_fixed_address"
     },
     {
-      "instructionKey": "dusk:liquidate_leverage_position",
+      "instructionKey": "dusk:begin_flash_liquidation",
+      "accountName": "instructions",
+      "address": "Sysvar1nstructions1111111111111111111111111",
+      "source": "idl_fixed_address"
+    },
+    {
+      "instructionKey": "dusk:begin_flash_liquidation",
+      "accountName": "system_program",
+      "address": "11111111111111111111111111111111",
+      "source": "idl_fixed_address"
+    },
+    {
+      "instructionKey": "dusk:begin_flash_liquidation",
+      "accountName": "program",
+      "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+      "source": "instruction_program"
+    },
+    {
+      "instructionKey": "dusk:emergency_liquidation",
+      "accountName": "token_program",
+      "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "source": "idl_fixed_address"
+    },
+    {
+      "instructionKey": "dusk:emergency_liquidation",
+      "accountName": "token_2022_program",
+      "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "source": "idl_fixed_address"
+    },
+    {
+      "instructionKey": "dusk:emergency_liquidation",
+      "accountName": "instructions",
+      "address": "Sysvar1nstructions1111111111111111111111111",
+      "source": "idl_fixed_address"
+    },
+    {
+      "instructionKey": "dusk:emergency_liquidation",
+      "accountName": "program",
+      "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+      "source": "instruction_program"
+    },
+    {
+      "instructionKey": "dusk:begin_hlp_flash",
+      "accountName": "token_program",
+      "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "source": "idl_fixed_address"
+    },
+    {
+      "instructionKey": "dusk:begin_hlp_flash",
+      "accountName": "token_2022_program",
+      "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "source": "idl_fixed_address"
+    },
+    {
+      "instructionKey": "dusk:begin_hlp_flash",
+      "accountName": "instructions",
+      "address": "Sysvar1nstructions1111111111111111111111111",
+      "source": "idl_fixed_address"
+    },
+    {
+      "instructionKey": "dusk:begin_hlp_flash",
+      "accountName": "system_program",
+      "address": "11111111111111111111111111111111",
+      "source": "idl_fixed_address"
+    },
+    {
+      "instructionKey": "dusk:begin_hlp_flash",
+      "accountName": "program",
+      "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+      "source": "instruction_program"
+    },
+    {
+      "instructionKey": "dusk:settle_hlp_flash",
+      "accountName": "token_program",
+      "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "source": "idl_fixed_address"
+    },
+    {
+      "instructionKey": "dusk:settle_hlp_flash",
+      "accountName": "token_2022_program",
+      "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "source": "idl_fixed_address"
+    },
+    {
+      "instructionKey": "dusk:settle_hlp_flash",
+      "accountName": "instructions",
+      "address": "Sysvar1nstructions1111111111111111111111111",
+      "source": "idl_fixed_address"
+    },
+    {
+      "instructionKey": "dusk:settle_hlp_flash",
+      "accountName": "program",
+      "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+      "source": "instruction_program"
+    },
+    {
+      "instructionKey": "dusk:close_insolvent_hlp",
+      "accountName": "token_program",
+      "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "source": "idl_fixed_address"
+    },
+    {
+      "instructionKey": "dusk:close_insolvent_hlp",
+      "accountName": "token_2022_program",
+      "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "source": "idl_fixed_address"
+    },
+    {
+      "instructionKey": "dusk:close_insolvent_hlp",
       "accountName": "program",
       "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "source": "instruction_program"
@@ -112,18 +250,6 @@
       "source": "instruction_program"
     },
     {
-      "instructionKey": "leverage_delegate:after_close_order",
-      "accountName": "token_program",
-      "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-      "source": "idl_fixed_address"
-    },
-    {
-      "instructionKey": "leverage_delegate:after_close_order",
-      "accountName": "token_2022_program",
-      "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
-      "source": "idl_fixed_address"
-    },
-    {
       "instructionKey": "dusk:settle_protocol_auction",
       "accountName": "token_program",
       "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
@@ -156,12 +282,121 @@
   ],
   "pdaRecipes": [
     {
+      "key": "leverage_delegate:order",
+      "program": "leverage_delegate",
+      "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+      "usages": [
+        {
+          "instructionKey": "leverage_delegate:execute_leverage_entry_order",
+          "accountName": "order",
+          "idlSeedPaths": [
+            "const:6c657665726167655f656e7472795f6f72646572",
+            "account:market",
+            "account:order.owner",
+            "arg:args.order_id"
+          ]
+        }
+      ],
+      "seeds": [
+        {
+          "kind": "const",
+          "valueHex": "6c657665726167655f656e7472795f6f72646572"
+        },
+        {
+          "kind": "input",
+          "name": "market",
+          "encoding": "pubkey"
+        },
+        {
+          "kind": "input",
+          "name": "owner",
+          "encoding": "pubkey"
+        },
+        {
+          "kind": "input",
+          "name": "orderId",
+          "encoding": "u64_le"
+        }
+      ]
+    },
+    {
+      "key": "leverage_delegate:dusk_event_authority",
+      "program": "leverage_delegate",
+      "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+      "usages": [
+        {
+          "instructionKey": "leverage_delegate:execute_leverage_entry_order",
+          "accountName": "dusk_event_authority",
+          "idlSeedPaths": [
+            "const:5f5f6576656e745f617574686f72697479"
+          ]
+        },
+        {
+          "instructionKey": "leverage_delegate:execute_hlp_order",
+          "accountName": "dusk_event_authority",
+          "idlSeedPaths": [
+            "const:5f5f6576656e745f617574686f72697479"
+          ]
+        }
+      ],
+      "seeds": [
+        {
+          "kind": "const",
+          "valueHex": "5f5f6576656e745f617574686f72697479"
+        }
+      ]
+    },
+    {
+      "key": "leverage_delegate:order:execute_hlp_order",
+      "program": "leverage_delegate",
+      "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+      "usages": [
+        {
+          "instructionKey": "leverage_delegate:execute_hlp_order",
+          "accountName": "order",
+          "idlSeedPaths": [
+            "const:686c705f6f72646572",
+            "account:market",
+            "account:order.owner",
+            "account:order.target_hlp_mint",
+            "arg:args.order_id"
+          ]
+        }
+      ],
+      "seeds": [
+        {
+          "kind": "const",
+          "valueHex": "686c705f6f72646572"
+        },
+        {
+          "kind": "input",
+          "name": "market",
+          "encoding": "pubkey"
+        },
+        {
+          "kind": "input",
+          "name": "owner",
+          "encoding": "pubkey"
+        },
+        {
+          "kind": "input",
+          "name": "targetHlpMint",
+          "encoding": "pubkey"
+        },
+        {
+          "kind": "input",
+          "name": "orderId",
+          "encoding": "u64_le"
+        }
+      ]
+    },
+    {
       "key": "dusk:market",
       "program": "dusk",
       "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "usages": [
         {
-          "instructionKey": "dusk:start_liquidation_auction",
+          "instructionKey": "dusk:settle_flash_liquidation",
           "accountName": "market",
           "idlSeedPaths": [
             "const:6d61726b65745f7632",
@@ -171,7 +406,7 @@
           ]
         },
         {
-          "instructionKey": "dusk:fill_liquidation_auction",
+          "instructionKey": "dusk:preview_flash_liquidation",
           "accountName": "market",
           "idlSeedPaths": [
             "const:6d61726b65745f7632",
@@ -181,7 +416,37 @@
           ]
         },
         {
-          "instructionKey": "dusk:backstop_liquidation_auction",
+          "instructionKey": "dusk:preview_emergency_liquidation",
+          "accountName": "market",
+          "idlSeedPaths": [
+            "const:6d61726b65745f7632",
+            "account:market.base_side.asset_mint",
+            "account:market.quote_side.asset_mint",
+            "account:market.params_hash"
+          ]
+        },
+        {
+          "instructionKey": "dusk:observe_liquidation",
+          "accountName": "market",
+          "idlSeedPaths": [
+            "const:6d61726b65745f7632",
+            "account:market.base_side.asset_mint",
+            "account:market.quote_side.asset_mint",
+            "account:market.params_hash"
+          ]
+        },
+        {
+          "instructionKey": "dusk:begin_flash_liquidation",
+          "accountName": "market",
+          "idlSeedPaths": [
+            "const:6d61726b65745f7632",
+            "account:market.base_side.asset_mint",
+            "account:market.quote_side.asset_mint",
+            "account:market.params_hash"
+          ]
+        },
+        {
+          "instructionKey": "dusk:emergency_liquidation",
           "accountName": "market",
           "idlSeedPaths": [
             "const:6d61726b65745f7632",
@@ -244,69 +509,33 @@
       ]
     },
     {
-      "key": "dusk:borrow_position",
-      "program": "dusk",
-      "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-      "usages": [
-        {
-          "instructionKey": "dusk:start_liquidation_auction",
-          "accountName": "borrow_position",
-          "idlSeedPaths": [
-            "const:626f72726f775f706f736974696f6e5f7632",
-            "account:market",
-            "account:borrow_position.position_id"
-          ]
-        },
-        {
-          "instructionKey": "dusk:fill_liquidation_auction",
-          "accountName": "borrow_position",
-          "idlSeedPaths": [
-            "const:626f72726f775f706f736974696f6e5f7632",
-            "account:market",
-            "account:borrow_position.position_id"
-          ]
-        },
-        {
-          "instructionKey": "dusk:backstop_liquidation_auction",
-          "accountName": "borrow_position",
-          "idlSeedPaths": [
-            "const:626f72726f775f706f736974696f6e5f7632",
-            "account:market",
-            "account:borrow_position.position_id"
-          ]
-        }
-      ],
-      "seeds": [
-        {
-          "kind": "const",
-          "valueHex": "626f72726f775f706f736974696f6e5f7632"
-        },
-        {
-          "kind": "input",
-          "name": "market",
-          "encoding": "pubkey"
-        },
-        {
-          "kind": "input",
-          "name": "positionId",
-          "encoding": "pubkey"
-        }
-      ]
-    },
-    {
       "key": "dusk:futarchy_authority",
       "program": "dusk",
       "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "usages": [
         {
-          "instructionKey": "dusk:fill_liquidation_auction",
+          "instructionKey": "dusk:settle_flash_liquidation",
           "accountName": "futarchy_authority",
           "idlSeedPaths": [
             "const:66757461726368795f617574686f72697479"
           ]
         },
         {
-          "instructionKey": "dusk:backstop_liquidation_auction",
+          "instructionKey": "dusk:preview_emergency_liquidation",
+          "accountName": "futarchy_authority",
+          "idlSeedPaths": [
+            "const:66757461726368795f617574686f72697479"
+          ]
+        },
+        {
+          "instructionKey": "dusk:begin_flash_liquidation",
+          "accountName": "futarchy_authority",
+          "idlSeedPaths": [
+            "const:66757461726368795f617574686f72697479"
+          ]
+        },
+        {
+          "instructionKey": "dusk:emergency_liquidation",
           "accountName": "futarchy_authority",
           "idlSeedPaths": [
             "const:66757461726368795f617574686f72697479"
@@ -328,26 +557,88 @@
       ]
     },
     {
+      "key": "dusk:session",
+      "program": "dusk",
+      "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+      "usages": [
+        {
+          "instructionKey": "dusk:settle_flash_liquidation",
+          "accountName": "session",
+          "idlSeedPaths": [
+            "const:6c69717569646174696f6e2d73657373696f6e",
+            "account:session.position"
+          ]
+        },
+        {
+          "instructionKey": "dusk:begin_flash_liquidation",
+          "accountName": "session",
+          "idlSeedPaths": [
+            "const:6c69717569646174696f6e2d73657373696f6e",
+            "arg:args.position"
+          ]
+        }
+      ],
+      "seeds": [
+        {
+          "kind": "const",
+          "valueHex": "6c69717569646174696f6e2d73657373696f6e"
+        },
+        {
+          "kind": "input",
+          "name": "position",
+          "encoding": "pubkey"
+        }
+      ]
+    },
+    {
       "key": "dusk:event_authority",
       "program": "dusk",
       "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "usages": [
         {
-          "instructionKey": "dusk:fill_liquidation_auction",
+          "instructionKey": "dusk:settle_flash_liquidation",
           "accountName": "event_authority",
           "idlSeedPaths": [
             "const:5f5f6576656e745f617574686f72697479"
           ]
         },
         {
-          "instructionKey": "dusk:backstop_liquidation_auction",
+          "instructionKey": "dusk:observe_liquidation",
           "accountName": "event_authority",
           "idlSeedPaths": [
             "const:5f5f6576656e745f617574686f72697479"
           ]
         },
         {
-          "instructionKey": "dusk:liquidate_leverage_position",
+          "instructionKey": "dusk:begin_flash_liquidation",
+          "accountName": "event_authority",
+          "idlSeedPaths": [
+            "const:5f5f6576656e745f617574686f72697479"
+          ]
+        },
+        {
+          "instructionKey": "dusk:emergency_liquidation",
+          "accountName": "event_authority",
+          "idlSeedPaths": [
+            "const:5f5f6576656e745f617574686f72697479"
+          ]
+        },
+        {
+          "instructionKey": "dusk:begin_hlp_flash",
+          "accountName": "event_authority",
+          "idlSeedPaths": [
+            "const:5f5f6576656e745f617574686f72697479"
+          ]
+        },
+        {
+          "instructionKey": "dusk:settle_hlp_flash",
+          "accountName": "event_authority",
+          "idlSeedPaths": [
+            "const:5f5f6576656e745f617574686f72697479"
+          ]
+        },
+        {
+          "instructionKey": "dusk:close_insolvent_hlp",
           "accountName": "event_authority",
           "idlSeedPaths": [
             "const:5f5f6576656e745f617574686f72697479"
@@ -390,6 +681,90 @@
       ]
     },
     {
+      "key": "dusk:repayment_vault",
+      "program": "dusk",
+      "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+      "usages": [
+        {
+          "instructionKey": "dusk:begin_flash_liquidation",
+          "accountName": "repayment_vault",
+          "idlSeedPaths": [
+            "const:6c69717569646174696f6e2d7061796d656e74",
+            "arg:args.position",
+            "account:accounts.debt_mint"
+          ]
+        }
+      ],
+      "seeds": [
+        {
+          "kind": "const",
+          "valueHex": "6c69717569646174696f6e2d7061796d656e74"
+        },
+        {
+          "kind": "input",
+          "name": "position",
+          "encoding": "pubkey"
+        },
+        {
+          "kind": "input",
+          "name": "debtMint",
+          "encoding": "pubkey"
+        }
+      ]
+    },
+    {
+      "key": "dusk:repayment_vault:begin_hlp_flash",
+      "program": "dusk",
+      "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+      "usages": [
+        {
+          "instructionKey": "dusk:begin_hlp_flash",
+          "accountName": "repayment_vault",
+          "idlSeedPaths": [
+            "const:686c702d666c6173682d7061796d656e74",
+            "account:session"
+          ]
+        }
+      ],
+      "seeds": [
+        {
+          "kind": "const",
+          "valueHex": "686c702d666c6173682d7061796d656e74"
+        },
+        {
+          "kind": "input",
+          "name": "session",
+          "encoding": "pubkey"
+        }
+      ]
+    },
+    {
+      "key": "dusk:repayment_vault:settle_hlp_flash",
+      "program": "dusk",
+      "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+      "usages": [
+        {
+          "instructionKey": "dusk:settle_hlp_flash",
+          "accountName": "repayment_vault",
+          "idlSeedPaths": [
+            "const:686c702d666c6173682d7061796d656e74",
+            "account:session"
+          ]
+        }
+      ],
+      "seeds": [
+        {
+          "kind": "const",
+          "valueHex": "686c702d666c6173682d7061796d656e74"
+        },
+        {
+          "kind": "input",
+          "name": "session",
+          "encoding": "pubkey"
+        }
+      ]
+    },
+    {
       "key": "dusk:leverage_position",
       "program": "dusk",
       "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
@@ -400,6 +775,8 @@
           "idlSeedPaths": [
             "const:6c657665726167655f706f736974696f6e5f7632",
             "account:market",
+            "account:leverage_position.owner",
+            "account:leverage_position.namespace_authority",
             "account:leverage_position.position_id"
           ]
         }
@@ -412,6 +789,16 @@
         {
           "kind": "input",
           "name": "market",
+          "encoding": "pubkey"
+        },
+        {
+          "kind": "input",
+          "name": "owner",
+          "encoding": "pubkey"
+        },
+        {
+          "kind": "input",
+          "name": "namespaceAuthority",
           "encoding": "pubkey"
         },
         {
@@ -454,7 +841,7 @@
       ]
     },
     {
-      "key": "leverage_delegate:order",
+      "key": "leverage_delegate:order:before_take_profit",
       "program": "leverage_delegate",
       "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
       "usages": [
@@ -467,7 +854,35 @@
             "account:order.owner",
             "arg:args.order_id"
           ]
+        }
+      ],
+      "seeds": [
+        {
+          "kind": "const",
+          "valueHex": "6c657665726167655f6f72646572"
         },
+        {
+          "kind": "input",
+          "name": "position",
+          "encoding": "pubkey"
+        },
+        {
+          "kind": "input",
+          "name": "owner",
+          "encoding": "pubkey"
+        },
+        {
+          "kind": "input",
+          "name": "orderId",
+          "encoding": "u64_le"
+        }
+      ]
+    },
+    {
+      "key": "leverage_delegate:order:after_close_order",
+      "program": "leverage_delegate",
+      "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+      "usages": [
         {
           "instructionKey": "leverage_delegate:after_close_order",
           "accountName": "order",
@@ -477,7 +892,35 @@
             "account:order.owner",
             "arg:args.order_id"
           ]
+        }
+      ],
+      "seeds": [
+        {
+          "kind": "const",
+          "valueHex": "6c657665726167655f6f72646572"
         },
+        {
+          "kind": "input",
+          "name": "position",
+          "encoding": "pubkey"
+        },
+        {
+          "kind": "input",
+          "name": "owner",
+          "encoding": "pubkey"
+        },
+        {
+          "kind": "input",
+          "name": "orderId",
+          "encoding": "u64_le"
+        }
+      ]
+    },
+    {
+      "key": "leverage_delegate:order:before_stop_loss",
+      "program": "leverage_delegate",
+      "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+      "usages": [
         {
           "instructionKey": "leverage_delegate:before_stop_loss",
           "accountName": "order",
