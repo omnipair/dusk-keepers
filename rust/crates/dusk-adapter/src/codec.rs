@@ -159,6 +159,19 @@ pub struct ExecuteOrderArgs {
     pub order_id: u64,
 }
 
+#[derive(Clone, Debug, BorshSerialize, Eq, PartialEq)]
+pub struct ExecuteEntryOrderArgs {
+    pub order_id: u64,
+    pub min_owner_refund_out: u64,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct ExecuteEntryOrderWire {
+    order_id: String,
+    min_owner_refund_out: String,
+}
+
 #[derive(Clone, Copy, Debug, BorshSerialize, Eq, PartialEq)]
 pub enum ProtocolAuctionLane {
     Fee,
@@ -196,6 +209,8 @@ pub enum KeeperInstructionArguments {
     BeforeTakeProfit(ExecuteOrderArgs),
     AfterCloseOrder(ExecuteOrderArgs),
     BeforeStopLoss(ExecuteOrderArgs),
+    ExecuteHlpOrder(ExecuteOrderArgs),
+    ExecuteEntryOrder(ExecuteEntryOrderArgs),
     SettleProtocolAuction(SettleProtocolAuctionArgs),
     QueueParameterProposal,
     ExecuteParameterProposal,
@@ -219,6 +234,8 @@ impl KeeperInstructionArguments {
             Self::BeforeTakeProfit(_) => "leverage_delegate:before_take_profit",
             Self::AfterCloseOrder(_) => "leverage_delegate:after_close_order",
             Self::BeforeStopLoss(_) => "leverage_delegate:before_stop_loss",
+            Self::ExecuteHlpOrder(_) => "leverage_delegate:execute_hlp_order",
+            Self::ExecuteEntryOrder(_) => "leverage_delegate:execute_leverage_entry_order",
             Self::SettleProtocolAuction(_) => "dusk:settle_protocol_auction",
             Self::QueueParameterProposal => "dusk:queue_parameter_proposal",
             Self::ExecuteParameterProposal => "dusk:execute_parameter_proposal",
@@ -242,7 +259,9 @@ impl KeeperInstructionArguments {
             Self::DelegatedCloseLeverage(value) => borsh::to_vec(value),
             Self::BeforeTakeProfit(value)
             | Self::AfterCloseOrder(value)
-            | Self::BeforeStopLoss(value) => borsh::to_vec(value),
+            | Self::BeforeStopLoss(value)
+            | Self::ExecuteHlpOrder(value) => borsh::to_vec(value),
+            Self::ExecuteEntryOrder(value) => borsh::to_vec(value),
             Self::SettleProtocolAuction(value) => borsh::to_vec(value),
         };
         result.map_err(|error| {
@@ -439,6 +458,18 @@ pub fn parse_keeper_instruction_arguments(
         }
         "leverage_delegate:before_stop_loss" => {
             parse_order(value).map(KeeperInstructionArguments::BeforeStopLoss)
+        }
+        "leverage_delegate:execute_hlp_order" => {
+            parse_order(value).map(KeeperInstructionArguments::ExecuteHlpOrder)
+        }
+        "leverage_delegate:execute_leverage_entry_order" => {
+            let wire: ExecuteEntryOrderWire = parse_wire(value)?;
+            Ok(KeeperInstructionArguments::ExecuteEntryOrder(
+                ExecuteEntryOrderArgs {
+                    order_id: decimal_u64(&wire.order_id)?,
+                    min_owner_refund_out: decimal_u64(&wire.min_owner_refund_out)?,
+                },
+            ))
         }
         "dusk:settle_protocol_auction" => {
             let wire: SettleProtocolWire = parse_wire(value)?;
@@ -719,7 +750,12 @@ mod tests {
     #[test]
     fn rejects_a_discriminator_drift_in_the_contract() {
         let mut contract = contract();
-        contract.instructions[0].discriminator_hex = "00".repeat(8);
+        contract
+            .instructions
+            .iter_mut()
+            .find(|s| s.key == "dusk:settle_flash_liquidation")
+            .unwrap()
+            .discriminator_hex = "00".repeat(8);
         let error = encode_keeper_instruction(
             &contract,
             &KeeperInstructionArguments::SettleFlashLiquidation,

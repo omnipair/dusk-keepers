@@ -87,9 +87,15 @@ impl FlashJob<'_> {
         });
         let mut attempted = 0;
         for (position, data) in positions {
-            let market = reader
-                .pubkey("market", &data)
-                .map_err(|e| ExecutionError::Assembly(e.to_string()))?;
+            // Identity is a fixed owner/market prefix shared by wallet account
+            // types. Full-layout readers intentionally reject retired shapes,
+            // so scope discovery before invoking those readers.
+            let market: [u8; 32] = data
+                .get(40..72)
+                .and_then(|v| v.try_into().ok())
+                .ok_or_else(|| {
+                    ExecutionError::Assembly("position identity prefix is truncated".into())
+                })?;
             if !active_markets.contains(&market) {
                 continue;
             }
@@ -518,7 +524,7 @@ impl FlashJob<'_> {
         let height = block["value"]["lastValidBlockHeight"]
             .as_u64()
             .ok_or("block height missing")?;
-        let message = self.message_for(fresh.buyer, &current, &instructions, key(hash)?)?;
+        let message = Self::compile_message_for(fresh.buyer, &current, &instructions, key(hash)?)?;
         if serialize_transaction(&[[0; 64]], &message).len() > 1232 {
             return Err("hLP transaction exceeds packet limit".into());
         }
@@ -602,10 +608,9 @@ impl FlashJob<'_> {
         ixs: &[Instruction],
         hash: [u8; 32],
     ) -> Result<Vec<u8>> {
-        self.message_for(c.buyer, s, ixs, hash)
+        Self::compile_message_for(c.buyer, s, ixs, hash)
     }
-    fn message_for(
-        &self,
+    pub(crate) fn compile_message_for(
         payer: [u8; 32],
         s: &Snapshot,
         ixs: &[Instruction],
@@ -651,7 +656,7 @@ impl FlashJob<'_> {
         ixs: &[Instruction],
         post: &[[u8; 32]],
     ) -> Result<serde_json::Value> {
-        let message = self.message_for(payer, snapshot, ixs, [0; 32])?;
+        let message = Self::compile_message_for(payer, snapshot, ixs, [0; 32])?;
         let wire = serialize_transaction(&[[0; 64]], &message);
         if wire.len() > 1232 {
             return Err(format!(

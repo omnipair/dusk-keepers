@@ -46,6 +46,24 @@ pub fn read_fees(
     mints: &[String],
     min_slot: u64,
 ) -> Result<FeeSnapshot, DiscoveryError> {
+    for attempt in 0..3 {
+        match read_fees_once(client, mints, min_slot) {
+            Err(DiscoveryError::Malformed(detail))
+                if detail == "clock and RPC bank do not match" && attempt < 2 =>
+            {
+                std::thread::sleep(std::time::Duration::from_millis(150));
+            }
+            result => return result,
+        }
+    }
+    unreachable!("fee snapshot retry is bounded")
+}
+
+fn read_fees_once(
+    client: &RpcClient,
+    mints: &[String],
+    min_slot: u64,
+) -> Result<FeeSnapshot, DiscoveryError> {
     if mints.is_empty() || mints.len() > 99 {
         return Err(DiscoveryError::Malformed("expected 1..99 mints".into()));
     }

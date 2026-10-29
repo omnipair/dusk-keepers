@@ -25,6 +25,8 @@
         "hlp_recovery",
         "stop_loss",
         "take_profit",
+        "limit_entry",
+        "hlp_order",
         "auction_bid",
         "lifecycle",
         "sentinel"

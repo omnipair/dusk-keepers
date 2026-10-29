@@ -33,6 +33,16 @@ export interface SettleProtocolAuctionArgs {
 
 export type KeeperInstructionArguments =
   | {
+      readonly specificationKey: "leverage_delegate:execute_hlp_order";
+      readonly arguments: ExecuteOrderArgs;
+    }
+  | {
+      readonly specificationKey: "leverage_delegate:execute_leverage_entry_order";
+      readonly arguments: ExecuteOrderArgs & {
+        readonly minOwnerRefundOut: bigint;
+      };
+    }
+  | {
       readonly specificationKey: "dusk:observe_liquidation";
       readonly arguments: { readonly debtAsset: number };
     }
@@ -252,7 +262,12 @@ export function encodeKeeperInstruction(
     case "leverage_delegate:before_take_profit":
     case "leverage_delegate:after_close_order":
     case "leverage_delegate:before_stop_loss":
+    case "leverage_delegate:execute_hlp_order":
       writer.u64(request.arguments.orderId);
+      break;
+    case "leverage_delegate:execute_leverage_entry_order":
+      writer.u64(request.arguments.orderId);
+      writer.u64(request.arguments.minOwnerRefundOut);
       break;
     case "dusk:settle_protocol_auction":
       writer.u8(
@@ -376,7 +391,11 @@ export function parseKeeperInstructionArguments(
       return {
         specificationKey,
         arguments: {
-          targetAsset: unsignedNumber(argumentsValue.targetAsset, 0xff, "targetAsset"),
+          targetAsset: unsignedNumber(
+            argumentsValue.targetAsset,
+            0xff,
+            "targetAsset",
+          ),
         },
       };
     case "dusk:begin_hlp_flash":
@@ -393,14 +412,22 @@ export function parseKeeperInstructionArguments(
       return {
         specificationKey,
         arguments: {
-          targetAsset: unsignedNumber(argumentsValue.targetAsset, 0xff, "targetAsset"),
+          targetAsset: unsignedNumber(
+            argumentsValue.targetAsset,
+            0xff,
+            "targetAsset",
+          ),
           maxPayment: decimalU64(argumentsValue.maxPayment),
           allowFull: booleanValue(argumentsValue.allowFull),
           maxInsuranceDraw: decimalU64(argumentsValue.maxInsuranceDraw),
           maxSocializedLoss: decimalU64(argumentsValue.maxSocializedLoss),
           maxCollateralDebit: decimalU64(argumentsValue.maxCollateralDebit),
           minCollateralCredit: decimalU64(argumentsValue.minCollateralCredit),
-          settleIndex: unsignedNumber(argumentsValue.settleIndex, 0xffff, "settleIndex"),
+          settleIndex: unsignedNumber(
+            argumentsValue.settleIndex,
+            0xffff,
+            "settleIndex",
+          ),
         },
       };
     case "dusk:settle_hlp_flash":
@@ -416,7 +443,11 @@ export function parseKeeperInstructionArguments(
       return {
         specificationKey,
         arguments: {
-          targetAsset: unsignedNumber(argumentsValue.targetAsset, 0xff, "targetAsset"),
+          targetAsset: unsignedNumber(
+            argumentsValue.targetAsset,
+            0xff,
+            "targetAsset",
+          ),
           maxInsuranceDraw: decimalU64(argumentsValue.maxInsuranceDraw),
           maxSocializedLoss: decimalU64(argumentsValue.maxSocializedLoss),
           minCallerBountyOut: decimalU64(argumentsValue.minCallerBountyOut),
@@ -460,10 +491,20 @@ export function parseKeeperInstructionArguments(
     case "leverage_delegate:before_take_profit":
     case "leverage_delegate:after_close_order":
     case "leverage_delegate:before_stop_loss":
+    case "leverage_delegate:execute_hlp_order":
       requireKeys(argumentsValue, ["orderId"]);
       return {
         specificationKey,
         arguments: { orderId: decimalU64(argumentsValue.orderId) },
+      };
+    case "leverage_delegate:execute_leverage_entry_order":
+      requireKeys(argumentsValue, ["orderId", "minOwnerRefundOut"]);
+      return {
+        specificationKey,
+        arguments: {
+          orderId: decimalU64(argumentsValue.orderId),
+          minOwnerRefundOut: decimalU64(argumentsValue.minOwnerRefundOut),
+        },
       };
     case "dusk:settle_protocol_auction":
       requireKeys(argumentsValue, [

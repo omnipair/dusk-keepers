@@ -20,6 +20,7 @@ COPY --chown=keeper:keeper protocol.lock.json /app/protocol.lock.json
 COPY --chown=keeper:keeper protocol/keeper-instructions.v1.json /app/protocol/keeper-instructions.v1.json
 COPY --chown=keeper:keeper protocol/keeper-account-resolution.v1.json /app/protocol/keeper-account-resolution.v1.json
 COPY --chown=keeper:keeper protocol/keeper-account-layout.v1.json /app/protocol/keeper-account-layout.v1.json
+COPY --chown=keeper:keeper protocol/keeper-order-layout.v1.json /app/protocol/keeper-order-layout.v1.json
 USER keeper
 WORKDIR /app
 ENV DUSK_PROTOCOL_LOCK=/app/protocol.lock.json

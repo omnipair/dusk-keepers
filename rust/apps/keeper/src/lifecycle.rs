@@ -64,6 +64,17 @@ pub struct LifecycleJob<'a> {
 
 impl LifecycleJob<'_> {
     pub fn candidates(&self) -> Result<Vec<ProposalRecord>, ExecutionError> {
+        let current: std::collections::BTreeSet<_> = self
+            .client
+            .program_accounts(
+                &bs58::encode(self.program_id).into_string(),
+                account_discriminator("Market"),
+            )?
+            .into_iter()
+            .filter_map(|(address, data)| {
+                MarketAccounts::decode(self.layout, address, &data).map(|_| address)
+            })
+            .collect();
         let accounts = self.client.program_accounts(
             &bs58::encode(self.program_id).into_string(),
             account_discriminator("ParameterProposal"),
@@ -71,6 +82,7 @@ impl LifecycleJob<'_> {
         Ok(accounts
             .into_iter()
             .filter_map(|(address, data)| ProposalRecord::decode(self.layout, address, &data))
+            .filter(|proposal| current.contains(&proposal.market))
             .collect())
     }
 

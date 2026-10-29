@@ -20,6 +20,8 @@ pub enum ProgramName {
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum JobAction {
+    LimitEntryExecute,
+    HlpOrderExecute,
     FlashLiquidationSettle,
     FlashLiquidationPreview,
     EmergencyLiquidationPreview,
@@ -48,6 +50,8 @@ pub enum JobKind {
     HlpRecovery,
     StopLoss,
     TakeProfit,
+    LimitEntry,
+    HlpOrder,
     AuctionBid,
     Lifecycle,
     Sentinel,

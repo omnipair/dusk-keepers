@@ -32,11 +32,18 @@ const WANTED = {
     "quote_collateral",
     "base_referral_partner",
     "quote_referral_partner",
-    "fixed_base_shares", "fixed_quote_shares", "active_liquidation_session",
-    "base_distress.active", "base_distress.started_at", "quote_distress.active", "quote_distress.started_at",
+    "fixed_base_shares",
+    "fixed_quote_shares",
+    "active_liquidation_session",
+    "base_distress.active",
+    "base_distress.started_at",
+    "quote_distress.active",
+    "quote_distress.started_at",
   ],
   Market: [
     "ylp_mint",
+    "base_side.hlp_mint",
+    "quote_side.hlp_mint",
     "base_side.asset_mint",
     "base_side.asset_decimals",
     "base_side.reserve_vault",
@@ -64,12 +71,25 @@ const WANTED = {
     "params_hash",
     "last_update_slot",
   ],
-  LeveragePosition: ["owner", "market", "position_id", "debt_asset", "namespace_authority", "referral_partner", "collateral_amount", "debt_shares", "active_liquidation_session", "distress.active", "distress.started_at"],
+  LeveragePosition: [
+    "owner",
+    "market",
+    "position_id",
+    "debt_asset",
+    "namespace_authority",
+    "referral_partner",
+    "collateral_amount",
+    "debt_shares",
+    "active_liquidation_session",
+    "distress.active",
+    "distress.started_at",
+  ],
   // Only the fields ahead of `update`, which is a data-carrying enum and so
   // gives everything after it no fixed offset. The lifecycle keeper does not
   // need the rest: whether a proposal may be queued or executed is the
   // program's judgement, asked by simulation, not a status byte read here.
   FutarchyAuthority: [
+    "recipients.futarchy_treasury",
     "fee_auction.accepted_mint",
     "fee_auction.recipients.treasury",
     "fee_auction.recipients.staking_vault",
@@ -78,6 +98,40 @@ const WANTED = {
     "buyback_auction.recipients.staking_vault",
   ],
   ParameterProposal: ["market", "proposer", "nonce"],
+};
+
+const ORDER_WANTED = {
+  LeverageOrder: [
+    "owner",
+    "market",
+    "position",
+    "order_id",
+    "kind",
+    "close_bps",
+  ],
+  LeverageEntryOrder: [
+    "owner",
+    "market",
+    "position",
+    "position_id",
+    "debt_mint",
+    "collateral_mint",
+    "order_id",
+    "debt_asset",
+    "margin_amount",
+    "executor_bounty",
+    "expiry_unix_timestamp",
+  ],
+  HlpOrder: [
+    "owner",
+    "market",
+    "target_hlp_mint",
+    "custody_hlp_account",
+    "order_id",
+    "kind",
+    "status",
+    "hlp_amount",
+  ],
 };
 
 /** Fixed sizes for the primitives the IDL uses. */
@@ -104,7 +158,11 @@ function sizeOf(type, types, path) {
   }
   if (type.array) {
     const [inner, count] = type.array;
-    assert.equal(typeof count, "number", `${path}: only fixed-length arrays are sized`);
+    assert.equal(
+      typeof count,
+      "number",
+      `${path}: only fixed-length arrays are sized`,
+    );
     return sizeOf(inner, types, path) * count;
   }
   if (type.defined) {
@@ -116,7 +174,10 @@ function sizeOf(type, types, path) {
     // is rejected rather than guessed at.
     if (defined.type.kind === "enum") {
       for (const variant of defined.type.variants) {
-        assert.ok(!variant.fields, `${path}: ${name} carries data and has no fixed size`);
+        assert.ok(
+          !variant.fields,
+          `${path}: ${name} carries data and has no fixed size`,
+        );
       }
       return 1;
     }
@@ -130,7 +191,8 @@ function sizeOf(type, types, path) {
 
 function structSize(defined, types, path) {
   return defined.type.fields.reduce(
-    (total, field) => total + sizeOf(field.type, types, `${path}.${field.name}`),
+    (total, field) =>
+      total + sizeOf(field.type, types, `${path}.${field.name}`),
     0,
   );
 }
@@ -154,23 +216,31 @@ function locate(accountName, dotted, types) {
     }
     assert.ok(found, `${accountName}.${dotted}: no field named ${segment}`);
     if (index === segments.length - 1) {
-      return { offset, size: sizeOf(found.type, types, `${accountName}.${dotted}`) };
+      return {
+        offset,
+        size: sizeOf(found.type, types, `${accountName}.${dotted}`),
+      };
     }
     const name = found.type.defined?.name ?? found.type.defined;
     current = types.get(name);
-    assert.ok(current, `${accountName}.${dotted}: ${name} is absent from the IDL`);
+    assert.ok(
+      current,
+      `${accountName}.${dotted}: ${name} is absent from the IDL`,
+    );
   }
   throw new Error(`${accountName}.${dotted}: unreachable`);
 }
 
-async function build() {
-  const lock = JSON.parse(await readFile(new URL("protocol.lock.json", root), "utf8"));
-  const dusk = lock.programs.find((program) => program.name === "dusk");
+async function build(programName = "dusk", wanted = WANTED) {
+  const lock = JSON.parse(
+    await readFile(new URL("protocol.lock.json", root), "utf8"),
+  );
+  const dusk = lock.programs.find((program) => program.name === programName);
   assert.ok(dusk, "protocol lock does not pin the dusk program");
   const idl = JSON.parse(await readFile(new URL(dusk.idl.path, root), "utf8"));
   const types = new Map(idl.types.map((type) => [type.name, type]));
 
-  const accounts = Object.entries(WANTED).map(([accountName, fields]) => {
+  const accounts = Object.entries(wanted).map(([accountName, fields]) => {
     const defined = types.get(accountName);
     assert.ok(defined, `${accountName} is absent from the pinned IDL`);
     const located = fields.map((field) => ({
@@ -214,15 +284,28 @@ async function build() {
   };
 }
 
-const layout = await build();
-const formatted = `${JSON.stringify(layout, null, 2)}\n`;
+for (const [programName, wanted, path] of [
+  ["dusk", WANTED, outputPath],
+  [
+    "leverage_delegate",
+    ORDER_WANTED,
+    new URL("protocol/keeper-order-layout.v1.json", root),
+  ],
+]) {
+  const layout = await build(programName, wanted);
+  const formatted = `${JSON.stringify(layout, null, 2)}\n`;
 
-if (process.argv.includes("--write")) {
-  await writeFile(outputPath, formatted);
-  console.log(
-    `wrote offsets for ${layout.accounts.length} accounts (${layout.accounts.reduce((total, account) => total + account.fields.length, 0)} fields)`,
-  );
-} else {
-  assert.equal(await readFile(outputPath, "utf8"), formatted, "account layout is stale");
-  console.log(`verified offsets for ${layout.accounts.length} accounts`);
+  if (process.argv.includes("--write")) {
+    await writeFile(path, formatted);
+    console.log(
+      `wrote offsets for ${layout.accounts.length} accounts (${layout.accounts.reduce((total, account) => total + account.fields.length, 0)} fields)`,
+    );
+  } else {
+    assert.equal(
+      await readFile(path, "utf8"),
+      formatted,
+      "account layout is stale",
+    );
+    console.log(`verified offsets for ${layout.accounts.length} accounts`);
+  }
 }

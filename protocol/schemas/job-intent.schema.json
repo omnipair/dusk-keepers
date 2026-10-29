@@ -34,6 +34,8 @@
         "lending_liquidation_bid",
         "lending_liquidation_floor_settle",
         "leverage_liquidation",
+        "limit_entry_execute",
+        "hlp_order_execute",
         "hlp_flash_preview",
         "hlp_flash_begin",
         "hlp_flash_settle",

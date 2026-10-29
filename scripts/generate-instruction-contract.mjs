@@ -5,12 +5,37 @@ import { readFile, writeFile } from "node:fs/promises";
 
 const root = new URL("../", import.meta.url);
 const contractPath = new URL("protocol/keeper-instructions.v1.json", root);
-const fixturesPath = new URL("fixtures/conformance/v1/instruction-envelope-cases.json", root);
+const fixturesPath = new URL(
+  "fixtures/conformance/v1/instruction-envelope-cases.json",
+  root,
+);
 
 const actionDefinitions = [
-  { action: "flash_liquidation_settle", jobKind: "lending_liquidation_bid", primary: ["dusk", "settle_flash_liquidation"] },
-  { action: "flash_liquidation_preview", jobKind: "lending_liquidation_bid", primary: ["dusk", "preview_flash_liquidation"] },
-  { action: "emergency_liquidation_preview", jobKind: "lending_liquidation_settle", primary: ["dusk", "preview_emergency_liquidation"] },
+  {
+    action: "limit_entry_execute",
+    jobKind: "limit_entry",
+    primary: ["leverage_delegate", "execute_leverage_entry_order"],
+  },
+  {
+    action: "hlp_order_execute",
+    jobKind: "hlp_order",
+    primary: ["leverage_delegate", "execute_hlp_order"],
+  },
+  {
+    action: "flash_liquidation_settle",
+    jobKind: "lending_liquidation_bid",
+    primary: ["dusk", "settle_flash_liquidation"],
+  },
+  {
+    action: "flash_liquidation_preview",
+    jobKind: "lending_liquidation_bid",
+    primary: ["dusk", "preview_flash_liquidation"],
+  },
+  {
+    action: "emergency_liquidation_preview",
+    jobKind: "lending_liquidation_settle",
+    primary: ["dusk", "preview_emergency_liquidation"],
+  },
   {
     action: "lending_liquidation_trigger",
     jobKind: "lending_liquidation_trigger",
@@ -101,7 +126,11 @@ async function buildContract() {
   const programs = new Map();
   for (const pinned of lock.programs) {
     const idl = await readJson(pinned.idl.path);
-    assert.equal(idl.address, pinned.programId, `${pinned.name}: IDL address differs from lock`);
+    assert.equal(
+      idl.address,
+      pinned.programId,
+      `${pinned.name}: IDL address differs from lock`,
+    );
     programs.set(pinned.name, { pinned, idl });
   }
 
@@ -109,15 +138,25 @@ async function buildContract() {
   for (const definition of actionDefinitions) {
     requested.push(definition.primary, ...(definition.cpi ?? []));
   }
-  const uniqueKeys = [...new Set(requested.map(([program, name]) => instructionKey(program, name)))];
+  const uniqueKeys = [
+    ...new Set(
+      requested.map(([program, name]) => instructionKey(program, name)),
+    ),
+  ];
 
   const instructions = uniqueKeys.map((key) => {
     const [program, instructionName] = key.split(":");
     const source = programs.get(program);
     assert.ok(source, `missing ${program} in protocol lock`);
-    const instruction = source.idl.instructions.find((entry) => entry.name === instructionName);
+    const instruction = source.idl.instructions.find(
+      (entry) => entry.name === instructionName,
+    );
     assert.ok(instruction, `${key}: instruction missing from pinned IDL`);
-    assert.equal(instruction.discriminator.length, 8, `${key}: discriminator must be 8 bytes`);
+    assert.equal(
+      instruction.discriminator.length,
+      8,
+      `${key}: discriminator must be 8 bytes`,
+    );
     const anchorDiscriminator = createHash("sha256")
       .update(`global:${instructionName}`)
       .digest()
@@ -128,7 +167,11 @@ async function buildContract() {
       `${key}: IDL discriminator differs from Anchor global discriminator`,
     );
     const accounts = flattenAccounts(instruction.accounts);
-    assert.equal(new Set(accounts.map(a => a.name)).size, accounts.length, `${key}: ambiguous flattened accounts`);
+    assert.equal(
+      new Set(accounts.map((a) => a.name)).size,
+      accounts.length,
+      `${key}: ambiguous flattened accounts`,
+    );
     return {
       key,
       program,
@@ -159,7 +202,9 @@ async function buildContract() {
       action: definition.action,
       jobKind: definition.jobKind,
       primaryInstructionKey: instructionKey(...definition.primary),
-      cpiInstructionKeys: (definition.cpi ?? []).map((parts) => instructionKey(...parts)),
+      cpiInstructionKeys: (definition.cpi ?? []).map((parts) =>
+        instructionKey(...parts),
+      ),
       requiredOptionalAccounts: definition.requiredOptionalAccounts ?? [],
     })),
     instructions,
@@ -197,9 +242,12 @@ function directInstructionData(specification) {
   switch (specification.instructionName) {
     case "queue_parameter_proposal":
     case "execute_parameter_proposal":
-    case "settle_flash_liquidation": return prefix;
-    case "settle_hlp_flash": return prefix;
-    case "preview_hlp_flash": return Buffer.concat([prefix, Buffer.from([0])]);
+    case "settle_flash_liquidation":
+      return prefix;
+    case "settle_hlp_flash":
+      return prefix;
+    case "preview_hlp_flash":
+      return Buffer.concat([prefix, Buffer.from([0])]);
     case "begin_hlp_flash":
       return Buffer.concat([
         prefix,
@@ -213,23 +261,62 @@ function directInstructionData(specification) {
         encodeU16(4),
       ]);
     case "close_insolvent_hlp":
-      return Buffer.concat([prefix, Buffer.from([0]), encodeU64(500), encodeU64(250), encodeU64(1)]);
-    case "observe_liquidation": return Buffer.concat([prefix, Buffer.from([0])]);
+      return Buffer.concat([
+        prefix,
+        Buffer.from([0]),
+        encodeU64(500),
+        encodeU64(250),
+        encodeU64(1),
+      ]);
+    case "observe_liquidation":
+      return Buffer.concat([prefix, Buffer.from([0])]);
     case "preview_flash_liquidation":
     case "preview_emergency_liquidation":
-      return Buffer.concat([prefix, Buffer.from([0]), encodeU64(1000), Buffer.from([0])]);
+      return Buffer.concat([
+        prefix,
+        Buffer.from([0]),
+        encodeU64(1000),
+        Buffer.from([0]),
+      ]);
     case "begin_flash_liquidation":
-      return Buffer.concat([prefix, Buffer.alloc(32, 7), Buffer.from([0]), encodeU64(1000), encodeU64(1100), encodeU64(900), encodeU64(25), Buffer.from([0]), encodeU16(1)]);
+      return Buffer.concat([
+        prefix,
+        Buffer.alloc(32, 7),
+        Buffer.from([0]),
+        encodeU64(1000),
+        encodeU64(1100),
+        encodeU64(900),
+        encodeU64(25),
+        Buffer.from([0]),
+        encodeU16(1),
+      ]);
     case "emergency_liquidation":
-      return Buffer.concat([prefix, Buffer.from([0]), encodeU64(1000), Buffer.from([0]), encodeU64(1), encodeU64(900)]);
+      return Buffer.concat([
+        prefix,
+        Buffer.from([0]),
+        encodeU64(1000),
+        Buffer.from([0]),
+        encodeU64(1),
+        encodeU64(900),
+      ]);
     case "settle_protocol_auction":
-      return Buffer.concat([prefix, Buffer.from([0, 0]), encodeU64(1_000), encodeU64(950)]);
+      return Buffer.concat([
+        prefix,
+        Buffer.from([0, 0]),
+        encodeU64(1_000),
+        encodeU64(950),
+      ]);
     case "before_take_profit":
     case "before_stop_loss":
     case "after_close_order":
+    case "execute_hlp_order":
       return Buffer.concat([prefix, encodeU64(7)]);
+    case "execute_leverage_entry_order":
+      return Buffer.concat([prefix, encodeU64(7), encodeU64(0)]);
     default:
-      throw new Error(`${specification.key}: fixture encoder is intentionally unavailable`);
+      throw new Error(
+        `${specification.key}: fixture encoder is intentionally unavailable`,
+      );
   }
 }
 
@@ -249,8 +336,19 @@ function base58Encode(bytes) {
     }
   }
   let result = "";
-  for (let index = 0; index < bytes.length - 1 && bytes[index] === 0; index += 1) result += "1";
-  return result + digits.reverse().map((digit) => alphabet[digit]).join("");
+  for (
+    let index = 0;
+    index < bytes.length - 1 && bytes[index] === 0;
+    index += 1
+  )
+    result += "1";
+  return (
+    result +
+    digits
+      .reverse()
+      .map((digit) => alphabet[digit])
+      .join("")
+  );
 }
 
 function deterministicPubkey(seed) {
@@ -258,11 +356,17 @@ function deterministicPubkey(seed) {
 }
 
 function resolvedMeta(contract, action, specification, account) {
-  const delegatedProgram = contract.programs.find((program) => program.name === "leverage_delegate");
+  const delegatedProgram = contract.programs.find(
+    (program) => program.name === "leverage_delegate",
+  );
   let address = account.fixedAddress;
   if (!address && account.name === "program") address = specification.programId;
-  if (!address && account.name === "delegated_program") address = delegatedProgram.programId;
-  if (!address) address = deterministicPubkey(`${action}:${specification.key}:${account.name}`);
+  if (!address && account.name === "delegated_program")
+    address = delegatedProgram.programId;
+  if (!address)
+    address = deterministicPubkey(
+      `${action}:${specification.key}:${account.name}`,
+    );
   return {
     name: account.name,
     address,
@@ -275,9 +379,12 @@ function resolvedAccounts(contract, actionContract, specification) {
   return specification.accounts
     .filter(
       (account) =>
-        !account.optional || actionContract.requiredOptionalAccounts.includes(account.name),
+        !account.optional ||
+        actionContract.requiredOptionalAccounts.includes(account.name),
     )
-    .map((account) => resolvedMeta(contract, actionContract.action, specification, account));
+    .map((account) =>
+      resolvedMeta(contract, actionContract.action, specification, account),
+    );
 }
 
 function instructionEnvelope(contract, actionContract, specification, data) {
@@ -293,7 +400,9 @@ function instructionEnvelope(contract, actionContract, specification, data) {
 }
 
 function buildValidEnvelope(contract, actionContract, index) {
-  const instructions = new Map(contract.instructions.map((entry) => [entry.key, entry]));
+  const instructions = new Map(
+    contract.instructions.map((entry) => [entry.key, entry]),
+  );
   const primarySpec = instructions.get(actionContract.primaryInstructionKey);
   const hooks = actionContract.cpiInstructionKeys.map((key) => {
     const specification = instructions.get(key);
@@ -322,9 +431,16 @@ function buildValidEnvelope(contract, actionContract, index) {
     primaryData = directInstructionData(primarySpec);
   }
 
-  const primary = instructionEnvelope(contract, actionContract, primarySpec, primaryData);
+  const primary = instructionEnvelope(
+    contract,
+    actionContract,
+    primarySpec,
+    primaryData,
+  );
   if (hooks.length > 0) {
-    primary.remainingAccounts = hooks.flatMap((hook) => structuredClone(hook.accounts));
+    primary.remainingAccounts = hooks.flatMap((hook) =>
+      structuredClone(hook.accounts),
+    );
   }
   const envelope = {
     schemaVersion: 1,
@@ -414,7 +530,9 @@ function envelopeParitySha256(envelope) {
 }
 
 function mutate(validCases, action, name, expectedError, mutation) {
-  const source = validCases.find((entry) => entry.envelope.intent.action === action);
+  const source = validCases.find(
+    (entry) => entry.envelope.intent.action === action,
+  );
   assert.ok(source, `${name}: missing source action ${action}`);
   const envelope = structuredClone(source.envelope);
   mutation(envelope);
@@ -428,64 +546,160 @@ function buildFixtures(contract) {
   }));
 
   const invalidCases = [
-    mutate(validCases, "lending_liquidation_trigger", "revision mismatch", "revision_mismatch", (envelope) => {
-      envelope.intent.protocolRevision = "another-revision";
-    }),
-    mutate(validCases, "lending_liquidation_trigger", "job kind mismatch", "job_kind_mismatch", (envelope) => {
-      envelope.intent.jobKind = "take_profit";
-    }),
-    mutate(validCases, "lending_liquidation_trigger", "wrong instruction name", "instruction_mismatch", (envelope) => {
-      envelope.primary.instructionName = "execute_parameter_proposal";
-    }),
-    mutate(validCases, "lending_liquidation_trigger", "wrong program id", "program_id_mismatch", (envelope) => {
-      envelope.primary.programId = deterministicPubkey("wrong-program");
-    }),
-    mutate(validCases, "lending_liquidation_trigger", "invalid 32-byte pubkey", "invalid_pubkey", (envelope) => {
-      envelope.primary.accounts[0].address = "22222222222222222222222222222222";
-    }),
-    mutate(validCases, "lending_liquidation_trigger", "bad discriminator", "discriminator_mismatch", (envelope) => {
-      envelope.primary.dataHex = `00${envelope.primary.dataHex.slice(2)}`;
-    }),
-    mutate(validCases, "eligible_proposal_queue", "missing required account", "missing_required_account", (envelope) => {
-      envelope.primary.accounts.splice(1, 1);
-    }),
-    mutate(validCases, "lending_liquidation_trigger", "required account order swapped", "account_order_mismatch", (envelope) => {
-      [envelope.primary.accounts[0], envelope.primary.accounts[1]] = [
-        envelope.primary.accounts[1],
-        envelope.primary.accounts[0],
-      ];
-    }),
-    mutate(validCases, "lending_liquidation_trigger", "account flags changed", "account_flags_mismatch", (envelope) => {
-      envelope.primary.accounts[0].writable = false;
-    }),
-    mutate(validCases, "lending_liquidation_bid", "fixed token program changed", "fixed_address_mismatch", (envelope) => {
-      envelope.primary.accounts.find((account) => account.name === "token_program").address =
-        deterministicPubkey("wrong-token-program");
-    }),
-    mutate(validCases, "delegated_close_take_profit", "required delegation account omitted", "required_optional_account_missing", (envelope) => {
-      envelope.primary.accounts = envelope.primary.accounts.filter(
-        (account) => account.name !== "leverage_delegation",
-      );
-    }),
-    mutate(validCases, "delegated_close_take_profit", "CPI hook sequence changed", "cpi_hook_mismatch", (envelope) => {
-      envelope.cpiHooks.reverse();
-    }),
-    mutate(validCases, "delegated_close_stop_loss", "remaining accounts changed", "remaining_accounts_mismatch", (envelope) => {
-      [envelope.primary.remainingAccounts[0], envelope.primary.remainingAccounts[1]] = [
-        envelope.primary.remainingAccounts[1],
-        envelope.primary.remainingAccounts[0],
-      ];
-    }),
-    mutate(validCases, "delegated_close_stop_loss", "embedded hook bytes changed", "delegated_hook_data_mismatch", (envelope) => {
-      envelope.cpiHooks[0].dataHex = `${envelope.cpiHooks[0].dataHex.slice(0, -2)}08`;
-    }),
-    mutate(validCases, "eligible_proposal_execute", "canonical parity changed", "parity_mismatch", (envelope) => {
-      envelope.paritySha256 = "0".repeat(64);
-    }),
+    mutate(
+      validCases,
+      "lending_liquidation_trigger",
+      "revision mismatch",
+      "revision_mismatch",
+      (envelope) => {
+        envelope.intent.protocolRevision = "another-revision";
+      },
+    ),
+    mutate(
+      validCases,
+      "lending_liquidation_trigger",
+      "job kind mismatch",
+      "job_kind_mismatch",
+      (envelope) => {
+        envelope.intent.jobKind = "take_profit";
+      },
+    ),
+    mutate(
+      validCases,
+      "lending_liquidation_trigger",
+      "wrong instruction name",
+      "instruction_mismatch",
+      (envelope) => {
+        envelope.primary.instructionName = "execute_parameter_proposal";
+      },
+    ),
+    mutate(
+      validCases,
+      "lending_liquidation_trigger",
+      "wrong program id",
+      "program_id_mismatch",
+      (envelope) => {
+        envelope.primary.programId = deterministicPubkey("wrong-program");
+      },
+    ),
+    mutate(
+      validCases,
+      "lending_liquidation_trigger",
+      "invalid 32-byte pubkey",
+      "invalid_pubkey",
+      (envelope) => {
+        envelope.primary.accounts[0].address =
+          "22222222222222222222222222222222";
+      },
+    ),
+    mutate(
+      validCases,
+      "lending_liquidation_trigger",
+      "bad discriminator",
+      "discriminator_mismatch",
+      (envelope) => {
+        envelope.primary.dataHex = `00${envelope.primary.dataHex.slice(2)}`;
+      },
+    ),
+    mutate(
+      validCases,
+      "eligible_proposal_queue",
+      "missing required account",
+      "missing_required_account",
+      (envelope) => {
+        envelope.primary.accounts.splice(1, 1);
+      },
+    ),
+    mutate(
+      validCases,
+      "lending_liquidation_trigger",
+      "required account order swapped",
+      "account_order_mismatch",
+      (envelope) => {
+        [envelope.primary.accounts[0], envelope.primary.accounts[1]] = [
+          envelope.primary.accounts[1],
+          envelope.primary.accounts[0],
+        ];
+      },
+    ),
+    mutate(
+      validCases,
+      "lending_liquidation_trigger",
+      "account flags changed",
+      "account_flags_mismatch",
+      (envelope) => {
+        envelope.primary.accounts[0].writable = false;
+      },
+    ),
+    mutate(
+      validCases,
+      "lending_liquidation_bid",
+      "fixed token program changed",
+      "fixed_address_mismatch",
+      (envelope) => {
+        envelope.primary.accounts.find(
+          (account) => account.name === "token_program",
+        ).address = deterministicPubkey("wrong-token-program");
+      },
+    ),
+    mutate(
+      validCases,
+      "delegated_close_take_profit",
+      "required delegation account omitted",
+      "required_optional_account_missing",
+      (envelope) => {
+        envelope.primary.accounts = envelope.primary.accounts.filter(
+          (account) => account.name !== "leverage_delegation",
+        );
+      },
+    ),
+    mutate(
+      validCases,
+      "delegated_close_take_profit",
+      "CPI hook sequence changed",
+      "cpi_hook_mismatch",
+      (envelope) => {
+        envelope.cpiHooks.reverse();
+      },
+    ),
+    mutate(
+      validCases,
+      "delegated_close_stop_loss",
+      "remaining accounts changed",
+      "remaining_accounts_mismatch",
+      (envelope) => {
+        [
+          envelope.primary.remainingAccounts[0],
+          envelope.primary.remainingAccounts[1],
+        ] = [
+          envelope.primary.remainingAccounts[1],
+          envelope.primary.remainingAccounts[0],
+        ];
+      },
+    ),
+    mutate(
+      validCases,
+      "delegated_close_stop_loss",
+      "embedded hook bytes changed",
+      "delegated_hook_data_mismatch",
+      (envelope) => {
+        envelope.cpiHooks[0].dataHex = `${envelope.cpiHooks[0].dataHex.slice(0, -2)}08`;
+      },
+    ),
+    mutate(
+      validCases,
+      "eligible_proposal_execute",
+      "canonical parity changed",
+      "parity_mismatch",
+      (envelope) => {
+        envelope.paritySha256 = "0".repeat(64);
+      },
+    ),
   ];
 
   return {
-    $schema: "../../../protocol/schemas/instruction-envelope-fixture.schema.json",
+    $schema:
+      "../../../protocol/schemas/instruction-envelope-fixture.schema.json",
     schemaVersion: 1,
     validCases,
     invalidCases,
@@ -502,13 +716,25 @@ async function main() {
   if (process.argv.includes("--write")) {
     await writeFile(contractPath, formatted(contract));
     await writeFile(fixturesPath, formatted(fixtures));
-    console.log(`wrote ${contract.instructions.length} instruction specifications and ${fixtures.validCases.length} valid fixtures`);
+    console.log(
+      `wrote ${contract.instructions.length} instruction specifications and ${fixtures.validCases.length} valid fixtures`,
+    );
     return;
   }
 
-  assert.equal(await readFile(contractPath, "utf8"), formatted(contract), "instruction contract is stale");
-  assert.equal(await readFile(fixturesPath, "utf8"), formatted(fixtures), "instruction fixtures are stale");
-  console.log(`verified ${contract.instructions.length} IDL-derived instruction specifications and ${fixtures.validCases.length + fixtures.invalidCases.length} envelope fixtures`);
+  assert.equal(
+    await readFile(contractPath, "utf8"),
+    formatted(contract),
+    "instruction contract is stale",
+  );
+  assert.equal(
+    await readFile(fixturesPath, "utf8"),
+    formatted(fixtures),
+    "instruction fixtures are stale",
+  );
+  console.log(
+    `verified ${contract.instructions.length} IDL-derived instruction specifications and ${fixtures.validCases.length + fixtures.invalidCases.length} envelope fixtures`,
+  );
 }
 
 await main();

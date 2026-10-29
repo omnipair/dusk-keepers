@@ -80,6 +80,26 @@ for (const [file, profile, expected] of [
                     Buffer.from(a.account.data[0], "base64").subarray(0, 8),
                   ) === discriminator,
               );
+            // Removed devnet markets leave short position accounts behind.
+            // The runtime must scope their identity before a full-layout read.
+            if (
+              !p[1].dataSlice &&
+              answer.some((a: any) => a.pubkey === f.position)
+            ) {
+              const old = Buffer.alloc(f.kind === "BorrowPosition" ? 266 : 220);
+              Buffer.from(bs58.decode(discriminator)).copy(old);
+              new PublicKey(f.buyer).toBuffer().copy(old, 8);
+              Buffer.alloc(32, 239).copy(old, 40);
+              answer.push({
+                pubkey: new PublicKey(Buffer.alloc(32, 238)).toBase58(),
+                account: {
+                  owner: p[0],
+                  lamports: 1000000,
+                  executable: false,
+                  data: [old.toString("base64"), "base64"],
+                },
+              });
+            }
             if (p[1].dataSlice)
               answer = answer.map((a: any) => ({
                 ...a,

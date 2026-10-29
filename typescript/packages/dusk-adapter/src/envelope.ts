@@ -5,6 +5,8 @@ import { assertLiveReady, type ProtocolLock } from "./protocol-lock.ts";
 export type ProgramName = "dusk" | "leverage_delegate";
 
 export type JobAction =
+  | "limit_entry_execute"
+  | "hlp_order_execute"
   | "flash_liquidation_settle"
   | "flash_liquidation_preview"
   | "emergency_liquidation_preview"
@@ -30,6 +32,8 @@ export type JobKind =
   | "hlp_recovery"
   | "stop_loss"
   | "take_profit"
+  | "limit_entry"
+  | "hlp_order"
   | "auction_bid"
   | "lifecycle"
   | "sentinel";
@@ -127,7 +131,9 @@ export class SignableJobEnvelope {
 
   constructor(envelope: JobEnvelope, token: symbol) {
     if (token !== signableEnvelopeToken) {
-      throw new TypeError("signable envelopes may only be created by EnvelopeValidator");
+      throw new TypeError(
+        "signable envelopes may only be created by EnvelopeValidator",
+      );
     }
     this.envelope = envelope;
   }
@@ -167,7 +173,10 @@ export class EnvelopeValidator {
   readonly #contract: InstructionContract;
 
   constructor(lock: ProtocolLock, contract: InstructionContract) {
-    if (contract.schemaVersion !== 1 || contract.protocolRevision !== lock.revision) {
+    if (
+      contract.schemaVersion !== 1 ||
+      contract.protocolRevision !== lock.revision
+    ) {
       throw validationError(
         "revision_mismatch",
         "instruction contract revision does not match protocol lock",
@@ -182,7 +191,9 @@ export class EnvelopeValidator {
         );
       }
       names.add(program.name);
-      const pinned = lock.programs.find((candidate) => candidate.name === program.name);
+      const pinned = lock.programs.find(
+        (candidate) => candidate.name === program.name,
+      );
       if (
         !pinned ||
         pinned.programId !== program.programId ||
@@ -201,29 +212,48 @@ export class EnvelopeValidator {
 
   validate(envelope: JobEnvelope): ValidatedJobEnvelope {
     if (envelope.schemaVersion !== 1 || envelope.intent.schemaVersion !== 1) {
-      throw validationError("instruction_mismatch", "unsupported envelope schema");
+      throw validationError(
+        "instruction_mismatch",
+        "unsupported envelope schema",
+      );
     }
     if (envelope.intent.protocolRevision !== this.#lock.revision) {
-      throw validationError("revision_mismatch", "job intent revision does not match protocol lock");
+      throw validationError(
+        "revision_mismatch",
+        "job intent revision does not match protocol lock",
+      );
     }
     const action = this.#contract.actions.find(
       (candidate) => candidate.action === envelope.intent.action,
     );
     if (!action) {
-      throw validationError("instruction_mismatch", "job action is absent from instruction contract");
+      throw validationError(
+        "instruction_mismatch",
+        "job action is absent from instruction contract",
+      );
     }
     if (envelope.intent.jobKind !== action.jobKind) {
-      throw validationError("job_kind_mismatch", "job kind does not match action");
+      throw validationError(
+        "job_kind_mismatch",
+        "job kind does not match action",
+      );
     }
 
-    this.#validateExpectedInstruction(envelope.primary, action.primaryInstructionKey);
+    this.#validateExpectedInstruction(
+      envelope.primary,
+      action.primaryInstructionKey,
+    );
     if (
       envelope.cpiHooks.length !== action.cpiInstructionKeys.length ||
       envelope.cpiHooks.some(
-        (hook, index) => hook.specificationKey !== action.cpiInstructionKeys[index],
+        (hook, index) =>
+          hook.specificationKey !== action.cpiInstructionKeys[index],
       )
     ) {
-      throw validationError("cpi_hook_mismatch", "CPI hook sequence does not match job action");
+      throw validationError(
+        "cpi_hook_mismatch",
+        "CPI hook sequence does not match job action",
+      );
     }
     for (let index = 0; index < envelope.cpiHooks.length; index += 1) {
       const hook = envelope.cpiHooks[index];
@@ -237,17 +267,23 @@ export class EnvelopeValidator {
     }
 
     for (const required of action.requiredOptionalAccounts) {
-      if (!envelope.primary.accounts.some((account) => account.name === required)) {
+      if (
+        !envelope.primary.accounts.some((account) => account.name === required)
+      ) {
         throw validationError(
           "required_optional_account_missing",
           `job action requires optional IDL account ${required}`,
         );
       }
     }
-    if (action.cpiInstructionKeys.length > 0) this.#validateDelegatedComposition(envelope);
+    if (action.cpiInstructionKeys.length > 0)
+      this.#validateDelegatedComposition(envelope);
 
     if (envelopeParitySha256(envelope) !== envelope.paritySha256) {
-      throw validationError("parity_mismatch", "canonical byte/account-order digest differs");
+      throw validationError(
+        "parity_mismatch",
+        "canonical byte/account-order digest differs",
+      );
     }
     return new ValidatedJobEnvelope(envelope);
   }
@@ -267,15 +303,24 @@ export class EnvelopeValidator {
     return new SignableJobEnvelope(envelope, signableEnvelopeToken);
   }
 
-  #validateExpectedInstruction(envelope: InstructionEnvelope, expectedKey: string): void {
+  #validateExpectedInstruction(
+    envelope: InstructionEnvelope,
+    expectedKey: string,
+  ): void {
     if (envelope.specificationKey !== expectedKey) {
-      throw validationError("instruction_mismatch", "instruction specification key differs");
+      throw validationError(
+        "instruction_mismatch",
+        "instruction specification key differs",
+      );
     }
     const specification = this.#contract.instructions.find(
       (candidate) => candidate.key === expectedKey,
     );
     if (!specification) {
-      throw validationError("instruction_mismatch", "instruction specification is absent");
+      throw validationError(
+        "instruction_mismatch",
+        "instruction specification is absent",
+      );
     }
     if (
       envelope.program !== specification.program ||
@@ -287,7 +332,10 @@ export class EnvelopeValidator {
       );
     }
     if (envelope.programId !== specification.programId) {
-      throw validationError("program_id_mismatch", "program ID differs from pinned contract");
+      throw validationError(
+        "program_id_mismatch",
+        "program ID differs from pinned contract",
+      );
     }
     requirePubkey(envelope.programId);
     const data = decodeHex(envelope.dataHex);
@@ -299,7 +347,8 @@ export class EnvelopeValidator {
       );
     }
     this.#validateAccounts(envelope, specification);
-    for (const account of envelope.remainingAccounts) requirePubkey(account.address);
+    for (const account of envelope.remainingAccounts)
+      requirePubkey(account.address);
   }
 
   #validateAccounts(
@@ -309,7 +358,8 @@ export class EnvelopeValidator {
     let actualIndex = 0;
     for (const expected of specification.accounts) {
       const actual = envelope.accounts[actualIndex];
-      if (expected.optional && (!actual || actual.name !== expected.name)) continue;
+      if (expected.optional && (!actual || actual.name !== expected.name))
+        continue;
       if (!actual) {
         throw validationError(
           "missing_required_account",
@@ -321,18 +371,24 @@ export class EnvelopeValidator {
           .slice(actualIndex + 1)
           .some((account) => account.name === expected.name);
         throw validationError(
-          expectedIsLater ? "account_order_mismatch" : "missing_required_account",
+          expectedIsLater
+            ? "account_order_mismatch"
+            : "missing_required_account",
           `expected account ${expected.name}, got ${actual.name}`,
         );
       }
       requirePubkey(actual.address);
-      if (actual.writable !== expected.writable || actual.signer !== expected.signer) {
+      if (
+        actual.writable !== expected.writable ||
+        actual.signer !== expected.signer
+      ) {
         throw validationError(
           "account_flags_mismatch",
           `account ${expected.name} flags differ from IDL`,
         );
       }
-      const fixedAddress = expected.fixedAddress ??
+      const fixedAddress =
+        expected.fixedAddress ??
         (expected.name === "program" ? specification.programId : null);
       if (fixedAddress && fixedAddress !== actual.address) {
         throw validationError(
@@ -352,7 +408,10 @@ export class EnvelopeValidator {
 
   #validateDelegatedComposition(envelope: JobEnvelope): void {
     if (envelope.cpiHooks.length !== 2) {
-      throw validationError("cpi_hook_mismatch", "delegated close requires exactly two CPI hooks");
+      throw validationError(
+        "cpi_hook_mismatch",
+        "delegated close requires exactly two CPI hooks",
+      );
     }
     const primary = decodeHex(envelope.primary.dataHex);
     const before = decodeHex(envelope.cpiHooks[0].dataHex);
@@ -364,17 +423,22 @@ export class EnvelopeValidator {
         "delegated close embedded CPI bytes differ from hook envelopes",
       );
     }
-    if (embedded.beforeAccountsLength !== envelope.cpiHooks[0].accounts.length) {
+    if (
+      embedded.beforeAccountsLength !== envelope.cpiHooks[0].accounts.length
+    ) {
       throw validationError(
         "remaining_accounts_mismatch",
         "before_accounts_len differs from before-hook account count",
       );
     }
-    const expectedRemaining = envelope.cpiHooks.flatMap((hook) => hook.accounts);
+    const expectedRemaining = envelope.cpiHooks.flatMap(
+      (hook) => hook.accounts,
+    );
     if (
       expectedRemaining.length !== envelope.primary.remainingAccounts.length ||
       expectedRemaining.some(
-        (account, index) => !sameAccount(account, envelope.primary.remainingAccounts[index]),
+        (account, index) =>
+          !sameAccount(account, envelope.primary.remainingAccounts[index]),
       )
     ) {
       throw validationError(
@@ -385,7 +449,10 @@ export class EnvelopeValidator {
     const delegatedProgram = envelope.primary.accounts.find(
       (account) => account.name === "delegated_program",
     );
-    if (!delegatedProgram || delegatedProgram.address !== envelope.cpiHooks[0].programId) {
+    if (
+      !delegatedProgram ||
+      delegatedProgram.address !== envelope.cpiHooks[0].programId
+    ) {
       throw validationError(
         "fixed_address_mismatch",
         "delegated_program does not match CPI hook program",
@@ -394,7 +461,10 @@ export class EnvelopeValidator {
   }
 }
 
-function sameAccount(left: ResolvedAccountMeta, right: ResolvedAccountMeta): boolean {
+function sameAccount(
+  left: ResolvedAccountMeta,
+  right: ResolvedAccountMeta,
+): boolean {
   return (
     left.name === right.name &&
     left.address === right.address &&
@@ -422,7 +492,10 @@ function decodeDelegatedCpiPayload(data: Buffer): {
   };
 }
 
-function readVector(data: Buffer, cursor: number): { bytes: Buffer; next: number } {
+function readVector(
+  data: Buffer,
+  cursor: number,
+): { bytes: Buffer; next: number } {
   if (cursor + 4 > data.length) throw invalidDelegatedData();
   const length = data.readUInt32LE(cursor);
   const start = cursor + 4;
@@ -441,11 +514,13 @@ function invalidDelegatedData(): EnvelopeValidationError {
 function requirePubkey(address: string): void {
   const alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
   let leadingZeros = 0;
-  while (leadingZeros < address.length && address[leadingZeros] === "1") leadingZeros += 1;
+  while (leadingZeros < address.length && address[leadingZeros] === "1")
+    leadingZeros += 1;
   const bytes: number[] = [];
   for (const character of address.slice(leadingZeros)) {
     const digit = alphabet.indexOf(character);
-    if (digit < 0) throw validationError("invalid_pubkey", "account address is not base58");
+    if (digit < 0)
+      throw validationError("invalid_pubkey", "account address is not base58");
     let carry = digit;
     for (let index = 0; index < bytes.length; index += 1) {
       const value = bytes[index] * 58 + carry;
@@ -458,12 +533,19 @@ function requirePubkey(address: string): void {
     }
   }
   if (leadingZeros + bytes.length !== 32) {
-    throw validationError("invalid_pubkey", "account address does not decode to 32 bytes");
+    throw validationError(
+      "invalid_pubkey",
+      "account address does not decode to 32 bytes",
+    );
   }
 }
 
 function decodeHex(value: string): Buffer {
-  if (value.length < 16 || value.length % 2 !== 0 || !/^[0-9a-f]+$/.test(value)) {
+  if (
+    value.length < 16 ||
+    value.length % 2 !== 0 ||
+    !/^[0-9a-f]+$/.test(value)
+  ) {
     throw validationError(
       "invalid_data_hex",
       "instruction data must be lowercase, even-length hex with an 8-byte discriminator",
@@ -481,7 +563,10 @@ class CanonicalWriter {
 
   u32(value: number): void {
     if (!Number.isSafeInteger(value) || value < 0 || value > 0xffff_ffff) {
-      throw validationError("parity_mismatch", "canonical field exceeds u32 length");
+      throw validationError(
+        "parity_mismatch",
+        "canonical field exceeds u32 length",
+      );
     }
     const buffer = Buffer.alloc(4);
     buffer.writeUInt32LE(value);
@@ -490,7 +575,10 @@ class CanonicalWriter {
 
   u64(value: number): void {
     if (!Number.isSafeInteger(value) || value < 0) {
-      throw validationError("parity_mismatch", "slot is outside safe integer range");
+      throw validationError(
+        "parity_mismatch",
+        "slot is outside safe integer range",
+      );
     }
     const buffer = Buffer.alloc(8);
     buffer.writeBigUInt64LE(BigInt(value));

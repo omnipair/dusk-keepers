@@ -29,6 +29,7 @@ mod flash_journal;
 mod flash_runtime;
 mod hlp_flash;
 mod lifecycle;
+mod orders;
 mod signer;
 mod transaction;
 
@@ -142,6 +143,9 @@ impl Config {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
+    if env::args().any(|a| a == "--order-plan") {
+        return orders::run_plan_cli();
+    }
     if env::args().any(|a| a == "--flash-plan") {
         return flash_cli::run();
     }
@@ -456,6 +460,30 @@ fn run_execution_pass(
                 priority_markets: &priority_markets,
             }
             .run_pass()
+            .and_then(|mut reports| {
+                if profile == "leverage" {
+                    let remaining = max_sends_per_pass.saturating_sub(
+                        reports
+                            .iter()
+                            .filter(|r| r.status == OutcomeStatus::Executed)
+                            .count(),
+                    );
+                    if remaining > 0 {
+                        reports.extend(
+                            orders::OrderJob {
+                                client,
+                                layout,
+                                contract,
+                                signer,
+                                dry_run,
+                                max_sends: remaining,
+                            }
+                            .run_pass()?,
+                        );
+                    }
+                }
+                Ok(reports)
+            })
         }
         "auction-arbitrage" => match arbitrage_policy() {
             None => Ok(Vec::new()),

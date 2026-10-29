@@ -91,6 +91,16 @@
           "size": 32
         },
         {
+          "path": "base_side.hlp_mint",
+          "offset": 74,
+          "size": 32
+        },
+        {
+          "path": "quote_side.hlp_mint",
+          "offset": 619,
+          "size": 32
+        },
+        {
           "path": "base_side.asset_mint",
           "offset": 41,
           "size": 32
@@ -287,6 +297,11 @@
       "name": "FutarchyAuthority",
       "sizeWithDiscriminator": 395,
       "fields": [
+        {
+          "path": "recipients.futarchy_treasury",
+          "offset": 41,
+          "size": 32
+        },
         {
           "path": "fee_auction.accepted_mint",
           "offset": 153,

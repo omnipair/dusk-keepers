@@ -6,6 +6,8 @@ export type JobKind =
   | "hlp_recovery"
   | "stop_loss"
   | "take_profit"
+  | "limit_entry"
+  | "hlp_order"
   | "auction_bid"
   | "lifecycle"
   | "sentinel";
@@ -35,6 +37,8 @@ const priorities: Readonly<Record<JobKind, number>> = {
   hlp_recovery: 500,
   stop_loss: 400,
   take_profit: 300,
+  limit_entry: 250,
+  hlp_order: 400,
   auction_bid: 200,
   lifecycle: 100,
   sentinel: 0,
@@ -50,11 +54,13 @@ export class Scheduler {
   }
 
   enqueue(candidate: CandidateIntent): EnqueueResult {
-    if (candidate.protocolRevision !== this.#protocolRevision) return "revision_mismatch";
+    if (candidate.protocolRevision !== this.#protocolRevision)
+      return "revision_mismatch";
     if (this.#inFlight.has(candidate.conflictKey)) return "conflict_locked";
 
     const current = this.#pending.get(candidate.conflictKey);
-    if (current && compareCandidates(candidate, current) <= 0) return "superseded";
+    if (current && compareCandidates(candidate, current) <= 0)
+      return "superseded";
     this.#pending.set(candidate.conflictKey, candidate);
     return "accepted";
   }
@@ -62,7 +68,8 @@ export class Scheduler {
   popNext(): CandidateIntent | undefined {
     let selected: CandidateIntent | undefined;
     for (const candidate of this.#pending.values()) {
-      if (!selected || compareCandidates(candidate, selected) > 0) selected = candidate;
+      if (!selected || compareCandidates(candidate, selected) > 0)
+        selected = candidate;
     }
     if (!selected) return undefined;
     this.#pending.delete(selected.conflictKey);
@@ -84,7 +91,10 @@ export class Scheduler {
   }
 }
 
-function compareCandidates(left: CandidateIntent, right: CandidateIntent): number {
+function compareCandidates(
+  left: CandidateIntent,
+  right: CandidateIntent,
+): number {
   return (
     priorities[left.jobKind] - priorities[right.jobKind] ||
     left.observedSlot - right.observedSlot ||
@@ -92,7 +102,11 @@ function compareCandidates(left: CandidateIntent, right: CandidateIntent): numbe
   );
 }
 
-export type OutcomeStatus = "executed" | "skipped" | "retryable_failure" | "terminal_failure";
+export type OutcomeStatus =
+  | "executed"
+  | "skipped"
+  | "retryable_failure"
+  | "terminal_failure";
 
 export type ReasonCode =
   | "confirmed"

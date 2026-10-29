@@ -117,12 +117,36 @@ Use market-scoped workers when assets have different units/economics.
 | `KEEPER_HLP_MAX_INSURANCE_DRAW` | Maximum insurance draw the worker authorizes for a full hLP settlement. |
 | `KEEPER_HLP_MAX_SOCIALIZED_LOSS` | Maximum principal loss the worker authorizes for a full hLP settlement. |
 | `KEEPER_HLP_MIN_BOUNTY_OUT` | Minimum borrowed-token bounty for the terminal-close fallback. |
+| `KEEPER_ORDER_MARKET` | Optional current market scope for conditional entry, TP/SL and hLP orders in the leverage worker. |
+| `KEEPER_ORDER_MIN_BOUNTY_CREDIT` | Required minimum simulated net executor credit for conditional orders, in the payout token's raw atoms. Use a market-specific worker for different payout units. |
 
 No default economic thresholds are guessed. Missing limits fail visibly.
 Associated token accounts are prepared before the atomic pair when necessary.
 Lookup tables are read from RPC and checked for ownership, warm-up and deactivation;
 the compiled wire size is checked before signing. `--once` runs one scan for
 local/shadow diagnostics without starting a permanent worker.
+
+## Conditional orders
+
+The native leverage worker discovers leverage entry orders, TP/SL close orders,
+and hLP stop-loss/stop-rate orders from the pinned delegate program. Removed
+markets are filtered before decoding their retired positions or orders. Trigger
+prices, close fractions, entry limits, expiry and settlement requirements remain
+enforced by the programs during full-transaction simulation. The worker does not
+replace those checks with an indexer estimate.
+
+Successful simulations must close entry/exit order accounts or transition an hLP
+order out of its active state, and pay the configured net bounty. Partial TP/SL
+closes use the order's stored fraction. hLP orders for a retired receipt cohort
+are left for owner cancellation/yield settlement. Missing lookup-table capacity
+or insufficient payout produces an explicit skip. No transaction is submitted in
+shadow mode.
+
+Before any authorized live signature, all instruction accounts are re-read,
+mint/Clock fingerprints are revalidated, and the same durable submission journal
+and position/side conflict lease used for liquidations is acquired. The captured
+protocol lock still prohibits live execution; adding an executor does not grant
+release authorization.
 
 ## Durable execution and restart
 
