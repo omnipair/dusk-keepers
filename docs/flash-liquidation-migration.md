@@ -72,11 +72,14 @@ profile never signs a health preview; bidder/settler/leverage submit execution.
 
 Every decision starts with fresh RPC position, market, both mint accounts, Clock,
 vault and hLP state. Indexer data never authorizes execution. Previews use the
-program's symmetric-EMA eligibility and partial/full permissions. The keeper probes
-bounded sizes; failure of those samples is **not proof** that a full close is
-allowed. Only an accepted full preview permits the full plan. A probe exceeding
-the chain compute budget is logged and skipped; invariant/ABI errors remain loud. Eligible positions
-with no acceptable sampled route are explicitly reported as unfilled.
+program's symmetric-EMA eligibility and partial/full permissions. The keeper starts
+with bounded geometric sizes, measures complete-route execution profit, refines the
+best interval, and exhaustively scans the final 64-atom window so integer-rounding
+peaks are not hidden by the coarse probes. Failure of this bounded search is **not
+proof** that a full close is allowed. Only an accepted full preview permits the full
+plan. A probe exceeding the chain compute budget is logged and skipped;
+invariant/ABI errors remain loud. Eligible positions with no acceptable adaptively
+searched route are explicitly reported as unfilled.
 
 ## Settlement modes and bounds
 

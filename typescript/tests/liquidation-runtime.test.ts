@@ -13,20 +13,82 @@ import { resolveLiquidationAccounts } from "../packages/dusk-adapter/src/liquida
 const layout = JSON.parse(
   readFileSync("protocol/keeper-account-layout.v1.json", "utf8"),
 );
-for (const [file, profile, expected] of [
-  ["01-flash-BorrowPosition.json", "lending-bidder", "flash"],
-  ["01-flash-BorrowPosition.json", "lending-trigger", "monitor"],
-  ["02-emergency-BorrowPosition.json", "lending-settler", "emergency"],
+for (const { file, profile, expected, settlement, maxRepay, minProfit, name } of [
+  {
+    file: "01-flash-BorrowPosition.json",
+    profile: "lending-bidder",
+    expected: "flash",
+    settlement: "inventory",
+    maxRepay: "18446744073709551615",
+    minProfit: "0",
+    name: "inventory flash",
+  },
+  {
+    file: "01-flash-BorrowPosition.json",
+    profile: "lending-trigger",
+    expected: "monitor",
+    settlement: "inventory",
+    maxRepay: "18446744073709551615",
+    minProfit: "0",
+    name: "health monitor",
+  },
+  {
+    file: "02-emergency-BorrowPosition.json",
+    profile: "lending-settler",
+    expected: "emergency",
+    settlement: "inventory",
+    maxRepay: "18446744073709551615",
+    minProfit: "0",
+    name: "emergency settlement",
+  },
   // Final-notice eligibility is rechecked directly on every pass.
-  ["05-flash-LeveragePosition.json", "leverage", "flash"],
+  {
+    file: "05-flash-LeveragePosition.json",
+    profile: "leverage",
+    expected: "flash",
+    settlement: "inventory",
+    maxRepay: "18446744073709551615",
+    minProfit: "0",
+    name: "final-notice leverage",
+  },
   // No registration is needed for a fresh leverage fill.
-  ["07-flash-LeveragePosition.json", "leverage", "flash"],
-  ["03-emergency-LeveragePosition.json", "leverage", "emergency"],
+  {
+    file: "07-flash-LeveragePosition.json",
+    profile: "leverage",
+    expected: "flash",
+    settlement: "inventory",
+    maxRepay: "18446744073709551615",
+    minProfit: "0",
+    name: "fresh leverage",
+  },
+  {
+    file: "03-emergency-LeveragePosition.json",
+    profile: "leverage",
+    expected: "emergency",
+    settlement: "inventory",
+    maxRepay: "18446744073709551615",
+    minProfit: "0",
+    name: "leverage emergency",
+  },
+  // The geometric probes top out at seven atoms for this fixture. Adaptive
+  // refinement must find the non-geometric 996-atom fill yielding eight.
+  {
+    file: "01-flash-BorrowPosition.json",
+    profile: "lending-bidder",
+    expected: "flash",
+    settlement: "dusk",
+    maxRepay: "1000",
+    minProfit: "8",
+    name: "adaptive non-geometric partial",
+  },
 ] as const) {
-  test(`native ${profile} completes discovery, read-only health, quote and simulation via RPC`, async () => {
+  test(`native ${profile} completes ${name} via RPC`, async () => {
     const f = JSON.parse(readFileSync(`fixtures/litesvm/${file}`, "utf8"));
     const svm = bank(f);
-    const { lookupTable } = planWithTable(f, svm);
+    const { lookupTable } = planWithTable(
+      { ...f, internal: settlement === "dusk" },
+      svm,
+    );
     const requests: string[] = [];
     let simulations = 0;
     const rpcAccount = (a: any) => {
@@ -184,13 +246,13 @@ for (const [file, profile, expected] of [
               PORT: "0",
               SOLANA_RPC_HTTP_URL: endpoint,
               KEEPER_LIQUIDATION_LOOKUP_TABLE: lookupTable,
-              KEEPER_FLASH_SETTLEMENT: "inventory",
+              KEEPER_FLASH_SETTLEMENT: settlement,
               KEEPER_FLASH_MARKET: context.named.market,
-              KEEPER_FLASH_MAX_REPAY: "18446744073709551615",
+              KEEPER_FLASH_MAX_REPAY: maxRepay,
               KEEPER_FLASH_MAX_PAYMENT_DEBIT: "18446744073709551615",
               KEEPER_FLASH_MIN_COLLATERAL_CREDIT:
                 expected === "emergency" ? "18446744073709551615" : "1",
-              KEEPER_LIQUIDATION_MIN_PROFIT: "0",
+              KEEPER_LIQUIDATION_MIN_PROFIT: minProfit,
             },
           });
           let output = "";
