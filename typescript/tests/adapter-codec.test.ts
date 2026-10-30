@@ -128,7 +128,7 @@ test("resolves every generated static account", () => {
     );
   }
   assert.equal(
-    resolver.pdaRecipeKey("dusk:observe_liquidation", "market"),
+    resolver.pdaRecipeKey("dusk:preview_liquidation_health", "market"),
     "dusk:market",
   );
 });
@@ -137,12 +137,12 @@ test("rejects an Anchor discriminator drift in the instruction contract", () => 
   const drifted = structuredClone(contract) as unknown as {
     instructions: Array<{ discriminatorHex: string }>;
   };
-  drifted.instructions[contract.instructions.findIndex(i => i.key === "dusk:observe_liquidation")].discriminatorHex = "00".repeat(8);
+  drifted.instructions[contract.instructions.findIndex(i => i.key === "dusk:preview_liquidation_health")].discriminatorHex = "00".repeat(8);
   assert.throws(
     () =>
       encodeKeeperInstructionJson(
         drifted as unknown as InstructionContract,
-        "dusk:observe_liquidation",
+        "dusk:preview_liquidation_health",
         { debtAsset: 0 },
       ),
     (error) => error instanceof InstructionEncodingError && error.code === "contract_mismatch",

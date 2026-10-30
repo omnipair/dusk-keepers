@@ -1,13 +1,13 @@
 {
   "$schema": "./schemas/account-layout.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "devnet-2026-10-26-cd6f1ec",
+  "protocolRevision": "health-only-2026-10-30-9d6e5373",
   "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-  "idlSha256": "574f9a347a2ecf2f85fa6d9f981fb474b1300f2e9cca5ae0ca0158da113019eb",
+  "idlSha256": "eb1081be876eab2721d962e277bb09da789b334abbf4ab6344b413a80b0fd894",
   "accounts": [
     {
       "name": "BorrowPosition",
-      "sizeWithDiscriminator": 348,
+      "sizeWithDiscriminator": 314,
       "fields": [
         {
           "path": "owner",
@@ -58,26 +58,6 @@
           "path": "active_liquidation_session",
           "offset": 256,
           "size": 32
-        },
-        {
-          "path": "base_distress.active",
-          "offset": 288,
-          "size": 1
-        },
-        {
-          "path": "base_distress.started_at",
-          "offset": 289,
-          "size": 8
-        },
-        {
-          "path": "quote_distress.active",
-          "offset": 305,
-          "size": 1
-        },
-        {
-          "path": "quote_distress.started_at",
-          "offset": 306,
-          "size": 8
         }
       ]
     },
@@ -234,7 +214,7 @@
     },
     {
       "name": "LeveragePosition",
-      "sizeWithDiscriminator": 345,
+      "sizeWithDiscriminator": 328,
       "fields": [
         {
           "path": "owner",
@@ -280,16 +260,6 @@
           "path": "active_liquidation_session",
           "offset": 295,
           "size": 32
-        },
-        {
-          "path": "distress.active",
-          "offset": 327,
-          "size": 1
-        },
-        {
-          "path": "distress.started_at",
-          "offset": 328,
-          "size": 8
         }
       ]
     },

@@ -1,14 +1,14 @@
 {
   "$schema": "./protocol/schemas/protocol-lock.schema.json",
   "schemaVersion": 1,
-  "revision": "devnet-2026-10-26-cd6f1ec",
+  "revision": "health-only-2026-10-30-9d6e5373",
   "status": "captured",
-  "generatedAt": "2026-10-26T23:51:27.878Z",
+  "generatedAt": "2026-10-30T15:55:06.959Z",
   "source": {
     "repository": "https://github.com/omnipair/dusk",
-    "branch": "fix/benchmark-replay-owner",
-    "gitCommit": "77877d576018fd2bd8191d13f05534b0484e2282",
-    "worktreeFingerprintSha256": "9e2edb10082253a2511b0e11119b1748fdcd3e09ead452964da4884956d8ae83"
+    "branch": "feat/health-only-liquidations",
+    "gitCommit": "9d6e53738f6c5dd550d539d8c045888b819c5ec8",
+    "worktreeFingerprintSha256": "fd0c0b00026c1a19aa2c9cbcb346ddfba646ef717f455f4118bf8b1f5bed8585"
   },
   "toolchain": {
     "anchor": "0.31.1",
@@ -23,11 +23,11 @@
       "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "binary": {
         "path": "artifacts/dusk.so",
-        "sha256": "21e3f3c4dd3e0e5b4fad85f69e0bae702b1209ab4fe1820f6bc86e81408d07ed"
+        "sha256": "f61dedf4aaaae278c4af651630a48ec6d95c9ff444020d5e1b497705379bdf66"
       },
       "idl": {
         "path": "artifacts/dusk.json",
-        "sha256": "574f9a347a2ecf2f85fa6d9f981fb474b1300f2e9cca5ae0ca0158da113019eb"
+        "sha256": "eb1081be876eab2721d962e277bb09da789b334abbf4ab6344b413a80b0fd894"
       }
     },
     {
@@ -35,23 +35,23 @@
       "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
       "binary": {
         "path": "artifacts/leverage_delegate.so",
-        "sha256": "4c1f7e1b326ff91d34d87edc888dee38bfde44058be50df3bb7ecdbe11845e1f"
+        "sha256": "602e1c9934af11796967453e155417da5a97a8085ca450365a069dc6daaea32b"
       },
       "idl": {
         "path": "artifacts/leverage_delegate.json",
-        "sha256": "59acc8a10b41c235156e593017b1e88dd6657fd192df4a1f1c0cc4275a1dd658"
+        "sha256": "dda5cbb8a48eff8753d9a4a235f19531293f2d475ab4fef9a3c9b64279b4ccd0"
       }
     }
   ],
   "sdk": {
     "path": "artifacts/dusk-sdk.tgz",
-    "sha256": "186c3d85c5a733da446c6f00301fefd0f36170336f1d8f4fdc9807ffc8c16d8c"
+    "sha256": "3ec4a888f4723aea24063cc73e3599ce3600128241abf9b366180f60020887c3"
   },
   "compatibility": {
-    "accountLayoutFingerprintSha256": "172109189feeb8f21753802fc4a2752cd4ef821ab452fa4dcdd9358adaea1d5c",
-    "instructionFingerprintSha256": "dc4ab7843b8510f6fc1660c2b244c6b9990aae475f77e4d8ed9909e566934978",
-    "eventFingerprintSha256": "00c711e86a809bc1b2bfbb298ce8ec0364e5b07779c5b389826a14a332df7199",
-    "errorFingerprintSha256": "569c0a6e131dc4041c8d8e59a22005babf8bb5f0c759c0f361e964882b91dcc6",
-    "pdaFingerprintSha256": "9fb3d63555aba971eb888651cc9d8fc4dcf98b0ac23e4016588afdc81175438d"
+    "accountLayoutFingerprintSha256": "310337422f7f11432c7e93a08f2cd41a372757eed23fbd05dd86193254981bec",
+    "instructionFingerprintSha256": "d3cd084486f16f7714cfe4f126943d366a73b3fc7601ea49d7516b8d3983ccaa",
+    "eventFingerprintSha256": "8c76e6124a2bc20434c2a361c3c579d0682d97d1c434114051d5f0fda2ff2cb2",
+    "errorFingerprintSha256": "14cf3e195ffb812faf3a4359cf49ecd2d834ca9861eea62277519064d3b1fa5b",
+    "pdaFingerprintSha256": "37ff74e3ebc734fd3b58edbdaf0939296e333364b34ddee77662f9481551f2b8"
   }
 }

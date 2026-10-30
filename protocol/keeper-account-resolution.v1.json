@@ -1,17 +1,17 @@
 {
   "$schema": "./schemas/account-resolution-manifest.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "devnet-2026-10-26-cd6f1ec",
+  "protocolRevision": "health-only-2026-10-30-9d6e5373",
   "programs": [
     {
       "name": "dusk",
       "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-      "idlSha256": "574f9a347a2ecf2f85fa6d9f981fb474b1300f2e9cca5ae0ca0158da113019eb"
+      "idlSha256": "eb1081be876eab2721d962e277bb09da789b334abbf4ab6344b413a80b0fd894"
     },
     {
       "name": "leverage_delegate",
       "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
-      "idlSha256": "59acc8a10b41c235156e593017b1e88dd6657fd192df4a1f1c0cc4275a1dd658"
+      "idlSha256": "dda5cbb8a48eff8753d9a4a235f19531293f2d475ab4fef9a3c9b64279b4ccd0"
     }
   ],
   "staticAccounts": [
@@ -83,12 +83,6 @@
     },
     {
       "instructionKey": "dusk:settle_flash_liquidation",
-      "accountName": "program",
-      "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-      "source": "instruction_program"
-    },
-    {
-      "instructionKey": "dusk:observe_liquidation",
       "accountName": "program",
       "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "source": "instruction_program"
@@ -426,7 +420,7 @@
           ]
         },
         {
-          "instructionKey": "dusk:observe_liquidation",
+          "instructionKey": "dusk:preview_liquidation_health",
           "accountName": "market",
           "idlSeedPaths": [
             "const:6d61726b65745f7632",
@@ -597,13 +591,6 @@
       "usages": [
         {
           "instructionKey": "dusk:settle_flash_liquidation",
-          "accountName": "event_authority",
-          "idlSeedPaths": [
-            "const:5f5f6576656e745f617574686f72697479"
-          ]
-        },
-        {
-          "instructionKey": "dusk:observe_liquidation",
           "accountName": "event_authority",
           "idlSeedPaths": [
             "const:5f5f6576656e745f617574686f72697479"

@@ -73,7 +73,7 @@ only after a completed early liquidation; that borrower penalty risk remains.
 ## Candidate migration and release status
 
 The candidate lock now pins #45 at `1bce17ba`. Native Rust callers use
-`observe_liquidation`, authoritative previews, atomic begin/settle and emergency
+read-only health and authoritative fill previews, atomic begin/settle and emergency
 execution. Old liquidation-auction callers have been removed. Independent
 TypeScript builders cover the same account layout, quotes and instruction bytes;
 the TypeScript service remains shadow-only.

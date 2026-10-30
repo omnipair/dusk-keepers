@@ -14,12 +14,12 @@ use sha2::{Digest, Sha256};
 use crate::InstructionContract;
 
 #[derive(Clone, Debug, BorshSerialize, Eq, PartialEq)]
-pub struct ObserveLiquidationArgs {
+pub struct PreviewLiquidationHealthArgs {
     pub debt_asset: u8,
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct ObserveLiquidationWire {
+struct PreviewLiquidationHealthWire {
     debt_asset: u8,
 }
 #[derive(Clone, Debug, BorshSerialize, Eq, PartialEq)]
@@ -194,7 +194,7 @@ pub struct SettleProtocolAuctionArgs {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum KeeperInstructionArguments {
-    ObserveLiquidation(ObserveLiquidationArgs),
+    PreviewLiquidationHealth(PreviewLiquidationHealthArgs),
     PreviewFlashLiquidation(PreviewFlashLiquidationArgs),
     PreviewEmergencyLiquidation(PreviewEmergencyLiquidationArgs),
     BeginFlashLiquidation(BeginFlashLiquidationArgs),
@@ -219,7 +219,7 @@ pub enum KeeperInstructionArguments {
 impl KeeperInstructionArguments {
     pub fn specification_key(&self) -> &'static str {
         match self {
-            Self::ObserveLiquidation(_) => "dusk:observe_liquidation",
+            Self::PreviewLiquidationHealth(_) => "dusk:preview_liquidation_health",
             Self::PreviewFlashLiquidation(_) => "dusk:preview_flash_liquidation",
             Self::PreviewEmergencyLiquidation(_) => "dusk:preview_emergency_liquidation",
             Self::BeginFlashLiquidation(_) => "dusk:begin_flash_liquidation",
@@ -244,7 +244,7 @@ impl KeeperInstructionArguments {
 
     fn borsh_bytes(&self) -> Result<Vec<u8>, InstructionEncodingError> {
         let result = match self {
-            Self::ObserveLiquidation(value) => borsh::to_vec(value),
+            Self::PreviewLiquidationHealth(value) => borsh::to_vec(value),
             Self::PreviewFlashLiquidation(value) => borsh::to_vec(value),
             Self::PreviewEmergencyLiquidation(value) => borsh::to_vec(value),
             Self::BeginFlashLiquidation(value) => borsh::to_vec(value),
@@ -328,10 +328,10 @@ pub fn parse_keeper_instruction_arguments(
     value: Value,
 ) -> Result<KeeperInstructionArguments, InstructionEncodingError> {
     match specification_key {
-        "dusk:observe_liquidation" => {
-            let wire: ObserveLiquidationWire = parse_wire(value)?;
-            Ok(KeeperInstructionArguments::ObserveLiquidation(
-                ObserveLiquidationArgs {
+        "dusk:preview_liquidation_health" => {
+            let wire: PreviewLiquidationHealthWire = parse_wire(value)?;
+            Ok(KeeperInstructionArguments::PreviewLiquidationHealth(
+                PreviewLiquidationHealthArgs {
                     debt_asset: wire.debt_asset,
                 },
             ))

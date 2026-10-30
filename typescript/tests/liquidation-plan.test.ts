@@ -44,19 +44,22 @@ for (const file of readdirSync("fixtures/litesvm").filter((f) =>
     );
     assert.deepEqual(native.instructions, plan);
     assert.ok(plan.length >= 3);
-    const observation = liquidationInstruction(
+    const healthPreview = liquidationInstruction(
       contract,
       context,
-      "observe_liquidation",
+      "preview_liquidation_health",
       { debtAsset: f.debtAsset },
     );
-    const nativeObserve = JSON.parse(
+    const nativeHealth = JSON.parse(
       execFileSync("target/debug/dusk-keeper", ["--flash-plan"], {
-        input: JSON.stringify({ ...f, action: "observe" }),
+        input: JSON.stringify({ ...f, action: "health" }),
         encoding: "utf8",
       }),
     );
-    assert.deepEqual(nativeObserve.instructions, [observation]);
+    assert.deepEqual(nativeHealth.instructions, [healthPreview]);
+    assert.ok(healthPreview.accounts.every(meta => !meta.is_writable && !meta.is_signer));
+    assert.ok(!plan.some(ix => Buffer.from(ix.data).equals(Buffer.from(healthPreview.data))));
+    assert.throws(() => liquidationInstruction(contract, context, "observe_liquidation", { debtAsset: f.debtAsset }));
     assert.throws(
       () =>
         decodeLiquidationQuote(

@@ -2,13 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
-import { spawn, execFileSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import {
   PublicKey,
-  TransactionMessage,
-  TransactionInstruction,
   VersionedTransaction,
-  ComputeBudgetProgram,
 } from "@solana/web3.js";
 import bs58 from "bs58";
 import { bank, planWithTable } from "./helpers/liquidation-bank.ts";
@@ -16,20 +13,82 @@ import { resolveLiquidationAccounts } from "../packages/dusk-adapter/src/liquida
 const layout = JSON.parse(
   readFileSync("protocol/keeper-account-layout.v1.json", "utf8"),
 );
-for (const [file, profile, expected] of [
-  ["01-flash-BorrowPosition.json", "lending-bidder", "flash"],
-  ["02-emergency-BorrowPosition.json", "lending-settler", "emergency"],
-  // This final-notice position remains liquidatable after the observation is
-  // committed, so the next pass must build the fresh flash settlement.
-  ["05-flash-LeveragePosition.json", "leverage", "flash"],
-  // This separate case remains liquidatable after the observation commits.
-  ["07-flash-LeveragePosition.json", "leverage", "flash"],
-  ["03-emergency-LeveragePosition.json", "leverage", "emergency"],
+for (const { file, profile, expected, settlement, maxRepay, minProfit, name } of [
+  {
+    file: "01-flash-BorrowPosition.json",
+    profile: "lending-bidder",
+    expected: "flash",
+    settlement: "inventory",
+    maxRepay: "18446744073709551615",
+    minProfit: "0",
+    name: "inventory flash",
+  },
+  {
+    file: "01-flash-BorrowPosition.json",
+    profile: "lending-trigger",
+    expected: "monitor",
+    settlement: "inventory",
+    maxRepay: "18446744073709551615",
+    minProfit: "0",
+    name: "health monitor",
+  },
+  {
+    file: "02-emergency-BorrowPosition.json",
+    profile: "lending-settler",
+    expected: "emergency",
+    settlement: "inventory",
+    maxRepay: "18446744073709551615",
+    minProfit: "0",
+    name: "emergency settlement",
+  },
+  // Final-notice eligibility is rechecked directly on every pass.
+  {
+    file: "05-flash-LeveragePosition.json",
+    profile: "leverage",
+    expected: "flash",
+    settlement: "inventory",
+    maxRepay: "18446744073709551615",
+    minProfit: "0",
+    name: "final-notice leverage",
+  },
+  // No registration is needed for a fresh leverage fill.
+  {
+    file: "07-flash-LeveragePosition.json",
+    profile: "leverage",
+    expected: "flash",
+    settlement: "inventory",
+    maxRepay: "18446744073709551615",
+    minProfit: "0",
+    name: "fresh leverage",
+  },
+  {
+    file: "03-emergency-LeveragePosition.json",
+    profile: "leverage",
+    expected: "emergency",
+    settlement: "inventory",
+    maxRepay: "18446744073709551615",
+    minProfit: "0",
+    name: "leverage emergency",
+  },
+  // The geometric probes top out at seven atoms for this fixture. Adaptive
+  // refinement must find the non-geometric 996-atom fill yielding eight.
+  {
+    file: "01-flash-BorrowPosition.json",
+    profile: "lending-bidder",
+    expected: "flash",
+    settlement: "dusk",
+    maxRepay: "1000",
+    minProfit: "8",
+    name: "adaptive non-geometric partial",
+  },
 ] as const) {
-  test(`native ${profile} completes discovery, observation, quote and simulation via RPC`, async () => {
+  test(`native ${profile} completes ${name} via RPC`, async () => {
     const f = JSON.parse(readFileSync(`fixtures/litesvm/${file}`, "utf8"));
     const svm = bank(f);
-    const { lookupTable } = planWithTable(f, svm);
+    const { lookupTable } = planWithTable(
+      { ...f, internal: settlement === "dusk" },
+      svm,
+    );
     const requests: string[] = [];
     let simulations = 0;
     const rpcAccount = (a: any) => {
@@ -187,13 +246,13 @@ for (const [file, profile, expected] of [
               PORT: "0",
               SOLANA_RPC_HTTP_URL: endpoint,
               KEEPER_LIQUIDATION_LOOKUP_TABLE: lookupTable,
-              KEEPER_FLASH_SETTLEMENT: "inventory",
+              KEEPER_FLASH_SETTLEMENT: settlement,
               KEEPER_FLASH_MARKET: context.named.market,
-              KEEPER_FLASH_MAX_REPAY: "18446744073709551615",
+              KEEPER_FLASH_MAX_REPAY: maxRepay,
               KEEPER_FLASH_MAX_PAYMENT_DEBIT: "18446744073709551615",
               KEEPER_FLASH_MIN_COLLATERAL_CREDIT:
                 expected === "emergency" ? "18446744073709551615" : "1",
-              KEEPER_LIQUIDATION_MIN_PROFIT: "0",
+              KEEPER_LIQUIDATION_MIN_PROFIT: minProfit,
             },
           });
           let output = "";
@@ -207,51 +266,17 @@ for (const [file, profile, expected] of [
     try {
       const first = await once();
       assert.equal(first.code, 0, first.output);
-      assert.match(
-        first.output,
-        /shadow observe|shadow flash|shadow emergency/,
-      );
-      const observe = JSON.parse(
-        execFileSync("target/debug/dusk-keeper", ["--flash-plan"], {
-          input: JSON.stringify({ ...f, action: "observe" }),
-          encoding: "utf8",
-        }),
-      );
-      const ixs = observe.instructions.map(
-        (i: any) =>
-          new TransactionInstruction({
-            programId: new PublicKey(i.program_id),
-            keys: i.accounts.map((a: any) => ({
-              pubkey: new PublicKey(a.pubkey),
-              isSigner: a.is_signer,
-              isWritable: a.is_writable,
-            })),
-            data: Buffer.from(i.data),
-          }),
-      );
-      const tx = new VersionedTransaction(
-        new TransactionMessage({
-          payerKey: new PublicKey(f.buyer),
-          recentBlockhash: svm.latestBlockhash(),
-          instructions: [
-            ComputeBudgetProgram.requestHeapFrame({ bytes: 262144 }),
-            ...ixs,
-          ],
-        }).compileToV0Message(),
-      );
-      const observed: any = svm.sendTransaction(tx);
-      assert.ok(
-        typeof observed.err !== "function",
-        observed.meta?.().prettyLogs?.(),
-      );
+      if (expected === "monitor") assert.doesNotMatch(first.output, /shadow (flash|emergency|observe)/);
+      else assert.match(first.output, new RegExp(`shadow ${expected}`));
       const advanced = svm.getClock();
       advanced.slot += 1n;
       advanced.unixTimestamp += 1n;
       svm.setClock(advanced);
       const second = await once();
       assert.equal(second.code, 0, second.output);
-      assert.match(second.output, new RegExp(`shadow ${expected}`));
-      assert.ok(simulations >= 4);
+      if (expected === "monitor") assert.doesNotMatch(second.output, /shadow (flash|emergency|observe)/);
+      else assert.match(second.output, new RegExp(`shadow ${expected}`));
+      assert.ok(simulations >= (expected === "monitor" ? 2 : 4));
       assert.ok(
         !requests.includes("sendTransaction"),
         "captured shadow must never submit",

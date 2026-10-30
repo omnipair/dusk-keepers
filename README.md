@@ -1,3 +1,8 @@
+> Health-only liquidation candidate: current-health previews replace liquidation
+> registration. The companion protocol/SDK PR changes position layouts and
+> removes distress clocks. This candidate is captured, not deployed; use the
+> pinned source, program, SDK and fixtures together.
+
 # Dusk Keepers
 
 Production-oriented keeper runtimes for Dusk, pinned to one protocol snapshot and

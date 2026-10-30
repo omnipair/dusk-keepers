@@ -280,7 +280,7 @@ function wireToIdlArguments(specificationKey, argumentsValue) {
       return {};
     case "dusk:preview_hlp_flash":
       return { target_asset: argumentsValue.targetAsset };
-    case "dusk:observe_liquidation":
+    case "dusk:preview_liquidation_health":
       return { debt_asset: argumentsValue.debtAsset };
     case "dusk:preview_flash_liquidation":
     case "dusk:preview_emergency_liquidation":
@@ -541,7 +541,7 @@ function buildEncodingCases(contract, idls) {
       orderId: "7",
       minOwnerRefundOut: "0",
     },
-    "dusk:observe_liquidation": { debtAsset: 1 },
+    "dusk:preview_liquidation_health": { debtAsset: 1 },
     "dusk:preview_flash_liquidation": {
       debtAsset: 0,
       maxRepayment: "18446744073709551615",
@@ -866,7 +866,7 @@ function buildFixtureBundle(contract, manifest, idls) {
       },
       {
         name: "u8 overflow",
-        specificationKey: "dusk:observe_liquidation",
+        specificationKey: "dusk:preview_liquidation_health",
         arguments: { debtAsset: 256 },
         expectedError: "invalid_arguments",
       },

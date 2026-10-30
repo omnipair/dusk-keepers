@@ -1,4 +1,4 @@
-//! Native RPC execution of observation, flash fill and emergency settlement.
+//! Native RPC health previews, atomic flash fills and emergency settlement.
 use crate::{
     discovery::{RpcClient, account_discriminator},
     execute::{AttemptReport, ExecutionError},
@@ -18,7 +18,10 @@ use dusk_adapter::{
 };
 use keeper_core::{OutcomeStatus, ReasonCode};
 use sha2::{Digest, Sha256};
-use std::collections::BTreeSet;
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    ops::Bound::{Excluded, Included},
+};
 type Result<T> = std::result::Result<T, String>;
 pub struct FlashJob<'a> {
     pub client: &'a RpcClient,
@@ -33,7 +36,7 @@ pub struct FlashJob<'a> {
 impl FlashJob<'_> {
     pub fn run_pass(&self) -> std::result::Result<Vec<AttemptReport>, ExecutionError> {
         let mut reports = Vec::new();
-        if !self.dry_run {
+        if !self.dry_run && self.profile != "lending-trigger" {
             let mut journal = Journal::connect(&std::env::var("DATABASE_URL").map_err(|_| {
                 ExecutionError::Assembly("DATABASE_URL is required before signing".into())
             })?)
@@ -109,12 +112,12 @@ impl FlashJob<'_> {
                 vec![0, 1]
             };
             for side in sides {
-                if attempted >= self.max_sends {
+                if send_limit_reached(self.profile, attempted, self.max_sends) {
                     return Ok(reports);
                 }
                 match self.attempt(position, kind, side) {
                     Ok(Some((signature, detail))) => {
-                        if !detail.starts_with("eligible but unfilled:") {
+                        if counts_toward_send_limit(self.profile, &detail) {
                             attempted += 1;
                         }
                         reports.push(AttemptReport {
@@ -137,7 +140,9 @@ impl FlashJob<'_> {
                     }
                     Ok(None) => {}
                     Err(e) => {
-                        attempted += 1;
+                        if self.profile != "lending-trigger" {
+                            attempted += 1;
+                        }
                         reports.push(AttemptReport {
                             position: address(position),
                             debt_mint: String::new(),
@@ -700,46 +705,26 @@ impl FlashJob<'_> {
         if c.shares == 0 {
             return Ok(None);
         }
-        let mut observe = flash::resources()?;
-        observe.push(c.observation(self.contract)?);
-        let observed = self.simulate(&c, &s, &observe, &[position])?;
-        if !observed["value"]["err"].is_null() {
+        let mut preview = flash::resources()?;
+        preview.push(c.health_preview(self.contract)?);
+        let result = self.simulate(&c, &s, &preview, &[])?;
+        if !result["value"]["err"].is_null() {
             return Err(format!(
-                "observation rejected: {}",
-                observed["value"]["err"]
+                "health preview rejected: {}",
+                result["value"]["err"]
             ));
         }
         let health: LiquidationHealth =
-            flash::decode_return(&observed["value"]["returnData"], c.program)?;
-        let post = post_bytes(&observed, 0)?;
-        let post = post.ok_or("observation omitted position post-state")?;
-        let reader = self.layout.reader(kind).map_err(|e| e.to_string())?;
-        let distress = if kind == "LeveragePosition" {
-            "distress"
-        } else if side == 0 {
-            "base_distress"
-        } else {
-            "quote_distress"
-        };
-        // observed_slot advances on every observation. Only a change to the
-        // distress episode needs its own committed transaction; comparing the
-        // entire account would starve fills whenever a new slot arrives.
-        let mut changed = false;
-        for field in ["active", "started_at"] {
-            let path = format!("{distress}.{field}");
-            changed |= reader.bytes(&path, &post).map_err(|e| e.to_string())?
-                != reader
-                    .bytes(&path, &s.account(position)?.data)
-                    .map_err(|e| e.to_string())?;
-        }
-        if self.profile == "lending-trigger" || changed {
-            if !changed {
-                return Ok(None);
-            }
-            return self.submit(&c, &s, "observe", observe, 0, false).map(Some);
-        }
+            flash::decode_return(&result["value"]["returnData"], c.program)?;
         if !health.eligible() {
             return Ok(None);
+        }
+        // This profile monitors eligibility without signing a registration.
+        if self.profile == "lending-trigger" {
+            return Ok(Some((
+                None,
+                "eligible health preview; atomic execution belongs to bidder/settler".into(),
+            )));
         }
         let inventory = self.inventory_mode()? && self.profile != "lending-settler";
         if inventory
@@ -764,21 +749,36 @@ impl FlashJob<'_> {
             if cap == 0 {
                 return Err("KEEPER_FLASH_MAX_REPAY must be positive".into());
             }
-            for repay in slices(cap.min(health.debt)) {
-                if let Some(q) = self.preview::<FlashLiquidationQuote>(
+            let partial = search_profitable(cap.min(health.debt), min_profit, |repay| {
+                let Some(q) = self.preview::<FlashLiquidationQuote>(
                     &c,
                     &s,
                     c.preview_flash(self.contract, repay, false)?,
-                )? {
-                    let Some(ixs) = self.flash_plan(&c, &s, &q, repay, min_profit)? else {
-                        continue;
-                    };
-                    if self.profitable(&c, &s, &ixs, min_profit, q.full)? {
-                        return self
-                            .submit(&c, &s, "flash", ixs, min_profit, true)
-                            .map(Some);
-                    }
+                )?
+                else {
+                    return Ok(None);
+                };
+                // Measure the route without the final profit floor; otherwise a
+                // below-floor probe rejects before exposing the score needed to
+                // refine the search. The selected transaction is rebuilt below
+                // with the configured floor enforced on chain.
+                let Some(ixs) = self.flash_plan(&c, &s, &q, repay, 0)? else {
+                    return Ok(None);
+                };
+                Ok(self
+                    .liquidation_profit(&c, &s, &ixs, q.full)?
+                    .map(|profit| (profit, (repay, q))))
+            })?;
+            if let Some((repay, quote)) = partial {
+                let ixs = self
+                    .flash_plan(&c, &s, &quote, repay, min_profit)?
+                    .ok_or("selected flash route no longer meets configured bounds")?;
+                if !self.profitable(&c, &s, &ixs, min_profit, false)? {
+                    return Err("selected flash route failed protected revalidation".into());
                 }
+                return self
+                    .submit(&c, &s, "flash", ixs, min_profit, true)
+                    .map(Some);
             }
             if cap >= health.debt
                 && let Some(q) = self.preview::<FlashLiquidationQuote>(
@@ -796,23 +796,26 @@ impl FlashJob<'_> {
         }
         if self.profile == "lending-settler" || self.profile == "leverage" {
             let min_profit = required_u64("KEEPER_LIQUIDATION_MIN_PROFIT")?;
-            for amount in slices(c.collateral)
-                .into_iter()
-                .filter(|v| *v < c.collateral)
-            {
-                if let Some(q) = self.preview::<EmergencyLiquidationQuote>(
-                    &c,
-                    &s,
-                    c.preview_emergency(self.contract, amount, false)?,
-                )? {
+            let partial =
+                search_profitable(c.collateral.saturating_sub(1), min_profit, |amount| {
+                    let Some(q) = self.preview::<EmergencyLiquidationQuote>(
+                        &c,
+                        &s,
+                        c.preview_emergency(self.contract, amount, false)?,
+                    )?
+                    else {
+                        return Ok(None);
+                    };
                     let mut ixs = flash::resources()?;
                     ixs.push(c.emergency(self.contract, &q)?);
-                    if self.profitable(&c, &s, &ixs, min_profit, false)? {
-                        return self
-                            .submit(&c, &s, "emergency", ixs, min_profit, true)
-                            .map(Some);
-                    }
-                }
+                    Ok(self
+                        .liquidation_profit(&c, &s, &ixs, false)?
+                        .map(|profit| (profit, ixs)))
+                })?;
+            if let Some(ixs) = partial {
+                return self
+                    .submit(&c, &s, "emergency", ixs, min_profit, true)
+                    .map(Some);
             }
             // Permission for full closure is determined by the program's preview;
             // failures of the keeper's partial probes are never proof of permission.
@@ -830,7 +833,7 @@ impl FlashJob<'_> {
                 }
             }
         }
-        Ok(Some((None, "eligible but unfilled: no sampled permitted route met the configured payment/profit bounds".into())))
+        Ok(Some((None, "eligible but unfilled: no adaptively searched permitted route met the configured payment/profit bounds".into())))
     }
     fn inventory_mode(&self) -> Result<bool> {
         match std::env::var("KEEPER_FLASH_SETTLEMENT")
@@ -892,6 +895,17 @@ impl FlashJob<'_> {
         minimum: u64,
         full: bool,
     ) -> Result<bool> {
+        Ok(self
+            .liquidation_profit(c, s, ixs, full)?
+            .is_some_and(|profit| profit >= minimum))
+    }
+    fn liquidation_profit(
+        &self,
+        c: &Context,
+        s: &Snapshot,
+        ixs: &[Instruction],
+        full: bool,
+    ) -> Result<Option<u64>> {
         let post = [
             c.position,
             c.named["buyer_refund_account"],
@@ -905,10 +919,10 @@ impl FlashJob<'_> {
                 eprintln!(
                     "keeper liquidation execution exceeded transaction compute limit; trying other permitted sizes"
                 );
-                return Ok(false);
+                return Ok(None);
             }
             return if expected_bound_rejection(&value) {
-                Ok(false)
+                Ok(None)
             } else {
                 Err(format!(
                     "unexpected execution rejection: {}",
@@ -954,17 +968,22 @@ impl FlashJob<'_> {
                     .checked_sub(collateral_before)
                     .is_none_or(|v| v < min_credit)
             {
-                return Ok(false);
+                return Ok(None);
             }
-        } else if debt_after
-            .checked_sub(debt_before)
-            .is_none_or(|profit| profit < minimum)
-            || collateral_after < collateral_before
-        {
-            return Ok(false);
         }
+        let profit = if self.inventory_mode()? && is_flash {
+            0
+        } else {
+            let Some(profit) = debt_after.checked_sub(debt_before) else {
+                return Ok(None);
+            };
+            if collateral_after < collateral_before {
+                return Ok(None);
+            }
+            profit
+        };
         let Some(position_after) = post_bytes(&value, 0)? else {
-            return Ok(full);
+            return Ok(full.then_some(profit));
         };
         let r = self.layout.reader(&c.kind).map_err(|e| e.to_string())?;
         let field = if c.kind == "LeveragePosition" {
@@ -980,7 +999,7 @@ impl FlashJob<'_> {
                 .try_into()
                 .map_err(|_| "shares post length")?,
         );
-        Ok(remaining < c.shares && (!full || remaining == 0))
+        Ok((remaining < c.shares && (!full || remaining == 0)).then_some(profit))
     }
     fn submit(
         &self,
@@ -993,7 +1012,7 @@ impl FlashJob<'_> {
     ) -> Result<(Option<String>, String)> {
         if self.dry_run {
             if !liquidation && !self.simulate(c, s, &ixs, &[])?["value"]["err"].is_null() {
-                return Err("shadow preparation/observation simulation rejected".into());
+                return Err("shadow account-preparation simulation rejected".into());
             }
             return Ok((
                 None,
@@ -1080,6 +1099,138 @@ pub fn slices(cap: u64) -> Vec<u64> {
         out.push(1);
     }
     out
+}
+
+const PROFIT_SEARCH_GRID_SEGMENTS: u64 = 8;
+const PROFIT_SEARCH_LOCAL_WIDTH: u64 = 64;
+const PROFIT_SEARCH_MAX_PROBES: usize = 256;
+
+fn probe_profit<T, F>(
+    amount: u64,
+    minimum: u64,
+    probes: &mut usize,
+    visited: &mut BTreeSet<u64>,
+    scores: &mut BTreeMap<u64, u64>,
+    evaluate: &mut F,
+) -> Result<Option<T>>
+where
+    F: FnMut(u64) -> Result<Option<(u64, T)>>,
+{
+    if amount == 0 || *probes >= PROFIT_SEARCH_MAX_PROBES || !visited.insert(amount) {
+        return Ok(None);
+    }
+    *probes += 1;
+    let Some((score, payload)) = evaluate(amount)? else {
+        return Ok(None);
+    };
+    scores.insert(amount, score);
+    Ok((score >= minimum).then_some(payload))
+}
+
+/// Start with the old geometric probes, then use their measured execution
+/// profit to refine the best interval. Once the interval is small, scan every
+/// integer amount so rounding peaks are not hidden between coarse samples.
+fn search_profitable<T, F>(cap: u64, minimum: u64, mut evaluate: F) -> Result<Option<T>>
+where
+    F: FnMut(u64) -> Result<Option<(u64, T)>>,
+{
+    if cap == 0 {
+        return Ok(None);
+    }
+    let mut probes = 0usize;
+    let mut visited = BTreeSet::new();
+    let mut scores = BTreeMap::new();
+    for amount in slices(cap) {
+        if let Some(payload) = probe_profit(
+            amount,
+            minimum,
+            &mut probes,
+            &mut visited,
+            &mut scores,
+            &mut evaluate,
+        )? {
+            return Ok(Some(payload));
+        }
+    }
+    let Some((&initial_best, _)) = scores
+        .iter()
+        .max_by_key(|(amount, score)| (**score, **amount))
+    else {
+        return Ok(None);
+    };
+    let mut low = visited
+        .range(..initial_best)
+        .next_back()
+        .copied()
+        .unwrap_or(1);
+    let mut high = visited
+        .range((Excluded(initial_best), Included(cap)))
+        .next()
+        .copied()
+        .unwrap_or(cap);
+
+    while high.saturating_sub(low) > PROFIT_SEARCH_LOCAL_WIDTH && probes < PROFIT_SEARCH_MAX_PROBES
+    {
+        let width = high - low;
+        for step in 0..=PROFIT_SEARCH_GRID_SEGMENTS {
+            let amount = low
+                + u64::try_from(
+                    u128::from(width) * u128::from(step) / u128::from(PROFIT_SEARCH_GRID_SEGMENTS),
+                )
+                .map_err(|_| "profit-search amount overflow")?;
+            if let Some(payload) = probe_profit(
+                amount,
+                minimum,
+                &mut probes,
+                &mut visited,
+                &mut scores,
+                &mut evaluate,
+            )? {
+                return Ok(Some(payload));
+            }
+        }
+        let Some((&best, _)) = scores
+            .range(low..=high)
+            .max_by_key(|(amount, score)| (**score, **amount))
+        else {
+            break;
+        };
+        let next_low = visited.range(low..best).next_back().copied().unwrap_or(low);
+        let next_high = visited
+            .range((Excluded(best), Included(high)))
+            .next()
+            .copied()
+            .unwrap_or(high);
+        if (next_low, next_high) == (low, high) {
+            break;
+        }
+        low = next_low;
+        high = next_high;
+    }
+
+    if high.saturating_sub(low) <= PROFIT_SEARCH_LOCAL_WIDTH {
+        for amount in (low..=high).rev() {
+            if let Some(payload) = probe_profit(
+                amount,
+                minimum,
+                &mut probes,
+                &mut visited,
+                &mut scores,
+                &mut evaluate,
+            )? {
+                return Ok(Some(payload));
+            }
+        }
+    }
+    Ok(None)
+}
+
+fn send_limit_reached(profile: &str, attempted: usize, maximum: usize) -> bool {
+    profile != "lending-trigger" && attempted >= maximum
+}
+
+fn counts_toward_send_limit(profile: &str, detail: &str) -> bool {
+    profile != "lending-trigger" && !detail.starts_with("eligible but unfilled:")
 }
 fn required_u64(name: &str) -> Result<u64> {
     std::env::var(name)
@@ -1178,10 +1329,20 @@ fn expected_hlp_rejection(value: &serde_json::Value) -> bool {
 }
 
 fn compute_limit_rejection(value: &serde_json::Value) -> bool {
+    // RPCs may expose the structured error without the compact enum spelling
+    // in logs. A compute-bound large fill must not stop smaller probes.
+    if value["value"]["err"]
+        .to_string()
+        .contains("ComputationalBudgetExceeded")
+    {
+        return true;
+    }
     value["value"]["logs"].as_array().is_some_and(|logs| {
         logs.iter().any(|v| {
             v.as_str().is_some_and(|line| {
-                line.contains("exceeded CUs meter") || line.contains("ComputationalBudgetExceeded")
+                line.contains("exceeded CUs meter")
+                    || line.contains("ComputationalBudgetExceeded")
+                    || line.ends_with("failed: Computational budget exceeded")
             })
         })
     })
@@ -1234,6 +1395,87 @@ mod tests {
         b.accounts.get_mut("mint").unwrap().as_mut().unwrap().data[0] = 2;
         assert_ne!(initial, state_hash(&b, 4).unwrap());
     }
+    #[test]
+    fn compute_limits_allow_smaller_probes_for_all_rpc_error_forms() {
+        for value in [
+            serde_json::json!({"value":{"err":{"InstructionError":[4,"ComputationalBudgetExceeded"]},"logs":[]}}),
+            serde_json::json!({"value":{"err":"TransactionErrorInstructionError { index: 4, error: ComputationalBudgetExceeded }","logs":[]}}),
+            serde_json::json!({"value":{"err":"execution failed","logs":["Program dusk failed: Computational budget exceeded"]}}),
+            serde_json::json!({"value":{"err":"execution failed","logs":["exceeded CUs meter at BPF instruction"]}}),
+        ] {
+            assert!(compute_limit_rejection(&value));
+        }
+        assert!(!compute_limit_rejection(
+            &serde_json::json!({"value":{"err":{"InstructionError":[4,{"Custom":6001}]},"logs":["Error Code: BrokenInvariant."]}})
+        ));
+    }
+
+    #[test]
+    fn adaptive_profit_search_finds_non_geometric_rounding_peak() {
+        let peaks = [906, 924, 981, 986, 991, 996];
+        let mut visited = BTreeSet::new();
+        let selected = search_profitable(1_000, 8, |amount| {
+            assert!(visited.insert(amount), "amount {amount} probed twice");
+            let profit = if peaks.contains(&amount) {
+                8
+            } else if amount >= 900 {
+                7
+            } else if amount >= 500 {
+                6
+            } else if amount >= 250 {
+                3
+            } else {
+                2
+            };
+            Ok(Some((profit, amount)))
+        })
+        .unwrap();
+        assert_eq!(selected, Some(996));
+        assert!(!slices(1_000).contains(&996));
+        assert!(visited.len() < PROFIT_SEARCH_MAX_PROBES);
+    }
+
+    #[test]
+    fn adaptive_profit_search_handles_empty_and_unavailable_domains() {
+        let mut calls = 0;
+        assert_eq!(
+            search_profitable::<u64, _>(0, 1, |_| {
+                calls += 1;
+                Ok(Some((1, 1)))
+            })
+            .unwrap(),
+            None
+        );
+        assert_eq!(calls, 0);
+        assert_eq!(
+            search_profitable::<u64, _>(u64::MAX, 1, |_| {
+                calls += 1;
+                Ok(None)
+            })
+            .unwrap(),
+            None
+        );
+        assert!(calls <= 17);
+    }
+
+    #[test]
+    fn health_monitor_does_not_consume_transaction_send_budget() {
+        assert!(!send_limit_reached("lending-trigger", 4, 4));
+        assert!(!counts_toward_send_limit(
+            "lending-trigger",
+            "eligible health preview; atomic execution belongs to bidder/settler"
+        ));
+        assert!(send_limit_reached("lending-bidder", 4, 4));
+        assert!(counts_toward_send_limit(
+            "lending-bidder",
+            "shadow flash: simulated; no signature produced"
+        ));
+        assert!(!counts_toward_send_limit(
+            "lending-bidder",
+            "eligible but unfilled: no route"
+        ));
+    }
+
     #[test]
     fn zero_share_probe_does_not_hide_other_arithmetic_failures() {
         let mut value = serde_json::json!({"value":{"logs":["Error Code: DebtShareDivisionOverflow.","Program log: Left: 0","Program log: Right: 0"]}});
