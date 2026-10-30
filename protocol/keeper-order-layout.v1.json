@@ -1,9 +1,9 @@
 {
   "$schema": "./schemas/account-layout.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "devnet-2026-10-26-cd6f1ec",
+  "protocolRevision": "health-only-2026-10-30-9d6e5373",
   "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
-  "idlSha256": "59acc8a10b41c235156e593017b1e88dd6657fd192df4a1f1c0cc4275a1dd658",
+  "idlSha256": "dda5cbb8a48eff8753d9a4a235f19531293f2d475ab4fef9a3c9b64279b4ccd0",
   "accounts": [
     {
       "name": "LeverageOrder",

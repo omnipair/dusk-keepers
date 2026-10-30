@@ -39,7 +39,7 @@ const actionDefinitions = [
   {
     action: "lending_liquidation_trigger",
     jobKind: "lending_liquidation_trigger",
-    primary: ["dusk", "observe_liquidation"],
+    primary: ["dusk", "preview_liquidation_health"],
   },
   {
     action: "lending_liquidation_bid",
@@ -54,7 +54,7 @@ const actionDefinitions = [
   {
     action: "leverage_liquidation",
     jobKind: "leverage_liquidation",
-    primary: ["dusk", "observe_liquidation"],
+    primary: ["dusk", "preview_liquidation_health"],
   },
   {
     action: "hlp_flash_preview",
@@ -268,7 +268,7 @@ function directInstructionData(specification) {
         encodeU64(250),
         encodeU64(1),
       ]);
-    case "observe_liquidation":
+    case "preview_liquidation_health":
       return Buffer.concat([prefix, Buffer.from([0])]);
     case "preview_flash_liquidation":
     case "preview_emergency_liquidation":
@@ -628,7 +628,7 @@ function buildFixtures(contract) {
       "account flags changed",
       "account_flags_mismatch",
       (envelope) => {
-        envelope.primary.accounts[0].writable = false;
+        envelope.primary.accounts[0].writable = !envelope.primary.accounts[0].writable;
       },
     ),
     mutate(

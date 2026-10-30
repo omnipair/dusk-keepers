@@ -17,8 +17,8 @@
       "jobKinds": ["lending_liquidation_trigger"],
       "liveRuntime": "rust",
       "shadowRuntime": "typescript",
-      "walletRole": "lending_trigger",
-      "signingRequired": true
+      "walletRole": "lending_preview",
+      "signingRequired": false
     },
     {
       "name": "dusk-lending-bidder",

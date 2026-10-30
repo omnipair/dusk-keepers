@@ -35,10 +35,7 @@ const WANTED = {
     "fixed_base_shares",
     "fixed_quote_shares",
     "active_liquidation_session",
-    "base_distress.active",
-    "base_distress.started_at",
-    "quote_distress.active",
-    "quote_distress.started_at",
+
   ],
   Market: [
     "ylp_mint",
@@ -81,8 +78,7 @@ const WANTED = {
     "collateral_amount",
     "debt_shares",
     "active_liquidation_session",
-    "distress.active",
-    "distress.started_at",
+
   ],
   // Only the fields ahead of `update`, which is a data-carrying enum and so
   // gives everything after it no fixed offset. The lifecycle keeper does not

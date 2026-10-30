@@ -1,19 +1,19 @@
 {
   "$schema": "./schemas/instruction-contract.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "devnet-2026-10-26-cd6f1ec",
+  "protocolRevision": "health-only-2026-10-30-9d6e5373",
   "programs": [
     {
       "name": "dusk",
       "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
       "idlPath": "artifacts/dusk.json",
-      "idlSha256": "574f9a347a2ecf2f85fa6d9f981fb474b1300f2e9cca5ae0ca0158da113019eb"
+      "idlSha256": "eb1081be876eab2721d962e277bb09da789b334abbf4ab6344b413a80b0fd894"
     },
     {
       "name": "leverage_delegate",
       "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
       "idlPath": "artifacts/leverage_delegate.json",
-      "idlSha256": "59acc8a10b41c235156e593017b1e88dd6657fd192df4a1f1c0cc4275a1dd658"
+      "idlSha256": "dda5cbb8a48eff8753d9a4a235f19531293f2d475ab4fef9a3c9b64279b4ccd0"
     }
   ],
   "actions": [
@@ -55,7 +55,7 @@
     {
       "action": "lending_liquidation_trigger",
       "jobKind": "lending_liquidation_trigger",
-      "primaryInstructionKey": "dusk:observe_liquidation",
+      "primaryInstructionKey": "dusk:preview_liquidation_health",
       "cpiInstructionKeys": [],
       "requiredOptionalAccounts": []
     },
@@ -76,7 +76,7 @@
     {
       "action": "leverage_liquidation",
       "jobKind": "leverage_liquidation",
-      "primaryInstructionKey": "dusk:observe_liquidation",
+      "primaryInstructionKey": "dusk:preview_liquidation_health",
       "cpiInstructionKeys": [],
       "requiredOptionalAccounts": []
     },
@@ -784,29 +784,29 @@
       ]
     },
     {
-      "key": "dusk:observe_liquidation",
+      "key": "dusk:preview_liquidation_health",
       "program": "dusk",
       "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-      "instructionName": "observe_liquidation",
-      "discriminatorHex": "8e9fbdd4f53c3671",
+      "instructionName": "preview_liquidation_health",
+      "discriminatorHex": "7b9e787a5f1c06ac",
       "accounts": [
         {
           "name": "market",
-          "writable": true,
+          "writable": false,
           "signer": false,
           "optional": false,
           "fixedAddress": null
         },
         {
           "name": "borrow_position",
-          "writable": true,
+          "writable": false,
           "signer": false,
           "optional": true,
           "fixedAddress": null
         },
         {
           "name": "leverage_position",
-          "writable": true,
+          "writable": false,
           "signer": false,
           "optional": true,
           "fixedAddress": null
@@ -820,20 +820,6 @@
         },
         {
           "name": "debt_mint",
-          "writable": false,
-          "signer": false,
-          "optional": false,
-          "fixedAddress": null
-        },
-        {
-          "name": "event_authority",
-          "writable": false,
-          "signer": false,
-          "optional": false,
-          "fixedAddress": null
-        },
-        {
-          "name": "program",
           "writable": false,
           "signer": false,
           "optional": false,

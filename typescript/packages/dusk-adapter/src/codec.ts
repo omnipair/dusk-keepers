@@ -43,7 +43,7 @@ export type KeeperInstructionArguments =
       };
     }
   | {
-      readonly specificationKey: "dusk:observe_liquidation";
+      readonly specificationKey: "dusk:preview_liquidation_health";
       readonly arguments: { readonly debtAsset: number };
     }
   | {
@@ -194,7 +194,7 @@ export function encodeKeeperInstruction(
 
   const writer = new BorshWriter();
   switch (request.specificationKey) {
-    case "dusk:observe_liquidation":
+    case "dusk:preview_liquidation_health":
       writer.u8(request.arguments.debtAsset);
       break;
     case "dusk:preview_flash_liquidation":
@@ -289,7 +289,7 @@ export function parseKeeperInstructionArguments(
 ): KeeperInstructionArguments {
   const argumentsValue = requireRecord(value);
   switch (specificationKey) {
-    case "dusk:observe_liquidation":
+    case "dusk:preview_liquidation_health":
       requireKeys(argumentsValue, ["debtAsset"]);
       return {
         specificationKey,

@@ -13,7 +13,7 @@
           "market": "market:meta-usdc",
           "target": "position:a",
           "observedSlot": 12,
-          "protocolRevision": "devnet-2026-10-26-cd6f1ec",
+          "protocolRevision": "health-only-2026-10-30-9d6e5373",
           "expectedStateHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         },
         {
@@ -23,7 +23,7 @@
           "market": "market:meta-usdc",
           "target": "obligation:b",
           "observedSlot": 10,
-          "protocolRevision": "devnet-2026-10-26-cd6f1ec",
+          "protocolRevision": "health-only-2026-10-30-9d6e5373",
           "expectedStateHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
         },
         {
@@ -33,7 +33,7 @@
           "market": "market:meta-usdc",
           "target": "position:c",
           "observedSlot": 11,
-          "protocolRevision": "devnet-2026-10-26-cd6f1ec",
+          "protocolRevision": "health-only-2026-10-30-9d6e5373",
           "expectedStateHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
         }
       ],
@@ -50,7 +50,7 @@
           "market": "market:meta-usdc",
           "target": "position:d",
           "observedSlot": 20,
-          "protocolRevision": "devnet-2026-10-26-cd6f1ec",
+          "protocolRevision": "health-only-2026-10-30-9d6e5373",
           "expectedStateHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
         },
         {
@@ -60,7 +60,7 @@
           "market": "market:meta-usdc",
           "target": "position:d",
           "observedSlot": 19,
-          "protocolRevision": "devnet-2026-10-26-cd6f1ec",
+          "protocolRevision": "health-only-2026-10-30-9d6e5373",
           "expectedStateHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
         }
       ],
@@ -77,7 +77,7 @@
           "market": "market:meta-usdc",
           "target": "position:e",
           "observedSlot": 30,
-          "protocolRevision": "devnet-2026-10-26-cd6f1ec",
+          "protocolRevision": "health-only-2026-10-30-9d6e5373",
           "expectedStateHash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         },
         {
@@ -87,7 +87,7 @@
           "market": "market:meta-usdc",
           "target": "position:e",
           "observedSlot": 31,
-          "protocolRevision": "devnet-2026-10-26-cd6f1ec",
+          "protocolRevision": "health-only-2026-10-30-9d6e5373",
           "expectedStateHash": "1111111111111111111111111111111111111111111111111111111111111111"
         },
         {
@@ -97,7 +97,7 @@
           "market": "market:meta-usdc",
           "target": "position:locked",
           "observedSlot": 32,
-          "protocolRevision": "devnet-2026-10-26-cd6f1ec",
+          "protocolRevision": "health-only-2026-10-30-9d6e5373",
           "expectedStateHash": "2222222222222222222222222222222222222222222222222222222222222222"
         }
       ],

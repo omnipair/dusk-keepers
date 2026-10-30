@@ -184,7 +184,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     // rather than a global switch.
     let executor: Option<Box<dyn TransactionSigner>> = if config.profile == "sentinel" {
         None
-    } else if config.mode == Mode::Shadow {
+    } else if config.mode == Mode::Shadow || config.profile == "lending-trigger" {
         let public = env::var("KEEPER_SHADOW_PUBLIC_KEY")
             .ok()
             .and_then(|p| accounts::decode_key(&p));
@@ -404,7 +404,7 @@ fn run_execution_pass(
     dry_run: bool,
     shared: &Arc<Mutex<Snapshot>>,
 ) {
-    if !dry_run {
+    if !dry_run && profile != "lending-trigger" {
         match client.lamports(&signer.public_key_base58()) {
             Ok(balance) if balance < minimum_lamports => {
                 if let Ok(mut current) = shared.lock() {

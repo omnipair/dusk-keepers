@@ -1,5 +1,16 @@
 # Flash/emergency keeper migration to Dusk #45
 
+## Current health-only candidate — 2026-10-30
+
+[Dusk PR #59](https://github.com/omnipair/dusk/pull/59), commit `9d6e5373`, removes
+liquidation episodes and registration. The active lock captures the new
+programs, regenerated interfaces and SDK 2.15.0-next.20261030. All lending and
+hLP bank fixtures are recaptured from that exact source and binary pair. The
+position layouts change; adopt the matching protocol and keeper artifacts
+as one candidate. This PR performs no deployment or live keeper activation.
+The rollout records below describe the previous development deployment.
+
+
 **Candidate:** `devnet-2026-10-26-cd6f1ec`, source commit
 `77877d576018fd2bd8191d13f05534b0484e2282`. Lock status: `captured`.
 
@@ -41,20 +52,23 @@ provenance was not applied to banks captured from the previous binary.
 
 | Profile | Native Rust action |
 | --- | --- |
-| `lending-trigger` | Observe a changed borrowing distress episode, including its recovery/reset. |
-| `lending-bidder` | Observe when needed, preview ordinary borrowing fills and settle an atomic pair. |
-| `lending-settler` | Observe when needed, preview permitted emergency partial/full borrowing settlement. |
-| `leverage` | Observe, try ordinary leverage fills, then permitted emergency settlement. |
+| `lending-trigger` | Read-only current-health monitoring; never signs a registration transaction. |
+| `lending-bidder` | Preview current health and ordinary borrowing fills and settle an atomic pair. |
+| `lending-settler` | Preview current health and permitted emergency partial/full borrowing settlement. |
+| `leverage` | Preview current health, try ordinary leverage fills, then permitted emergency settlement. |
 | `hlp-recovery` | Preview both market-wide hLP vaults, attempt an inventory-funded atomic flash repair, then use terminal close only when a full quote permits it. |
 
 Existing profile names remain stable for service configuration. Auction instructions
 for these positions are gone; protocol revenue auctions remain a separate service.
-Run services with distinct signing wallets when a frozen release is authorized.
+Run signing services with distinct wallets when a frozen release is authorized.
+The lending-trigger monitor uses a public preview identity and no signing key.
 
-Observation is committed separately when the distress episode starts or resets.
-A failed fill cannot roll back that previously committed start. Advancing
-`observed_slot` alone does not trigger an endless observation loop. Healthy
-positions are rechecked every pass; final-notice markets get priority.
+Liquidation incentives depend only on current health. No distress episode or
+registration instruction exists. Each pass simulates `preview_liquidation_health`
+with read-only accounts, then independently previews an atomic fill. Advancing
+Unix time alone cannot increase either incentive. Healthy positions are rechecked
+every pass; final-notice markets get priority. The monitor-only `lending-trigger`
+profile never signs a health preview; bidder/settler/leverage submit execution.
 
 Every decision starts with fresh RPC position, market, both mint accounts, Clock,
 vault and hLP state. Indexer data never authorizes execution. Previews use the
@@ -193,7 +207,7 @@ borrowing and leverage; both debt sides; current/pending capped transfer fees;
 internal and inventory settlement; concentrated pools and active hLP; emergency
 partial/full loss accounting; preserved repayment donations; hLP partial/full
 bank execution and terminal close; underpayment and missing-settle rollback;
-native RPC discovery/observation/fill; and PostgreSQL
+native RPC discovery/read-only-health/atomic-fill; and PostgreSQL
 lease contention, pending-signature restart, and finalized-absence reconciliation.
 
 `fixtures/litesvm` are disposable bank states captured from the exact protocol

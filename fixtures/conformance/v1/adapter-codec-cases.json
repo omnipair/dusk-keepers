@@ -51,13 +51,13 @@
       "expectedDataHex": "4bc8420070e6183801e80300000000000001"
     },
     {
-      "name": "dusk observe_liquidation",
-      "specificationKey": "dusk:observe_liquidation",
+      "name": "dusk preview_liquidation_health",
+      "specificationKey": "dusk:preview_liquidation_health",
       "arguments": {
         "debtAsset": 1
       },
       "argumentLayoutSha256": "71eeeccd4dccfd47308be8968bf9195b874b31ba06b9dcef4015bf558717ff38",
-      "expectedDataHex": "8e9fbdd4f53c367101"
+      "expectedDataHex": "7b9e787a5f1c06ac01"
     },
     {
       "name": "dusk begin_flash_liquidation",
@@ -239,7 +239,7 @@
     },
     {
       "name": "u8 overflow",
-      "specificationKey": "dusk:observe_liquidation",
+      "specificationKey": "dusk:preview_liquidation_health",
       "arguments": {
         "debtAsset": 256
       },
@@ -561,12 +561,6 @@
     {
       "name": "dusk:settle_flash_liquidation program",
       "instructionKey": "dusk:settle_flash_liquidation",
-      "accountName": "program",
-      "expectedAddress": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X"
-    },
-    {
-      "name": "dusk:observe_liquidation program",
-      "instructionKey": "dusk:observe_liquidation",
       "accountName": "program",
       "expectedAddress": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X"
     },

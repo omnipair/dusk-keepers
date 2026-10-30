@@ -68,7 +68,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
         )?;
         let max = v["maxRepayment"].as_str().unwrap_or("0").parse()?;
         let ixs = match action {
-            Some("observe") => vec![c.observation(&contract)?],
+            Some("health") => vec![c.health_preview(&contract)?],
             Some("setup") => c.setup(&s)?,
             Some("preview_flash") => {
                 vec![c.preview_flash(&contract, max, v["full"].as_bool().unwrap_or(false))?]

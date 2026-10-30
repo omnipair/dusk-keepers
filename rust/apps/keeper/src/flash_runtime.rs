@@ -1,4 +1,4 @@
-//! Native RPC execution of observation, flash fill and emergency settlement.
+//! Native RPC health previews, atomic flash fills and emergency settlement.
 use crate::{
     discovery::{RpcClient, account_discriminator},
     execute::{AttemptReport, ExecutionError},
@@ -33,7 +33,7 @@ pub struct FlashJob<'a> {
 impl FlashJob<'_> {
     pub fn run_pass(&self) -> std::result::Result<Vec<AttemptReport>, ExecutionError> {
         let mut reports = Vec::new();
-        if !self.dry_run {
+        if !self.dry_run && self.profile != "lending-trigger" {
             let mut journal = Journal::connect(&std::env::var("DATABASE_URL").map_err(|_| {
                 ExecutionError::Assembly("DATABASE_URL is required before signing".into())
             })?)
@@ -700,46 +700,26 @@ impl FlashJob<'_> {
         if c.shares == 0 {
             return Ok(None);
         }
-        let mut observe = flash::resources()?;
-        observe.push(c.observation(self.contract)?);
-        let observed = self.simulate(&c, &s, &observe, &[position])?;
-        if !observed["value"]["err"].is_null() {
+        let mut preview = flash::resources()?;
+        preview.push(c.health_preview(self.contract)?);
+        let result = self.simulate(&c, &s, &preview, &[])?;
+        if !result["value"]["err"].is_null() {
             return Err(format!(
-                "observation rejected: {}",
-                observed["value"]["err"]
+                "health preview rejected: {}",
+                result["value"]["err"]
             ));
         }
         let health: LiquidationHealth =
-            flash::decode_return(&observed["value"]["returnData"], c.program)?;
-        let post = post_bytes(&observed, 0)?;
-        let post = post.ok_or("observation omitted position post-state")?;
-        let reader = self.layout.reader(kind).map_err(|e| e.to_string())?;
-        let distress = if kind == "LeveragePosition" {
-            "distress"
-        } else if side == 0 {
-            "base_distress"
-        } else {
-            "quote_distress"
-        };
-        // observed_slot advances on every observation. Only a change to the
-        // distress episode needs its own committed transaction; comparing the
-        // entire account would starve fills whenever a new slot arrives.
-        let mut changed = false;
-        for field in ["active", "started_at"] {
-            let path = format!("{distress}.{field}");
-            changed |= reader.bytes(&path, &post).map_err(|e| e.to_string())?
-                != reader
-                    .bytes(&path, &s.account(position)?.data)
-                    .map_err(|e| e.to_string())?;
-        }
-        if self.profile == "lending-trigger" || changed {
-            if !changed {
-                return Ok(None);
-            }
-            return self.submit(&c, &s, "observe", observe, 0, false).map(Some);
-        }
+            flash::decode_return(&result["value"]["returnData"], c.program)?;
         if !health.eligible() {
             return Ok(None);
+        }
+        // This profile monitors eligibility without signing a registration.
+        if self.profile == "lending-trigger" {
+            return Ok(Some((
+                None,
+                "eligible health preview; atomic execution belongs to bidder/settler".into(),
+            )));
         }
         let inventory = self.inventory_mode()? && self.profile != "lending-settler";
         if inventory
@@ -993,7 +973,7 @@ impl FlashJob<'_> {
     ) -> Result<(Option<String>, String)> {
         if self.dry_run {
             if !liquidation && !self.simulate(c, s, &ixs, &[])?["value"]["err"].is_null() {
-                return Err("shadow preparation/observation simulation rejected".into());
+                return Err("shadow account-preparation simulation rejected".into());
             }
             return Ok((
                 None,
@@ -1178,10 +1158,20 @@ fn expected_hlp_rejection(value: &serde_json::Value) -> bool {
 }
 
 fn compute_limit_rejection(value: &serde_json::Value) -> bool {
+    // RPCs may expose the structured error without the compact enum spelling
+    // in logs. A compute-bound large fill must not stop smaller probes.
+    if value["value"]["err"]
+        .to_string()
+        .contains("ComputationalBudgetExceeded")
+    {
+        return true;
+    }
     value["value"]["logs"].as_array().is_some_and(|logs| {
         logs.iter().any(|v| {
             v.as_str().is_some_and(|line| {
-                line.contains("exceeded CUs meter") || line.contains("ComputationalBudgetExceeded")
+                line.contains("exceeded CUs meter")
+                    || line.contains("ComputationalBudgetExceeded")
+                    || line.ends_with("failed: Computational budget exceeded")
             })
         })
     })
@@ -1234,6 +1224,21 @@ mod tests {
         b.accounts.get_mut("mint").unwrap().as_mut().unwrap().data[0] = 2;
         assert_ne!(initial, state_hash(&b, 4).unwrap());
     }
+    #[test]
+    fn compute_limits_allow_smaller_probes_for_all_rpc_error_forms() {
+        for value in [
+            serde_json::json!({"value":{"err":{"InstructionError":[4,"ComputationalBudgetExceeded"]},"logs":[]}}),
+            serde_json::json!({"value":{"err":"TransactionErrorInstructionError { index: 4, error: ComputationalBudgetExceeded }","logs":[]}}),
+            serde_json::json!({"value":{"err":"execution failed","logs":["Program dusk failed: Computational budget exceeded"]}}),
+            serde_json::json!({"value":{"err":"execution failed","logs":["exceeded CUs meter at BPF instruction"]}}),
+        ] {
+            assert!(compute_limit_rejection(&value));
+        }
+        assert!(!compute_limit_rejection(
+            &serde_json::json!({"value":{"err":{"InstructionError":[4,{"Custom":6001}]},"logs":["Error Code: BrokenInvariant."]}})
+        ));
+    }
+
     #[test]
     fn zero_share_probe_does_not_hide_other_arithmetic_failures() {
         let mut value = serde_json::json!({"value":{"logs":["Error Code: DebtShareDivisionOverflow.","Program log: Left: 0","Program log: Right: 0"]}});

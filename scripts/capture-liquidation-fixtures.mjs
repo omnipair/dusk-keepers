@@ -83,7 +83,7 @@ try {
       "ts",
       file,
       "--grep",
-      "liquidates unhealthy fixed|settles insolvent borrowing immediately|liquidates leverage in the final notice|pays a capped-fee flash|settles a late affordable|concentrated flash fees|flash settlement clears a base-debt|flash debt transfer fees|flash liquidation can repay through Dusk",
+      "liquidates unhealthy fixed|settles insolvent borrowing immediately|liquidates leverage in the final notice|pays a capped-fee flash|settles a health-only affordable|concentrated flash fees|flash settlement clears a base-debt|flash debt transfer fees|flash liquidation can repay through Dusk",
     ],
     {
       cwd: source,

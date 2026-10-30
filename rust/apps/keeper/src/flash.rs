@@ -9,8 +9,8 @@ use dusk_adapter::liquidation::{EmergencyLiquidationQuote, FlashLiquidationQuote
 use dusk_adapter::transfer_fees::{CLOCK, decode_clock_epoch, decode_mint_fees};
 use dusk_adapter::{
     AccountLayoutManifest, BeginFlashLiquidationArgs, EmergencyLiquidationArgs,
-    InstructionContract, KeeperInstructionArguments as Args, ObserveLiquidationArgs,
-    PreviewEmergencyLiquidationArgs, PreviewFlashLiquidationArgs, derive_program_address,
+    InstructionContract, KeeperInstructionArguments as Args, PreviewEmergencyLiquidationArgs,
+    PreviewFlashLiquidationArgs, PreviewLiquidationHealthArgs, derive_program_address,
     encode_keeper_instruction,
 };
 use serde::{Deserialize, Serialize};
@@ -391,10 +391,10 @@ impl Context {
         }
         Ok(out)
     }
-    pub fn observation(&self, c: &InstructionContract) -> Result<Instruction> {
+    pub fn health_preview(&self, c: &InstructionContract) -> Result<Instruction> {
         self.instruction(
             c,
-            Args::ObserveLiquidation(ObserveLiquidationArgs {
+            Args::PreviewLiquidationHealth(PreviewLiquidationHealthArgs {
                 debt_asset: self.debt_asset,
             }),
             false,

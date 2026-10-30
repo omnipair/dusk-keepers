@@ -735,7 +735,7 @@ mod tests {
             );
         }
         assert_eq!(
-            resolver.pda_recipe_key("dusk:observe_liquidation", "market"),
+            resolver.pda_recipe_key("dusk:preview_liquidation_health", "market"),
             Some("dusk:market")
         );
     }

@@ -158,7 +158,10 @@ for (const requiredProfile of [
 const sentinel = profiles.services.find((service) => service.profile === "sentinel");
 assert.equal(sentinel.signingRequired, false);
 assert.equal(sentinel.walletRole, "none");
-for (const service of profiles.services.filter((service) => service.profile !== "sentinel")) {
+const monitor = profiles.services.find((service) => service.profile === "lending-trigger");
+assert.equal(monitor.signingRequired, false);
+assert.equal(monitor.walletRole, "lending_preview");
+for (const service of profiles.services.filter((service) => !["sentinel", "lending-trigger"].includes(service.profile))) {
   assert.equal(service.signingRequired, true, `${service.profile}: signing policy must be explicit`);
   assert.notEqual(service.walletRole, "none", `${service.profile}: missing isolated wallet role`);
 }
