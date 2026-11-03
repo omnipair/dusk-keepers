@@ -1,5 +1,5 @@
 //! Poll mints AND Clock: entering the last notice epoch does not write the mint.
-use crate::discovery::{DiscoveryError, RpcClient, account_discriminator};
+use crate::runtime::rpc::{DiscoveryError, RpcClient, account_discriminator};
 use dusk_adapter::{
     AccountLayoutManifest,
     transfer_fees::{CLOCK, FeePhase, decode_clock_epoch, decode_mint_fees},
@@ -89,7 +89,7 @@ fn read_fees_once(
                 "invalid fee snapshot account".into(),
             ));
         }
-        let data = crate::discovery::decode_base64(&entry.data[0])
+        let data = crate::runtime::rpc::decode_base64(&entry.data[0])
             .ok_or_else(|| DiscoveryError::Malformed("invalid fee account encoding".into()))?;
         accounts.push((entry.owner, data));
     }
@@ -229,7 +229,7 @@ mod tests {
                 let mut clock = vec![0; 40];
                 clock[..8].copy_from_slice(&slot.to_le_bytes());
                 clock[16..24].copy_from_slice(&epoch.to_le_bytes());
-                let account = |owner: &str, data: &[u8]| serde_json::json!({"owner":owner,"executable":false,"data":[crate::transaction::base64(data),"base64"]});
+                let account = |owner: &str, data: &[u8]| serde_json::json!({"owner":owner,"executable":false,"data":[crate::runtime::transaction::base64(data),"base64"]});
                 let body = serde_json::json!({"jsonrpc":"2.0","id":1,"result":{"context":{"slot":slot},"value":[account(TOKEN_2022_PROGRAM,&mint),account(SYSVAR_OWNER,&clock)]}}).to_string();
                 write!(socket,"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",body.len(),body).unwrap();
             }

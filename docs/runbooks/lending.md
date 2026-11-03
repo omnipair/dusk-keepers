@@ -43,6 +43,6 @@ locks and pending transactions.
 
 Configure the wallet, SOL reserve, per-pass budget and optional address lookup
 table as for the prior executors. When switching from two instances to one,
-remove the old deployments and preserve their journal database and signing
-identity access until pending transactions have been reconciled. Do not discard
-pending records to start the new service.
+remove the old deployments and preserve their journal database until pending
+transactions have been reconciled. Do not discard pending records to start the
+new service.
