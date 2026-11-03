@@ -40,6 +40,31 @@ The colleague-built `leverage-execution-bot` informed priority, deduplication,
 race classification, and postcondition behavior. It is not copied or treated as
 the canonical protocol client.
 
+## Worker layout
+
+The Rust application keeps each service in its own folder:
+
+```text
+rust/apps/keeper/src/
+  workers/
+    lending/      Borrowing discovery and ordinary/emergency policy
+    leverage/     Leveraged liquidation and conditional orders
+    hlp/          Aggregate vault recovery and its transaction plans
+    revenue/      Protocol revenue auctions
+    lifecycle/    Governance proposal transitions
+    sentinel/     Read-only discovery and transfer-fee monitoring
+  liquidation/    Shared lending/leverage engine, plans, search and simulation
+  runtime/        RPC, accounts, signing, transaction encoding and journal
+  config.rs       Service profile and mode validation
+  health.rs       Observation state and health/readiness endpoints
+  main.rs         Startup and polling orchestration
+```
+
+`workers/mod.rs` dispatches a validated profile. Lending and leverage share the
+liquidation engine so their freshness, economic bounds and durable-submission
+checks stay aligned. hLP recovery owns its separate vault algorithm. TypeScript
+keeps its independent protocol/reference libraries; it does not have live workers.
+
 ## Lending worker
 
 `KEEPER_PROFILE=lending` combines borrowing discovery, health checks, ordinary

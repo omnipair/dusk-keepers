@@ -21,11 +21,11 @@ use dusk_adapter::{
 use keeper_core::{OutcomeStatus, ReasonCode};
 
 use crate::{
-    accounts::{AccountAssembler, MarketAccounts, decode_key},
-    discovery::{RpcClient, account_discriminator},
-    execute::{AttemptReport, ExecutionError, classify_simulation_failure},
-    signer::TransactionSigner,
-    transaction::{Instruction, base64, compile_message, serialize_transaction},
+    runtime::accounts::{AccountAssembler, MarketAccounts, decode_key},
+    runtime::execution::{AttemptReport, ExecutionError, classify_simulation_failure},
+    runtime::rpc::{RpcClient, account_discriminator},
+    runtime::signer::TransactionSigner,
+    runtime::transaction::{Instruction, base64, compile_message, serialize_transaction},
 };
 
 const QUEUE: &str = "dusk:queue_parameter_proposal";
@@ -262,4 +262,18 @@ impl LifecycleJob<'_> {
         }
         Ok(reports)
     }
+}
+
+pub fn run(context: &super::WorkerContext<'_>) -> Result<Vec<AttemptReport>, ExecutionError> {
+    LifecycleJob {
+        client: context.client,
+        contract: context.contract,
+        dry_run: context.dry_run,
+        layout: context.layout,
+        max_sends_per_pass: context.max_sends,
+        program_id: context.program_id,
+        resolver: context.resolver,
+        signer: context.signer,
+    }
+    .run_pass()
 }

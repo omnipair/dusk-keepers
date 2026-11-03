@@ -1,10 +1,10 @@
 //! Conditional orders use the delegate program's own trigger and settlement
 //! checks. This module assembles accounts; it never invents a trigger price.
 use crate::{
-    accounts::{ASSOCIATED_TOKEN_PROGRAM, MarketAccounts, associated_token_account},
-    discovery::account_discriminator,
-    flash::{Snapshot, address, key},
-    transaction::{AccountMeta, Instruction},
+    liquidation::plan::{Snapshot, address, key},
+    runtime::accounts::{ASSOCIATED_TOKEN_PROGRAM, MarketAccounts, associated_token_account},
+    runtime::rpc::account_discriminator,
+    runtime::transaction::{AccountMeta, Instruction},
 };
 use dusk_adapter::{
     AccountLayoutManifest, DelegatedCloseLeverageArgs, DelegatedCpiArgs, ExecuteEntryOrderArgs,
@@ -55,7 +55,7 @@ fn instruction(
             .or_else(|| {
                 a.fixed_address
                     .as_deref()
-                    .and_then(crate::accounts::decode_key)
+                    .and_then(crate::runtime::accounts::decode_key)
             });
         let absent = resolved.is_none() && a.optional;
         let pubkey = resolved
@@ -143,7 +143,7 @@ pub fn build_order_plan(
             pda(program, &[b"__event_authority"])?,
         ),
     ]);
-    let mut setup = crate::flash::resources()?;
+    let mut setup = crate::liquidation::plan::resources()?;
     let mut ata = |who: [u8; 32], mint: [u8; 32]| -> Result<[u8; 32]> {
         let mint_account = snapshot.account(mint)?;
         dusk_adapter::transfer_fees::decode_mint_fees(&mint_account.owner, &mint_account.data)?;
@@ -523,10 +523,10 @@ pub fn run_plan_cli() -> std::result::Result<(), Box<dyn std::error::Error>> {
 }
 
 pub struct OrderJob<'a> {
-    pub client: &'a crate::discovery::RpcClient,
+    pub client: &'a crate::runtime::rpc::RpcClient,
     pub layout: &'a AccountLayoutManifest,
     pub contract: &'a InstructionContract,
-    pub signer: &'a dyn crate::signer::TransactionSigner,
+    pub signer: &'a dyn crate::runtime::signer::TransactionSigner,
     pub dry_run: bool,
     pub max_sends: usize,
 }
@@ -546,9 +546,11 @@ fn balance(data: Option<&[u8]>) -> Result<u64> {
 impl OrderJob<'_> {
     pub fn run_pass(
         &self,
-    ) -> std::result::Result<Vec<crate::execute::AttemptReport>, crate::execute::ExecutionError>
-    {
-        use crate::execute::ExecutionError;
+    ) -> std::result::Result<
+        Vec<crate::runtime::execution::AttemptReport>,
+        crate::runtime::execution::ExecutionError,
+    > {
+        use crate::runtime::execution::ExecutionError;
         let orders = order_layout().map_err(ExecutionError::Assembly)?;
         let markets = self
             .client
@@ -663,11 +665,11 @@ impl OrderJob<'_> {
         order: [u8; 32],
         market: [u8; 32],
         kind: &str,
-    ) -> Result<(crate::execute::AttemptReport, bool)> {
+    ) -> Result<(crate::runtime::execution::AttemptReport, bool)> {
         use crate::{
-            execute::AttemptReport,
-            flash_runtime::FlashJob,
-            transaction::{base64, serialize_transaction},
+            liquidation::simulation,
+            runtime::execution::AttemptReport,
+            runtime::transaction::{base64, serialize_transaction},
         };
         use keeper_core::{OutcomeStatus, ReasonCode};
         let skipped = |reason, detail| {
@@ -705,9 +707,10 @@ impl OrderJob<'_> {
             address(plan.named["base_mint"]),
             address(plan.named["quote_mint"]),
         ];
-        let fees = crate::fee_notice::read_fees(self.client, &mints, snapshot.slot)
-            .map_err(|e| e.to_string())?;
-        let unsigned = FlashJob::compile_message_for(
+        let fees =
+            crate::workers::sentinel::fee_notice::read_fees(self.client, &mints, snapshot.slot)
+                .map_err(|e| e.to_string())?;
+        let unsigned = simulation::compile_message_for(
             self.signer.public_key(),
             &snapshot,
             &plan.instructions,
@@ -733,8 +736,9 @@ impl OrderJob<'_> {
                 format!("order trigger/settlement rejected: {error}"),
             ));
         }
-        let after_fees = crate::fee_notice::read_fees(self.client, &mints, fees.slot)
-            .map_err(|e| e.to_string())?;
+        let after_fees =
+            crate::workers::sentinel::fee_notice::read_fees(self.client, &mints, fees.slot)
+                .map_err(|e| e.to_string())?;
         if after_fees.fingerprint != fees.fingerprint {
             return Ok(skipped(
                 ReasonCode::StateChanged,
@@ -818,14 +822,15 @@ impl OrderJob<'_> {
         let height = block["value"]["lastValidBlockHeight"]
             .as_u64()
             .ok_or("order blockheight")?;
-        let message = FlashJob::compile_message_for(
+        let message = simulation::compile_message_for(
             self.signer.public_key(),
             &recheck,
             &plan.instructions,
             key(hash)?,
         )?;
-        let signing_fees = crate::fee_notice::read_fees(self.client, &mints, recheck.slot)
-            .map_err(|e| e.to_string())?;
+        let signing_fees =
+            crate::workers::sentinel::fee_notice::read_fees(self.client, &mints, recheck.slot)
+                .map_err(|e| e.to_string())?;
         if signing_fees.fingerprint != fees.fingerprint {
             return Ok(skipped(
                 ReasonCode::StateChanged,
@@ -837,7 +842,7 @@ impl OrderJob<'_> {
             serde_json::to_vec(&recheck.accounts).map_err(|e| e.to_string())?,
         ))
         .into_string();
-        let mut journal = crate::flash_journal::Journal::connect(
+        let mut journal = crate::runtime::flash_journal::Journal::connect(
             &std::env::var("DATABASE_URL")
                 .map_err(|_| "DATABASE_URL is required before signing")?,
         )?;

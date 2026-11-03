@@ -1,6 +1,11 @@
 //! Durable single-generation submission. Session advisory locks are released if
 //! the DB connection dies; every mutation checks the connection before signing.
-use crate::{discovery::RpcClient, signer::TransactionSigner, transaction::serialize_transaction};
+use crate::runtime::execution::{AttemptReport, ExecutionError};
+use crate::{
+    runtime::rpc::RpcClient, runtime::signer::TransactionSigner,
+    runtime::transaction::serialize_transaction,
+};
+use keeper_core::{OutcomeStatus, ReasonCode};
 use postgres::{Client, NoTls};
 use postgres_native_tls::MakeTlsConnector;
 use sha2::{Digest, Sha256};
@@ -245,7 +250,7 @@ impl Journal {
                 // Re-broadcast only the exact recorded bytes. A lost RPC response never
                 // authorizes a new signature or refreshed blockhash.
                 let bytes: Vec<u8> = row.get(2);
-                let _ = rpc.send_transaction(&crate::transaction::base64(&bytes));
+                let _ = rpc.send_transaction(&crate::runtime::transaction::base64(&bytes));
                 return Err(format!(
                     "pending signature {sig}; reconcile finalized history before replacement"
                 ));
@@ -289,7 +294,7 @@ impl Journal {
         tx.execute("INSERT INTO keeper_flash_events(work_key,phase,evidence) VALUES($1,'submitted_unknown',$2)",&[&work,&serde_json::json!({"signature":sig})]).map_err(|e|e.to_string())?;
         tx.commit().map_err(|e| e.to_string())?;
         let returned = rpc
-            .send_transaction(&crate::transaction::base64(&bytes))
+            .send_transaction(&crate::runtime::transaction::base64(&bytes))
             .map_err(|e| e.to_string())?;
         if returned != sig {
             return Err("RPC returned a different signature".into());
@@ -313,7 +318,7 @@ impl Journal {
             return Err("complete finalized receipt unavailable".into());
         }
         let actual =
-            crate::discovery::decode_base64(receipt["transaction"][0].as_str().unwrap_or(""))
+            crate::runtime::rpc::decode_base64(receipt["transaction"][0].as_str().unwrap_or(""))
                 .ok_or("invalid finalized transaction bytes")?;
         let expected: Vec<u8> = self
             .client
@@ -359,6 +364,52 @@ impl Journal {
     }
 }
 
+pub(crate) fn recover_pending(
+    client: &RpcClient,
+    revision: &str,
+    dry_run: bool,
+) -> std::result::Result<Vec<AttemptReport>, ExecutionError> {
+    let mut reports = Vec::new();
+    if !dry_run {
+        let mut journal = Journal::connect(&std::env::var("DATABASE_URL").map_err(|_| {
+            ExecutionError::Assembly("DATABASE_URL is required before signing".into())
+        })?)
+        .map_err(ExecutionError::Assembly)?;
+        for (position, signature, outcome) in journal
+            .recover(client, revision)
+            .map_err(ExecutionError::Assembly)?
+        {
+            let (status, reason) = recovered_submission_status(&outcome);
+            reports.push(AttemptReport {
+                position,
+                debt_mint: String::new(),
+                status,
+                reason,
+                race: None,
+                signature,
+                detail: Some(outcome),
+            });
+        }
+    }
+    Ok(reports)
+}
+
+fn recovered_submission_status(outcome: &str) -> (OutcomeStatus, ReasonCode) {
+    match outcome {
+        "executed" => (OutcomeStatus::Executed, ReasonCode::Confirmed),
+        "failed" => (
+            OutcomeStatus::RetryableFailure,
+            ReasonCode::SimulationRejected,
+        ),
+        "expired_absent" | "abandoned_before_submission" => {
+            (OutcomeStatus::Skipped, ReasonCode::BlockhashExpired)
+        }
+        _ => (
+            OutcomeStatus::RetryableFailure,
+            ReasonCode::ConfirmationUnknown,
+        ),
+    }
+}
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -382,6 +433,20 @@ mod tests {
         }
     }
     #[test]
+    fn finalized_failure_is_not_reported_as_expired() {
+        assert_eq!(
+            recovered_submission_status("failed"),
+            (
+                OutcomeStatus::RetryableFailure,
+                ReasonCode::SimulationRejected
+            )
+        );
+        assert_eq!(
+            recovered_submission_status("expired_absent"),
+            (OutcomeStatus::Skipped, ReasonCode::BlockhashExpired)
+        );
+    }
+    #[test]
     #[ignore = "requires isolated KEEPER_TEST_DATABASE_URL and localhost RPC"]
     fn persists_before_send_reconciles_and_holds_the_distributed_lease() {
         let url = std::env::var("KEEPER_TEST_DATABASE_URL").expect("test database URL");
@@ -396,7 +461,7 @@ mod tests {
         journal
             .client
             .batch_execute(include_str!(
-                "../../../../deploy/postgres/migrations/0002_flash_attempts.sql"
+                "../../../../../deploy/postgres/migrations/0002_flash_attempts.sql"
             ))
             .unwrap();
         let listener = TcpListener::bind("127.0.0.1:0").unwrap();

@@ -1,10 +1,12 @@
 //! Vault-wide hLP flash recovery and terminal-close instruction assembly.
 
 use crate::{
-    accounts::{ASSOCIATED_TOKEN_PROGRAM, MarketAccounts, associated_token_account, decode_key},
-    discovery::account_discriminator,
-    flash::{InventoryPaymentAccounts, Snapshot, address, inventory_payment_for, key},
-    transaction::{AccountMeta, Instruction},
+    liquidation::plan::{InventoryPaymentAccounts, Snapshot, address, inventory_payment_for, key},
+    runtime::accounts::{
+        ASSOCIATED_TOKEN_PROGRAM, MarketAccounts, associated_token_account, decode_key,
+    },
+    runtime::rpc::account_discriminator,
+    runtime::transaction::{AccountMeta, Instruction},
 };
 use dusk_adapter::{
     AccountLayoutManifest, BeginHlpFlashArgs, CloseInsolventHlpArgs, InstructionContract,
@@ -249,7 +251,7 @@ impl HlpContext {
         max_insurance_draw: u64,
         max_socialized_loss: u64,
     ) -> Result<(Vec<Instruction>, u64)> {
-        let prefix = crate::flash::resources()?;
+        let prefix = crate::liquidation::plan::resources()?;
         let (payment, gross_payment) = inventory_payment_for(
             snapshot,
             InventoryPaymentAccounts {
@@ -292,7 +294,7 @@ impl HlpContext {
         max_socialized_loss: u64,
         min_caller_bounty_out: u64,
     ) -> Result<Vec<Instruction>> {
-        let mut instructions = crate::flash::resources()?;
+        let mut instructions = crate::liquidation::plan::resources()?;
         instructions.push(self.instruction(
             contract,
             Args::CloseInsolventHlp(CloseInsolventHlpArgs {

@@ -18,7 +18,7 @@ use dusk_adapter::{
     derive_program_address,
 };
 
-use crate::transaction::AccountMeta;
+use crate::runtime::transaction::AccountMeta;
 
 /// SPL associated token account program.
 pub const ASSOCIATED_TOKEN_PROGRAM: &str = "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";

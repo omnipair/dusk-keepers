@@ -1,176 +1,41 @@
-use std::{
-    collections::BTreeMap,
-    env,
-    error::Error,
-    io::{Read, Write},
-    net::{SocketAddr, TcpListener, TcpStream},
-    path::PathBuf,
-};
+//! Keeper startup, polling loop and execution reporting.
+mod config;
+mod health;
+mod liquidation;
+mod runtime;
+mod workers;
 
-use std::{
-    sync::{Arc, Mutex},
-    thread,
-    time::Duration,
+use crate::{
+    liquidation::policy::LiquidationMode,
+    runtime::rpc::RpcClient,
+    runtime::signer::{LocalKeypair, TransactionSigner},
+    workers::{
+        leverage::orders,
+        sentinel::{fee_notice, observe},
+    },
 };
-
+use config::{Config, Mode};
 use dusk_adapter::{
     AccountLayoutManifest, AccountResolutionManifest, DeterministicAccountResolver,
     InstructionContract, ProtocolLock,
 };
-
-mod accounts;
-mod arbitrageur;
-mod discovery;
-mod execute;
-mod fee_notice;
-mod flash;
-mod flash_cli;
-mod flash_journal;
-mod flash_runtime;
-mod hlp_flash;
-mod lending;
-mod lifecycle;
-use lending::LiquidationMode;
-mod orders;
-mod signer;
-mod transaction;
-
-use arbitrageur::{ArbitragePolicy, ArbitrageurJob};
-use discovery::{Observation, RpcClient, observe};
+use health::{Snapshot, serve};
 use keeper_core::OutcomeStatus;
-
-use lifecycle::LifecycleJob;
-use signer::{LocalKeypair, TransactionSigner};
-
-/// What the last discovery pass saw, shared with the health endpoint.
-#[derive(Clone, Debug, Default)]
-struct Snapshot {
-    observation: Observation,
-    fee_notices: Option<fee_notice::NoticeMonitor>,
-    fee_notice_error: Option<String>,
-    error: Option<String>,
-    passes: u64,
-    /// Execution counters. Sent is deliberately separate from evaluated: on a
-    /// healthy market the first climbs and the second does not, and an
-    /// operator needs to see that the keeper is working rather than idle.
-    evaluated: u64,
-    execution_passes: u64,
-    execution_configured: bool,
-    sent: u64,
-    last_signature: Option<String>,
-    last_execution_error: Option<String>,
-    /// The last skip's own words. A reason code says a bound was not met; it
-    /// does not say which bound or by how much, and an operator looking at a
-    /// keeper that never acts needs the second thing.
-    last_skip_detail: Option<String>,
-    /// Why the last pass declined to act, counted by reason.
-    ///
-    /// Without this, "every position is healthy" and "every simulation is
-    /// failing because the keeper builds a malformed transaction" both read as
-    /// zero sends. They are the two most important states to tell apart.
-    last_reasons: BTreeMap<String, u32>,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-enum Mode {
-    Shadow,
-    Live,
-}
-
-impl Mode {
-    fn parse(value: &str) -> Result<Self, String> {
-        match value {
-            "shadow" => Ok(Self::Shadow),
-            "live" => Ok(Self::Live),
-            _ => Err(format!("KEEPER_MODE must be shadow or live, got {value}")),
-        }
-    }
-}
-
-#[derive(Debug)]
-struct Config {
-    mode: Mode,
-    profile: String,
-    lending_mode: LiquidationMode,
-    bind_address: SocketAddr,
-    protocol_lock: PathBuf,
-    instruction_contract: PathBuf,
-    account_layout: PathBuf,
-    account_resolution: PathBuf,
-    /// Ceiling on transactions per pass. A keeper that has gone wrong should
-    /// run out of permission before it runs out of money.
-    max_sends_per_pass: usize,
-    /// Below this the keeper reports unready rather than discovering it
-    /// cannot pay halfway through a liquidation.
-    minimum_lamports: u64,
-}
-
-impl Config {
-    fn from_environment() -> Result<Self, Box<dyn Error>> {
-        let mode = Mode::parse(&env::var("KEEPER_MODE").unwrap_or_else(|_| "shadow".into()))?;
-        let profile = env::var("KEEPER_PROFILE").unwrap_or_else(|_| "conformance".into());
-        if !matches!(
-            profile.as_str(),
-            "conformance"
-                | "lending"
-                | "leverage"
-                | "hlp-recovery"
-                | "auction-arbitrage"
-                | "lifecycle"
-                | "sentinel"
-        ) {
-            return Err(format!("unsupported KEEPER_PROFILE: {profile}").into());
-        }
-        let lending_mode = if profile == "lending" {
-            LiquidationMode::parse(
-                &env::var("KEEPER_LENDING_MODE").unwrap_or_else(|_| "both".into()),
-            )?
-        } else {
-            LiquidationMode::Both
-        };
-        let port = env::var("PORT").unwrap_or_else(|_| "8080".into());
-        let bind_address = format!("0.0.0.0:{port}").parse()?;
-        let protocol_lock = env::var("DUSK_PROTOCOL_LOCK")
-            .unwrap_or_else(|_| "protocol.lock.json".into())
-            .into();
-        let instruction_contract = env::var("DUSK_INSTRUCTION_CONTRACT")
-            .unwrap_or_else(|_| "protocol/keeper-instructions.v1.json".into())
-            .into();
-        let account_layout = env::var("DUSK_ACCOUNT_LAYOUT")
-            .unwrap_or_else(|_| "protocol/keeper-account-layout.v1.json".into())
-            .into();
-        let account_resolution = env::var("DUSK_ACCOUNT_RESOLUTION")
-            .unwrap_or_else(|_| "protocol/keeper-account-resolution.v1.json".into())
-            .into();
-        let max_sends_per_pass = env::var("KEEPER_MAX_SENDS_PER_PASS")
-            .ok()
-            .and_then(|value| value.parse().ok())
-            .unwrap_or(4);
-        let minimum_lamports = env::var("KEEPER_MINIMUM_LAMPORTS")
-            .ok()
-            .and_then(|value| value.parse().ok())
-            .unwrap_or(20_000_000);
-        Ok(Self {
-            account_layout,
-            account_resolution,
-            bind_address,
-            instruction_contract,
-            max_sends_per_pass,
-            minimum_lamports,
-            mode,
-            profile,
-            lending_mode,
-            protocol_lock,
-        })
-    }
-}
+use std::{
+    collections::BTreeMap,
+    env,
+    error::Error,
+    sync::{Arc, Mutex},
+    thread,
+    time::Duration,
+};
 
 fn main() -> Result<(), Box<dyn Error>> {
     if env::args().any(|a| a == "--order-plan") {
         return orders::run_plan_cli();
     }
     if env::args().any(|a| a == "--flash-plan") {
-        return flash_cli::run();
+        return liquidation::cli::run();
     }
     let config = Config::from_environment()?;
     let lock = ProtocolLock::read(&config.protocol_lock)?;
@@ -210,8 +75,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     } else if config.mode == Mode::Shadow {
         let public = env::var("KEEPER_SHADOW_PUBLIC_KEY")
             .ok()
-            .and_then(|p| accounts::decode_key(&p));
-        public.map(|key| Box::new(signer::ShadowIdentity(key)) as Box<dyn TransactionSigner>)
+            .and_then(|p| crate::runtime::accounts::decode_key(&p));
+        public.map(|key| {
+            Box::new(crate::runtime::signer::ShadowIdentity(key)) as Box<dyn TransactionSigner>
+        })
     } else {
         Some(Box::new(load_signer()?))
     };
@@ -377,7 +244,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 /// The variable is how a deployed keeper receives a key, since there is no
 /// filesystem to mount one onto; the path is how a local run uses an existing
 /// Solana keypair without pasting it into a shell.
-fn load_signer() -> Result<LocalKeypair, signer::SignerError> {
+fn load_signer() -> Result<LocalKeypair, crate::runtime::signer::SignerError> {
     match env::var("KEEPER_SIGNER_KEY_PATH") {
         Ok(path) => LocalKeypair::from_file(path),
         Err(_) => LocalKeypair::from_environment("KEEPER_SIGNER_KEY"),
@@ -392,21 +259,6 @@ fn decode_program_id(encoded: &str) -> Result<[u8; 32], Box<dyn Error>> {
     let mut key = [0_u8; 32];
     key.copy_from_slice(&bytes);
     Ok(key)
-}
-
-/// How much revenue the arbitrageur will buy, and at what tolerance.
-///
-/// Required rather than defaulted, like the other spending profiles: the
-/// ceiling is the operator's money, and a keeper that picks it is picking how
-/// much of someone else's balance to commit.
-fn arbitrage_policy() -> Option<ArbitragePolicy> {
-    Some(ArbitragePolicy {
-        max_sold: env::var("KEEPER_AUCTION_MAX_SOLD").ok()?.parse().ok()?,
-        slippage_bps: env::var("KEEPER_AUCTION_SLIPPAGE_BPS")
-            .ok()
-            .and_then(|value| value.parse().ok())
-            .unwrap_or(50),
-    })
 }
 
 /// One execution pass, folded into the shared snapshot.
@@ -466,78 +318,25 @@ fn run_execution_pass(
             notice
                 .final_notice_markets
                 .into_iter()
-                .filter_map(|key| accounts::decode_key(&key))
+                .filter_map(|key| crate::runtime::accounts::decode_key(&key))
                 .collect()
         })
         .unwrap_or_default();
-    // Which job a service runs is its profile, not a flag: one service, one
-    // wallet, one thing it is allowed to do. A profile with no job here does
-    // nothing rather than falling back to something it was not deployed for.
-    let outcome = match profile {
-        "lending" | "leverage" | "hlp-recovery" => flash_runtime::FlashJob {
-            client,
-            layout,
-            contract,
-            signer,
-            dry_run,
-            profile,
-            liquidation_mode: lending_mode,
-            max_sends: max_sends_per_pass,
-            priority_markets: &priority_markets,
-        }
-        .run_pass()
-        .and_then(|mut reports| {
-            if profile == "leverage" {
-                let remaining = max_sends_per_pass.saturating_sub(
-                    reports
-                        .iter()
-                        .filter(|r| r.status == OutcomeStatus::Executed)
-                        .count(),
-                );
-                if remaining > 0 {
-                    reports.extend(
-                        orders::OrderJob {
-                            client,
-                            layout,
-                            contract,
-                            signer,
-                            dry_run,
-                            max_sends: remaining,
-                        }
-                        .run_pass()?,
-                    );
-                }
-            }
-            Ok(reports)
-        }),
-        "auction-arbitrage" => match arbitrage_policy() {
-            None => Ok(Vec::new()),
-            Some(policy) => ArbitrageurJob {
-                client,
-                contract,
-                dry_run,
-                layout,
-                max_sends_per_pass,
-                policy,
-                program_id,
-                resolver,
-                signer,
-            }
-            .run_pass(),
-        },
-        "lifecycle" => LifecycleJob {
+    let outcome = workers::run(
+        profile,
+        lending_mode,
+        &workers::WorkerContext {
             client,
             contract,
-            dry_run,
             layout,
-            max_sends_per_pass,
-            program_id,
             resolver,
             signer,
-        }
-        .run_pass(),
-        _ => Ok(Vec::new()),
-    };
+            program_id,
+            dry_run,
+            max_sends: max_sends_per_pass,
+            priority_markets: &priority_markets,
+        },
+    );
 
     match outcome {
         Ok(reports) => {
@@ -595,130 +394,5 @@ fn run_execution_pass(
                 current.last_execution_error = Some(error.to_string());
             }
         }
-    }
-}
-
-fn serve(
-    address: SocketAddr,
-    profile: &str,
-    revision: &str,
-    snapshot: Arc<Mutex<Snapshot>>,
-) -> Result<(), Box<dyn Error>> {
-    let listener = TcpListener::bind(address)?;
-    for stream in listener.incoming() {
-        let current = snapshot
-            .lock()
-            .map(|guard| guard.clone())
-            .unwrap_or_default();
-        respond(stream?, profile, revision, &current)?;
-    }
-    Ok(())
-}
-
-fn optional_json(value: Option<&str>) -> String {
-    value.map_or_else(
-        || "null".to_owned(),
-        |text| serde_json::Value::String(text.to_owned()).to_string(),
-    )
-}
-
-fn respond(
-    mut stream: TcpStream,
-    profile: &str,
-    revision: &str,
-    snapshot: &Snapshot,
-) -> std::io::Result<()> {
-    let mut buffer = [0_u8; 1024];
-    let read = stream.read(&mut buffer)?;
-    let request = String::from_utf8_lossy(&buffer[..read]);
-    let path = request.split_whitespace().nth(1).unwrap_or("/");
-    let observed = format!(
-        "\"slot\":{},\"markets\":{},\"borrowPositions\":{},\"leveragePositions\":{},\"passes\":{},\"evaluated\":{},\"sent\":{},\"lastSignature\":{},\"executionError\":{}",
-        snapshot.observation.slot,
-        snapshot.observation.markets,
-        snapshot.observation.borrow_positions,
-        snapshot.observation.leverage_positions,
-        snapshot.passes,
-        snapshot.evaluated,
-        snapshot.sent,
-        optional_json(snapshot.last_signature.as_deref()),
-        optional_json(snapshot.last_execution_error.as_deref()),
-    );
-    let observed = format!(
-        "{observed},\"lastSkipDetail\":{}",
-        optional_json(snapshot.last_skip_detail.as_deref())
-    );
-    let observed = format!(
-        "{observed},\"executionConfigured\":{},\"executionPasses\":{}",
-        snapshot.execution_configured, snapshot.execution_passes
-    );
-    let reasons = serde_json::to_string(&snapshot.last_reasons).unwrap_or_else(|_| "{}".to_owned());
-    let observed = format!("{observed},\"lastReasons\":{reasons}");
-    let notices = serde_json::to_string(&snapshot.fee_notices).unwrap_or_else(|_| "null".into());
-    let observed = format!(
-        "{observed},\"feeNotices\":{notices},\"feeNoticeError\":{}",
-        optional_json(snapshot.fee_notice_error.as_deref())
-    );
-    let (status, body) = match path {
-        // Liveness is about the process; readiness is about whether this
-        // keeper can currently see the chain, so a discovery failure fails
-        // readiness closed while liveness stays healthy.
-        "/healthz" => (
-            "200 OK",
-            format!(
-                "{{\"status\":\"healthy\",\"profile\":\"{profile}\",\"protocolRevision\":\"{revision}\",{observed}}}"
-            ),
-        ),
-        "/readyz" => {
-            let blocked = snapshot
-                .error
-                .as_deref()
-                .or(snapshot.fee_notice_error.as_deref())
-                .or(snapshot.last_execution_error.as_deref())
-                .or_else(|| {
-                    (profile != "sentinel" && !snapshot.execution_configured).then_some(
-                        "execution is not configured; shadow profiles require a public identity",
-                    )
-                });
-            match blocked {
-                Some(reason) => (
-                    "503 Service Unavailable",
-                    format!(
-                        "{{\"status\":\"degraded\",\"profile\":\"{profile}\",\"protocolRevision\":\"{revision}\",\"reason\":{},{observed}}}",
-                        serde_json::Value::String(reason.to_owned())
-                    ),
-                ),
-                None if snapshot.passes == 0 => (
-                    "503 Service Unavailable",
-                    format!(
-                        "{{\"status\":\"starting\",\"profile\":\"{profile}\",\"protocolRevision\":\"{revision}\",{observed}}}"
-                    ),
-                ),
-                None => (
-                    "200 OK",
-                    format!(
-                        "{{\"status\":\"ready\",\"profile\":\"{profile}\",\"protocolRevision\":\"{revision}\",{observed}}}"
-                    ),
-                ),
-            }
-        }
-        _ => ("404 Not Found", "{\"status\":\"not_found\"}".into()),
-    };
-    write!(
-        stream,
-        "HTTP/1.1 {status}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
-        body.len()
-    )
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn mode_is_fail_closed() {
-        assert_eq!(Mode::parse("shadow").unwrap(), Mode::Shadow);
-        assert_eq!(Mode::parse("live").unwrap(), Mode::Live);
-        assert!(Mode::parse("send").is_err());
     }
 }

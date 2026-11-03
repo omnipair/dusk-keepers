@@ -1,29 +1,10 @@
-//! Candidate discovery.
-//!
-//! The sentinel's whole job, and the first stage of every other profile's.
-//! It reads the chain directly rather than trusting the indexer: a keeper that
-//! acted on database state alone would act on a view that is, by construction,
-//! behind the cluster it is trying to race.
-//!
-//! Nothing here signs. Discovery is deliberately separable from execution so
-//! the wallet-less sentinel can prove the read path works before any profile
-//! is given a key.
-
+//! Solana RPC transport and wire decoding.
 use std::{error::Error, fmt, time::Duration};
 
 use serde::Deserialize;
 
 pub type ProgramAccountData = Vec<([u8; 32], Vec<u8>)>;
 pub type SimulatedAccountData = (Option<String>, Vec<Option<Vec<u8>>>);
-
-/// What a discovery pass observed.
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub struct Observation {
-    pub markets: usize,
-    pub borrow_positions: usize,
-    pub leverage_positions: usize,
-    pub slot: u64,
-}
 
 #[derive(Debug)]
 pub enum DiscoveryError {
@@ -424,22 +405,6 @@ pub(crate) fn decode_base64(input: &str) -> Option<Vec<u8>> {
         }
     }
     Some(output)
-}
-
-/// One discovery pass over the pinned programs.
-pub fn observe(client: &RpcClient, dusk_program_id: &str) -> Result<Observation, DiscoveryError> {
-    let slot = client.slot()?;
-    let markets = client.count_accounts(dusk_program_id, account_discriminator("Market"))?;
-    let borrow_positions =
-        client.count_accounts(dusk_program_id, account_discriminator("BorrowPosition"))?;
-    let leverage_positions =
-        client.count_accounts(dusk_program_id, account_discriminator("LeveragePosition"))?;
-    Ok(Observation {
-        borrow_positions,
-        leverage_positions,
-        markets,
-        slot,
-    })
 }
 
 #[cfg(test)]

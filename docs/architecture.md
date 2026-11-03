@@ -57,3 +57,21 @@ instruction construction, fee-aware arithmetic, and error classification.
 Rust builds and simulates native transactions. TypeScript provides independent
 codecs and reference checks; its service remains a non-signing scaffold. The
 captured protocol lock blocks live startup in both runtimes.
+
+## Source boundaries
+
+The native entry points are `rust/apps/keeper/src/workers/{lending,leverage,hlp,
+revenue,lifecycle,sentinel}/`. Each folder owns its domain's discovery or execution
+orchestration; leverage also owns delegated orders and hLP owns its vault plans.
+`workers/mod.rs` is the only profile dispatcher.
+
+`liquidation/` contains the shared borrowing/leverage engine, ordinary/emergency
+selection policy, atomic instruction plans, bounded size search, simulation and
+snapshot validation. Route selection returns one plan before submission starts.
+`runtime/` contains RPC transport, account resolution, the signer interface,
+transaction wire encoding and PostgreSQL submission/recovery. `config.rs` and
+`health.rs` keep configuration and HTTP reporting out of the workers.
+
+The six deployable profiles are lending, leverage, hLP recovery, revenue auctions,
+governance lifecycle and sentinel. The TypeScript service remains a scaffold;
+its codecs and shared fixtures validate protocol parity, not a second executor.

@@ -1,5 +1,5 @@
 //! Shared execution outcomes and error classification.
-use crate::discovery::DiscoveryError;
+use crate::runtime::rpc::DiscoveryError;
 use keeper_core::{OutcomeStatus, ReasonCode, lifecycle::ExpectedRace};
 use std::{error::Error, fmt};
 
