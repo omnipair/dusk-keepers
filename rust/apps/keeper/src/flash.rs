@@ -317,6 +317,7 @@ impl Context {
         for a in &spec.accounts {
             let k = named
                 .get(&a.name)
+                .or_else(|| named.get(&a.name.replace("ylp", "srlp")))
                 .copied()
                 .or_else(|| a.fixed_address.as_deref().and_then(decode_key));
             let absent = k.is_none() && a.optional;

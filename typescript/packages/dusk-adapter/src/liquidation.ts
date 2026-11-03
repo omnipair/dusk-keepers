@@ -59,7 +59,7 @@ function reader(layout: LiquidationLayout, name: string, data: number[]) {
   )
     throw new Error("account discriminator");
   const field = (path: string) => {
-    const f = spec.fields.find((f) => f.path === path);
+    const f = spec.fields.find((f) => f.path === path || f.path === path.replaceAll("srlp", "ylp"));
     if (!f) throw new Error(`missing field ${path}`);
     return Buffer.from(data.slice(f.offset, f.offset + f.size));
   };
@@ -162,9 +162,9 @@ export function resolveLiquidationAccounts(
   ].some((f) => m.int(f) !== 0n);
   const hlp = active
     ? [
-        "ylp_mint",
-        "base_hlp_vault.ylp_vault",
-        "quote_hlp_vault.ylp_vault",
+        "srlp_mint",
+        "base_hlp_vault.srlp_vault",
+        "quote_hlp_vault.srlp_vault",
         "base_side.interest_vault",
         "quote_side.interest_vault",
       ].map((f) => m.key(f))

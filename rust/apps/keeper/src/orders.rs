@@ -48,11 +48,15 @@ fn instruction(
     let program = key(&spec.program_id)?;
     let mut accounts = Vec::new();
     for a in &spec.accounts {
-        let resolved = named.get(&a.name).copied().or_else(|| {
-            a.fixed_address
-                .as_deref()
-                .and_then(crate::accounts::decode_key)
-        });
+        let resolved = named
+            .get(&a.name)
+            .or_else(|| named.get(&a.name.replace("ylp", "srlp")))
+            .copied()
+            .or_else(|| {
+                a.fixed_address
+                    .as_deref()
+                    .and_then(crate::accounts::decode_key)
+            });
         let absent = resolved.is_none() && a.optional;
         let pubkey = resolved
             .or(absent.then_some(program))
@@ -127,7 +131,7 @@ pub fn build_order_plan(
         ("quote_mint".into(), market.quote_mint),
         ("base_reserve_vault".into(), market.base_reserve_vault),
         ("quote_reserve_vault".into(), market.quote_reserve_vault),
-        ("ylp_mint".into(), market.ylp_mint),
+        ("srlp_mint".into(), market.srlp_mint),
         ("dusk_program".into(), program),
         ("program".into(), program),
         (
@@ -220,11 +224,11 @@ pub fn build_order_plan(
             ("executor_target_account".into(), reward),
             ("fee_recipient".into(), ata(treasury, mint)?),
             (
-                "hlp_ylp_account".into(),
+                "hlp_srlp_account".into(),
                 if side == 0 {
-                    market.base_ylp_vault
+                    market.base_srlp_vault
                 } else {
-                    market.quote_ylp_vault
+                    market.quote_srlp_vault
                 },
             ),
             (

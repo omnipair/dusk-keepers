@@ -66,7 +66,7 @@
       "sizeWithDiscriminator": 3128,
       "fields": [
         {
-          "path": "ylp_mint",
+          "path": "srlp_mint",
           "offset": 9,
           "size": 32
         },
@@ -141,12 +141,12 @@
           "size": 8
         },
         {
-          "path": "base_hlp_vault.ylp_vault",
+          "path": "base_hlp_vault.srlp_vault",
           "offset": 1952,
           "size": 32
         },
         {
-          "path": "quote_hlp_vault.ylp_vault",
+          "path": "quote_hlp_vault.srlp_vault",
           "offset": 2344,
           "size": 32
         },

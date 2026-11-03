@@ -38,7 +38,7 @@ const WANTED = {
 
   ],
   Market: [
-    "ylp_mint",
+    "srlp_mint",
     "base_side.hlp_mint",
     "quote_side.hlp_mint",
     "base_side.asset_mint",
@@ -53,8 +53,8 @@ const WANTED = {
     "quote_side.interest_vault",
     "base_side.reserves.live_reserve",
     "quote_side.reserves.live_reserve",
-    "base_hlp_vault.ylp_vault",
-    "quote_hlp_vault.ylp_vault",
+    "base_hlp_vault.srlp_vault",
+    "quote_hlp_vault.srlp_vault",
     "base_hlp_vault.hlp_supply",
     "base_hlp_vault.debt_principal",
     "quote_hlp_vault.debt_principal",
@@ -204,7 +204,7 @@ function locate(accountName, dotted, types) {
   for (const [index, segment] of segments.entries()) {
     let found;
     for (const field of current.type.fields) {
-      if (field.name === segment) {
+      if (field.name === segment || field.name === segment.replaceAll("srlp", "ylp")) {
         found = field;
         break;
       }
