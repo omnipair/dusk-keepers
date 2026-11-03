@@ -5,6 +5,7 @@ use crate::{
     flash::{self, Context, Snapshot, address, key},
     flash_journal::Journal,
     hlp_flash::HlpContext,
+    lending::{LiquidationMode, select_liquidation},
     signer::TransactionSigner,
     transaction::{Instruction, base64, compile_message, serialize_transaction},
 };
@@ -30,9 +31,16 @@ pub struct FlashJob<'a> {
     pub signer: &'a dyn TransactionSigner,
     pub dry_run: bool,
     pub profile: &'a str,
+    pub liquidation_mode: LiquidationMode,
     pub max_sends: usize,
     pub priority_markets: &'a BTreeSet<[u8; 32]>,
 }
+struct LiquidationPlan {
+    action: &'static str,
+    instructions: Vec<Instruction>,
+    minimum_profit: u64,
+}
+
 impl FlashJob<'_> {
     pub fn run_pass(&self) -> std::result::Result<Vec<AttemptReport>, ExecutionError> {
         let mut reports = Vec::new();
@@ -717,114 +725,150 @@ impl FlashJob<'_> {
         if !health.eligible() {
             return Ok(None);
         }
-        let inventory = self.inventory_mode()? && self.profile != "lending-settler";
-        if inventory
-            && std::env::var("KEEPER_FLASH_MARKET").ok().as_deref()
-                != Some(&address(c.market.address))
-        {
-            return Ok(None);
-        }
-        let min_profit = if inventory {
-            0
-        } else {
-            required_u64("KEEPER_LIQUIDATION_MIN_PROFIT")?
-        };
         let setup = c.setup(&s)?;
         if !setup.is_empty() {
             return self
                 .submit(&c, &s, "prepare_accounts", setup, 0, false)
                 .map(Some);
         }
-        if self.profile != "lending-settler" {
-            let cap = required_u64("KEEPER_FLASH_MAX_REPAY")?;
-            if cap == 0 {
-                return Err("KEEPER_FLASH_MAX_REPAY must be positive".into());
-            }
-            let partial = search_profitable(cap.min(health.debt), min_profit, |repay| {
-                let Some(q) = self.preview::<FlashLiquidationQuote>(
+        let plan = select_liquidation(
+            self.liquidation_mode,
+            || self.ordinary_plan(&c, &s, &health),
+            || self.emergency_plan(&c, &s),
+        )?;
+        if let Some(plan) = plan {
+            // Once a plan enters submission, every outcome returns to the journal.
+            // Submission errors and unknown signatures never select another route.
+            return self
+                .submit(
                     &c,
                     &s,
-                    c.preview_flash(self.contract, repay, false)?,
+                    plan.action,
+                    plan.instructions,
+                    plan.minimum_profit,
+                    true,
+                )
+                .map(Some);
+        }
+        Ok(Some((None, "eligible but unfilled: no adaptively searched permitted route met the configured payment/profit bounds".into())))
+    }
+
+    fn ordinary_plan(
+        &self,
+        c: &Context,
+        s: &Snapshot,
+        health: &LiquidationHealth,
+    ) -> Result<Option<LiquidationPlan>> {
+        let inventory = self.inventory_mode()?;
+        if inventory {
+            let market = std::env::var("KEEPER_FLASH_MARKET")
+                .map_err(|_| "KEEPER_FLASH_MARKET is required for inventory settlement")?;
+            key(&market)?;
+            if market != address(c.market.address) {
+                return Ok(None);
+            }
+        }
+        let minimum_profit = if inventory {
+            0
+        } else {
+            required_u64("KEEPER_LIQUIDATION_MIN_PROFIT")?
+        };
+        let cap = required_u64("KEEPER_FLASH_MAX_REPAY")?;
+        if cap == 0 {
+            return Err("KEEPER_FLASH_MAX_REPAY must be positive".into());
+        }
+        let partial = search_profitable(cap.min(health.debt), minimum_profit, |repay| {
+            let Some(q) = self.preview::<FlashLiquidationQuote>(
+                c,
+                s,
+                c.preview_flash(self.contract, repay, false)?,
+            )?
+            else {
+                return Ok(None);
+            };
+            // Score without the final floor, then rebuild and recheck the winner
+            // with that floor enforced on chain.
+            let Some(ixs) = self.flash_plan(c, s, &q, repay, 0)? else {
+                return Ok(None);
+            };
+            Ok(self
+                .liquidation_profit(c, s, &ixs, q.full)?
+                .map(|profit| (profit, (repay, q))))
+        })?;
+        if let Some((repay, quote)) = partial {
+            let instructions = self
+                .flash_plan(c, s, &quote, repay, minimum_profit)?
+                .ok_or("selected flash route no longer meets configured bounds")?;
+            if !self.profitable(c, s, &instructions, minimum_profit, false)? {
+                return Err("selected flash route failed protected revalidation".into());
+            }
+            return Ok(Some(LiquidationPlan {
+                action: "flash",
+                instructions,
+                minimum_profit,
+            }));
+        }
+        if cap >= health.debt
+            && let Some(q) = self.preview::<FlashLiquidationQuote>(
+                c,
+                s,
+                c.preview_flash(self.contract, cap, true)?,
+            )?
+            && let Some(instructions) = self.flash_plan(c, s, &q, cap, minimum_profit)?
+            && self.profitable(c, s, &instructions, minimum_profit, q.full)?
+        {
+            return Ok(Some(LiquidationPlan {
+                action: "flash_full",
+                instructions,
+                minimum_profit,
+            }));
+        }
+        Ok(None)
+    }
+
+    fn emergency_plan(&self, c: &Context, s: &Snapshot) -> Result<Option<LiquidationPlan>> {
+        let minimum_profit = required_u64("KEEPER_LIQUIDATION_MIN_PROFIT")?;
+        let partial =
+            search_profitable(c.collateral.saturating_sub(1), minimum_profit, |amount| {
+                let Some(q) = self.preview::<EmergencyLiquidationQuote>(
+                    c,
+                    s,
+                    c.preview_emergency(self.contract, amount, false)?,
                 )?
                 else {
                     return Ok(None);
                 };
-                // Measure the route without the final profit floor; otherwise a
-                // below-floor probe rejects before exposing the score needed to
-                // refine the search. The selected transaction is rebuilt below
-                // with the configured floor enforced on chain.
-                let Some(ixs) = self.flash_plan(&c, &s, &q, repay, 0)? else {
-                    return Ok(None);
-                };
+                let mut instructions = flash::resources()?;
+                instructions.push(c.emergency(self.contract, &q)?);
                 Ok(self
-                    .liquidation_profit(&c, &s, &ixs, q.full)?
-                    .map(|profit| (profit, (repay, q))))
+                    .liquidation_profit(c, s, &instructions, false)?
+                    .map(|profit| (profit, instructions)))
             })?;
-            if let Some((repay, quote)) = partial {
-                let ixs = self
-                    .flash_plan(&c, &s, &quote, repay, min_profit)?
-                    .ok_or("selected flash route no longer meets configured bounds")?;
-                if !self.profitable(&c, &s, &ixs, min_profit, false)? {
-                    return Err("selected flash route failed protected revalidation".into());
-                }
-                return self
-                    .submit(&c, &s, "flash", ixs, min_profit, true)
-                    .map(Some);
-            }
-            if cap >= health.debt
-                && let Some(q) = self.preview::<FlashLiquidationQuote>(
-                    &c,
-                    &s,
-                    c.preview_flash(self.contract, cap, true)?,
-                )?
-                && let Some(ixs) = self.flash_plan(&c, &s, &q, cap, min_profit)?
-                && self.profitable(&c, &s, &ixs, min_profit, q.full)?
-            {
-                return self
-                    .submit(&c, &s, "flash_full", ixs, min_profit, true)
-                    .map(Some);
+        if let Some(instructions) = partial {
+            return Ok(Some(LiquidationPlan {
+                action: "emergency",
+                instructions,
+                minimum_profit,
+            }));
+        }
+        // A failed partial search never authorizes a full close. The program
+        // must independently accept the full emergency preview.
+        if let Some(q) = self.preview::<EmergencyLiquidationQuote>(
+            c,
+            s,
+            c.preview_emergency(self.contract, c.collateral, true)?,
+        )? {
+            let mut instructions = flash::resources()?;
+            instructions.push(c.emergency(self.contract, &q)?);
+            if self.profitable(c, s, &instructions, minimum_profit, true)? {
+                return Ok(Some(LiquidationPlan {
+                    action: "emergency_full",
+                    instructions,
+                    minimum_profit,
+                }));
             }
         }
-        if self.profile == "lending-settler" || self.profile == "leverage" {
-            let min_profit = required_u64("KEEPER_LIQUIDATION_MIN_PROFIT")?;
-            let partial =
-                search_profitable(c.collateral.saturating_sub(1), min_profit, |amount| {
-                    let Some(q) = self.preview::<EmergencyLiquidationQuote>(
-                        &c,
-                        &s,
-                        c.preview_emergency(self.contract, amount, false)?,
-                    )?
-                    else {
-                        return Ok(None);
-                    };
-                    let mut ixs = flash::resources()?;
-                    ixs.push(c.emergency(self.contract, &q)?);
-                    Ok(self
-                        .liquidation_profit(&c, &s, &ixs, false)?
-                        .map(|profit| (profit, ixs)))
-                })?;
-            if let Some(ixs) = partial {
-                return self
-                    .submit(&c, &s, "emergency", ixs, min_profit, true)
-                    .map(Some);
-            }
-            // Permission for full closure is determined by the program's preview;
-            // failures of the keeper's partial probes are never proof of permission.
-            if let Some(q) = self.preview::<EmergencyLiquidationQuote>(
-                &c,
-                &s,
-                c.preview_emergency(self.contract, c.collateral, true)?,
-            )? {
-                let mut ixs = flash::resources()?;
-                ixs.push(c.emergency(self.contract, &q)?);
-                if self.profitable(&c, &s, &ixs, min_profit, true)? {
-                    return self
-                        .submit(&c, &s, "emergency_full", ixs, min_profit, true)
-                        .map(Some);
-                }
-            }
-        }
-        Ok(Some((None, "eligible but unfilled: no adaptively searched permitted route met the configured payment/profit bounds".into())))
+        Ok(None)
     }
     fn inventory_mode(&self) -> Result<bool> {
         match std::env::var("KEEPER_FLASH_SETTLEMENT")
@@ -951,7 +995,8 @@ impl FlashJob<'_> {
             i.data.get(..8)
                 == Some(sha2::Sha256::digest(b"global:begin_flash_liquidation")[..8].as_ref())
         });
-        if self.inventory_mode()? && is_flash {
+        let inventory = is_flash && self.inventory_mode()?;
+        if inventory {
             let cap = required_u64("KEEPER_FLASH_MAX_PAYMENT_DEBIT")?;
             let min_credit = required_u64("KEEPER_FLASH_MIN_COLLATERAL_CREDIT")?;
             if debt_before.saturating_sub(debt_after) > cap
@@ -962,7 +1007,7 @@ impl FlashJob<'_> {
                 return Ok(None);
             }
         }
-        let profit = if self.inventory_mode()? && is_flash {
+        let profit = if inventory {
             0
         } else {
             let Some(profit) = debt_after.checked_sub(debt_before) else {

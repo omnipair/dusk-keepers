@@ -40,6 +40,16 @@ The colleague-built `leverage-execution-bot` informed priority, deduplication,
 race classification, and postcondition behavior. It is not copied or treated as
 the canonical protocol client.
 
+## Lending worker
+
+`KEEPER_PROFILE=lending` combines borrowing discovery, health checks, ordinary
+flash liquidation and emergency settlement. `KEEPER_LENDING_MODE=both` tries an
+ordinary route first; `ordinary` and `emergency` restrict the worker to one
+mechanism. Only an unavailable or below-bound route permits fallback; errors
+stop evaluation, and unknown submitted signatures stay in journal recovery.
+The former trigger, bidder and settler service names are rejected. Use shadow
+mode for monitoring without signing. See [the lending runbook](docs/runbooks/lending.md).
+
 ## Start here
 
 ```bash

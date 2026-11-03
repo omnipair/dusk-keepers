@@ -10,8 +10,11 @@ function parseMode(value: string): Mode {
 
 const mode = parseMode(process.env.KEEPER_MODE ?? "shadow");
 const profile = process.env.KEEPER_PROFILE ?? "conformance";
-const supportedProfiles = ["conformance", "lending-bidder", "lending-settler", "leverage", "hlp-recovery", "auction-arbitrage", "lifecycle", "sentinel"];
+const supportedProfiles = ["conformance", "lending", "leverage", "hlp-recovery", "auction-arbitrage", "lifecycle", "sentinel"];
 if (!supportedProfiles.includes(profile)) throw new Error(`unsupported KEEPER_PROFILE: ${profile}`);
+if (profile === "lending" && !["ordinary", "emergency", "both"].includes(process.env.KEEPER_LENDING_MODE ?? "both")) {
+  throw new Error("KEEPER_LENDING_MODE must be ordinary, emergency, or both");
+}
 const lock = await readProtocolLock(process.env.DUSK_PROTOCOL_LOCK ?? "protocol.lock.json");
 
 if (mode === "live") {

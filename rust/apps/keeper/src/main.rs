@@ -28,7 +28,9 @@ mod flash_cli;
 mod flash_journal;
 mod flash_runtime;
 mod hlp_flash;
+mod lending;
 mod lifecycle;
+use lending::LiquidationMode;
 mod orders;
 mod signer;
 mod transaction;
@@ -89,6 +91,7 @@ impl Mode {
 struct Config {
     mode: Mode,
     profile: String,
+    lending_mode: LiquidationMode,
     bind_address: SocketAddr,
     protocol_lock: PathBuf,
     instruction_contract: PathBuf,
@@ -109,8 +112,7 @@ impl Config {
         if !matches!(
             profile.as_str(),
             "conformance"
-                | "lending-bidder"
-                | "lending-settler"
+                | "lending"
                 | "leverage"
                 | "hlp-recovery"
                 | "auction-arbitrage"
@@ -119,6 +121,13 @@ impl Config {
         ) {
             return Err(format!("unsupported KEEPER_PROFILE: {profile}").into());
         }
+        let lending_mode = if profile == "lending" {
+            LiquidationMode::parse(
+                &env::var("KEEPER_LENDING_MODE").unwrap_or_else(|_| "both".into()),
+            )?
+        } else {
+            LiquidationMode::Both
+        };
         let port = env::var("PORT").unwrap_or_else(|_| "8080".into());
         let bind_address = format!("0.0.0.0:{port}").parse()?;
         let protocol_lock = env::var("DUSK_PROTOCOL_LOCK")
@@ -150,6 +159,7 @@ impl Config {
             minimum_lamports,
             mode,
             profile,
+            lending_mode,
             protocol_lock,
         })
     }
@@ -257,6 +267,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let program_id_key = decode_program_id(&dusk_program_id)?;
         let dry_run = config.mode == Mode::Shadow;
         let profile = config.profile.clone();
+        let lending_mode = config.lending_mode;
         let max_sends = config.max_sends_per_pass;
         let minimum_lamports = config.minimum_lamports;
         thread::spawn(move || {
@@ -322,6 +333,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                         resolver,
                         signer.as_ref(),
                         &profile,
+                        lending_mode,
                         program_id_key,
                         max_sends,
                         minimum_lamports,
@@ -411,6 +423,7 @@ fn run_execution_pass(
     resolver: &DeterministicAccountResolver,
     signer: &dyn TransactionSigner,
     profile: &str,
+    lending_mode: LiquidationMode,
     program_id: [u8; 32],
     max_sends_per_pass: usize,
     minimum_lamports: u64,
@@ -461,43 +474,42 @@ fn run_execution_pass(
     // wallet, one thing it is allowed to do. A profile with no job here does
     // nothing rather than falling back to something it was not deployed for.
     let outcome = match profile {
-        "lending-bidder" | "lending-settler" | "leverage" | "hlp-recovery" => {
-            flash_runtime::FlashJob {
-                client,
-                layout,
-                contract,
-                signer,
-                dry_run,
-                profile,
-                max_sends: max_sends_per_pass,
-                priority_markets: &priority_markets,
-            }
-            .run_pass()
-            .and_then(|mut reports| {
-                if profile == "leverage" {
-                    let remaining = max_sends_per_pass.saturating_sub(
-                        reports
-                            .iter()
-                            .filter(|r| r.status == OutcomeStatus::Executed)
-                            .count(),
-                    );
-                    if remaining > 0 {
-                        reports.extend(
-                            orders::OrderJob {
-                                client,
-                                layout,
-                                contract,
-                                signer,
-                                dry_run,
-                                max_sends: remaining,
-                            }
-                            .run_pass()?,
-                        );
-                    }
-                }
-                Ok(reports)
-            })
+        "lending" | "leverage" | "hlp-recovery" => flash_runtime::FlashJob {
+            client,
+            layout,
+            contract,
+            signer,
+            dry_run,
+            profile,
+            liquidation_mode: lending_mode,
+            max_sends: max_sends_per_pass,
+            priority_markets: &priority_markets,
         }
+        .run_pass()
+        .and_then(|mut reports| {
+            if profile == "leverage" {
+                let remaining = max_sends_per_pass.saturating_sub(
+                    reports
+                        .iter()
+                        .filter(|r| r.status == OutcomeStatus::Executed)
+                        .count(),
+                );
+                if remaining > 0 {
+                    reports.extend(
+                        orders::OrderJob {
+                            client,
+                            layout,
+                            contract,
+                            signer,
+                            dry_run,
+                            max_sends: remaining,
+                        }
+                        .run_pass()?,
+                    );
+                }
+            }
+            Ok(reports)
+        }),
         "auction-arbitrage" => match arbitrage_policy() {
             None => Ok(Vec::new()),
             Some(policy) => ArbitrageurJob {
