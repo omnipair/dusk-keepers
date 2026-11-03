@@ -18,25 +18,15 @@
       "signingRequired": true
     },
     {
-      "name": "dusk-lending-bidder",
-      "profile": "lending-bidder",
+      "name": "dusk-lending-keeper",
+      "profile": "lending",
       "jobKinds": [
-        "lending_liquidation_bid"
-      ],
-      "liveRuntime": "rust",
-      "shadowRuntime": "typescript",
-      "walletRole": "lending_bidder",
-      "signingRequired": true
-    },
-    {
-      "name": "dusk-lending-settler",
-      "profile": "lending-settler",
-      "jobKinds": [
+        "lending_liquidation_bid",
         "lending_liquidation_settle"
       ],
       "liveRuntime": "rust",
       "shadowRuntime": "typescript",
-      "walletRole": "lending_settler",
+      "walletRole": "lending_executor",
       "signingRequired": true
     },
     {

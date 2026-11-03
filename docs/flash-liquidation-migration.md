@@ -52,12 +52,12 @@ provenance was not applied to banks captured from the previous binary.
 
 | Profile | Native Rust action |
 | --- | --- |
-| `lending-bidder` | Preview current health and ordinary borrowing fills and settle an atomic pair. |
-| `lending-settler` | Preview current health and permitted emergency partial/full borrowing settlement. |
+| `lending` | Preview borrowing health once, try ordinary atomic fills, then permitted emergency settlement when no acceptable ordinary route exists. Modes: `ordinary`, `emergency`, `both` (default). |
 | `leverage` | Preview current health, try ordinary leverage fills, then permitted emergency settlement. |
 | `hlp-recovery` | Preview both market-wide hLP vaults, attempt an inventory-funded atomic flash repair, then use terminal close only when a full quote permits it. |
 
-Existing profile names remain stable for service configuration. Auction instructions
+The standalone trigger, bidder, and settler profiles have been removed. Configure
+`KEEPER_PROFILE=lending`; see [the lending runbook](runbooks/lending.md). Auction instructions
 for these positions are gone; protocol revenue auctions remain a separate service.
 Run signing services with distinct wallets when a frozen release is authorized.
 Health monitoring is part of each execution worker; shadow mode uses a public identity and no signing key.
@@ -66,7 +66,7 @@ Liquidation incentives depend only on current health. No distress episode or
 registration instruction exists. Each pass simulates `preview_liquidation_health`
 with read-only accounts, then independently previews an atomic fill. Advancing
 Unix time alone cannot increase either incentive. Healthy positions are rechecked
-every pass; final-notice markets get priority. Health previews never produce signatures; bidder/settler/leverage submit execution.
+every pass; final-notice markets get priority. Health previews never produce signatures; lending/leverage submit execution.
 
 Every decision starts with fresh RPC position, market, both mint accounts, Clock,
 vault and hLP state. Indexer data never authorizes execution. Previews use the

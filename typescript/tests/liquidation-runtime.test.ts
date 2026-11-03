@@ -8,15 +8,16 @@ import {
   VersionedTransaction,
 } from "@solana/web3.js";
 import bs58 from "bs58";
+import { createHash } from "node:crypto";
 import { bank, planWithTable } from "./helpers/liquidation-bank.ts";
 import { resolveLiquidationAccounts } from "../packages/dusk-adapter/src/liquidation.ts";
 const layout = JSON.parse(
   readFileSync("protocol/keeper-account-layout.v1.json", "utf8"),
 );
-for (const { file, profile, expected, settlement, maxRepay, minProfit, name } of [
+for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mode = "both", rejectOrdinary = false } of [
   {
     file: "01-flash-BorrowPosition.json",
-    profile: "lending-bidder",
+    profile: "lending",
     expected: "flash",
     settlement: "inventory",
     maxRepay: "18446744073709551615",
@@ -25,12 +26,42 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name } of
   },
   {
     file: "02-emergency-BorrowPosition.json",
-    profile: "lending-settler",
+    profile: "lending",
     expected: "emergency",
     settlement: "inventory",
     maxRepay: "18446744073709551615",
     minProfit: "0",
     name: "emergency settlement",
+  },
+  {
+    file: "02-emergency-BorrowPosition.json",
+    profile: "lending",
+    mode: "emergency",
+    expected: "emergency",
+    settlement: "inventory",
+    maxRepay: "not-required",
+    minProfit: "0",
+    name: "emergency-only skips ordinary evaluation",
+  },
+  {
+    file: "02-emergency-BorrowPosition.json",
+    profile: "lending",
+    mode: "ordinary",
+    expected: "unfilled",
+    settlement: "inventory",
+    maxRepay: "18446744073709551615",
+    minProfit: "0",
+    name: "ordinary-only never falls back",
+  },
+  {
+    file: "02-emergency-BorrowPosition.json",
+    profile: "lending",
+    expected: "error",
+    rejectOrdinary: true,
+    settlement: "inventory",
+    maxRepay: "18446744073709551615",
+    minProfit: "0",
+    name: "unexpected ordinary failure never falls back",
   },
   // Final-notice eligibility is rechecked directly on every pass.
   {
@@ -65,7 +96,7 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name } of
   // refinement must find the non-geometric 996-atom fill yielding eight.
   {
     file: "01-flash-BorrowPosition.json",
-    profile: "lending-bidder",
+    profile: "lending",
     expected: "flash",
     settlement: "dusk",
     maxRepay: "1000",
@@ -82,6 +113,9 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name } of
     );
     const requests: string[] = [];
     let simulations = 0;
+    const previewNames = ["preview_flash_liquidation", "preview_emergency_liquidation"];
+    const previews: string[] = [];
+    const discriminator = (name: string) => createHash("sha256").update(`global:${name}`).digest().subarray(0, 8);
     const rpcAccount = (a: any) => {
       if (!a) return null;
       const field = (name: string) =>
@@ -162,6 +196,12 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name } of
             const tx = VersionedTransaction.deserialize(
               Buffer.from(p[0], "base64"),
             );
+            const invoked = previewNames.filter((name) => tx.message.compiledInstructions.some((ix) => Buffer.from(ix.data).subarray(0, 8).equals(discriminator(name))));
+            previews.push(...invoked);
+            if (rejectOrdinary && invoked.includes("preview_flash_liquidation")) {
+              answer = { context, value: { err: "injected unexpected ordinary failure", logs: [] } };
+              break;
+            }
             const outcome: any = svm.simulateTransaction(tx);
             const failed = typeof outcome.err === "function";
             const meta = outcome.meta();
@@ -233,6 +273,7 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name } of
               ...process.env,
               KEEPER_MODE: "shadow",
               KEEPER_PROFILE: profile,
+              KEEPER_LENDING_MODE: mode,
               KEEPER_SHADOW_PUBLIC_KEY: f.buyer,
               PORT: "0",
               SOLANA_RPC_HTTP_URL: endpoint,
@@ -242,7 +283,7 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name } of
               KEEPER_FLASH_MAX_REPAY: maxRepay,
               KEEPER_FLASH_MAX_PAYMENT_DEBIT: "18446744073709551615",
               KEEPER_FLASH_MIN_COLLATERAL_CREDIT:
-                expected === "emergency" ? "18446744073709551615" : "1",
+                ["emergency", "unfilled", "error"].includes(expected) ? "18446744073709551615" : "1",
               KEEPER_LIQUIDATION_MIN_PROFIT: minProfit,
             },
           });
@@ -257,15 +298,23 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name } of
     try {
       const first = await once();
       assert.equal(first.code, 0, first.output);
-      assert.match(first.output, new RegExp(`shadow ${expected}`));
+      assert.match(first.output, expected === "unfilled" ? /eligible but unfilled/ : expected === "error" ? /injected unexpected ordinary failure/ : new RegExp(`shadow ${expected}`));
       const advanced = svm.getClock();
       advanced.slot += 1n;
       advanced.unixTimestamp += 1n;
       svm.setClock(advanced);
       const second = await once();
       assert.equal(second.code, 0, second.output);
-      assert.match(second.output, new RegExp(`shadow ${expected}`));
+      assert.match(second.output, expected === "unfilled" ? /eligible but unfilled/ : expected === "error" ? /injected unexpected ordinary failure/ : new RegExp(`shadow ${expected}`));
       assert.ok(simulations >= 4);
+      if (mode === "emergency") assert.ok(!previews.includes("preview_flash_liquidation"));
+      if (expected === "flash" || mode === "ordinary" || rejectOrdinary) assert.ok(!previews.includes("preview_emergency_liquidation"));
+      if (expected === "emergency") {
+        assert.ok(previews.includes("preview_emergency_liquidation"));
+        if (mode === "both") {
+          assert.equal(previews[0], "preview_flash_liquidation");
+        }
+      }
       assert.ok(
         !requests.includes("sendTransaction"),
         "captured shadow must never submit",
