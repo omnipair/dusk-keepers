@@ -37,8 +37,8 @@ const actionDefinitions = [
     primary: ["dusk", "preview_emergency_liquidation"],
   },
   {
-    action: "lending_liquidation_trigger",
-    jobKind: "lending_liquidation_trigger",
+    action: "lending_health_preview",
+    jobKind: "lending_liquidation_bid",
     primary: ["dusk", "preview_liquidation_health"],
   },
   {
@@ -548,7 +548,7 @@ function buildFixtures(contract) {
   const invalidCases = [
     mutate(
       validCases,
-      "lending_liquidation_trigger",
+      "lending_health_preview",
       "revision mismatch",
       "revision_mismatch",
       (envelope) => {
@@ -557,7 +557,7 @@ function buildFixtures(contract) {
     ),
     mutate(
       validCases,
-      "lending_liquidation_trigger",
+      "lending_health_preview",
       "job kind mismatch",
       "job_kind_mismatch",
       (envelope) => {
@@ -566,7 +566,7 @@ function buildFixtures(contract) {
     ),
     mutate(
       validCases,
-      "lending_liquidation_trigger",
+      "lending_health_preview",
       "wrong instruction name",
       "instruction_mismatch",
       (envelope) => {
@@ -575,7 +575,7 @@ function buildFixtures(contract) {
     ),
     mutate(
       validCases,
-      "lending_liquidation_trigger",
+      "lending_health_preview",
       "wrong program id",
       "program_id_mismatch",
       (envelope) => {
@@ -584,7 +584,7 @@ function buildFixtures(contract) {
     ),
     mutate(
       validCases,
-      "lending_liquidation_trigger",
+      "lending_health_preview",
       "invalid 32-byte pubkey",
       "invalid_pubkey",
       (envelope) => {
@@ -594,7 +594,7 @@ function buildFixtures(contract) {
     ),
     mutate(
       validCases,
-      "lending_liquidation_trigger",
+      "lending_health_preview",
       "bad discriminator",
       "discriminator_mismatch",
       (envelope) => {
@@ -612,7 +612,7 @@ function buildFixtures(contract) {
     ),
     mutate(
       validCases,
-      "lending_liquidation_trigger",
+      "lending_health_preview",
       "required account order swapped",
       "account_order_mismatch",
       (envelope) => {
@@ -624,7 +624,7 @@ function buildFixtures(contract) {
     ),
     mutate(
       validCases,
-      "lending_liquidation_trigger",
+      "lending_health_preview",
       "account flags changed",
       "account_flags_mismatch",
       (envelope) => {

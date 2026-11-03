@@ -9,8 +9,8 @@
 5. Keep `KEEPER_MODE=shadow` until the release checklist and shadow-parity window pass.
 
 The sentinel is the only service with `signingRequired: false`; configure its
-signer dependency as `disabled`. Lending trigger, bidder, and settler must use
-three different signer policies even when the same operator runs all services.
+signer dependency as `disabled`. Lending bidder and settler use separate signer policies. Health monitoring is
+performed by these workers, including in shadow mode; there is no trigger service.
 
 Railway `/readyz` must eventually include RPC lag, WebSocket state, signer policy,
 database/lease availability, protocol revision, last completed scan, and circuit

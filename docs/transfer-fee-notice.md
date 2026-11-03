@@ -18,7 +18,7 @@ the prior observation is not used for prioritization. Each liquidation attempt
 must still pass its own fresh mint/Clock reads. An unrelated monitor failure
 does not block other service profiles.
 
-All four liquidation profiles prioritize markets with final-notice
+All three borrowing/leverage liquidation profiles prioritize markets with final-notice
 mints, then continue their ordinary candidate scan. They do not cache a healthy
 position across scans. Before re-signing an evaluated attempt they re-read both
 mints and Clock, at a slot no older than their initial read. A changed fingerprint

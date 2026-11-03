@@ -24,15 +24,6 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name } of
     name: "inventory flash",
   },
   {
-    file: "01-flash-BorrowPosition.json",
-    profile: "lending-trigger",
-    expected: "monitor",
-    settlement: "inventory",
-    maxRepay: "18446744073709551615",
-    minProfit: "0",
-    name: "health monitor",
-  },
-  {
     file: "02-emergency-BorrowPosition.json",
     profile: "lending-settler",
     expected: "emergency",
@@ -266,17 +257,15 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name } of
     try {
       const first = await once();
       assert.equal(first.code, 0, first.output);
-      if (expected === "monitor") assert.doesNotMatch(first.output, /shadow (flash|emergency|observe)/);
-      else assert.match(first.output, new RegExp(`shadow ${expected}`));
+      assert.match(first.output, new RegExp(`shadow ${expected}`));
       const advanced = svm.getClock();
       advanced.slot += 1n;
       advanced.unixTimestamp += 1n;
       svm.setClock(advanced);
       const second = await once();
       assert.equal(second.code, 0, second.output);
-      if (expected === "monitor") assert.doesNotMatch(second.output, /shadow (flash|emergency|observe)/);
-      else assert.match(second.output, new RegExp(`shadow ${expected}`));
-      assert.ok(simulations >= (expected === "monitor" ? 2 : 4));
+      assert.match(second.output, new RegExp(`shadow ${expected}`));
+      assert.ok(simulations >= 4);
       assert.ok(
         !requests.includes("sendTransaction"),
         "captured shadow must never submit",

@@ -580,19 +580,19 @@
       }
     },
     {
-      "name": "lending liquidation trigger",
+      "name": "lending health preview",
       "envelope": {
         "schemaVersion": 1,
         "intent": {
           "schemaVersion": 1,
-          "intentId": "intent-lending_liquidation_trigger",
+          "intentId": "intent-lending_health_preview",
           "protocolRevision": "health-only-2026-10-30-9d6e5373",
-          "action": "lending_liquidation_trigger",
-          "jobKind": "lending_liquidation_trigger",
-          "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
-          "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
+          "action": "lending_health_preview",
+          "jobKind": "lending_liquidation_bid",
+          "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
+          "target": "9BXQpjr6ZGouecD8g5i8o6MMpjByuDmJD1jw7gzcjzrd",
           "observedSlot": 1005,
-          "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
+          "expectedStateHash": "b352b092d0cc9a3cab8939015389cd19dc2b1f7a6fd2dc2d60ae7379738b6e49"
         },
         "primary": {
           "specificationKey": "dusk:preview_liquidation_health",
@@ -603,19 +603,19 @@
           "accounts": [
             {
               "name": "market",
-              "address": "4rkh9gcRDKpJukgmBHdYe4XU15PicoEzLp1a49CLAuW6",
+              "address": "EtA4bbTTHpk4u7ntdECRmgaqA37vGcc73NDxCkYefegH",
               "writable": false,
               "signer": false
             },
             {
               "name": "collateral_mint",
-              "address": "2rvSZSwtTWcqwU65XwzSUtkFbVxAHnkBxxye5PNQLGjU",
+              "address": "HxQJhoFkvGwecqowr1bZy7y8CnvTbJdaNGUnDwBL7RJr",
               "writable": false,
               "signer": false
             },
             {
               "name": "debt_mint",
-              "address": "BoaHnwYA6Pe4NZLMPrCWT8kL5bdDmK2NwY47pxSADkzC",
+              "address": "2KacM59yRTdXaufx9jVZeQkXQmQd3PMwhfnUB4TA1sG9",
               "writable": false,
               "signer": false
             }
@@ -623,7 +623,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "70a8e12f92e929f45450d5086a693db1b6f043705da79b40060834fc34e6d47a"
+        "paritySha256": "d691ef455b805710fab9203f4015325b36024f8efd7384da53a21c3daed00286"
       }
     },
     {
@@ -2515,14 +2515,14 @@
         "schemaVersion": 1,
         "intent": {
           "schemaVersion": 1,
-          "intentId": "intent-lending_liquidation_trigger",
+          "intentId": "intent-lending_health_preview",
           "protocolRevision": "another-revision",
-          "action": "lending_liquidation_trigger",
-          "jobKind": "lending_liquidation_trigger",
-          "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
-          "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
+          "action": "lending_health_preview",
+          "jobKind": "lending_liquidation_bid",
+          "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
+          "target": "9BXQpjr6ZGouecD8g5i8o6MMpjByuDmJD1jw7gzcjzrd",
           "observedSlot": 1005,
-          "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
+          "expectedStateHash": "b352b092d0cc9a3cab8939015389cd19dc2b1f7a6fd2dc2d60ae7379738b6e49"
         },
         "primary": {
           "specificationKey": "dusk:preview_liquidation_health",
@@ -2533,19 +2533,19 @@
           "accounts": [
             {
               "name": "market",
-              "address": "4rkh9gcRDKpJukgmBHdYe4XU15PicoEzLp1a49CLAuW6",
+              "address": "EtA4bbTTHpk4u7ntdECRmgaqA37vGcc73NDxCkYefegH",
               "writable": false,
               "signer": false
             },
             {
               "name": "collateral_mint",
-              "address": "2rvSZSwtTWcqwU65XwzSUtkFbVxAHnkBxxye5PNQLGjU",
+              "address": "HxQJhoFkvGwecqowr1bZy7y8CnvTbJdaNGUnDwBL7RJr",
               "writable": false,
               "signer": false
             },
             {
               "name": "debt_mint",
-              "address": "BoaHnwYA6Pe4NZLMPrCWT8kL5bdDmK2NwY47pxSADkzC",
+              "address": "2KacM59yRTdXaufx9jVZeQkXQmQd3PMwhfnUB4TA1sG9",
               "writable": false,
               "signer": false
             }
@@ -2553,7 +2553,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "70a8e12f92e929f45450d5086a693db1b6f043705da79b40060834fc34e6d47a"
+        "paritySha256": "d691ef455b805710fab9203f4015325b36024f8efd7384da53a21c3daed00286"
       }
     },
     {
@@ -2563,14 +2563,14 @@
         "schemaVersion": 1,
         "intent": {
           "schemaVersion": 1,
-          "intentId": "intent-lending_liquidation_trigger",
+          "intentId": "intent-lending_health_preview",
           "protocolRevision": "health-only-2026-10-30-9d6e5373",
-          "action": "lending_liquidation_trigger",
+          "action": "lending_health_preview",
           "jobKind": "take_profit",
-          "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
-          "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
+          "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
+          "target": "9BXQpjr6ZGouecD8g5i8o6MMpjByuDmJD1jw7gzcjzrd",
           "observedSlot": 1005,
-          "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
+          "expectedStateHash": "b352b092d0cc9a3cab8939015389cd19dc2b1f7a6fd2dc2d60ae7379738b6e49"
         },
         "primary": {
           "specificationKey": "dusk:preview_liquidation_health",
@@ -2581,19 +2581,19 @@
           "accounts": [
             {
               "name": "market",
-              "address": "4rkh9gcRDKpJukgmBHdYe4XU15PicoEzLp1a49CLAuW6",
+              "address": "EtA4bbTTHpk4u7ntdECRmgaqA37vGcc73NDxCkYefegH",
               "writable": false,
               "signer": false
             },
             {
               "name": "collateral_mint",
-              "address": "2rvSZSwtTWcqwU65XwzSUtkFbVxAHnkBxxye5PNQLGjU",
+              "address": "HxQJhoFkvGwecqowr1bZy7y8CnvTbJdaNGUnDwBL7RJr",
               "writable": false,
               "signer": false
             },
             {
               "name": "debt_mint",
-              "address": "BoaHnwYA6Pe4NZLMPrCWT8kL5bdDmK2NwY47pxSADkzC",
+              "address": "2KacM59yRTdXaufx9jVZeQkXQmQd3PMwhfnUB4TA1sG9",
               "writable": false,
               "signer": false
             }
@@ -2601,7 +2601,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "70a8e12f92e929f45450d5086a693db1b6f043705da79b40060834fc34e6d47a"
+        "paritySha256": "d691ef455b805710fab9203f4015325b36024f8efd7384da53a21c3daed00286"
       }
     },
     {
@@ -2611,14 +2611,14 @@
         "schemaVersion": 1,
         "intent": {
           "schemaVersion": 1,
-          "intentId": "intent-lending_liquidation_trigger",
+          "intentId": "intent-lending_health_preview",
           "protocolRevision": "health-only-2026-10-30-9d6e5373",
-          "action": "lending_liquidation_trigger",
-          "jobKind": "lending_liquidation_trigger",
-          "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
-          "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
+          "action": "lending_health_preview",
+          "jobKind": "lending_liquidation_bid",
+          "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
+          "target": "9BXQpjr6ZGouecD8g5i8o6MMpjByuDmJD1jw7gzcjzrd",
           "observedSlot": 1005,
-          "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
+          "expectedStateHash": "b352b092d0cc9a3cab8939015389cd19dc2b1f7a6fd2dc2d60ae7379738b6e49"
         },
         "primary": {
           "specificationKey": "dusk:preview_liquidation_health",
@@ -2629,19 +2629,19 @@
           "accounts": [
             {
               "name": "market",
-              "address": "4rkh9gcRDKpJukgmBHdYe4XU15PicoEzLp1a49CLAuW6",
+              "address": "EtA4bbTTHpk4u7ntdECRmgaqA37vGcc73NDxCkYefegH",
               "writable": false,
               "signer": false
             },
             {
               "name": "collateral_mint",
-              "address": "2rvSZSwtTWcqwU65XwzSUtkFbVxAHnkBxxye5PNQLGjU",
+              "address": "HxQJhoFkvGwecqowr1bZy7y8CnvTbJdaNGUnDwBL7RJr",
               "writable": false,
               "signer": false
             },
             {
               "name": "debt_mint",
-              "address": "BoaHnwYA6Pe4NZLMPrCWT8kL5bdDmK2NwY47pxSADkzC",
+              "address": "2KacM59yRTdXaufx9jVZeQkXQmQd3PMwhfnUB4TA1sG9",
               "writable": false,
               "signer": false
             }
@@ -2649,7 +2649,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "70a8e12f92e929f45450d5086a693db1b6f043705da79b40060834fc34e6d47a"
+        "paritySha256": "d691ef455b805710fab9203f4015325b36024f8efd7384da53a21c3daed00286"
       }
     },
     {
@@ -2659,14 +2659,14 @@
         "schemaVersion": 1,
         "intent": {
           "schemaVersion": 1,
-          "intentId": "intent-lending_liquidation_trigger",
+          "intentId": "intent-lending_health_preview",
           "protocolRevision": "health-only-2026-10-30-9d6e5373",
-          "action": "lending_liquidation_trigger",
-          "jobKind": "lending_liquidation_trigger",
-          "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
-          "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
+          "action": "lending_health_preview",
+          "jobKind": "lending_liquidation_bid",
+          "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
+          "target": "9BXQpjr6ZGouecD8g5i8o6MMpjByuDmJD1jw7gzcjzrd",
           "observedSlot": 1005,
-          "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
+          "expectedStateHash": "b352b092d0cc9a3cab8939015389cd19dc2b1f7a6fd2dc2d60ae7379738b6e49"
         },
         "primary": {
           "specificationKey": "dusk:preview_liquidation_health",
@@ -2677,19 +2677,19 @@
           "accounts": [
             {
               "name": "market",
-              "address": "4rkh9gcRDKpJukgmBHdYe4XU15PicoEzLp1a49CLAuW6",
+              "address": "EtA4bbTTHpk4u7ntdECRmgaqA37vGcc73NDxCkYefegH",
               "writable": false,
               "signer": false
             },
             {
               "name": "collateral_mint",
-              "address": "2rvSZSwtTWcqwU65XwzSUtkFbVxAHnkBxxye5PNQLGjU",
+              "address": "HxQJhoFkvGwecqowr1bZy7y8CnvTbJdaNGUnDwBL7RJr",
               "writable": false,
               "signer": false
             },
             {
               "name": "debt_mint",
-              "address": "BoaHnwYA6Pe4NZLMPrCWT8kL5bdDmK2NwY47pxSADkzC",
+              "address": "2KacM59yRTdXaufx9jVZeQkXQmQd3PMwhfnUB4TA1sG9",
               "writable": false,
               "signer": false
             }
@@ -2697,7 +2697,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "70a8e12f92e929f45450d5086a693db1b6f043705da79b40060834fc34e6d47a"
+        "paritySha256": "d691ef455b805710fab9203f4015325b36024f8efd7384da53a21c3daed00286"
       }
     },
     {
@@ -2707,14 +2707,14 @@
         "schemaVersion": 1,
         "intent": {
           "schemaVersion": 1,
-          "intentId": "intent-lending_liquidation_trigger",
+          "intentId": "intent-lending_health_preview",
           "protocolRevision": "health-only-2026-10-30-9d6e5373",
-          "action": "lending_liquidation_trigger",
-          "jobKind": "lending_liquidation_trigger",
-          "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
-          "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
+          "action": "lending_health_preview",
+          "jobKind": "lending_liquidation_bid",
+          "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
+          "target": "9BXQpjr6ZGouecD8g5i8o6MMpjByuDmJD1jw7gzcjzrd",
           "observedSlot": 1005,
-          "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
+          "expectedStateHash": "b352b092d0cc9a3cab8939015389cd19dc2b1f7a6fd2dc2d60ae7379738b6e49"
         },
         "primary": {
           "specificationKey": "dusk:preview_liquidation_health",
@@ -2731,13 +2731,13 @@
             },
             {
               "name": "collateral_mint",
-              "address": "2rvSZSwtTWcqwU65XwzSUtkFbVxAHnkBxxye5PNQLGjU",
+              "address": "HxQJhoFkvGwecqowr1bZy7y8CnvTbJdaNGUnDwBL7RJr",
               "writable": false,
               "signer": false
             },
             {
               "name": "debt_mint",
-              "address": "BoaHnwYA6Pe4NZLMPrCWT8kL5bdDmK2NwY47pxSADkzC",
+              "address": "2KacM59yRTdXaufx9jVZeQkXQmQd3PMwhfnUB4TA1sG9",
               "writable": false,
               "signer": false
             }
@@ -2745,7 +2745,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "70a8e12f92e929f45450d5086a693db1b6f043705da79b40060834fc34e6d47a"
+        "paritySha256": "d691ef455b805710fab9203f4015325b36024f8efd7384da53a21c3daed00286"
       }
     },
     {
@@ -2755,14 +2755,14 @@
         "schemaVersion": 1,
         "intent": {
           "schemaVersion": 1,
-          "intentId": "intent-lending_liquidation_trigger",
+          "intentId": "intent-lending_health_preview",
           "protocolRevision": "health-only-2026-10-30-9d6e5373",
-          "action": "lending_liquidation_trigger",
-          "jobKind": "lending_liquidation_trigger",
-          "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
-          "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
+          "action": "lending_health_preview",
+          "jobKind": "lending_liquidation_bid",
+          "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
+          "target": "9BXQpjr6ZGouecD8g5i8o6MMpjByuDmJD1jw7gzcjzrd",
           "observedSlot": 1005,
-          "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
+          "expectedStateHash": "b352b092d0cc9a3cab8939015389cd19dc2b1f7a6fd2dc2d60ae7379738b6e49"
         },
         "primary": {
           "specificationKey": "dusk:preview_liquidation_health",
@@ -2773,19 +2773,19 @@
           "accounts": [
             {
               "name": "market",
-              "address": "4rkh9gcRDKpJukgmBHdYe4XU15PicoEzLp1a49CLAuW6",
+              "address": "EtA4bbTTHpk4u7ntdECRmgaqA37vGcc73NDxCkYefegH",
               "writable": false,
               "signer": false
             },
             {
               "name": "collateral_mint",
-              "address": "2rvSZSwtTWcqwU65XwzSUtkFbVxAHnkBxxye5PNQLGjU",
+              "address": "HxQJhoFkvGwecqowr1bZy7y8CnvTbJdaNGUnDwBL7RJr",
               "writable": false,
               "signer": false
             },
             {
               "name": "debt_mint",
-              "address": "BoaHnwYA6Pe4NZLMPrCWT8kL5bdDmK2NwY47pxSADkzC",
+              "address": "2KacM59yRTdXaufx9jVZeQkXQmQd3PMwhfnUB4TA1sG9",
               "writable": false,
               "signer": false
             }
@@ -2793,7 +2793,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "70a8e12f92e929f45450d5086a693db1b6f043705da79b40060834fc34e6d47a"
+        "paritySha256": "d691ef455b805710fab9203f4015325b36024f8efd7384da53a21c3daed00286"
       }
     },
     {
@@ -2869,14 +2869,14 @@
         "schemaVersion": 1,
         "intent": {
           "schemaVersion": 1,
-          "intentId": "intent-lending_liquidation_trigger",
+          "intentId": "intent-lending_health_preview",
           "protocolRevision": "health-only-2026-10-30-9d6e5373",
-          "action": "lending_liquidation_trigger",
-          "jobKind": "lending_liquidation_trigger",
-          "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
-          "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
+          "action": "lending_health_preview",
+          "jobKind": "lending_liquidation_bid",
+          "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
+          "target": "9BXQpjr6ZGouecD8g5i8o6MMpjByuDmJD1jw7gzcjzrd",
           "observedSlot": 1005,
-          "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
+          "expectedStateHash": "b352b092d0cc9a3cab8939015389cd19dc2b1f7a6fd2dc2d60ae7379738b6e49"
         },
         "primary": {
           "specificationKey": "dusk:preview_liquidation_health",
@@ -2887,19 +2887,19 @@
           "accounts": [
             {
               "name": "collateral_mint",
-              "address": "2rvSZSwtTWcqwU65XwzSUtkFbVxAHnkBxxye5PNQLGjU",
+              "address": "HxQJhoFkvGwecqowr1bZy7y8CnvTbJdaNGUnDwBL7RJr",
               "writable": false,
               "signer": false
             },
             {
               "name": "market",
-              "address": "4rkh9gcRDKpJukgmBHdYe4XU15PicoEzLp1a49CLAuW6",
+              "address": "EtA4bbTTHpk4u7ntdECRmgaqA37vGcc73NDxCkYefegH",
               "writable": false,
               "signer": false
             },
             {
               "name": "debt_mint",
-              "address": "BoaHnwYA6Pe4NZLMPrCWT8kL5bdDmK2NwY47pxSADkzC",
+              "address": "2KacM59yRTdXaufx9jVZeQkXQmQd3PMwhfnUB4TA1sG9",
               "writable": false,
               "signer": false
             }
@@ -2907,7 +2907,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "70a8e12f92e929f45450d5086a693db1b6f043705da79b40060834fc34e6d47a"
+        "paritySha256": "d691ef455b805710fab9203f4015325b36024f8efd7384da53a21c3daed00286"
       }
     },
     {
@@ -2917,14 +2917,14 @@
         "schemaVersion": 1,
         "intent": {
           "schemaVersion": 1,
-          "intentId": "intent-lending_liquidation_trigger",
+          "intentId": "intent-lending_health_preview",
           "protocolRevision": "health-only-2026-10-30-9d6e5373",
-          "action": "lending_liquidation_trigger",
-          "jobKind": "lending_liquidation_trigger",
-          "market": "3b6kSHz1QMi9muHChtP9aKbNGXycqUxSNmd1V2yZ4zpL",
-          "target": "74HGFuxJKF5wt3dT24tQSA58r6AtyHuuuue9NWyuXVdY",
+          "action": "lending_health_preview",
+          "jobKind": "lending_liquidation_bid",
+          "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
+          "target": "9BXQpjr6ZGouecD8g5i8o6MMpjByuDmJD1jw7gzcjzrd",
           "observedSlot": 1005,
-          "expectedStateHash": "c8cbaefa50f0cf403147703b1a053dd0c51e23948c60be6b716c664ea28353b2"
+          "expectedStateHash": "b352b092d0cc9a3cab8939015389cd19dc2b1f7a6fd2dc2d60ae7379738b6e49"
         },
         "primary": {
           "specificationKey": "dusk:preview_liquidation_health",
@@ -2935,19 +2935,19 @@
           "accounts": [
             {
               "name": "market",
-              "address": "4rkh9gcRDKpJukgmBHdYe4XU15PicoEzLp1a49CLAuW6",
+              "address": "EtA4bbTTHpk4u7ntdECRmgaqA37vGcc73NDxCkYefegH",
               "writable": true,
               "signer": false
             },
             {
               "name": "collateral_mint",
-              "address": "2rvSZSwtTWcqwU65XwzSUtkFbVxAHnkBxxye5PNQLGjU",
+              "address": "HxQJhoFkvGwecqowr1bZy7y8CnvTbJdaNGUnDwBL7RJr",
               "writable": false,
               "signer": false
             },
             {
               "name": "debt_mint",
-              "address": "BoaHnwYA6Pe4NZLMPrCWT8kL5bdDmK2NwY47pxSADkzC",
+              "address": "2KacM59yRTdXaufx9jVZeQkXQmQd3PMwhfnUB4TA1sG9",
               "writable": false,
               "signer": false
             }
@@ -2955,7 +2955,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "70a8e12f92e929f45450d5086a693db1b6f043705da79b40060834fc34e6d47a"
+        "paritySha256": "d691ef455b805710fab9203f4015325b36024f8efd7384da53a21c3daed00286"
       }
     },
     {
