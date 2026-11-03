@@ -36,7 +36,7 @@ pub struct FlashJob<'a> {
 impl FlashJob<'_> {
     pub fn run_pass(&self) -> std::result::Result<Vec<AttemptReport>, ExecutionError> {
         let mut reports = Vec::new();
-        if !self.dry_run && self.profile != "lending-trigger" {
+        if !self.dry_run {
             let mut journal = Journal::connect(&std::env::var("DATABASE_URL").map_err(|_| {
                 ExecutionError::Assembly("DATABASE_URL is required before signing".into())
             })?)
@@ -112,12 +112,12 @@ impl FlashJob<'_> {
                 vec![0, 1]
             };
             for side in sides {
-                if send_limit_reached(self.profile, attempted, self.max_sends) {
+                if send_limit_reached(attempted, self.max_sends) {
                     return Ok(reports);
                 }
                 match self.attempt(position, kind, side) {
                     Ok(Some((signature, detail))) => {
-                        if counts_toward_send_limit(self.profile, &detail) {
+                        if counts_toward_send_limit(&detail) {
                             attempted += 1;
                         }
                         reports.push(AttemptReport {
@@ -140,9 +140,7 @@ impl FlashJob<'_> {
                     }
                     Ok(None) => {}
                     Err(e) => {
-                        if self.profile != "lending-trigger" {
-                            attempted += 1;
-                        }
+                        attempted += 1;
                         reports.push(AttemptReport {
                             position: address(position),
                             debt_mint: String::new(),
@@ -719,13 +717,6 @@ impl FlashJob<'_> {
         if !health.eligible() {
             return Ok(None);
         }
-        // This profile monitors eligibility without signing a registration.
-        if self.profile == "lending-trigger" {
-            return Ok(Some((
-                None,
-                "eligible health preview; atomic execution belongs to bidder/settler".into(),
-            )));
-        }
         let inventory = self.inventory_mode()? && self.profile != "lending-settler";
         if inventory
             && std::env::var("KEEPER_FLASH_MARKET").ok().as_deref()
@@ -1225,12 +1216,12 @@ where
     Ok(None)
 }
 
-fn send_limit_reached(profile: &str, attempted: usize, maximum: usize) -> bool {
-    profile != "lending-trigger" && attempted >= maximum
+fn send_limit_reached(attempted: usize, maximum: usize) -> bool {
+    attempted >= maximum
 }
 
-fn counts_toward_send_limit(profile: &str, detail: &str) -> bool {
-    profile != "lending-trigger" && !detail.starts_with("eligible but unfilled:")
+fn counts_toward_send_limit(detail: &str) -> bool {
+    !detail.starts_with("eligible but unfilled:")
 }
 fn required_u64(name: &str) -> Result<u64> {
     std::env::var(name)
@@ -1459,21 +1450,12 @@ mod tests {
     }
 
     #[test]
-    fn health_monitor_does_not_consume_transaction_send_budget() {
-        assert!(!send_limit_reached("lending-trigger", 4, 4));
-        assert!(!counts_toward_send_limit(
-            "lending-trigger",
-            "eligible health preview; atomic execution belongs to bidder/settler"
-        ));
-        assert!(send_limit_reached("lending-bidder", 4, 4));
+    fn unfilled_positions_do_not_consume_transaction_send_budget() {
+        assert!(send_limit_reached(4, 4));
         assert!(counts_toward_send_limit(
-            "lending-bidder",
             "shadow flash: simulated; no signature produced"
         ));
-        assert!(!counts_toward_send_limit(
-            "lending-bidder",
-            "eligible but unfilled: no route"
-        ));
+        assert!(!counts_toward_send_limit("eligible but unfilled: no route"));
     }
 
     #[test]

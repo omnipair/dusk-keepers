@@ -53,8 +53,8 @@
       "requiredOptionalAccounts": []
     },
     {
-      "action": "lending_liquidation_trigger",
-      "jobKind": "lending_liquidation_trigger",
+      "action": "lending_health_preview",
+      "jobKind": "lending_liquidation_bid",
       "primaryInstructionKey": "dusk:preview_liquidation_health",
       "cpiInstructionKeys": [],
       "requiredOptionalAccounts": []

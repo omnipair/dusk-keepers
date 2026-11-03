@@ -106,6 +106,19 @@ impl Config {
     fn from_environment() -> Result<Self, Box<dyn Error>> {
         let mode = Mode::parse(&env::var("KEEPER_MODE").unwrap_or_else(|_| "shadow".into()))?;
         let profile = env::var("KEEPER_PROFILE").unwrap_or_else(|_| "conformance".into());
+        if !matches!(
+            profile.as_str(),
+            "conformance"
+                | "lending-bidder"
+                | "lending-settler"
+                | "leverage"
+                | "hlp-recovery"
+                | "auction-arbitrage"
+                | "lifecycle"
+                | "sentinel"
+        ) {
+            return Err(format!("unsupported KEEPER_PROFILE: {profile}").into());
+        }
         let port = env::var("PORT").unwrap_or_else(|_| "8080".into());
         let bind_address = format!("0.0.0.0:{port}").parse()?;
         let protocol_lock = env::var("DUSK_PROTOCOL_LOCK")
@@ -184,7 +197,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     // rather than a global switch.
     let executor: Option<Box<dyn TransactionSigner>> = if config.profile == "sentinel" {
         None
-    } else if config.mode == Mode::Shadow || config.profile == "lending-trigger" {
+    } else if config.mode == Mode::Shadow {
         let public = env::var("KEEPER_SHADOW_PUBLIC_KEY")
             .ok()
             .and_then(|p| accounts::decode_key(&p));
@@ -404,7 +417,7 @@ fn run_execution_pass(
     dry_run: bool,
     shared: &Arc<Mutex<Snapshot>>,
 ) {
-    if !dry_run && profile != "lending-trigger" {
+    if !dry_run {
         match client.lamports(&signer.public_key_base58()) {
             Ok(balance) if balance < minimum_lamports => {
                 if let Ok(mut current) = shared.lock() {
@@ -448,7 +461,7 @@ fn run_execution_pass(
     // wallet, one thing it is allowed to do. A profile with no job here does
     // nothing rather than falling back to something it was not deployed for.
     let outcome = match profile {
-        "lending-bidder" | "lending-settler" | "lending-trigger" | "leverage" | "hlp-recovery" => {
+        "lending-bidder" | "lending-settler" | "leverage" | "hlp-recovery" => {
             flash_runtime::FlashJob {
                 client,
                 layout,

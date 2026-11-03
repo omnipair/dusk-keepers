@@ -31,7 +31,7 @@ executed concurrently by different job profiles.
 ## Service boundaries
 
 - **Leverage keeper:** leverage liquidation plus TP/SL. Liquidation supersedes stop-loss, which supersedes take-profit for a position.
-- **Lending trigger, bidder, and settler:** three independent services and wallets for opening liquidation, bidding into it, and final settlement. Each has its own budget, concurrency, and circuit breaker.
+- **Lending bidder and settler:** independent ordinary and emergency liquidation workers. Each discovers and previews current health; no separate trigger service or liquidation registration is needed.
 - **Auction arbitrageur:** bids only when the quoted Jupiter exit, fees, priority fee, and conservative slippage leave the configured minimum profit.
 - **Lifecycle keeper:** lower-frequency market proposal/activation/LP-lock maintenance jobs; TypeScript may be live after parity and authorization tests.
 - **Sentinel:** non-signing liveness, protocol-provenance, slot-lag, circuit-breaker, and Rust/TypeScript parity monitor.

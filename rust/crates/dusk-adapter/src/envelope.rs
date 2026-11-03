@@ -25,7 +25,7 @@ pub enum JobAction {
     FlashLiquidationSettle,
     FlashLiquidationPreview,
     EmergencyLiquidationPreview,
-    LendingLiquidationTrigger,
+    LendingHealthPreview,
     LendingLiquidationBid,
     LendingLiquidationFloorSettle,
     LeverageLiquidation,
@@ -44,7 +44,6 @@ pub enum JobAction {
 #[serde(rename_all = "snake_case")]
 pub enum JobKind {
     LeverageLiquidation,
-    LendingLiquidationTrigger,
     LendingLiquidationBid,
     LendingLiquidationSettle,
     HlpRecovery,

@@ -144,7 +144,6 @@ assert.equal(
   "each service must have a distinct wallet role",
 );
 for (const requiredProfile of [
-  "lending-trigger",
   "lending-bidder",
   "lending-settler",
   "hlp-recovery",
@@ -158,10 +157,8 @@ for (const requiredProfile of [
 const sentinel = profiles.services.find((service) => service.profile === "sentinel");
 assert.equal(sentinel.signingRequired, false);
 assert.equal(sentinel.walletRole, "none");
-const monitor = profiles.services.find((service) => service.profile === "lending-trigger");
-assert.equal(monitor.signingRequired, false);
-assert.equal(monitor.walletRole, "lending_preview");
-for (const service of profiles.services.filter((service) => !["sentinel", "lending-trigger"].includes(service.profile))) {
+assert.ok(!profiles.services.some((service) => service.profile === "lending-trigger"));
+for (const service of profiles.services.filter((service) => service.profile !== "sentinel")) {
   assert.equal(service.signingRequired, true, `${service.profile}: signing policy must be explicit`);
   assert.notEqual(service.walletRole, "none", `${service.profile}: missing isolated wallet role`);
 }

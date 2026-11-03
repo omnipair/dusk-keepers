@@ -10,7 +10,7 @@ export type JobAction =
   | "flash_liquidation_settle"
   | "flash_liquidation_preview"
   | "emergency_liquidation_preview"
-  | "lending_liquidation_trigger"
+  | "lending_health_preview"
   | "lending_liquidation_bid"
   | "lending_liquidation_floor_settle"
   | "leverage_liquidation"
@@ -26,7 +26,6 @@ export type JobAction =
 
 export type JobKind =
   | "leverage_liquidation"
-  | "lending_liquidation_trigger"
   | "lending_liquidation_bid"
   | "lending_liquidation_settle"
   | "hlp_recovery"
