@@ -107,12 +107,12 @@ impl LifecycleJob<'_> {
         let mut supplied: BTreeMap<&'static str, [u8; 32]> = BTreeMap::new();
         supplied.insert("market", market.address);
         supplied.insert("proposal", proposal.address);
-        // Queueing weighs support held as hLP, so it names the yLP mint and
-        // both hLP yLP vaults; execution does not, and the assembler ignores
+        // Queueing weighs support held as hLP, so it names the srLP mint and
+        // both hLP srLP vaults; execution does not, and the assembler ignores
         // what an instruction does not declare.
-        supplied.insert("ylp_mint", market.ylp_mint);
-        supplied.insert("base_hlp_ylp_vault", market.base_ylp_vault);
-        supplied.insert("quote_hlp_ylp_vault", market.quote_ylp_vault);
+        supplied.insert("srlp_mint", market.srlp_mint);
+        supplied.insert("base_hlp_srlp_vault", market.base_srlp_vault);
+        supplied.insert("quote_hlp_srlp_vault", market.quote_srlp_vault);
 
         let mut pda_inputs = BTreeMap::new();
         pda_inputs.insert(

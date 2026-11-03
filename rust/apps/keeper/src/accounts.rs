@@ -40,9 +40,9 @@ pub struct MarketAccounts {
     pub quote_interest_vault: [u8; 32],
     pub base_insurance_vault: [u8; 32],
     pub quote_insurance_vault: [u8; 32],
-    pub ylp_mint: [u8; 32],
-    pub base_ylp_vault: [u8; 32],
-    pub quote_ylp_vault: [u8; 32],
+    pub srlp_mint: [u8; 32],
+    pub base_srlp_vault: [u8; 32],
+    pub quote_srlp_vault: [u8; 32],
     /// Whether the market carries hLP that must be settled alongside any
     /// instruction that updates it.
     pub hlp_active: bool,
@@ -63,9 +63,9 @@ impl MarketAccounts {
             quote_interest_vault: reader.pubkey("quote_side.interest_vault", data).ok()?,
             quote_mint: reader.pubkey("quote_side.asset_mint", data).ok()?,
             quote_reserve_vault: reader.pubkey("quote_side.reserve_vault", data).ok()?,
-            base_ylp_vault: reader.pubkey("base_hlp_vault.ylp_vault", data).ok()?,
-            quote_ylp_vault: reader.pubkey("quote_hlp_vault.ylp_vault", data).ok()?,
-            ylp_mint: reader.pubkey("ylp_mint", data).ok()?,
+            base_srlp_vault: reader.pubkey("base_hlp_vault.srlp_vault", data).ok()?,
+            quote_srlp_vault: reader.pubkey("quote_hlp_vault.srlp_vault", data).ok()?,
+            srlp_mint: reader.pubkey("srlp_mint", data).ok()?,
             // Mirrors Market::has_active_hlp. Getting this wrong in either
             // direction breaks the instruction: too few accounts is
             // NotEnoughAccounts, too many shifts whatever the instruction
@@ -90,9 +90,9 @@ impl MarketAccounts {
             return Vec::new();
         }
         [
-            self.ylp_mint,
-            self.base_ylp_vault,
-            self.quote_ylp_vault,
+            self.srlp_mint,
+            self.base_srlp_vault,
+            self.quote_srlp_vault,
             self.base_interest_vault,
             self.quote_interest_vault,
         ]
@@ -221,7 +221,11 @@ impl AccountAssembler<'_> {
                     });
                 }
                 program_id
-            } else if let Some(address) = self.supplied.get(name) {
+            } else if let Some(address) = self
+                .supplied
+                .get(name)
+                .or_else(|| self.supplied.get(name.replace("ylp", "srlp").as_str()))
+            {
                 *address
             } else if let Some(fixed) = self.resolver.resolve_static(instruction_key, name) {
                 decode_key(fixed).ok_or_else(|| AssemblyError {
@@ -313,12 +317,12 @@ mod tests {
             quote_collateral_vault: [13; 32],
             quote_insurance_vault: [15; 32],
             quote_interest_vault: [14; 32],
-            base_ylp_vault: [6; 32],
+            base_srlp_vault: [6; 32],
             hlp_active: true,
             quote_mint: [11; 32],
             quote_reserve_vault: [12; 32],
-            quote_ylp_vault: [16; 32],
-            ylp_mint: [7; 32],
+            quote_srlp_vault: [16; 32],
+            srlp_mint: [7; 32],
         };
         let base_debt = market.oriented(true);
         let quote_debt = market.oriented(false);
@@ -349,21 +353,21 @@ mod tests {
             base_interest_vault: [4; 32],
             base_mint: [1; 32],
             base_reserve_vault: [2; 32],
-            base_ylp_vault: [6; 32],
+            base_srlp_vault: [6; 32],
             hlp_active: true,
             quote_collateral_vault: [13; 32],
             quote_insurance_vault: [15; 32],
             quote_interest_vault: [14; 32],
             quote_mint: [11; 32],
             quote_reserve_vault: [12; 32],
-            quote_ylp_vault: [16; 32],
-            ylp_mint: [7; 32],
+            quote_srlp_vault: [16; 32],
+            srlp_mint: [7; 32],
         };
         let prefix = market.hlp_remaining_accounts();
         assert_eq!(prefix.len(), 5);
-        assert_eq!(prefix[0].pubkey, market.ylp_mint);
-        assert_eq!(prefix[1].pubkey, market.base_ylp_vault);
-        assert_eq!(prefix[2].pubkey, market.quote_ylp_vault);
+        assert_eq!(prefix[0].pubkey, market.srlp_mint);
+        assert_eq!(prefix[1].pubkey, market.base_srlp_vault);
+        assert_eq!(prefix[2].pubkey, market.quote_srlp_vault);
         assert_eq!(prefix[3].pubkey, market.base_interest_vault);
         assert_eq!(prefix[4].pubkey, market.quote_interest_vault);
         assert!(prefix.iter().all(|meta| meta.is_writable));

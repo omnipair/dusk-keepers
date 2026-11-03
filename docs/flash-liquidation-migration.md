@@ -40,7 +40,7 @@ accounting fixes. Bank fixtures were recaptured from the exact source commit and
 execute the deployed payloads locally.
 
 The 27 October compatible repair sequence bounds emergency recovery proofs,
-restores concentrated reseeding after the final external yLP exit, and permits
+restores concentrated reseeding after the final external srLP exit, and permits
 drained-market read previews. Only the
 Dusk executable changed. The delegate remains the previously deployed
 `cd6f1ec0` artifact, and its source/interface was not modified by the repair.

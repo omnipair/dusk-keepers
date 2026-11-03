@@ -122,6 +122,7 @@ impl<'a> AccountReader<'a> {
         let field = self
             .fields
             .get(path)
+            .or_else(|| self.fields.get(path.replace("srlp", "ylp").as_str()))
             .ok_or_else(|| LayoutError::UnknownField(path.to_owned()))?;
         Ok(&data[field.offset..field.offset + field.size])
     }

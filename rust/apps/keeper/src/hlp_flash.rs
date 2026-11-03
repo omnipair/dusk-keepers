@@ -87,10 +87,10 @@ impl HlpContext {
         } else {
             market.base_interest_vault
         };
-        let target_hlp_ylp_vault = if target_is_base {
-            market.base_ylp_vault
+        let target_hlp_srlp_vault = if target_is_base {
+            market.base_srlp_vault
         } else {
-            market.quote_ylp_vault
+            market.quote_srlp_vault
         };
         let collateral_mint_account = snapshot.account(target_mint)?;
         let debt_mint_account = snapshot.account(borrowed_mint)?;
@@ -134,8 +134,8 @@ impl HlpContext {
             ("borrowed_token_program".into(), debt_token),
             ("session".into(), session),
             ("repayment_vault".into(), repayment_vault),
-            ("ylp_mint".into(), market.ylp_mint),
-            ("target_hlp_ylp_vault".into(), target_hlp_ylp_vault),
+            ("srlp_mint".into(), market.srlp_mint),
+            ("target_hlp_srlp_vault".into(), target_hlp_srlp_vault),
             (
                 "event_authority".into(),
                 pda(program, &[b"__event_authority"])?,
@@ -170,6 +170,7 @@ impl HlpContext {
             let address = self
                 .named
                 .get(&account.name)
+                .or_else(|| self.named.get(&account.name.replace("ylp", "srlp")))
                 .copied()
                 .or_else(|| account.fixed_address.as_deref().and_then(decode_key))
                 .ok_or_else(|| format!("missing {}", account.name))?;
