@@ -1,5 +1,5 @@
 {
-  "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+  "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
   "metadata": {
     "name": "dusk",
     "version": "2.0.0",
@@ -1179,6 +1179,232 @@
       ]
     },
     {
+      "name": "burn_retired_junior",
+      "discriminator": [
+        180,
+        25,
+        139,
+        146,
+        47,
+        20,
+        168,
+        135
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.base_side.asset_mint",
+                "account": "Market"
+              },
+              {
+                "kind": "account",
+                "path": "market.quote_side.asset_mint",
+                "account": "Market"
+              },
+              {
+                "kind": "account",
+                "path": "market.params_hash",
+                "account": "Market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "signer": true
+        },
+        {
+          "name": "retired_mint",
+          "writable": true
+        },
+        {
+          "name": "cohort",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  117,
+                  110,
+                  105,
+                  111,
+                  114,
+                  95,
+                  99,
+                  111,
+                  104,
+                  111,
+                  114,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "retired_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner_junior",
+          "writable": true
+        },
+        {
+          "name": "base_yield",
+          "writable": true
+        },
+        {
+          "name": "quote_yield",
+          "writable": true
+        },
+        {
+          "name": "exit",
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "token_2022_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "event_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "BurnRetiredJuniorArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "checkpoint_income",
+      "discriminator": [
+        48,
+        103,
+        250,
+        65,
+        201,
+        100,
+        178,
+        237
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.base_side.asset_mint",
+                "account": "Market"
+              },
+              {
+                "kind": "account",
+                "path": "market.quote_side.asset_mint",
+                "account": "Market"
+              },
+              {
+                "kind": "account",
+                "path": "market.params_hash",
+                "account": "Market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "lp_mint"
+        },
+        {
+          "name": "owner_lp"
+        },
+        {
+          "name": "yield_account",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "CheckpointIncomeArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "claim_referral_interest",
       "discriminator": [
         16,
@@ -1774,6 +2000,94 @@
       ]
     },
     {
+      "name": "compound_junior_seed",
+      "discriminator": [
+        145,
+        120,
+        244,
+        44,
+        0,
+        37,
+        243,
+        36
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.base_side.asset_mint",
+                "account": "Market"
+              },
+              {
+                "kind": "account",
+                "path": "market.quote_side.asset_mint",
+                "account": "Market"
+              },
+              {
+                "kind": "account",
+                "path": "market.params_hash",
+                "account": "Market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "junior_mint"
+        },
+        {
+          "name": "event_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "configure_referral_partner",
       "discriminator": [
         36,
@@ -1897,6 +2211,148 @@
           "type": {
             "defined": {
               "name": "ConfigureReferralPartnerArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "convert_tranche",
+      "discriminator": [
+        192,
+        218,
+        132,
+        202,
+        247,
+        23,
+        75,
+        230
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "senior_mint",
+          "writable": true
+        },
+        {
+          "name": "junior_mint",
+          "writable": true
+        },
+        {
+          "name": "owner_senior",
+          "writable": true
+        },
+        {
+          "name": "owner_junior",
+          "writable": true
+        },
+        {
+          "name": "exit",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  117,
+                  110,
+                  105,
+                  111,
+                  114,
+                  95,
+                  101,
+                  120,
+                  105,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              },
+              {
+                "kind": "account",
+                "path": "junior_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "senior_base_yield",
+          "writable": true
+        },
+        {
+          "name": "senior_quote_yield",
+          "writable": true
+        },
+        {
+          "name": "junior_base_yield",
+          "writable": true
+        },
+        {
+          "name": "junior_quote_yield",
+          "writable": true
+        },
+        {
+          "name": "token_2022_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "event_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "action",
+          "type": {
+            "defined": {
+              "name": "TrancheAction"
             }
           }
         }
@@ -4045,6 +4501,110 @@
       }
     },
     {
+      "name": "fund_junior_seed",
+      "discriminator": [
+        245,
+        198,
+        220,
+        232,
+        96,
+        64,
+        51,
+        71
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.base_side.asset_mint",
+                "account": "Market"
+              },
+              {
+                "kind": "account",
+                "path": "market.quote_side.asset_mint",
+                "account": "Market"
+              },
+              {
+                "kind": "account",
+                "path": "market.params_hash",
+                "account": "Market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "asset_mint"
+        },
+        {
+          "name": "reserve_vault",
+          "writable": true
+        },
+        {
+          "name": "interest_vault",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token_2022_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "event_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "grow_yield_account",
       "docs": [
         "Bring a yield account created before `harvest_authority` existed up",
@@ -4538,38 +5098,38 @@
               {
                 "kind": "const",
                 "value": [
+                  62,
                   254,
-                  237,
-                  118,
-                  109,
-                  5,
-                  146,
-                  245,
-                  249,
-                  66,
-                  135,
-                  243,
+                  159,
+                  172,
+                  61,
+                  59,
                   124,
-                  36,
-                  53,
-                  12,
-                  19,
-                  89,
-                  72,
+                  201,
+                  115,
+                  229,
                   84,
+                  36,
+                  73,
+                  157,
+                  150,
+                  203,
+                  228,
+                  237,
+                  222,
+                  36,
+                  247,
+                  148,
+                  181,
+                  131,
+                  155,
+                  204,
+                  63,
+                  226,
+                  166,
                   7,
-                  236,
-                  95,
-                  227,
-                  238,
-                  53,
-                  42,
-                  79,
-                  224,
-                  225,
-                  53,
-                  141,
-                  56
+                  231,
+                  51
                 ]
               }
             ],
@@ -4623,6 +5183,163 @@
           "type": {
             "defined": {
               "name": "InitFutarchyAuthorityArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "initialize_junior",
+      "discriminator": [
+        179,
+        239,
+        121,
+        100,
+        88,
+        74,
+        12,
+        66
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "junior_mint",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  117,
+                  110,
+                  105,
+                  111,
+                  114,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "arg",
+                "path": "args.generation"
+              }
+            ]
+          }
+        },
+        {
+          "name": "cohort",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  117,
+                  110,
+                  105,
+                  111,
+                  114,
+                  95,
+                  99,
+                  111,
+                  104,
+                  111,
+                  114,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "junior_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "previous_cohort",
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "token_metadata",
+          "writable": true
+        },
+        {
+          "name": "sysvar_instructions",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "token_metadata_program",
+          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+        },
+        {
+          "name": "token_2022_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "event_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "InitializeJuniorArgs"
             }
           }
         }
@@ -5760,16 +6477,20 @@
               {
                 "kind": "account",
                 "path": "owner"
+              },
+              {
+                "kind": "account",
+                "path": "lp_mint"
               }
             ]
           }
         },
         {
-          "name": "ylp_mint",
+          "name": "lp_mint",
           "writable": true
         },
         {
-          "name": "owner_ylp_account",
+          "name": "owner_lp_account",
           "writable": true
         },
         {
@@ -7839,6 +8560,48 @@
       ]
     },
     {
+      "name": "roll_income_epoch",
+      "discriminator": [
+        4,
+        217,
+        228,
+        135,
+        97,
+        80,
+        174,
+        100
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "income_epoch",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "RollIncomeEpochArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "rotate_hlp_cohort",
       "discriminator": [
         163,
@@ -8172,6 +8935,11 @@
               {
                 "kind": "account",
                 "path": "owner"
+              },
+              {
+                "kind": "account",
+                "path": "governance_balance.lp_mint",
+                "account": "GovernanceBalance"
               }
             ]
           }
@@ -11433,6 +12201,45 @@
       ]
     },
     {
+      "name": "IncomeEpoch",
+      "discriminator": [
+        180,
+        248,
+        84,
+        87,
+        99,
+        16,
+        62,
+        246
+      ]
+    },
+    {
+      "name": "JuniorCohort",
+      "discriminator": [
+        66,
+        255,
+        14,
+        91,
+        158,
+        179,
+        23,
+        9
+      ]
+    },
+    {
+      "name": "JuniorExitAccount",
+      "discriminator": [
+        186,
+        158,
+        208,
+        250,
+        7,
+        219,
+        13,
+        26
+      ]
+    },
+    {
       "name": "LeverageDelegation",
       "discriminator": [
         49,
@@ -11809,6 +12616,45 @@
         224,
         236,
         18
+      ]
+    },
+    {
+      "name": "JuniorCohortInitialized",
+      "discriminator": [
+        18,
+        109,
+        85,
+        200,
+        65,
+        58,
+        228,
+        243
+      ]
+    },
+    {
+      "name": "JuniorSeedCompounded",
+      "discriminator": [
+        253,
+        233,
+        124,
+        178,
+        67,
+        98,
+        224,
+        87
+      ]
+    },
+    {
+      "name": "JuniorSeedFunded",
+      "discriminator": [
+        123,
+        105,
+        18,
+        32,
+        9,
+        92,
+        120,
+        184
       ]
     },
     {
@@ -12241,6 +13087,19 @@
       ]
     },
     {
+      "name": "RetiredJuniorBurned",
+      "discriminator": [
+        29,
+        56,
+        158,
+        137,
+        97,
+        193,
+        230,
+        93
+      ]
+    },
+    {
       "name": "SwapExecuted",
       "discriminator": [
         150,
@@ -12251,6 +13110,19 @@
         89,
         38,
         79
+      ]
+    },
+    {
+      "name": "TrancheConverted",
+      "discriminator": [
+        249,
+        121,
+        88,
+        27,
+        39,
+        181,
+        244,
+        199
       ]
     },
     {
@@ -12995,6 +13867,41 @@
       "code": 6142,
       "name": "LiquidationDoesNotImproveHealth",
       "msg": "Partial liquidation does not improve health after costs"
+    },
+    {
+      "code": 6143,
+      "name": "IncomeEpochNeedsRollover",
+      "msg": "Archive and roll the income epoch before issuing new receivables"
+    },
+    {
+      "code": 6144,
+      "name": "IncomeHistoryRequired",
+      "msg": "Prepare this holder's income history before changing its balance"
+    },
+    {
+      "code": 6145,
+      "name": "OracleAccountMissing",
+      "msg": "The market's configured oracle account was not supplied"
+    },
+    {
+      "code": 6146,
+      "name": "OracleAuthenticationFailed",
+      "msg": "Oracle account owner, identity or verification failed"
+    },
+    {
+      "code": 6147,
+      "name": "OracleInvalidObservation",
+      "msg": "Oracle report is invalid, future-dated, halted or too uncertain"
+    },
+    {
+      "code": 6148,
+      "name": "OracleStale",
+      "msg": "Oracle source observation is stale"
+    },
+    {
+      "code": 6149,
+      "name": "OracleReplay",
+      "msg": "Oracle sequence or source observation regressed"
     }
   ],
   "types": [
@@ -14160,6 +15067,63 @@
       }
     },
     {
+      "name": "BurnRetiredJuniorArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CheckpointIncomeArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "source",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CloseApprovalQuote",
+      "docs": [
+        "Dusk-owned, transaction-local approval context. Written immediately before",
+        "the read-only delegate callback and cleared before settlement. A standalone",
+        "delegate invocation cannot authenticate an off-chain or old quote with it."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "slot",
+            "type": "u64"
+          },
+          {
+            "name": "close_bps",
+            "type": "u16"
+          },
+          {
+            "name": "collateral_credit",
+            "type": "u64"
+          },
+          {
+            "name": "selected_output",
+            "type": "u64"
+          },
+          {
+            "name": "full_output",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "CloseInsolventHlpArgs",
       "type": {
         "kind": "struct",
@@ -14358,7 +15322,7 @@
           {
             "name": "updates",
             "docs": [
-              "One to seven updates, at most one per family, in ascending family",
+              "One to nine updates, at most one per family, in ascending family",
               "order. One sponsorship and one vote cover all of them."
             ],
             "type": {
@@ -14456,6 +15420,17 @@
           {
             "name": "quote_rate_at_target_nad",
             "type": "u128"
+          },
+          {
+            "name": "base_rate_fraction_e18",
+            "docs": [
+              "Fractional NAD APR carried by the exponential controller (scale 1e9)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "quote_rate_fraction_e18",
+            "type": "u64"
           },
           {
             "name": "global_health_base_contribution_for_quote_debt",
@@ -15050,6 +16025,14 @@
         "kind": "struct",
         "fields": [
           {
+            "name": "junior",
+            "type": {
+              "defined": {
+                "name": "TrancheIncome"
+              }
+            }
+          },
+          {
             "name": "public_interest_advance",
             "type": {
               "defined": {
@@ -15612,6 +16595,14 @@
             "type": "pubkey"
           },
           {
+            "name": "lp_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_kind",
+            "type": "u8"
+          },
+          {
             "name": "delegate",
             "docs": [
               "The default key revokes delegation. The owner always retains control."
@@ -15694,6 +16685,17 @@
           {
             "name": "governance_balance",
             "type": "pubkey"
+          },
+          {
+            "name": "lp_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_kind",
+            "docs": [
+              "0 senior yLP, 1 current-generation junior LP."
+            ],
+            "type": "u8"
           },
           {
             "name": "delegate",
@@ -16787,6 +17789,147 @@
       }
     },
     {
+      "name": "IncomeEpoch",
+      "docs": [
+        "Immutable closing state of one unpaid-income denomination. Holders use it",
+        "to carry their existing units and unpaid cash fractions into the next epoch."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "book_index",
+            "type": "u8"
+          },
+          {
+            "name": "book",
+            "type": {
+              "defined": {
+                "name": "IncomeReceivableBook"
+              }
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "IncomeExposureEnd",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "ended",
+            "type": "bool"
+          },
+          {
+            "name": "epoch",
+            "type": "u64"
+          },
+          {
+            "name": "growth",
+            "type": {
+              "defined": {
+                "name": "ReceivableGrowth"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "IncomeReceivableBook",
+      "docs": [
+        "A bounded-denomination epoch of an unpaid-income pool. Public and hLP",
+        "funding income use separate books. Repayments/defaults are pooled within",
+        "each book; already funded advances do not remain unpaid claims."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "epoch",
+            "type": "u64"
+          },
+          {
+            "name": "unpaid",
+            "type": "u64"
+          },
+          {
+            "name": "units",
+            "type": "u64"
+          },
+          {
+            "name": "paid_per_unit_q64",
+            "type": "u128"
+          },
+          {
+            "name": "paid_remainder",
+            "type": "u64"
+          },
+          {
+            "name": "growth",
+            "docs": [
+              "Ordinary senior, junior, base hLP, quote hLP."
+            ],
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "ReceivableGrowth"
+                  }
+                },
+                4
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "IncomeReceivableClaim",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "epoch",
+            "type": "u64"
+          },
+          {
+            "name": "units_q64",
+            "type": "u128"
+          },
+          {
+            "name": "paid_checkpoint_q64",
+            "type": "u128"
+          },
+          {
+            "name": "growth_checkpoint",
+            "type": {
+              "defined": {
+                "name": "ReceivableGrowth"
+              }
+            }
+          },
+          {
+            "name": "paid_fraction_q128",
+            "type": "u128"
+          },
+          {
+            "name": "claimable",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "IncreaseLeverageArgs",
       "type": {
         "kind": "struct",
@@ -16884,6 +18027,26 @@
       }
     },
     {
+      "name": "InitializeJuniorArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "generation",
+            "type": "u64"
+          },
+          {
+            "name": "metadata",
+            "type": {
+              "defined": {
+                "name": "InitializeLpMetadataArgs"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "InitializeLpMetadataArgs",
       "type": {
         "kind": "struct",
@@ -16909,6 +18072,18 @@
         "kind": "struct",
         "fields": [
           {
+            "name": "params_hash",
+            "docs": [
+              "First in the wire payload so account validation reads only the PDA seed."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
             "name": "config",
             "type": {
               "defined": {
@@ -16917,12 +18092,18 @@
             }
           },
           {
-            "name": "params_hash",
+            "name": "oracle",
+            "docs": [
+              "Initial oracle policy, installed atomically with the market. None uses",
+              "native pricing. First liquidity authenticates a current report when",
+              "the selected weight is positive; later policy changes use governance."
+            ],
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "option": {
+                "defined": {
+                  "name": "OraclePolicy"
+                }
+              }
             }
           },
           {
@@ -17136,20 +18317,218 @@
       }
     },
     {
-      "name": "IrmConfig",
+      "name": "JuniorCohort",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "target_utilization_bps",
-            "type": "u16"
+            "name": "income_end",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "IncomeExposureEnd"
+                  }
+                },
+                4
+              ]
+            }
           },
           {
-            "name": "curve_steepness_nad",
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "generation",
             "type": "u64"
           },
           {
-            "name": "adjustment_speed_per_year",
+            "name": "retired",
+            "type": "bool"
+          },
+          {
+            "name": "final_income",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "TrancheIncome"
+                  }
+                },
+                2
+              ]
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "JuniorCohortInitialized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "generation",
+            "type": "u64"
+          },
+          {
+            "name": "previous_mint",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "JuniorExitAccount",
+      "docs": [
+        "Burned receipt units in this account remain junior claims. They earn income",
+        "through the owner's yield accounts and cannot be transferred or spent twice."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "ticket",
+            "type": {
+              "defined": {
+                "name": "JuniorExitTicket"
+              }
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "JuniorExitConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "minimum_notice_slots",
+            "type": "u64"
+          },
+          {
+            "name": "maximum_notice_slots",
+            "type": "u64"
+          },
+          {
+            "name": "exercise_window_slots",
+            "type": "u64"
+          },
+          {
+            "name": "request_fee_bps",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "JuniorExitTicket",
+      "docs": [
+        "Notice uses scheduled slots. The exercise window counts only slots without",
+        "a verified conversion restriction; notice itself is not paused. Handlers",
+        "authenticate owner/escrow and derive blocked time from protocol records."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "generation",
+            "type": "u64"
+          },
+          {
+            "name": "receipts",
+            "type": "u64"
+          },
+          {
+            "name": "ready_at",
+            "type": "u64"
+          },
+          {
+            "name": "expires_at",
+            "docs": [
+              "Exclusive end before adding verified blocked time after ready_at."
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "JuniorSeedCompounded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "base_amount",
+            "type": "u64"
+          },
+          {
+            "name": "quote_amount",
+            "type": "u64"
+          },
+          {
+            "name": "reserve_shares",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "JuniorSeedFunded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "interest_debit",
+            "type": "u64"
+          },
+          {
+            "name": "reserve_credit",
             "type": "u64"
           }
         ]
@@ -17372,6 +18751,14 @@
           {
             "name": "active_liquidation_session",
             "type": "pubkey"
+          },
+          {
+            "name": "close_approval",
+            "type": {
+              "defined": {
+                "name": "CloseApprovalQuote"
+              }
+            }
           },
           {
             "name": "bump",
@@ -18315,6 +19702,14 @@
         "kind": "struct",
         "fields": [
           {
+            "name": "oracle",
+            "type": {
+              "defined": {
+                "name": "OracleState"
+              }
+            }
+          },
+          {
             "name": "version",
             "type": "u8"
           },
@@ -18361,6 +19756,45 @@
                 "name": "Debt"
               }
             }
+          },
+          {
+            "name": "tranches",
+            "docs": [
+              "One shared junior capital budget across both reserve/debt books."
+            ],
+            "type": {
+              "defined": {
+                "name": "TrancheCapital"
+              }
+            }
+          },
+          {
+            "name": "income",
+            "type": {
+              "defined": {
+                "name": "MarketIncomeBooks"
+              }
+            }
+          },
+          {
+            "name": "junior_exit_config",
+            "type": {
+              "defined": {
+                "name": "JuniorExitConfig"
+              }
+            }
+          },
+          {
+            "name": "tranche_policy",
+            "type": {
+              "defined": {
+                "name": "TranchePolicy"
+              }
+            }
+          },
+          {
+            "name": "junior_mint",
+            "type": "pubkey"
           },
           {
             "name": "base_hlp_vault",
@@ -18421,6 +19855,14 @@
             "type": "u64"
           },
           {
+            "name": "governance_locked_junior",
+            "docs": [
+              "Active-generation jrLP receipts burned into governance locks. They",
+              "remain part of junior receipt supply and keep full first-loss exposure."
+            ],
+            "type": "u64"
+          },
+          {
             "name": "parameter_revisions",
             "docs": [
               "Independent monotone revisions for fee, concentration, IRM, EMA,",
@@ -18429,7 +19871,7 @@
             "type": {
               "array": [
                 "u64",
-                7
+                9
               ]
             }
           },
@@ -18690,7 +20132,7 @@
             "name": "irm",
             "type": {
               "defined": {
-                "name": "IrmConfig"
+                "name": "RiskRateConfig"
               }
             }
           },
@@ -18759,6 +20201,17 @@
             "type": {
               "defined": {
                 "name": "MarketConfig"
+              }
+            }
+          },
+          {
+            "name": "oracle",
+            "docs": [
+              "Initial policy; an empty policy identifies an oracleless launch."
+            ],
+            "type": {
+              "defined": {
+                "name": "OraclePolicy"
               }
             }
           },
@@ -19011,6 +20464,102 @@
       }
     },
     {
+      "name": "MarketIncomeBooks",
+      "docs": [
+        "Public-loan and hLP-funding receivables are independent. The vault-owned",
+        "public-income claims preserve hLP's automatic funding-gap repayment."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "books",
+            "docs": [
+              "base public, quote public, base hLP funding, quote hLP funding."
+            ],
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "IncomeReceivableBook"
+                  }
+                },
+                4
+              ]
+            }
+          },
+          {
+            "name": "pending",
+            "docs": [
+              "Gross settlement budget awaiting measured net custody credit."
+            ],
+            "type": {
+              "array": [
+                "u64",
+                4
+              ]
+            }
+          },
+          {
+            "name": "seed",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "IncomeReceivableClaim"
+                  }
+                },
+                4
+              ]
+            }
+          },
+          {
+            "name": "hlp",
+            "docs": [
+              "[hLP target][income asset], owned by the vault rather than its holders."
+            ],
+            "type": {
+              "array": [
+                {
+                  "array": [
+                    {
+                      "defined": {
+                        "name": "IncomeReceivableClaim"
+                      }
+                    },
+                    2
+                  ]
+                },
+                2
+              ]
+            }
+          },
+          {
+            "name": "junior_end",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "IncomeExposureEnd"
+                  }
+                },
+                4
+              ]
+            }
+          },
+          {
+            "name": "split_carry_bps",
+            "type": {
+              "array": [
+                "u16",
+                4
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "MarketParameterUpdate",
       "type": {
         "kind": "enum",
@@ -19047,7 +20596,7 @@
             "fields": [
               {
                 "defined": {
-                  "name": "IrmConfig"
+                  "name": "RiskRateConfig"
                 }
               }
             ]
@@ -19108,6 +20657,33 @@
               },
               {
                 "name": "per_day_bps",
+                "type": "u16"
+              }
+            ]
+          },
+          {
+            "name": "Oracle",
+            "fields": [
+              {
+                "defined": {
+                  "name": "OraclePolicy"
+                }
+              }
+            ]
+          },
+          {
+            "name": "Tranche",
+            "fields": [
+              {
+                "name": "junior_income_share_bps",
+                "type": "u16"
+              },
+              {
+                "name": "request_fee_bps",
+                "type": "u16"
+              },
+              {
+                "name": "liquidation_fee_bps",
                 "type": "u16"
               }
             ]
@@ -19346,6 +20922,214 @@
       }
     },
     {
+      "name": "OracleObservation",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "price_nad",
+            "type": "u64"
+          },
+          {
+            "name": "confidence_nad",
+            "type": "u64"
+          },
+          {
+            "name": "publish_time",
+            "type": "i64"
+          },
+          {
+            "name": "posted_slot",
+            "type": "u64"
+          },
+          {
+            "name": "sequence",
+            "type": "u64"
+          },
+          {
+            "name": "hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "source_times",
+            "type": {
+              "array": [
+                "i64",
+                2
+              ]
+            }
+          },
+          {
+            "name": "source_slots",
+            "type": {
+              "array": [
+                "u64",
+                2
+              ]
+            }
+          },
+          {
+            "name": "source_sequences",
+            "docs": [
+              "Independent counters retain replay protection when only one leg updates."
+            ],
+            "type": {
+              "array": [
+                "u64",
+                2
+              ]
+            }
+          },
+          {
+            "name": "source_hashes",
+            "docs": [
+              "Each normalized report is immutable at an already observed counter."
+            ],
+            "type": {
+              "array": [
+                {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                2
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "OraclePolicy",
+      "docs": [
+        "Creation selects an optional policy atomically; omission uses native pricing.",
+        "Subsequent governance can change the policy within the same mathematical",
+        "limits. Every native market supports later oracle activation."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "format",
+            "type": "u8"
+          },
+          {
+            "name": "provider",
+            "type": "pubkey"
+          },
+          {
+            "name": "base_account",
+            "type": "pubkey"
+          },
+          {
+            "name": "quote_account",
+            "type": "pubkey"
+          },
+          {
+            "name": "base_feed_id",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "quote_feed_id",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "lambda_bps",
+            "type": "u16"
+          },
+          {
+            "name": "adjustment_cap_nad",
+            "type": "u64"
+          },
+          {
+            "name": "max_age_seconds",
+            "type": "u32"
+          },
+          {
+            "name": "max_age_slots",
+            "type": "u64"
+          },
+          {
+            "name": "max_confidence_bps",
+            "type": "u16"
+          },
+          {
+            "name": "max_publish_skew_seconds",
+            "type": "u32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OracleState",
+      "docs": [
+        "Persisted policy and replay protection. `runtime` occupies zero wire bytes",
+        "and is reset on every account deserialization, including a second CPI."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "policy",
+            "type": {
+              "defined": {
+                "name": "OraclePolicy"
+              }
+            }
+          },
+          {
+            "name": "last_observation",
+            "type": {
+              "defined": {
+                "name": "OracleObservation"
+              }
+            }
+          },
+          {
+            "name": "revision",
+            "type": "u64"
+          },
+          {
+            "name": "recognized_tail_liquidity",
+            "docs": [
+              "Recognized native-tail depth cannot grow merely because an OP trade",
+              "moves to a different native invariant. Real ordinary LP capital scales",
+              "the ceiling through its share supply; losses reduce it immediately."
+            ],
+            "type": "u128"
+          },
+          {
+            "name": "recognized_ordinary_supply",
+            "type": "u64"
+          },
+          {
+            "name": "runtime",
+            "type": {
+              "defined": {
+                "name": "RuntimePricing"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "ParameterProposal",
       "type": {
         "kind": "struct",
@@ -19386,7 +21170,7 @@
             "type": {
               "array": [
                 "u64",
-                7
+                9
               ]
             }
           },
@@ -19425,6 +21209,17 @@
           },
           {
             "name": "total_locked",
+            "docs": [
+              "Senior voting units are one-for-one yLP reserve shares."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "total_locked_junior_receipts",
+            "docs": [
+              "Current-generation junior receipts. Their voting value is calculated",
+              "from the live junior exchange rate whenever support is evaluated."
+            ],
             "type": "u64"
           },
           {
@@ -19491,7 +21286,7 @@
             "type": {
               "array": [
                 "u64",
-                7
+                9
               ]
             }
           },
@@ -19568,7 +21363,7 @@
             "type": {
               "array": [
                 "u64",
-                7
+                9
               ]
             }
           },
@@ -20668,6 +22463,32 @@
       }
     },
     {
+      "name": "ReceivableGrowth",
+      "docs": [
+        "One exposure lane's newly issued receivable units per LP receipt. The",
+        "weighted paid index is kept at full Q128 precision: flooring it earlier can",
+        "give late entrants a fractional claim on money paid before their entry."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "units_q64",
+            "type": "u128"
+          },
+          {
+            "name": "weighted_paid_q128",
+            "type": {
+              "array": [
+                "u64",
+                4
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "ReferralAccrual",
       "docs": [
         "Claimable referral revenue for one partner, market, and debt asset."
@@ -21057,6 +22878,34 @@
       }
     },
     {
+      "name": "RetiredJuniorBurned",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "wallet_amount",
+            "type": "u64"
+          },
+          {
+            "name": "escrow_amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "RevenueDistribution",
       "type": {
         "kind": "struct",
@@ -21167,6 +23016,62 @@
       }
     },
     {
+      "name": "RiskRateConfig",
+      "docs": [
+        "Per-market inputs for the coverage band controller. A zero maximum leaves",
+        "APR economically uncapped; arithmetic still rejects unrepresentable debt."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "lower_signal_nad",
+            "type": "u64"
+          },
+          {
+            "name": "upper_signal_nad",
+            "type": "u64"
+          },
+          {
+            "name": "half_life_ms",
+            "type": "u64"
+          },
+          {
+            "name": "initial_apr_nad",
+            "type": "u64"
+          },
+          {
+            "name": "minimum_apr_nad",
+            "type": "u64"
+          },
+          {
+            "name": "maximum_apr_nad",
+            "type": "u64"
+          },
+          {
+            "name": "borrow_utilization_limit_bps",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RollIncomeEpochArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "book_index",
+            "type": "u8"
+          },
+          {
+            "name": "epoch",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "RotateHlpCohortArgs",
       "type": {
         "kind": "struct",
@@ -21184,6 +23089,13 @@
             }
           }
         ]
+      }
+    },
+    {
+      "name": "RuntimePricing",
+      "type": {
+        "kind": "struct",
+        "fields": []
       }
     },
     {
@@ -21884,6 +23796,243 @@
       }
     },
     {
+      "name": "TrancheAction",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Enter",
+            "fields": [
+              {
+                "name": "senior_amount",
+                "type": "u64"
+              },
+              {
+                "name": "minimum_junior",
+                "type": "u64"
+              }
+            ]
+          },
+          {
+            "name": "RequestExit",
+            "fields": [
+              {
+                "name": "additional_junior",
+                "type": "u64"
+              }
+            ]
+          },
+          {
+            "name": "ConvertExit",
+            "fields": [
+              {
+                "name": "minimum_senior",
+                "type": "u64"
+              }
+            ]
+          },
+          {
+            "name": "CancelExit"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TrancheCapital",
+      "docs": [
+        "Junior's portion of the AMM's existing reserve shares. Senior receipts stay",
+        "one-for-one with the remaining reserve shares, including hLP-held receipts.",
+        "Junior receipts have their own exchange rate after income, losses and fees."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "junior_reserve_shares",
+            "type": "u64"
+          },
+          {
+            "name": "junior_receipt_supply",
+            "type": "u64"
+          },
+          {
+            "name": "permanent_receipts",
+            "docs": [
+              "Funded, nonredeemable protocol receipts; included in junior supply."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "queued_receipts",
+            "docs": [
+              "Escrow remains junior until a successful conversion or cancellation."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "generation",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TrancheConverted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "action",
+            "type": "u8"
+          },
+          {
+            "name": "senior_amount",
+            "type": "u64"
+          },
+          {
+            "name": "junior_amount",
+            "type": "u64"
+          },
+          {
+            "name": "junior_fee",
+            "type": "u64"
+          },
+          {
+            "name": "ready_at",
+            "type": "u64"
+          },
+          {
+            "name": "expires_at",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TrancheIncome",
+      "docs": [
+        "Custody-backed junior income. Cached ownership is synchronized by every",
+        "capital transition; the market invariant checks it against the shared book."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "initialized",
+            "type": "bool"
+          },
+          {
+            "name": "income_share_bps",
+            "type": "u16"
+          },
+          {
+            "name": "reserve_shares",
+            "type": "u64"
+          },
+          {
+            "name": "receipt_supply",
+            "type": "u64"
+          },
+          {
+            "name": "swap_growth_q64",
+            "type": "u128"
+          },
+          {
+            "name": "interest_growth_q64",
+            "type": "u128"
+          },
+          {
+            "name": "swap_remainder",
+            "type": "u64"
+          },
+          {
+            "name": "interest_remainder",
+            "type": "u64"
+          },
+          {
+            "name": "seed_swap_amount",
+            "type": "u64"
+          },
+          {
+            "name": "seed_interest_amount",
+            "type": "u64"
+          },
+          {
+            "name": "seed_swap_checkpoint",
+            "type": "u128"
+          },
+          {
+            "name": "seed_interest_checkpoint",
+            "type": "u128"
+          },
+          {
+            "name": "seed_swap_remainder",
+            "type": "u64"
+          },
+          {
+            "name": "seed_interest_remainder",
+            "type": "u64"
+          },
+          {
+            "name": "carry",
+            "type": {
+              "defined": {
+                "name": "TrancheRevenueCarry"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "TranchePolicy",
+      "docs": [
+        "Governed tranche economics. Exit timing remains protocol-defined; only its",
+        "request/renewal fee is changed through the tranche parameter family."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "junior_income_share_bps",
+            "type": "u16"
+          },
+          {
+            "name": "liquidation_fee_bps",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TrancheRevenueCarry",
+      "docs": [
+        "Carry sub-basis-point atoms across credits so splitting a payment into many",
+        "small transfers cannot change either tranche's governed allocation."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "interest_remainder_bps",
+            "type": "u16"
+          },
+          {
+            "name": "swap_remainder_bps",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
       "name": "UpdateFutarchyAuthorityArgs",
       "type": {
         "kind": "struct",
@@ -22280,6 +24429,32 @@
             "type": {
               "option": "pubkey"
             }
+          },
+          {
+            "name": "income_initialized",
+            "type": "bool"
+          },
+          {
+            "name": "income",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "IncomeReceivableClaim"
+                  }
+                },
+                2
+              ]
+            }
+          },
+          {
+            "name": "escrow_balance",
+            "docs": [
+              "Owner's virtual receipts: junior exit escrow, or senior governance locks.",
+              "Governance cash yield uses its existing virtual ledger; historical",
+              "unpaid-income ownership is checkpointed here for both token kinds."
+            ],
+            "type": "u64"
           }
         ]
       }
@@ -22389,6 +24564,9 @@
           },
           {
             "name": "Hlp"
+          },
+          {
+            "name": "Junior"
           }
         ]
       }
@@ -22404,6 +24582,16 @@
       "name": "BPS_DENOMINATOR",
       "type": "u16",
       "value": "10000"
+    },
+    {
+      "name": "DEFAULT_JUNIOR_INCOME_SHARE_BPS",
+      "type": "u16",
+      "value": "5000"
+    },
+    {
+      "name": "DEFAULT_LIQUIDATION_FEE_BPS",
+      "type": "u16",
+      "value": "100"
     },
     {
       "name": "DEFAULT_PROTOCOL_REVENUE_SHARE_BPS",
@@ -22532,7 +24720,7 @@
         "decode as this structure."
       ],
       "type": "u8",
-      "value": "6"
+      "value": "10"
     },
     {
       "name": "MARKET_RESERVE_VAULT_SEED_PREFIX",
@@ -22565,6 +24753,21 @@
       "value": "7500"
     },
     {
+      "name": "MAX_JUNIOR_EXIT_FEE_BPS",
+      "type": "u16",
+      "value": "50"
+    },
+    {
+      "name": "MAX_JUNIOR_INCOME_SHARE_BPS",
+      "type": "u16",
+      "value": "9000"
+    },
+    {
+      "name": "MAX_LIQUIDATION_FEE_BPS",
+      "type": "u16",
+      "value": "300"
+    },
+    {
       "name": "MAX_PARAMETER_FEE_BPS",
       "docs": [
         "Absolute cap shared by the three configurable swap-fee components.",
@@ -22582,6 +24785,21 @@
       "name": "METADATA_SEED_PREFIX",
       "type": "bytes",
       "value": "[109, 101, 116, 97, 100, 97, 116, 97]"
+    },
+    {
+      "name": "MIN_JUNIOR_EXIT_FEE_BPS",
+      "type": "u16",
+      "value": "1"
+    },
+    {
+      "name": "MIN_JUNIOR_INCOME_SHARE_BPS",
+      "type": "u16",
+      "value": "1000"
+    },
+    {
+      "name": "MIN_LIQUIDATION_FEE_BPS",
+      "type": "u16",
+      "value": "25"
     },
     {
       "name": "NAD",
@@ -22654,6 +24872,15 @@
       ],
       "type": "u64",
       "value": "200"
+    },
+    {
+      "name": "TRANCHE_PARAMETER_TIMELOCK_SECONDS",
+      "docs": [
+        "Tranche holders can need the full maximum exit notice before changing the",
+        "economics they underwrite."
+      ],
+      "type": "i64",
+      "value": "864000"
     },
     {
       "name": "YIELD_ACCOUNT_SEED_PREFIX",

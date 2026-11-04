@@ -1,29 +1,23 @@
-> Health-only liquidation candidate: current-health previews replace liquidation
-> registration. The companion protocol/SDK PR changes position layouts and
-> removes distress clocks. This candidate is captured, not deployed; use the
-> pinned source, program, SDK and fixtures together.
-
 # Dusk Keepers
 
-Production-oriented keeper runtimes for Dusk, pinned to one protocol snapshot and
-verified with the same conformance fixtures in Rust and TypeScript.
+Keeper runtimes for Dusk, pinned to the observed Solana devnet deployment and
+verified with shared conformance fixtures in Rust and TypeScript.
 
-The candidate interface is Dusk PR #45 at `cd6f1ec0`. Rust implements borrowing,
-leverage and hLP observation, atomic flash fills, emergency settlement and hLP
-terminal close. TypeScript provides independent protocol codecs and shadow
-reference checks.
+The current capture is `devnet-2026-11-04-c7db901`. Its program IDs, IDLs and
+executable payloads were read directly from devnet. Source `c7db901` supplies the
+matching SDK and fixture builders; newer Dusk `main` (`e309197`) contains an srLP
+rename that was not present in the deployed IDLs at capture time. Keeper aliases
+continue to use srLP while encoding the deployed yLP names and PDA seeds.
 
-The `hlp-recovery` profile checks both market-wide hLP vaults. It first attempts
-the program-quoted atomic flash repair with explicit wallet and collateral
-bounds, then permits terminal close only when the quote authorizes a full
-settlement. The devnet program bytes are verified against the captured
-artifacts. The lock stays captured so this PR remains shadow-only until the
-separately reviewed live-release gate freezes it.
+Rust implements lending, leveraged liquidation and orders, hLP recovery, revenue,
+lifecycle and sentinel workers. TypeScript provides independent protocol codecs
+and shadow reference checks. Active oracle policies add the required read-only
+reports to liquidation, hLP and order instructions and fresh execution snapshots.
 
-The lock remains **captured** and defaults to **shadow mode**. Local tests execute
-the exact binaries deployed on devnet. Nothing in this migration freezes the
-lock or enables signing on that candidate.
-See [the flash migration runbook](docs/flash-liquidation-migration.md).
+The lock remains **captured** and defaults to **shadow mode**. Local bank tests
+execute the downloaded devnet binaries. Live signing still requires the separate
+frozen-lock release gate. See [the devnet capture record](docs/devnet-capture.md)
+and [the flash migration runbook](docs/flash-liquidation-migration.md).
 
 ## What is here
 

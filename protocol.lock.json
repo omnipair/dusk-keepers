@@ -1,57 +1,57 @@
 {
   "$schema": "./protocol/schemas/protocol-lock.schema.json",
   "schemaVersion": 1,
-  "revision": "health-only-2026-10-30-9d6e5373",
+  "revision": "devnet-2026-11-04-c7db901",
   "status": "captured",
-  "generatedAt": "2026-10-30T15:55:06.959Z",
+  "generatedAt": "2026-11-04T12:22:43.458Z",
   "source": {
     "repository": "https://github.com/omnipair/dusk",
-    "branch": "feat/health-only-liquidations",
-    "gitCommit": "9d6e53738f6c5dd550d539d8c045888b819c5ec8",
-    "worktreeFingerprintSha256": "fd0c0b00026c1a19aa2c9cbcb346ddfba646ef717f455f4118bf8b1f5bed8585"
+    "branch": "(detached)",
+    "gitCommit": "c7db9013b9d751da5a734914e3efae203ccdf59b",
+    "worktreeFingerprintSha256": "795c805376213df22bb3431033617562c4a57d0c258dd6d655e80ae478e7abeb"
   },
   "toolchain": {
-    "anchor": "0.31.1",
-    "rust": "1.97.1",
-    "solana": "4.1.0-rc.1",
-    "surfpool": "1.2.0",
-    "node": "24.9.0"
+    "anchor": "anchor-cli 0.31.1",
+    "rust": "rustc 1.95.0 (59807616e 2026-04-14)",
+    "solana": "solana-cli 3.1.15 (src:40a31afe; feat:687058115, client:Agave)",
+    "surfpool": null,
+    "node": "v24.22.2"
   },
   "programs": [
     {
       "name": "dusk",
-      "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+      "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
       "binary": {
         "path": "artifacts/dusk.so",
-        "sha256": "f61dedf4aaaae278c4af651630a48ec6d95c9ff444020d5e1b497705379bdf66"
+        "sha256": "df07df6e5f7a19de564db019b9b93172f3e58ecb73d6ffbc896967ea3d84e2bb"
       },
       "idl": {
         "path": "artifacts/dusk.json",
-        "sha256": "eb1081be876eab2721d962e277bb09da789b334abbf4ab6344b413a80b0fd894"
+        "sha256": "1c980a9be65bd47fdbe3f90c6f50c004078c43c28e5c13321590c3e33ea618d0"
       }
     },
     {
       "name": "leverage_delegate",
-      "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+      "programId": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
       "binary": {
         "path": "artifacts/leverage_delegate.so",
-        "sha256": "602e1c9934af11796967453e155417da5a97a8085ca450365a069dc6daaea32b"
+        "sha256": "dcc8bd4c3cb9cf966c499b49de5bd20da43c62afb2387c630ada16ac9b314703"
       },
       "idl": {
         "path": "artifacts/leverage_delegate.json",
-        "sha256": "dda5cbb8a48eff8753d9a4a235f19531293f2d475ab4fef9a3c9b64279b4ccd0"
+        "sha256": "a208219d23675a973df89a45f23c5af1cbd2464bed2d8439324b4bc261e2f3fb"
       }
     }
   ],
   "sdk": {
     "path": "artifacts/dusk-sdk.tgz",
-    "sha256": "3ec4a888f4723aea24063cc73e3599ce3600128241abf9b366180f60020887c3"
+    "sha256": "4368025f7a95ccba235403e2664e6c867b1f8bd9f263401faa20fc4d0f5fcc17"
   },
   "compatibility": {
-    "accountLayoutFingerprintSha256": "310337422f7f11432c7e93a08f2cd41a372757eed23fbd05dd86193254981bec",
-    "instructionFingerprintSha256": "d3cd084486f16f7714cfe4f126943d366a73b3fc7601ea49d7516b8d3983ccaa",
-    "eventFingerprintSha256": "8c76e6124a2bc20434c2a361c3c579d0682d97d1c434114051d5f0fda2ff2cb2",
-    "errorFingerprintSha256": "14cf3e195ffb812faf3a4359cf49ecd2d834ca9861eea62277519064d3b1fa5b",
-    "pdaFingerprintSha256": "37ff74e3ebc734fd3b58edbdaf0939296e333364b34ddee77662f9481551f2b8"
+    "accountLayoutFingerprintSha256": "f2a245fba706ff8f6ca0a9e8bfe9777fd06c7839ca2c4e2fc5f46a93ed52b528",
+    "instructionFingerprintSha256": "e1a646dd0d2f98ab9d17367cb71ac2dc38afd94d68e08188ce1b05fbd301d2e8",
+    "eventFingerprintSha256": "9cea53faff989ba964432e93b1ea84c07759101f1ba1b9f4e3f9db93e9f66cb3",
+    "errorFingerprintSha256": "26255723d0d0008102f323ad566fa1b5120d0c4d00043f65efa25fe92cc686cf",
+    "pdaFingerprintSha256": "82ec4b8a18324f0e23cbaa759ea3381fc4782e43b8c1a02615d203b4ea47d95c"
   }
 }

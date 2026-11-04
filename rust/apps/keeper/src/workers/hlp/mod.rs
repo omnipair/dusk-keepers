@@ -111,6 +111,13 @@ impl HlpJob<'_> {
         keys.extend(
             context
                 .market
+                .oracle_remaining_accounts()
+                .iter()
+                .map(|meta| meta.pubkey),
+        );
+        keys.extend(
+            context
+                .market
                 .hlp_remaining_accounts()
                 .iter()
                 .map(|meta| meta.pubkey),
@@ -132,6 +139,9 @@ impl HlpJob<'_> {
             self.signer.public_key(),
             target_asset,
         )?;
+        for feed in context.market.oracle_remaining_accounts() {
+            snapshot.account(feed.pubkey)?;
+        }
         Ok((context, snapshot))
     }
 

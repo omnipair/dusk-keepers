@@ -169,9 +169,25 @@ export function resolveLiquidationAccounts(
         "quote_side.interest_vault",
       ].map((f) => m.key(f))
     : [];
+  const oracle: string[] = [];
+  const weight = m.int("oracle.policy.lambda_bps");
+  if (weight > 0n) {
+    const format = Number(m.int("oracle.policy.format"));
+    if (weight >= 10_000n || ![1, 2, 3, 4].includes(format))
+      throw new Error("invalid oracle policy");
+    const base = m.key("oracle.policy.base_account");
+    if (base === ZERO) throw new Error("missing oracle base feed");
+    oracle.push(base);
+    if (format === 2 || format === 4) {
+      const quote = m.key("oracle.policy.quote_account");
+      if (quote === ZERO || quote === base) throw new Error("invalid oracle quote feed");
+      oracle.push(quote);
+    }
+  }
   return {
     named,
     hlp,
+    oracle,
     collateralReserve: m.key(`${collateral}_side.reserve_vault`),
     program,
     position,
@@ -212,6 +228,9 @@ export function liquidationInstruction(
         is_writable: true,
       })),
     );
+  accounts.push(...context.oracle.map(k => ({
+    pubkey: Array.from(bytes(k)), is_signer: false, is_writable: false,
+  })));
   return {
     program_id: Array.from(bytes(context.program)),
     accounts,

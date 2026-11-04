@@ -334,6 +334,7 @@ impl Context {
         if internal {
             accounts.extend(self.market.hlp_remaining_accounts());
         }
+        accounts.extend(self.market.oracle_remaining_accounts());
         Ok(Instruction {
             program_id: self.program,
             accounts,

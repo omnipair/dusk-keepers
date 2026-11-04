@@ -77,6 +77,7 @@ try {
   execFileSync(
     `${source}/node_modules/.bin/mocha`,
     [
+      "--no-config", "--node-option", "loader=ts-node/esm",
       "--require",
       "ts-node/register",
       "--extensions",

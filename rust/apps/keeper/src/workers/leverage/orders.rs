@@ -477,6 +477,7 @@ pub fn build_order_plan(
     if kind != "LeverageOrder" {
         primary.accounts.extend(market.hlp_remaining_accounts());
     }
+    primary.accounts.extend(market.oracle_remaining_accounts());
     setup.push(primary);
     Ok(OrderPlan {
         instructions: setup,

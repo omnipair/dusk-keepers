@@ -9,7 +9,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-limit_entry_execute",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "limit_entry_execute",
           "jobKind": "limit_entry",
           "market": "58y6Xs6Ujqh68vFWrAXsPUcBv1YMqWJWgZsHT75aL24Y",
@@ -20,7 +20,7 @@
         "primary": {
           "specificationKey": "leverage_delegate:execute_leverage_entry_order",
           "program": "leverage_delegate",
-          "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+          "programId": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
           "instructionName": "execute_leverage_entry_order",
           "dataHex": "63433961cc47ac9007000000000000000000000000000000",
           "accounts": [
@@ -122,7 +122,7 @@
             },
             {
               "name": "dusk_program",
-              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+              "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
               "writable": false,
               "signer": false
             },
@@ -154,7 +154,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "7653a0d26a765e5056dc7a6b8b274d96a7987f632cd6a51883a4a1da587340de"
+        "paritySha256": "f87787bfef917cb3c9fd5f4a0ee29a64e6170775ddec410feb35221e510a7e8f"
       }
     },
     {
@@ -164,7 +164,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-hlp_order_execute",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "hlp_order_execute",
           "jobKind": "hlp_order",
           "market": "3hBMFrEN3Uo42vpS9JM5Zs4Cx92PTPZWiitHTQpEoGZ2",
@@ -175,7 +175,7 @@
         "primary": {
           "specificationKey": "leverage_delegate:execute_hlp_order",
           "program": "leverage_delegate",
-          "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+          "programId": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
           "instructionName": "execute_hlp_order",
           "dataHex": "ba32b16ca8ca8ec90700000000000000",
           "accounts": [
@@ -301,7 +301,7 @@
             },
             {
               "name": "dusk_program",
-              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+              "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
               "writable": false,
               "signer": false
             },
@@ -327,7 +327,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "ba7aad9e09cad47be6f388580b7623b5a5ce48e56fe2f84759ee9b16485ea1d2"
+        "paritySha256": "a3e79cec45c04eb3d03972e7b19086c62a4d90d24d5e6dbc27b6d55fdac6dd4d"
       }
     },
     {
@@ -337,7 +337,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-flash_liquidation_settle",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "flash_liquidation_settle",
           "jobKind": "lending_liquidation_bid",
           "market": "AEtZVM5c55RkzrqkuTBaHJsbZNkkTuN3ygAiJry8HyQf",
@@ -348,7 +348,7 @@
         "primary": {
           "specificationKey": "dusk:settle_flash_liquidation",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "settle_flash_liquidation",
           "dataHex": "a15d5938857c4f14",
           "accounts": [
@@ -468,7 +468,7 @@
             },
             {
               "name": "program",
-              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+              "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
               "writable": false,
               "signer": false
             }
@@ -476,7 +476,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "5f03c41d5ef400c3f9162346e6b98802a629adb508186f84051a43e7e8f330c5"
+        "paritySha256": "24f24d20acd00bf6f57ca98544a1d0fb4b85564b8b48e3f2887218ca673a9101"
       }
     },
     {
@@ -486,7 +486,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-flash_liquidation_preview",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "flash_liquidation_preview",
           "jobKind": "lending_liquidation_bid",
           "market": "HzUWCedXS7JYGNxQmLS5xkApxvQLXRQDgQLw1okk4wSF",
@@ -497,7 +497,7 @@
         "primary": {
           "specificationKey": "dusk:preview_flash_liquidation",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "preview_flash_liquidation",
           "dataHex": "ee5e7af3d6aff60300e80300000000000000",
           "accounts": [
@@ -523,7 +523,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "611488c18f4433fc09428a09b2f2d2eb0e745b67633ee2fbcab9d3eb0135607b"
+        "paritySha256": "8d27f06a0fb9b1ec5175151716e0f2aa832bad654c4c615539b0b43802bb939e"
       }
     },
     {
@@ -533,7 +533,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-emergency_liquidation_preview",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "emergency_liquidation_preview",
           "jobKind": "lending_liquidation_settle",
           "market": "4r9ENwj9SAvNQCfXmxswGm4RyQdGmm3zUcHUyiCPCTqd",
@@ -544,7 +544,7 @@
         "primary": {
           "specificationKey": "dusk:preview_emergency_liquidation",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "preview_emergency_liquidation",
           "dataHex": "4bc8420070e6183800e80300000000000000",
           "accounts": [
@@ -576,7 +576,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "f627323022b3465ad9012b61f3a86c655ad7c1b6cb805029e4b5519965c8367f"
+        "paritySha256": "449bd409903c8df8a539b8e5b523c93764369a80ae5729135c2276cf01f2ab6d"
       }
     },
     {
@@ -586,7 +586,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_health_preview",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "lending_health_preview",
           "jobKind": "lending_liquidation_bid",
           "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
@@ -597,7 +597,7 @@
         "primary": {
           "specificationKey": "dusk:preview_liquidation_health",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "preview_liquidation_health",
           "dataHex": "7b9e787a5f1c06ac00",
           "accounts": [
@@ -623,7 +623,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "d691ef455b805710fab9203f4015325b36024f8efd7384da53a21c3daed00286"
+        "paritySha256": "86f3e55e1bce25e99f2cbc83cdb8c5294d00bd5561c4820fdda138d717dbaf0f"
       }
     },
     {
@@ -633,7 +633,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_liquidation_bid",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "lending_liquidation_bid",
           "jobKind": "lending_liquidation_bid",
           "market": "FyVqcLFgZPoQ827oQwvnvNLnggyWNkgZdMsrPVx5xERy",
@@ -644,7 +644,7 @@
         "primary": {
           "specificationKey": "dusk:begin_flash_liquidation",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "begin_flash_liquidation",
           "dataHex": "12f22f2acb2d62fc070707070707070707070707070707070707070707070707070707070707070700e8030000000000004c0400000000000084030000000000001900000000000000000100",
           "accounts": [
@@ -770,7 +770,7 @@
             },
             {
               "name": "program",
-              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+              "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
               "writable": false,
               "signer": false
             }
@@ -778,7 +778,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "eed48bb427fca2e368b0c7eeb2d81241135c6fcc0ba7c8614b6c994babc45acb"
+        "paritySha256": "7f81db4143ef513c0573bb693fbf42292ca60a68629a31b31d6d0752644af98f"
       }
     },
     {
@@ -788,7 +788,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_liquidation_floor_settle",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "lending_liquidation_floor_settle",
           "jobKind": "lending_liquidation_settle",
           "market": "28NFhr44HWvSdKUAi5g7PV6VapbJuqSEUJ1Zf2NK5sEe",
@@ -799,7 +799,7 @@
         "primary": {
           "specificationKey": "dusk:emergency_liquidation",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "emergency_liquidation",
           "dataHex": "185f76884dc22cf700e8030000000000000001000000000000008403000000000000",
           "accounts": [
@@ -913,7 +913,7 @@
             },
             {
               "name": "program",
-              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+              "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
               "writable": false,
               "signer": false
             }
@@ -921,7 +921,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "dac60b4a4e57ec1701db1d405091f1ddc55950824a6167377ab9be7effd99e86"
+        "paritySha256": "96f65b7825ecb4c850619db9c07a5fb43be1aa766077a36c5b25667b468aba4d"
       }
     },
     {
@@ -931,7 +931,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-leverage_liquidation",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "leverage_liquidation",
           "jobKind": "leverage_liquidation",
           "market": "ETPTSwgSN95hbe3tWqw96UqbpkSZ9v2XWvfyL7vRoPTZ",
@@ -942,7 +942,7 @@
         "primary": {
           "specificationKey": "dusk:preview_liquidation_health",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "preview_liquidation_health",
           "dataHex": "7b9e787a5f1c06ac00",
           "accounts": [
@@ -968,7 +968,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "e69fc094929063466c24873ee1c848e5248e3d98b109a8f6f1d826f12461ef84"
+        "paritySha256": "59ee49cc5eb0ded951158a7bab86ae2a888f45bc32557a6aaee4f61432b143fd"
       }
     },
     {
@@ -978,7 +978,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-hlp_flash_preview",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "hlp_flash_preview",
           "jobKind": "hlp_recovery",
           "market": "Dmq8tHo5XeGUpMWCqjgq157n2TJu2UsdYNkxmuvaALrH",
@@ -989,7 +989,7 @@
         "primary": {
           "specificationKey": "dusk:preview_hlp_flash",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "preview_hlp_flash",
           "dataHex": "1aa47654e7569db000",
           "accounts": [
@@ -1021,7 +1021,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "bd94453b31ec533549d239d97c7c52e998fee54e279284fb23e1be86a384460f"
+        "paritySha256": "4aa3e2124363aaa8d78e92942cf44e06346c1513ec04ef76c7703fd54ef3cf85"
       }
     },
     {
@@ -1031,7 +1031,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-hlp_flash_begin",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "hlp_flash_begin",
           "jobKind": "hlp_recovery",
           "market": "Fy3cw3L3Ky8nmJjmNkvtRSENGLzdC82huiAk98NDYdsg",
@@ -1042,7 +1042,7 @@
         "primary": {
           "specificationKey": "dusk:begin_hlp_flash",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "begin_hlp_flash",
           "dataHex": "29cff767b43a830d00e80300000000000000f401000000000000fa000000000000004c0400000000000084030000000000000400",
           "accounts": [
@@ -1156,7 +1156,7 @@
             },
             {
               "name": "program",
-              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+              "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
               "writable": false,
               "signer": false
             }
@@ -1164,7 +1164,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "f3a5e5d5a8f2c02f47eff1c9c80ed35e829753547ba1ae9d97589981b94f6243"
+        "paritySha256": "3128f6f5cf30eb2c60760b4ef5017e3e91132c41c6f79f3850ac762883f2d9be"
       }
     },
     {
@@ -1174,7 +1174,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-hlp_flash_settle",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "hlp_flash_settle",
           "jobKind": "hlp_recovery",
           "market": "AK475cMfSrxQtCakSccwYGyRJJN3rhYALhuf9eVhcJuJ",
@@ -1185,7 +1185,7 @@
         "primary": {
           "specificationKey": "dusk:settle_hlp_flash",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "settle_hlp_flash",
           "dataHex": "d77c9968c35b76d1",
           "accounts": [
@@ -1293,7 +1293,7 @@
             },
             {
               "name": "program",
-              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+              "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
               "writable": false,
               "signer": false
             }
@@ -1301,7 +1301,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "b2759db1416b51dcb20da4be8e742d814dbdb0629453da91708dc731825b34c3"
+        "paritySha256": "9708f161042b076ad06872ab5a325e3c5d45997c322c94096bd3d55899d4276c"
       }
     },
     {
@@ -1311,7 +1311,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-hlp_insolvent_close",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "hlp_insolvent_close",
           "jobKind": "hlp_recovery",
           "market": "J6zHYQRbdceBmWLXFeRvJJ1jf4mDGhXFgAKTjqg8yvgr",
@@ -1322,7 +1322,7 @@
         "primary": {
           "specificationKey": "dusk:close_insolvent_hlp",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "close_insolvent_hlp",
           "dataHex": "9eac308679a1c2a800f401000000000000fa000000000000000100000000000000",
           "accounts": [
@@ -1406,7 +1406,7 @@
             },
             {
               "name": "program",
-              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+              "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
               "writable": false,
               "signer": false
             }
@@ -1414,7 +1414,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "af0bbb221abebfda4beef1e49697a4dcea82e0f721a2bb35bca3500f4a19e23a"
+        "paritySha256": "7ea14bc2748aee4ff461a651e601409956cb7a4121c64acf877ab9f16d6a3639"
       }
     },
     {
@@ -1424,7 +1424,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-delegated_close_take_profit",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "delegated_close_take_profit",
           "jobKind": "take_profit",
           "market": "3JSi3jkznPd3X6fCfd62EceVZmTkatZnCsxvmJYTgiwh",
@@ -1435,7 +1435,7 @@
         "primary": {
           "specificationKey": "dusk:delegated_close_leverage",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "delegated_close_leverage",
           "dataHex": "0eda6299a413308b00200300000000000010271000000005236f00df83c11f0700000000000000100000009ce0eefa5fe5eb3b07000000000000000b00",
           "accounts": [
@@ -1513,7 +1513,7 @@
             },
             {
               "name": "delegated_program",
-              "address": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+              "address": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
               "writable": false,
               "signer": false
             },
@@ -1549,7 +1549,7 @@
             },
             {
               "name": "program",
-              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+              "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
               "writable": false,
               "signer": false
             }
@@ -1687,7 +1687,7 @@
           {
             "specificationKey": "leverage_delegate:before_take_profit",
             "program": "leverage_delegate",
-            "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+            "programId": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
             "instructionName": "before_take_profit",
             "dataHex": "05236f00df83c11f0700000000000000",
             "accounts": [
@@ -1763,7 +1763,7 @@
           {
             "specificationKey": "leverage_delegate:after_close_order",
             "program": "leverage_delegate",
-            "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+            "programId": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
             "instructionName": "after_close_order",
             "dataHex": "9ce0eefa5fe5eb3b0700000000000000",
             "accounts": [
@@ -1831,7 +1831,7 @@
             "remainingAccounts": []
           }
         ],
-        "paritySha256": "ff7e4bf384169a9ae5ae008f7c7b553d3cc8494be0e87e16d4a0504689eec2f5"
+        "paritySha256": "cb717fe815d90ad23d2c6795c78b47a9f668cb0696d87462270f31a161ce67a6"
       }
     },
     {
@@ -1841,7 +1841,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-delegated_close_stop_loss",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "delegated_close_stop_loss",
           "jobKind": "stop_loss",
           "market": "8PB15EEhUh5AQoMyQKorgGGNiNLYTHkW3NZQchDuRGLh",
@@ -1852,7 +1852,7 @@
         "primary": {
           "specificationKey": "dusk:delegated_close_leverage",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "delegated_close_leverage",
           "dataHex": "0eda6299a413308b002003000000000000102710000000f63e52e8a8c7794e0700000000000000100000009ce0eefa5fe5eb3b07000000000000000b00",
           "accounts": [
@@ -1930,7 +1930,7 @@
             },
             {
               "name": "delegated_program",
-              "address": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+              "address": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
               "writable": false,
               "signer": false
             },
@@ -1966,7 +1966,7 @@
             },
             {
               "name": "program",
-              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+              "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
               "writable": false,
               "signer": false
             }
@@ -2104,7 +2104,7 @@
           {
             "specificationKey": "leverage_delegate:before_stop_loss",
             "program": "leverage_delegate",
-            "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+            "programId": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
             "instructionName": "before_stop_loss",
             "dataHex": "f63e52e8a8c7794e0700000000000000",
             "accounts": [
@@ -2180,7 +2180,7 @@
           {
             "specificationKey": "leverage_delegate:after_close_order",
             "program": "leverage_delegate",
-            "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+            "programId": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
             "instructionName": "after_close_order",
             "dataHex": "9ce0eefa5fe5eb3b0700000000000000",
             "accounts": [
@@ -2248,7 +2248,7 @@
             "remainingAccounts": []
           }
         ],
-        "paritySha256": "60aeb73c146d976bf294c30f695688955579cefc946d11dcb0b129687cb27939"
+        "paritySha256": "ace8ca5f1c2b50ff86fe4fbfb068699c6a32e7462e9e946f61f264cfbdec6d55"
       }
     },
     {
@@ -2258,7 +2258,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-protocol_revenue_auction_settle",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "protocol_revenue_auction_settle",
           "jobKind": "auction_bid",
           "market": "23uE62bbfpdBoJE1ByN1TiSkMEYsDkt9pDS2huKSmkXF",
@@ -2269,7 +2269,7 @@
         "primary": {
           "specificationKey": "dusk:settle_protocol_auction",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "settle_protocol_auction",
           "dataHex": "cecc2087081648500000e803000000000000b603000000000000",
           "accounts": [
@@ -2359,7 +2359,7 @@
             },
             {
               "name": "program",
-              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+              "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
               "writable": false,
               "signer": false
             }
@@ -2367,7 +2367,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "3938124b446c3501fdaeb135d9f5dec39a5c01e4ece922b9d7e34cc696e9ba22"
+        "paritySha256": "82a3de2d4015fc785cd8ab5e22588f1870a8a7a62ce903a039de654fa2cf71ba"
       }
     },
     {
@@ -2377,7 +2377,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-eligible_proposal_queue",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "eligible_proposal_queue",
           "jobKind": "lifecycle",
           "market": "Cu5Jhb1STfGExWRWKxroE1CwxoGRkbMjbSxoVTJNQ7bU",
@@ -2388,7 +2388,7 @@
         "primary": {
           "specificationKey": "dusk:queue_parameter_proposal",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "queue_parameter_proposal",
           "dataHex": "c259a444fdfb156c",
           "accounts": [
@@ -2430,7 +2430,7 @@
             },
             {
               "name": "program",
-              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+              "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
               "writable": false,
               "signer": false
             }
@@ -2438,7 +2438,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "f6496d4189f1c0496e59bb6c92c9aa3a9bb90a82dace185d30947145b71e02e9"
+        "paritySha256": "d53c7859d1f645c14e18ad9853cb75f3294e9b37bb63cd896ee7709f811b0847"
       }
     },
     {
@@ -2448,7 +2448,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-eligible_proposal_execute",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "eligible_proposal_execute",
           "jobKind": "lifecycle",
           "market": "9QyWxynPcNbwqLzga6ZioAL9GcA8DpEFxvkWEaGQtfzJ",
@@ -2459,7 +2459,7 @@
         "primary": {
           "specificationKey": "dusk:execute_parameter_proposal",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "execute_parameter_proposal",
           "dataHex": "2e6a707128ff9a1b",
           "accounts": [
@@ -2495,7 +2495,7 @@
             },
             {
               "name": "program",
-              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+              "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
               "writable": false,
               "signer": false
             }
@@ -2503,7 +2503,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "f1eae4f6b687fee44adf91b613566551f32b159480568065cfecf2a0bfc871d3"
+        "paritySha256": "95a71c01707b88f1bd57e0d973ce4eda8b931ae03e46203ed5e210a7c9b5d23f"
       }
     }
   ],
@@ -2527,7 +2527,7 @@
         "primary": {
           "specificationKey": "dusk:preview_liquidation_health",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "preview_liquidation_health",
           "dataHex": "7b9e787a5f1c06ac00",
           "accounts": [
@@ -2553,7 +2553,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "d691ef455b805710fab9203f4015325b36024f8efd7384da53a21c3daed00286"
+        "paritySha256": "86f3e55e1bce25e99f2cbc83cdb8c5294d00bd5561c4820fdda138d717dbaf0f"
       }
     },
     {
@@ -2564,7 +2564,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_health_preview",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "lending_health_preview",
           "jobKind": "take_profit",
           "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
@@ -2575,7 +2575,7 @@
         "primary": {
           "specificationKey": "dusk:preview_liquidation_health",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "preview_liquidation_health",
           "dataHex": "7b9e787a5f1c06ac00",
           "accounts": [
@@ -2601,7 +2601,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "d691ef455b805710fab9203f4015325b36024f8efd7384da53a21c3daed00286"
+        "paritySha256": "86f3e55e1bce25e99f2cbc83cdb8c5294d00bd5561c4820fdda138d717dbaf0f"
       }
     },
     {
@@ -2612,7 +2612,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_health_preview",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "lending_health_preview",
           "jobKind": "lending_liquidation_bid",
           "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
@@ -2623,7 +2623,7 @@
         "primary": {
           "specificationKey": "dusk:preview_liquidation_health",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "execute_parameter_proposal",
           "dataHex": "7b9e787a5f1c06ac00",
           "accounts": [
@@ -2649,7 +2649,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "d691ef455b805710fab9203f4015325b36024f8efd7384da53a21c3daed00286"
+        "paritySha256": "86f3e55e1bce25e99f2cbc83cdb8c5294d00bd5561c4820fdda138d717dbaf0f"
       }
     },
     {
@@ -2660,7 +2660,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_health_preview",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "lending_health_preview",
           "jobKind": "lending_liquidation_bid",
           "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
@@ -2697,7 +2697,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "d691ef455b805710fab9203f4015325b36024f8efd7384da53a21c3daed00286"
+        "paritySha256": "86f3e55e1bce25e99f2cbc83cdb8c5294d00bd5561c4820fdda138d717dbaf0f"
       }
     },
     {
@@ -2708,7 +2708,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_health_preview",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "lending_health_preview",
           "jobKind": "lending_liquidation_bid",
           "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
@@ -2719,7 +2719,7 @@
         "primary": {
           "specificationKey": "dusk:preview_liquidation_health",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "preview_liquidation_health",
           "dataHex": "7b9e787a5f1c06ac00",
           "accounts": [
@@ -2745,7 +2745,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "d691ef455b805710fab9203f4015325b36024f8efd7384da53a21c3daed00286"
+        "paritySha256": "86f3e55e1bce25e99f2cbc83cdb8c5294d00bd5561c4820fdda138d717dbaf0f"
       }
     },
     {
@@ -2756,7 +2756,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_health_preview",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "lending_health_preview",
           "jobKind": "lending_liquidation_bid",
           "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
@@ -2767,7 +2767,7 @@
         "primary": {
           "specificationKey": "dusk:preview_liquidation_health",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "preview_liquidation_health",
           "dataHex": "009e787a5f1c06ac00",
           "accounts": [
@@ -2793,7 +2793,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "d691ef455b805710fab9203f4015325b36024f8efd7384da53a21c3daed00286"
+        "paritySha256": "86f3e55e1bce25e99f2cbc83cdb8c5294d00bd5561c4820fdda138d717dbaf0f"
       }
     },
     {
@@ -2804,7 +2804,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-eligible_proposal_queue",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "eligible_proposal_queue",
           "jobKind": "lifecycle",
           "market": "Cu5Jhb1STfGExWRWKxroE1CwxoGRkbMjbSxoVTJNQ7bU",
@@ -2815,7 +2815,7 @@
         "primary": {
           "specificationKey": "dusk:queue_parameter_proposal",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "queue_parameter_proposal",
           "dataHex": "c259a444fdfb156c",
           "accounts": [
@@ -2851,7 +2851,7 @@
             },
             {
               "name": "program",
-              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+              "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
               "writable": false,
               "signer": false
             }
@@ -2859,7 +2859,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "f6496d4189f1c0496e59bb6c92c9aa3a9bb90a82dace185d30947145b71e02e9"
+        "paritySha256": "d53c7859d1f645c14e18ad9853cb75f3294e9b37bb63cd896ee7709f811b0847"
       }
     },
     {
@@ -2870,7 +2870,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_health_preview",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "lending_health_preview",
           "jobKind": "lending_liquidation_bid",
           "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
@@ -2881,7 +2881,7 @@
         "primary": {
           "specificationKey": "dusk:preview_liquidation_health",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "preview_liquidation_health",
           "dataHex": "7b9e787a5f1c06ac00",
           "accounts": [
@@ -2907,7 +2907,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "d691ef455b805710fab9203f4015325b36024f8efd7384da53a21c3daed00286"
+        "paritySha256": "86f3e55e1bce25e99f2cbc83cdb8c5294d00bd5561c4820fdda138d717dbaf0f"
       }
     },
     {
@@ -2918,7 +2918,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_health_preview",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "lending_health_preview",
           "jobKind": "lending_liquidation_bid",
           "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
@@ -2929,7 +2929,7 @@
         "primary": {
           "specificationKey": "dusk:preview_liquidation_health",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "preview_liquidation_health",
           "dataHex": "7b9e787a5f1c06ac00",
           "accounts": [
@@ -2955,7 +2955,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "d691ef455b805710fab9203f4015325b36024f8efd7384da53a21c3daed00286"
+        "paritySha256": "86f3e55e1bce25e99f2cbc83cdb8c5294d00bd5561c4820fdda138d717dbaf0f"
       }
     },
     {
@@ -2966,7 +2966,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_liquidation_bid",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "lending_liquidation_bid",
           "jobKind": "lending_liquidation_bid",
           "market": "FyVqcLFgZPoQ827oQwvnvNLnggyWNkgZdMsrPVx5xERy",
@@ -2977,7 +2977,7 @@
         "primary": {
           "specificationKey": "dusk:begin_flash_liquidation",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "begin_flash_liquidation",
           "dataHex": "12f22f2acb2d62fc070707070707070707070707070707070707070707070707070707070707070700e8030000000000004c0400000000000084030000000000001900000000000000000100",
           "accounts": [
@@ -3103,7 +3103,7 @@
             },
             {
               "name": "program",
-              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+              "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
               "writable": false,
               "signer": false
             }
@@ -3111,7 +3111,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "eed48bb427fca2e368b0c7eeb2d81241135c6fcc0ba7c8614b6c994babc45acb"
+        "paritySha256": "7f81db4143ef513c0573bb693fbf42292ca60a68629a31b31d6d0752644af98f"
       }
     },
     {
@@ -3122,7 +3122,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-delegated_close_take_profit",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "delegated_close_take_profit",
           "jobKind": "take_profit",
           "market": "3JSi3jkznPd3X6fCfd62EceVZmTkatZnCsxvmJYTgiwh",
@@ -3133,7 +3133,7 @@
         "primary": {
           "specificationKey": "dusk:delegated_close_leverage",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "delegated_close_leverage",
           "dataHex": "0eda6299a413308b00200300000000000010271000000005236f00df83c11f0700000000000000100000009ce0eefa5fe5eb3b07000000000000000b00",
           "accounts": [
@@ -3205,7 +3205,7 @@
             },
             {
               "name": "delegated_program",
-              "address": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+              "address": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
               "writable": false,
               "signer": false
             },
@@ -3241,7 +3241,7 @@
             },
             {
               "name": "program",
-              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+              "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
               "writable": false,
               "signer": false
             }
@@ -3379,7 +3379,7 @@
           {
             "specificationKey": "leverage_delegate:before_take_profit",
             "program": "leverage_delegate",
-            "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+            "programId": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
             "instructionName": "before_take_profit",
             "dataHex": "05236f00df83c11f0700000000000000",
             "accounts": [
@@ -3455,7 +3455,7 @@
           {
             "specificationKey": "leverage_delegate:after_close_order",
             "program": "leverage_delegate",
-            "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+            "programId": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
             "instructionName": "after_close_order",
             "dataHex": "9ce0eefa5fe5eb3b0700000000000000",
             "accounts": [
@@ -3523,7 +3523,7 @@
             "remainingAccounts": []
           }
         ],
-        "paritySha256": "ff7e4bf384169a9ae5ae008f7c7b553d3cc8494be0e87e16d4a0504689eec2f5"
+        "paritySha256": "cb717fe815d90ad23d2c6795c78b47a9f668cb0696d87462270f31a161ce67a6"
       }
     },
     {
@@ -3534,7 +3534,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-delegated_close_take_profit",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "delegated_close_take_profit",
           "jobKind": "take_profit",
           "market": "3JSi3jkznPd3X6fCfd62EceVZmTkatZnCsxvmJYTgiwh",
@@ -3545,7 +3545,7 @@
         "primary": {
           "specificationKey": "dusk:delegated_close_leverage",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "delegated_close_leverage",
           "dataHex": "0eda6299a413308b00200300000000000010271000000005236f00df83c11f0700000000000000100000009ce0eefa5fe5eb3b07000000000000000b00",
           "accounts": [
@@ -3623,7 +3623,7 @@
             },
             {
               "name": "delegated_program",
-              "address": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+              "address": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
               "writable": false,
               "signer": false
             },
@@ -3659,7 +3659,7 @@
             },
             {
               "name": "program",
-              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+              "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
               "writable": false,
               "signer": false
             }
@@ -3797,7 +3797,7 @@
           {
             "specificationKey": "leverage_delegate:after_close_order",
             "program": "leverage_delegate",
-            "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+            "programId": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
             "instructionName": "after_close_order",
             "dataHex": "9ce0eefa5fe5eb3b0700000000000000",
             "accounts": [
@@ -3867,7 +3867,7 @@
           {
             "specificationKey": "leverage_delegate:before_take_profit",
             "program": "leverage_delegate",
-            "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+            "programId": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
             "instructionName": "before_take_profit",
             "dataHex": "05236f00df83c11f0700000000000000",
             "accounts": [
@@ -3941,7 +3941,7 @@
             "remainingAccounts": []
           }
         ],
-        "paritySha256": "ff7e4bf384169a9ae5ae008f7c7b553d3cc8494be0e87e16d4a0504689eec2f5"
+        "paritySha256": "cb717fe815d90ad23d2c6795c78b47a9f668cb0696d87462270f31a161ce67a6"
       }
     },
     {
@@ -3952,7 +3952,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-delegated_close_stop_loss",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "delegated_close_stop_loss",
           "jobKind": "stop_loss",
           "market": "8PB15EEhUh5AQoMyQKorgGGNiNLYTHkW3NZQchDuRGLh",
@@ -3963,7 +3963,7 @@
         "primary": {
           "specificationKey": "dusk:delegated_close_leverage",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "delegated_close_leverage",
           "dataHex": "0eda6299a413308b002003000000000000102710000000f63e52e8a8c7794e0700000000000000100000009ce0eefa5fe5eb3b07000000000000000b00",
           "accounts": [
@@ -4041,7 +4041,7 @@
             },
             {
               "name": "delegated_program",
-              "address": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+              "address": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
               "writable": false,
               "signer": false
             },
@@ -4077,7 +4077,7 @@
             },
             {
               "name": "program",
-              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+              "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
               "writable": false,
               "signer": false
             }
@@ -4215,7 +4215,7 @@
           {
             "specificationKey": "leverage_delegate:before_stop_loss",
             "program": "leverage_delegate",
-            "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+            "programId": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
             "instructionName": "before_stop_loss",
             "dataHex": "f63e52e8a8c7794e0700000000000000",
             "accounts": [
@@ -4291,7 +4291,7 @@
           {
             "specificationKey": "leverage_delegate:after_close_order",
             "program": "leverage_delegate",
-            "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+            "programId": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
             "instructionName": "after_close_order",
             "dataHex": "9ce0eefa5fe5eb3b0700000000000000",
             "accounts": [
@@ -4359,7 +4359,7 @@
             "remainingAccounts": []
           }
         ],
-        "paritySha256": "60aeb73c146d976bf294c30f695688955579cefc946d11dcb0b129687cb27939"
+        "paritySha256": "ace8ca5f1c2b50ff86fe4fbfb068699c6a32e7462e9e946f61f264cfbdec6d55"
       }
     },
     {
@@ -4370,7 +4370,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-delegated_close_stop_loss",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "delegated_close_stop_loss",
           "jobKind": "stop_loss",
           "market": "8PB15EEhUh5AQoMyQKorgGGNiNLYTHkW3NZQchDuRGLh",
@@ -4381,7 +4381,7 @@
         "primary": {
           "specificationKey": "dusk:delegated_close_leverage",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "delegated_close_leverage",
           "dataHex": "0eda6299a413308b002003000000000000102710000000f63e52e8a8c7794e0700000000000000100000009ce0eefa5fe5eb3b07000000000000000b00",
           "accounts": [
@@ -4459,7 +4459,7 @@
             },
             {
               "name": "delegated_program",
-              "address": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+              "address": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
               "writable": false,
               "signer": false
             },
@@ -4495,7 +4495,7 @@
             },
             {
               "name": "program",
-              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+              "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
               "writable": false,
               "signer": false
             }
@@ -4633,7 +4633,7 @@
           {
             "specificationKey": "leverage_delegate:before_stop_loss",
             "program": "leverage_delegate",
-            "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+            "programId": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
             "instructionName": "before_stop_loss",
             "dataHex": "f63e52e8a8c7794e0700000000000008",
             "accounts": [
@@ -4709,7 +4709,7 @@
           {
             "specificationKey": "leverage_delegate:after_close_order",
             "program": "leverage_delegate",
-            "programId": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+            "programId": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
             "instructionName": "after_close_order",
             "dataHex": "9ce0eefa5fe5eb3b0700000000000000",
             "accounts": [
@@ -4777,7 +4777,7 @@
             "remainingAccounts": []
           }
         ],
-        "paritySha256": "60aeb73c146d976bf294c30f695688955579cefc946d11dcb0b129687cb27939"
+        "paritySha256": "ace8ca5f1c2b50ff86fe4fbfb068699c6a32e7462e9e946f61f264cfbdec6d55"
       }
     },
     {
@@ -4788,7 +4788,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-eligible_proposal_execute",
-          "protocolRevision": "health-only-2026-10-30-9d6e5373",
+          "protocolRevision": "devnet-2026-11-04-c7db901",
           "action": "eligible_proposal_execute",
           "jobKind": "lifecycle",
           "market": "9QyWxynPcNbwqLzga6ZioAL9GcA8DpEFxvkWEaGQtfzJ",
@@ -4799,7 +4799,7 @@
         "primary": {
           "specificationKey": "dusk:execute_parameter_proposal",
           "program": "dusk",
-          "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+          "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
           "instructionName": "execute_parameter_proposal",
           "dataHex": "2e6a707128ff9a1b",
           "accounts": [
@@ -4835,7 +4835,7 @@
             },
             {
               "name": "program",
-              "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
+              "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
               "writable": false,
               "signer": false
             }

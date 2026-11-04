@@ -1,5 +1,5 @@
 {
-  "address": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv",
+  "address": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
   "metadata": {
     "name": "leverage_delegate",
     "version": "2.0.0",
@@ -745,45 +745,45 @@
             "program": {
               "kind": "const",
               "value": [
+                62,
                 254,
-                237,
-                118,
-                109,
-                5,
-                146,
-                245,
-                249,
-                66,
-                135,
-                243,
+                159,
+                172,
+                61,
+                59,
                 124,
-                36,
-                53,
-                12,
-                19,
-                89,
-                72,
+                201,
+                115,
+                229,
                 84,
+                36,
+                73,
+                157,
+                150,
+                203,
+                228,
+                237,
+                222,
+                36,
+                247,
+                148,
+                181,
+                131,
+                155,
+                204,
+                63,
+                226,
+                166,
                 7,
-                236,
-                95,
-                227,
-                238,
-                53,
-                42,
-                79,
-                224,
-                225,
-                53,
-                141,
-                56
+                231,
+                51
               ]
             }
           }
         },
         {
           "name": "dusk_program",
-          "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X"
+          "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ"
         },
         {
           "name": "token_2022_program",
@@ -1109,45 +1109,45 @@
             "program": {
               "kind": "const",
               "value": [
+                62,
                 254,
-                237,
-                118,
-                109,
-                5,
-                146,
-                245,
-                249,
-                66,
-                135,
-                243,
+                159,
+                172,
+                61,
+                59,
                 124,
-                36,
-                53,
-                12,
-                19,
-                89,
-                72,
+                201,
+                115,
+                229,
                 84,
+                36,
+                73,
+                157,
+                150,
+                203,
+                228,
+                237,
+                222,
+                36,
+                247,
+                148,
+                181,
+                131,
+                155,
+                204,
+                63,
+                226,
+                166,
                 7,
-                236,
-                95,
-                227,
-                238,
-                53,
-                42,
-                79,
-                224,
-                225,
-                53,
-                141,
-                56
+                231,
+                51
               ]
             }
           }
         },
         {
           "name": "dusk_program",
-          "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X"
+          "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ"
         },
         {
           "name": "token_2022_program",
@@ -1323,45 +1323,45 @@
             "program": {
               "kind": "const",
               "value": [
+                62,
                 254,
-                237,
-                118,
-                109,
-                5,
-                146,
-                245,
-                249,
-                66,
-                135,
-                243,
+                159,
+                172,
+                61,
+                59,
                 124,
-                36,
-                53,
-                12,
-                19,
-                89,
-                72,
+                201,
+                115,
+                229,
                 84,
+                36,
+                73,
+                157,
+                150,
+                203,
+                228,
+                237,
+                222,
+                36,
+                247,
+                148,
+                181,
+                131,
+                155,
+                204,
+                63,
+                226,
+                166,
                 7,
-                236,
-                95,
-                227,
-                238,
-                53,
-                42,
-                79,
-                224,
-                225,
-                53,
-                141,
-                56
+                231,
+                51
               ]
             }
           }
         },
         {
           "name": "dusk_program",
-          "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X"
+          "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ"
         },
         {
           "name": "protocol_fee",
@@ -1544,45 +1544,45 @@
             "program": {
               "kind": "const",
               "value": [
+                62,
                 254,
-                237,
-                118,
-                109,
-                5,
-                146,
-                245,
-                249,
-                66,
-                135,
-                243,
+                159,
+                172,
+                61,
+                59,
                 124,
-                36,
-                53,
-                12,
-                19,
-                89,
-                72,
+                201,
+                115,
+                229,
                 84,
+                36,
+                73,
+                157,
+                150,
+                203,
+                228,
+                237,
+                222,
+                36,
+                247,
+                148,
+                181,
+                131,
+                155,
+                204,
+                63,
+                226,
+                166,
                 7,
-                236,
-                95,
-                227,
-                238,
-                53,
-                42,
-                79,
-                224,
-                225,
-                53,
-                141,
-                56
+                231,
+                51
               ]
             }
           }
         },
         {
           "name": "dusk_program",
-          "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X"
+          "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ"
         },
         {
           "name": "protocol_fee",
@@ -1808,45 +1808,45 @@
             "program": {
               "kind": "const",
               "value": [
+                62,
                 254,
-                237,
-                118,
-                109,
-                5,
-                146,
-                245,
-                249,
-                66,
-                135,
-                243,
+                159,
+                172,
+                61,
+                59,
                 124,
-                36,
-                53,
-                12,
-                19,
-                89,
-                72,
+                201,
+                115,
+                229,
                 84,
+                36,
+                73,
+                157,
+                150,
+                203,
+                228,
+                237,
+                222,
+                36,
+                247,
+                148,
+                181,
+                131,
+                155,
+                204,
+                63,
+                226,
+                166,
                 7,
-                236,
-                95,
-                227,
-                238,
-                53,
-                42,
-                79,
-                224,
-                225,
-                53,
-                141,
-                56
+                231,
+                51
               ]
             }
           }
         },
         {
           "name": "dusk_program",
-          "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X"
+          "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ"
         },
         {
           "name": "protocol_fee",
@@ -2137,45 +2137,45 @@
             "program": {
               "kind": "const",
               "value": [
+                62,
                 254,
-                237,
-                118,
-                109,
-                5,
-                146,
-                245,
-                249,
-                66,
-                135,
-                243,
+                159,
+                172,
+                61,
+                59,
                 124,
-                36,
-                53,
-                12,
-                19,
-                89,
-                72,
+                201,
+                115,
+                229,
                 84,
+                36,
+                73,
+                157,
+                150,
+                203,
+                228,
+                237,
+                222,
+                36,
+                247,
+                148,
+                181,
+                131,
+                155,
+                204,
+                63,
+                226,
+                166,
                 7,
-                236,
-                95,
-                227,
-                238,
-                53,
-                42,
-                79,
-                224,
-                225,
-                53,
-                141,
-                56
+                231,
+                51
               ]
             }
           }
         },
         {
           "name": "dusk_program",
-          "address": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X"
+          "address": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ"
         },
         {
           "name": "token_program",
@@ -2933,6 +2933,39 @@
       }
     },
     {
+      "name": "CloseApprovalQuote",
+      "docs": [
+        "Dusk-owned, transaction-local approval context. Written immediately before",
+        "the read-only delegate callback and cleared before settlement. A standalone",
+        "delegate invocation cannot authenticate an off-chain or old quote with it."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "slot",
+            "type": "u64"
+          },
+          {
+            "name": "close_bps",
+            "type": "u16"
+          },
+          {
+            "name": "collateral_credit",
+            "type": "u64"
+          },
+          {
+            "name": "selected_output",
+            "type": "u64"
+          },
+          {
+            "name": "full_output",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "ConcentratedCurveCache",
       "type": {
         "kind": "struct",
@@ -3240,6 +3273,17 @@
             "type": "u128"
           },
           {
+            "name": "base_rate_fraction_e18",
+            "docs": [
+              "Fractional NAD APR carried by the exponential controller (scale 1e9)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "quote_rate_fraction_e18",
+            "type": "u64"
+          },
+          {
             "name": "global_health_base_contribution_for_quote_debt",
             "type": "u64"
           },
@@ -3383,6 +3427,14 @@
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "junior",
+            "type": {
+              "defined": {
+                "name": "TrancheIncome"
+              }
+            }
+          },
           {
             "name": "public_interest_advance",
             "type": {
@@ -3852,6 +3904,115 @@
       }
     },
     {
+      "name": "IncomeExposureEnd",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "ended",
+            "type": "bool"
+          },
+          {
+            "name": "epoch",
+            "type": "u64"
+          },
+          {
+            "name": "growth",
+            "type": {
+              "defined": {
+                "name": "ReceivableGrowth"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "IncomeReceivableBook",
+      "docs": [
+        "A bounded-denomination epoch of an unpaid-income pool. Public and hLP",
+        "funding income use separate books. Repayments/defaults are pooled within",
+        "each book; already funded advances do not remain unpaid claims."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "epoch",
+            "type": "u64"
+          },
+          {
+            "name": "unpaid",
+            "type": "u64"
+          },
+          {
+            "name": "units",
+            "type": "u64"
+          },
+          {
+            "name": "paid_per_unit_q64",
+            "type": "u128"
+          },
+          {
+            "name": "paid_remainder",
+            "type": "u64"
+          },
+          {
+            "name": "growth",
+            "docs": [
+              "Ordinary senior, junior, base hLP, quote hLP."
+            ],
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "ReceivableGrowth"
+                  }
+                },
+                4
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "IncomeReceivableClaim",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "epoch",
+            "type": "u64"
+          },
+          {
+            "name": "units_q64",
+            "type": "u128"
+          },
+          {
+            "name": "paid_checkpoint_q64",
+            "type": "u128"
+          },
+          {
+            "name": "growth_checkpoint",
+            "type": {
+              "defined": {
+                "name": "ReceivableGrowth"
+              }
+            }
+          },
+          {
+            "name": "paid_fraction_q128",
+            "type": "u128"
+          },
+          {
+            "name": "claimable",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "Insurance",
       "type": {
         "kind": "struct",
@@ -3948,21 +4109,25 @@
       }
     },
     {
-      "name": "IrmConfig",
+      "name": "JuniorExitConfig",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "target_utilization_bps",
+            "name": "minimum_notice_slots",
+            "type": "u64"
+          },
+          {
+            "name": "maximum_notice_slots",
+            "type": "u64"
+          },
+          {
+            "name": "exercise_window_slots",
+            "type": "u64"
+          },
+          {
+            "name": "request_fee_bps",
             "type": "u16"
-          },
-          {
-            "name": "curve_steepness_nad",
-            "type": "u64"
-          },
-          {
-            "name": "adjustment_speed_per_year",
-            "type": "u64"
           }
         ]
       }
@@ -4361,6 +4526,14 @@
             "type": "pubkey"
           },
           {
+            "name": "close_approval",
+            "type": {
+              "defined": {
+                "name": "CloseApprovalQuote"
+              }
+            }
+          },
+          {
             "name": "bump",
             "type": "u8"
           }
@@ -4380,6 +4553,14 @@
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "oracle",
+            "type": {
+              "defined": {
+                "name": "OracleState"
+              }
+            }
+          },
           {
             "name": "version",
             "type": "u8"
@@ -4427,6 +4608,45 @@
                 "name": "Debt"
               }
             }
+          },
+          {
+            "name": "tranches",
+            "docs": [
+              "One shared junior capital budget across both reserve/debt books."
+            ],
+            "type": {
+              "defined": {
+                "name": "TrancheCapital"
+              }
+            }
+          },
+          {
+            "name": "income",
+            "type": {
+              "defined": {
+                "name": "MarketIncomeBooks"
+              }
+            }
+          },
+          {
+            "name": "junior_exit_config",
+            "type": {
+              "defined": {
+                "name": "JuniorExitConfig"
+              }
+            }
+          },
+          {
+            "name": "tranche_policy",
+            "type": {
+              "defined": {
+                "name": "TranchePolicy"
+              }
+            }
+          },
+          {
+            "name": "junior_mint",
+            "type": "pubkey"
           },
           {
             "name": "base_hlp_vault",
@@ -4487,6 +4707,14 @@
             "type": "u64"
           },
           {
+            "name": "governance_locked_junior",
+            "docs": [
+              "Active-generation jrLP receipts burned into governance locks. They",
+              "remain part of junior receipt supply and keep full first-loss exposure."
+            ],
+            "type": "u64"
+          },
+          {
             "name": "parameter_revisions",
             "docs": [
               "Independent monotone revisions for fee, concentration, IRM, EMA,",
@@ -4495,7 +4723,7 @@
             "type": {
               "array": [
                 "u64",
-                7
+                9
               ]
             }
           },
@@ -4596,13 +4824,109 @@
             "name": "irm",
             "type": {
               "defined": {
-                "name": "IrmConfig"
+                "name": "RiskRateConfig"
               }
             }
           },
           {
             "name": "start_time",
             "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MarketIncomeBooks",
+      "docs": [
+        "Public-loan and hLP-funding receivables are independent. The vault-owned",
+        "public-income claims preserve hLP's automatic funding-gap repayment."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "books",
+            "docs": [
+              "base public, quote public, base hLP funding, quote hLP funding."
+            ],
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "IncomeReceivableBook"
+                  }
+                },
+                4
+              ]
+            }
+          },
+          {
+            "name": "pending",
+            "docs": [
+              "Gross settlement budget awaiting measured net custody credit."
+            ],
+            "type": {
+              "array": [
+                "u64",
+                4
+              ]
+            }
+          },
+          {
+            "name": "seed",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "IncomeReceivableClaim"
+                  }
+                },
+                4
+              ]
+            }
+          },
+          {
+            "name": "hlp",
+            "docs": [
+              "[hLP target][income asset], owned by the vault rather than its holders."
+            ],
+            "type": {
+              "array": [
+                {
+                  "array": [
+                    {
+                      "defined": {
+                        "name": "IncomeReceivableClaim"
+                      }
+                    },
+                    2
+                  ]
+                },
+                2
+              ]
+            }
+          },
+          {
+            "name": "junior_end",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "IncomeExposureEnd"
+                  }
+                },
+                4
+              ]
+            }
+          },
+          {
+            "name": "split_carry_bps",
+            "type": {
+              "array": [
+                "u16",
+                4
+              ]
+            }
           }
         ]
       }
@@ -4665,6 +4989,214 @@
             "type": {
               "defined": {
                 "name": "DailyBorrowBucket"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "OracleObservation",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "price_nad",
+            "type": "u64"
+          },
+          {
+            "name": "confidence_nad",
+            "type": "u64"
+          },
+          {
+            "name": "publish_time",
+            "type": "i64"
+          },
+          {
+            "name": "posted_slot",
+            "type": "u64"
+          },
+          {
+            "name": "sequence",
+            "type": "u64"
+          },
+          {
+            "name": "hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "source_times",
+            "type": {
+              "array": [
+                "i64",
+                2
+              ]
+            }
+          },
+          {
+            "name": "source_slots",
+            "type": {
+              "array": [
+                "u64",
+                2
+              ]
+            }
+          },
+          {
+            "name": "source_sequences",
+            "docs": [
+              "Independent counters retain replay protection when only one leg updates."
+            ],
+            "type": {
+              "array": [
+                "u64",
+                2
+              ]
+            }
+          },
+          {
+            "name": "source_hashes",
+            "docs": [
+              "Each normalized report is immutable at an already observed counter."
+            ],
+            "type": {
+              "array": [
+                {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                2
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "OraclePolicy",
+      "docs": [
+        "Creation selects an optional policy atomically; omission uses native pricing.",
+        "Subsequent governance can change the policy within the same mathematical",
+        "limits. Every native market supports later oracle activation."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "format",
+            "type": "u8"
+          },
+          {
+            "name": "provider",
+            "type": "pubkey"
+          },
+          {
+            "name": "base_account",
+            "type": "pubkey"
+          },
+          {
+            "name": "quote_account",
+            "type": "pubkey"
+          },
+          {
+            "name": "base_feed_id",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "quote_feed_id",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "lambda_bps",
+            "type": "u16"
+          },
+          {
+            "name": "adjustment_cap_nad",
+            "type": "u64"
+          },
+          {
+            "name": "max_age_seconds",
+            "type": "u32"
+          },
+          {
+            "name": "max_age_slots",
+            "type": "u64"
+          },
+          {
+            "name": "max_confidence_bps",
+            "type": "u16"
+          },
+          {
+            "name": "max_publish_skew_seconds",
+            "type": "u32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OracleState",
+      "docs": [
+        "Persisted policy and replay protection. `runtime` occupies zero wire bytes",
+        "and is reset on every account deserialization, including a second CPI."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "policy",
+            "type": {
+              "defined": {
+                "name": "OraclePolicy"
+              }
+            }
+          },
+          {
+            "name": "last_observation",
+            "type": {
+              "defined": {
+                "name": "OracleObservation"
+              }
+            }
+          },
+          {
+            "name": "revision",
+            "type": "u64"
+          },
+          {
+            "name": "recognized_tail_liquidity",
+            "docs": [
+              "Recognized native-tail depth cannot grow merely because an OP trade",
+              "moves to a different native invariant. Real ordinary LP capital scales",
+              "the ceiling through its share supply; losses reduce it immediately."
+            ],
+            "type": "u128"
+          },
+          {
+            "name": "recognized_ordinary_supply",
+            "type": "u64"
+          },
+          {
+            "name": "runtime",
+            "type": {
+              "defined": {
+                "name": "RuntimePricing"
               }
             }
           }
@@ -4992,6 +5524,32 @@
       }
     },
     {
+      "name": "ReceivableGrowth",
+      "docs": [
+        "One exposure lane's newly issued receivable units per LP receipt. The",
+        "weighted paid index is kept at full Q128 precision: flooring it earlier can",
+        "give late entrants a fractional claim on money paid before their entry."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "units_q64",
+            "type": "u128"
+          },
+          {
+            "name": "weighted_paid_q128",
+            "type": {
+              "array": [
+                "u64",
+                4
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "ReferralAccrual",
       "docs": [
         "Claimable referral revenue for one partner, market, and debt asset."
@@ -5227,6 +5785,208 @@
       }
     },
     {
+      "name": "RiskRateConfig",
+      "docs": [
+        "Per-market inputs for the coverage band controller. A zero maximum leaves",
+        "APR economically uncapped; arithmetic still rejects unrepresentable debt."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "lower_signal_nad",
+            "type": "u64"
+          },
+          {
+            "name": "upper_signal_nad",
+            "type": "u64"
+          },
+          {
+            "name": "half_life_ms",
+            "type": "u64"
+          },
+          {
+            "name": "initial_apr_nad",
+            "type": "u64"
+          },
+          {
+            "name": "minimum_apr_nad",
+            "type": "u64"
+          },
+          {
+            "name": "maximum_apr_nad",
+            "type": "u64"
+          },
+          {
+            "name": "borrow_utilization_limit_bps",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RuntimePricing",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
+      "name": "TrancheCapital",
+      "docs": [
+        "Junior's portion of the AMM's existing reserve shares. Senior receipts stay",
+        "one-for-one with the remaining reserve shares, including hLP-held receipts.",
+        "Junior receipts have their own exchange rate after income, losses and fees."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "junior_reserve_shares",
+            "type": "u64"
+          },
+          {
+            "name": "junior_receipt_supply",
+            "type": "u64"
+          },
+          {
+            "name": "permanent_receipts",
+            "docs": [
+              "Funded, nonredeemable protocol receipts; included in junior supply."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "queued_receipts",
+            "docs": [
+              "Escrow remains junior until a successful conversion or cancellation."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "generation",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TrancheIncome",
+      "docs": [
+        "Custody-backed junior income. Cached ownership is synchronized by every",
+        "capital transition; the market invariant checks it against the shared book."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "initialized",
+            "type": "bool"
+          },
+          {
+            "name": "income_share_bps",
+            "type": "u16"
+          },
+          {
+            "name": "reserve_shares",
+            "type": "u64"
+          },
+          {
+            "name": "receipt_supply",
+            "type": "u64"
+          },
+          {
+            "name": "swap_growth_q64",
+            "type": "u128"
+          },
+          {
+            "name": "interest_growth_q64",
+            "type": "u128"
+          },
+          {
+            "name": "swap_remainder",
+            "type": "u64"
+          },
+          {
+            "name": "interest_remainder",
+            "type": "u64"
+          },
+          {
+            "name": "seed_swap_amount",
+            "type": "u64"
+          },
+          {
+            "name": "seed_interest_amount",
+            "type": "u64"
+          },
+          {
+            "name": "seed_swap_checkpoint",
+            "type": "u128"
+          },
+          {
+            "name": "seed_interest_checkpoint",
+            "type": "u128"
+          },
+          {
+            "name": "seed_swap_remainder",
+            "type": "u64"
+          },
+          {
+            "name": "seed_interest_remainder",
+            "type": "u64"
+          },
+          {
+            "name": "carry",
+            "type": {
+              "defined": {
+                "name": "TrancheRevenueCarry"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "TranchePolicy",
+      "docs": [
+        "Governed tranche economics. Exit timing remains protocol-defined; only its",
+        "request/renewal fee is changed through the tranche parameter family."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "junior_income_share_bps",
+            "type": "u16"
+          },
+          {
+            "name": "liquidation_fee_bps",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TrancheRevenueCarry",
+      "docs": [
+        "Carry sub-basis-point atoms across credits so splitting a payment into many",
+        "small transfers cannot change either tranche's governed allocation."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "interest_remainder_bps",
+            "type": "u16"
+          },
+          {
+            "name": "swap_remainder_bps",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
       "name": "UpdateLeverageOrderArgs",
       "type": {
         "kind": "struct",
@@ -5325,6 +6085,32 @@
             "type": {
               "option": "pubkey"
             }
+          },
+          {
+            "name": "income_initialized",
+            "type": "bool"
+          },
+          {
+            "name": "income",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "IncomeReceivableClaim"
+                  }
+                },
+                2
+              ]
+            }
+          },
+          {
+            "name": "escrow_balance",
+            "docs": [
+              "Owner's virtual receipts: junior exit escrow, or senior governance locks.",
+              "Governance cash yield uses its existing virtual ledger; historical",
+              "unpaid-income ownership is checkpointed here for both token kinds."
+            ],
+            "type": "u64"
           }
         ]
       }

@@ -9,12 +9,13 @@ import {
 } from "@solana/web3.js";
 import bs58 from "bs58";
 import { createHash } from "node:crypto";
+import { withOracle, base as oracleFeed, provider as oracleProvider } from "./helpers/oracle-fixture.ts";
 import { bank, planWithTable } from "./helpers/liquidation-bank.ts";
 import { resolveLiquidationAccounts } from "../packages/dusk-adapter/src/liquidation.ts";
 const layout = JSON.parse(
   readFileSync("protocol/keeper-account-layout.v1.json", "utf8"),
 );
-for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mode = "both", rejectOrdinary = false } of [
+for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mode = "both", rejectOrdinary = false, oracle = false } of [
   {
     file: "01-flash-BorrowPosition.json",
     profile: "lending",
@@ -63,6 +64,11 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mod
     minProfit: "0",
     name: "unexpected ordinary failure never falls back",
   },
+  {
+    file: "01-flash-BorrowPosition.json", profile: "lending", expected: "flash",
+    settlement: "inventory", maxRepay: "18446744073709551615", minProfit: "0",
+    name: "oracle-backed inventory flash", oracle: true,
+  },
   // Final-notice eligibility is rechecked directly on every pass.
   {
     file: "05-flash-LeveragePosition.json",
@@ -106,7 +112,21 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mod
 ] as const) {
   test(`native ${profile} completes ${name} via RPC`, async () => {
     const f = JSON.parse(readFileSync(`fixtures/litesvm/${file}`, "utf8"));
+    const oracleState = oracle ? withOracle(f).state : null;
     const svm = bank(f);
+    if (oracleState) {
+      const clock = svm.getClock();
+      const data = Buffer.alloc(145);
+      data.set(Buffer.from("DOPRV001")); data.fill(7, 8, 40);
+      data.set(oracleState.base_side.asset_mint.toBytes(), 40);
+      data.set(oracleState.quote_side.asset_mint.toBytes(), 72);
+      data.writeBigUInt64LE(1_000_000_000n, 104);
+      data.writeBigInt64LE(clock.unixTimestamp, 120);
+      data.writeBigUInt64LE(clock.slot, 128);
+      data.writeBigUInt64LE(1n, 136); data[144] = 1;
+      svm.setAccount(oracleFeed, {data, owner: oracleProvider, lamports: 10_000_000n, executable: false});
+    }
+    let oracleReads = 0;
     const { lookupTable } = planWithTable(
       { ...f, internal: settlement === "dusk" },
       svm,
@@ -143,6 +163,7 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mod
             answer = context.slot;
             break;
           case "getMultipleAccounts":
+            if (p[0].includes(oracleFeed.toBase58())) oracleReads++;
             answer = {
               context,
               value: p[0].map((key: string) =>
@@ -307,6 +328,7 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mod
       assert.equal(second.code, 0, second.output);
       assert.match(second.output, expected === "unfilled" ? /eligible but unfilled/ : expected === "error" ? /injected unexpected ordinary failure/ : new RegExp(`shadow ${expected}`));
       assert.ok(simulations >= 4);
+      if (oracle) assert.ok(oracleReads >= 2, "each fresh evaluation must fetch the active feed into its snapshot");
       if (mode === "emergency") assert.ok(!previews.includes("preview_flash_liquidation"));
       if (expected === "flash" || mode === "ordinary" || rejectOrdinary) assert.ok(!previews.includes("preview_emergency_liquidation"));
       if (expected === "emergency") {

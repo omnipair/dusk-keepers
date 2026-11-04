@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "cluster": "devnet",
+  "genesisHash": "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG",
+  "capturedAt": "2026-11-04T12:22:43.458Z",
+  "protocolRevision": "devnet-2026-11-04-c7db901",
+  "sourceCommit": "c7db9013b9d751da5a734914e3efae203ccdf59b",
+  "artifactOrigin": "upgradeable-loader-programdata",
+  "sourceVerification": "Vendored IDLs match the deployed IDLs exactly. Source is used for SDK and fixture construction; this is not a reproducible-build attestation.",
+  "binaryEncoding": "Entire ProgramData payload after its 45-byte metadata header, including allocation padding.",
+  "programs": [
+    {
+      "name": "dusk",
+      "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
+      "programData": "5YiNghFPTQ9rzpBJxNEgEBxwoLmVUFTn1Cxc5VLAoEFr",
+      "observedSlot": 518575175,
+      "lastUpgradeSlot": 517844520,
+      "binaryBytes": 4953544,
+      "binarySha256": "df07df6e5f7a19de564db019b9b93172f3e58ecb73d6ffbc896967ea3d84e2bb",
+      "idlAccount": "C65xDYTppRy8W2r2fwqxY8KR8Wkdw1njXbTitAShMR2u",
+      "idlSha256": "1c980a9be65bd47fdbe3f90c6f50c004078c43c28e5c13321590c3e33ea618d0",
+      "idlAccountSha256": "4faf3880ee9c9eb5a7408db056bd56789516c0f4df6f5b38524c6f08ffcda93a"
+    },
+    {
+      "name": "leverage_delegate",
+      "programId": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
+      "programData": "9Cy5J4Y5igAPdMdTCL7DUbHE4omXgKFsnAugGfWnhTUZ",
+      "observedSlot": 518575177,
+      "lastUpgradeSlot": 517825628,
+      "binaryBytes": 1405328,
+      "binarySha256": "dcc8bd4c3cb9cf966c499b49de5bd20da43c62afb2387c630ada16ac9b314703",
+      "idlAccount": "4K41o1ZxwRKGKcz2GWL9fAcdXPCKtJ6ipH6hrvgHYaax",
+      "idlSha256": "a208219d23675a973df89a45f23c5af1cbd2464bed2d8439324b4bc261e2f3fb",
+      "idlAccountSha256": "9baaa2490822d955104be8cc051e98e39a18f28dba0912894262786ab2809059"
+    }
+  ]
+}

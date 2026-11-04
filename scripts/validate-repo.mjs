@@ -72,6 +72,38 @@ if (lock.status !== "draft") {
   assert.deepEqual(lock.compatibility, compatibilityFingerprints(idls), "IDL compatibility fingerprint mismatch");
 }
 
+// Offline consistency of the read-only chain capture. Live release still has
+// its separate frozen-lock gate; this record is not a build attestation.
+const deployment = await readJson("protocol/devnet-deployment.v1.json").catch(error => {
+  if (error.code === "ENOENT") return null;
+  throw error;
+});
+if (deployment) {
+  assert.equal(deployment.schemaVersion, 1);
+  assert.equal(deployment.cluster, "devnet");
+  assert.equal(deployment.genesisHash, "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG");
+  assert.equal(deployment.protocolRevision, lock.revision);
+  assert.equal(deployment.sourceCommit, lock.source.gitCommit);
+  assert.equal(deployment.capturedAt, lock.generatedAt);
+  assert.equal(deployment.artifactOrigin, "upgradeable-loader-programdata");
+  assert.equal(deployment.programs.length, lock.programs.length);
+  assert.equal(new Set(deployment.programs.map(p => p.name)).size, lock.programs.length);
+  for (const observed of deployment.programs) {
+    const pinned = lock.programs.find(p => p.name === observed.name);
+    assert.ok(pinned, "unexpected deployment program");
+    assert.equal(observed.programId, pinned.programId);
+    assert.equal(observed.binarySha256, pinned.binary.sha256);
+    assert.equal(observed.idlSha256, pinned.idl.sha256);
+    assert.equal((await readFile(new URL(pinned.binary.path, root))).length, observed.binaryBytes);
+    assert.equal((await readJson(pinned.idl.path)).address, pinned.programId);
+    assert.ok(Number.isSafeInteger(observed.lastUpgradeSlot) && observed.lastUpgradeSlot > 0);
+    assert.ok(Number.isSafeInteger(observed.observedSlot) && observed.observedSlot >= observed.lastUpgradeSlot);
+    for (const key of [observed.programData, observed.idlAccount])
+      assert.match(key, /^[1-9A-HJ-NP-Za-km-z]{32,44}$/);
+    assert.match(observed.idlAccountSha256, /^[0-9a-f]{64}$/);
+  }
+}
+
 const bundle = await readJson("fixtures/conformance/v1/scheduler-cases.json");
 assert.equal(bundle.schemaVersion, 1);
 assert.ok(bundle.cases.length > 0);

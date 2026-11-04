@@ -15,7 +15,8 @@ update existing service configuration before deploying this revision.
 
 Keep `KEEPER_MODE=shadow` with a `KEEPER_SHADOW_PUBLIC_KEY` to discover and simulate
 without signing. The captured protocol lock still blocks live startup. This
-service consolidation does not change protocol artifacts or release permissions.
+devnet artifact update does not grant live release permissions. See the
+[devnet capture record](../devnet-capture.md) for the pinned deployment.
 
 ## Economic bounds
 

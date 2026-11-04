@@ -176,6 +176,12 @@ impl LiquidationJob<'_> {
         let mut all = keys.to_vec();
         all.extend(c.named.values());
         all.extend(c.market.hlp_remaining_accounts().iter().map(|a| a.pubkey));
+        all.extend(
+            c.market
+                .oracle_remaining_accounts()
+                .iter()
+                .map(|a| a.pubkey),
+        );
         all.sort();
         all.dedup();
         // Executable/static keys are not needed in the semantic state snapshot.
@@ -194,6 +200,9 @@ impl LiquidationJob<'_> {
             kind,
             side,
         )?;
+        for feed in c.market.oracle_remaining_accounts() {
+            snapshot.account(feed.pubkey)?;
+        }
         Ok((c, snapshot))
     }
     fn message(
