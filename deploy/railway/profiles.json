@@ -5,43 +5,36 @@
     {
       "name": "dusk-leverage-keeper",
       "profile": "leverage",
-      "jobKinds": ["leverage_liquidation", "stop_loss", "take_profit", "limit_entry", "hlp_order"],
+      "jobKinds": [
+        "leverage_liquidation",
+        "stop_loss",
+        "take_profit",
+        "limit_entry",
+        "hlp_order"
+      ],
       "liveRuntime": "rust",
       "shadowRuntime": "typescript",
       "walletRole": "leverage_executor",
       "signingRequired": true
     },
     {
-      "name": "dusk-lending-trigger",
-      "profile": "lending-trigger",
-      "jobKinds": ["lending_liquidation_trigger"],
+      "name": "dusk-lending-keeper",
+      "profile": "lending",
+      "jobKinds": [
+        "lending_liquidation_bid",
+        "lending_liquidation_settle"
+      ],
       "liveRuntime": "rust",
       "shadowRuntime": "typescript",
-      "walletRole": "lending_preview",
-      "signingRequired": false
-    },
-    {
-      "name": "dusk-lending-bidder",
-      "profile": "lending-bidder",
-      "jobKinds": ["lending_liquidation_bid"],
-      "liveRuntime": "rust",
-      "shadowRuntime": "typescript",
-      "walletRole": "lending_bidder",
-      "signingRequired": true
-    },
-    {
-      "name": "dusk-lending-settler",
-      "profile": "lending-settler",
-      "jobKinds": ["lending_liquidation_settle"],
-      "liveRuntime": "rust",
-      "shadowRuntime": "typescript",
-      "walletRole": "lending_settler",
+      "walletRole": "lending_executor",
       "signingRequired": true
     },
     {
       "name": "dusk-hlp-recovery",
       "profile": "hlp-recovery",
-      "jobKinds": ["hlp_recovery"],
+      "jobKinds": [
+        "hlp_recovery"
+      ],
       "liveRuntime": "rust",
       "shadowRuntime": "typescript",
       "walletRole": "hlp_recovery",
@@ -50,7 +43,9 @@
     {
       "name": "dusk-auction-arbitrageur",
       "profile": "auction-arbitrage",
-      "jobKinds": ["auction_bid"],
+      "jobKinds": [
+        "auction_bid"
+      ],
       "liveRuntime": "rust",
       "shadowRuntime": "typescript",
       "walletRole": "revenue_auction_bidder",
@@ -59,7 +54,9 @@
     {
       "name": "dusk-lifecycle-keeper",
       "profile": "lifecycle",
-      "jobKinds": ["lifecycle"],
+      "jobKinds": [
+        "lifecycle"
+      ],
       "liveRuntime": "typescript",
       "shadowRuntime": "rust",
       "walletRole": "lifecycle_executor",
@@ -68,7 +65,9 @@
     {
       "name": "dusk-sentinel",
       "profile": "sentinel",
-      "jobKinds": ["sentinel"],
+      "jobKinds": [
+        "sentinel"
+      ],
       "liveRuntime": "rust",
       "shadowRuntime": "typescript",
       "walletRole": "none",

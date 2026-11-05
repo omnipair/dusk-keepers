@@ -11,7 +11,6 @@ pub mod lifecycle;
 #[serde(rename_all = "snake_case")]
 pub enum JobKind {
     LeverageLiquidation,
-    LendingLiquidationTrigger,
     LendingLiquidationBid,
     LendingLiquidationSettle,
     HlpRecovery,
@@ -28,7 +27,6 @@ impl JobKind {
     pub const fn priority(self) -> u16 {
         match self {
             Self::LeverageLiquidation | Self::LendingLiquidationSettle | Self::HlpRecovery => 500,
-            Self::LendingLiquidationTrigger => 490,
             Self::StopLoss | Self::HlpOrder => 400,
             Self::TakeProfit => 300,
             Self::LimitEntry => 250,

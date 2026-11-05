@@ -1,6 +1,5 @@
 export type JobKind =
   | "leverage_liquidation"
-  | "lending_liquidation_trigger"
   | "lending_liquidation_bid"
   | "lending_liquidation_settle"
   | "hlp_recovery"
@@ -31,7 +30,6 @@ export type EnqueueResult =
 
 const priorities: Readonly<Record<JobKind, number>> = {
   leverage_liquidation: 500,
-  lending_liquidation_trigger: 490,
   lending_liquidation_bid: 200,
   lending_liquidation_settle: 500,
   hlp_recovery: 500,

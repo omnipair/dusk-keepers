@@ -14,7 +14,7 @@
 //! a ceiling high enough not to bind, read what the sale would actually cost,
 //! then bind the sent transaction to that.
 
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, env};
 
 use dusk_adapter::{
     AccountLayoutManifest, DeterministicAccountResolver, InstructionContract,
@@ -24,12 +24,12 @@ use dusk_adapter::{
 use keeper_core::{OutcomeStatus, ReasonCode};
 
 use crate::{
-    accounts::{AccountAssembler, MarketAccounts, associated_token_account, decode_key},
-    discovery::{RpcClient, account_discriminator},
-    execute::{AttemptReport, ExecutionError, classify_simulation_failure},
-    flash::token_amount,
-    signer::TransactionSigner,
-    transaction::{Instruction, base64, compile_message, serialize_transaction},
+    liquidation::plan::token_amount,
+    runtime::accounts::{AccountAssembler, MarketAccounts, associated_token_account, decode_key},
+    runtime::execution::{AttemptReport, ExecutionError, classify_simulation_failure},
+    runtime::rpc::{RpcClient, account_discriminator},
+    runtime::signer::TransactionSigner,
+    runtime::transaction::{Instruction, base64, compile_message, serialize_transaction},
 };
 
 const INSTRUCTION_KEY: &str = "dusk:settle_protocol_auction";
@@ -408,4 +408,37 @@ impl ArbitrageurJob<'_> {
         }
         Ok(reports)
     }
+}
+
+/// How much revenue the arbitrageur will buy, and at what tolerance.
+///
+/// Required rather than defaulted, like the other spending profiles: the
+/// ceiling is the operator's money, and a keeper that picks it is picking how
+/// much of someone else's balance to commit.
+fn policy() -> Option<ArbitragePolicy> {
+    Some(ArbitragePolicy {
+        max_sold: env::var("KEEPER_AUCTION_MAX_SOLD").ok()?.parse().ok()?,
+        slippage_bps: env::var("KEEPER_AUCTION_SLIPPAGE_BPS")
+            .ok()
+            .and_then(|value| value.parse().ok())
+            .unwrap_or(50),
+    })
+}
+
+pub fn run(context: &super::WorkerContext<'_>) -> Result<Vec<AttemptReport>, ExecutionError> {
+    let Some(policy) = policy() else {
+        return Ok(Vec::new());
+    };
+    ArbitrageurJob {
+        client: context.client,
+        contract: context.contract,
+        dry_run: context.dry_run,
+        layout: context.layout,
+        max_sends_per_pass: context.max_sends,
+        policy,
+        program_id: context.program_id,
+        resolver: context.resolver,
+        signer: context.signer,
+    }
+    .run_pass()
 }

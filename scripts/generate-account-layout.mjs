@@ -38,6 +38,10 @@ const WANTED = {
 
   ],
   Market: [
+    "oracle.policy.format",
+    "oracle.policy.lambda_bps",
+    "oracle.policy.base_account",
+    "oracle.policy.quote_account",
     "srlp_mint",
     "base_side.hlp_mint",
     "quote_side.hlp_mint",

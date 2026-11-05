@@ -1,6 +1,6 @@
 // Explicit, reviewable candidate capture. Never freezes a lock or deploys.
 import assert from "node:assert/strict";
-import { readFile, writeFile, copyFile } from "node:fs/promises";
+import { readFile, writeFile, copyFile, rm } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { resolve } from "node:path";
@@ -28,11 +28,23 @@ lock.revision = revision;
 lock.status = "captured";
 lock.generatedAt = new Date().toISOString();
 delete lock.cluster;
+// Record the capture environment instead of inheriting a previous revision's tools.
+const version = (command, args = ["--version"]) => {
+  try {
+    return execFileSync(command, args, { encoding: "utf8", cwd: source, stdio: ["ignore", "pipe", "ignore"] }).trim().split("\n")[0];
+  } catch {
+    return null;
+  }
+};
+lock.toolchain = {
+  anchor: version("anchor"), rust: version("rustc"), solana: version("solana"),
+  surfpool: version("surfpool"), node: process.version,
+};
 lock.source = {
   repository: "https://github.com/omnipair/dusk",
   branch: execFileSync("git", ["-C", source, "branch", "--show-current"], {
     encoding: "utf8",
-  }).trim(),
+  }).trim() || "(detached)",
   gitCommit: execFileSync("git", ["-C", source, "rev-parse", "HEAD"], {
     encoding: "utf8",
   }).trim(),
@@ -100,6 +112,9 @@ for (const script of [
   execFileSync(process.execPath, [`scripts/${script}.mjs`, "--write"], {
     stdio: "inherit",
   });
+// A generic source capture does not inherit a previous deployment observation.
+// capture-devnet.mjs writes fresh evidence after this command succeeds.
+await rm("protocol/devnet-deployment.v1.json", { force: true });
 console.log(
   "Candidate captured. Refresh health provenance and bank fixtures; run the repository checks before committing.",
 );

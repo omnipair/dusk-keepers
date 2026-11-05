@@ -1,8 +1,10 @@
 //! Atomic liquidation plans for the captured #45 interface. No auction calls.
 use crate::{
-    accounts::{ASSOCIATED_TOKEN_PROGRAM, MarketAccounts, associated_token_account, decode_key},
-    discovery::{DiscoveryError, RpcClient, decode_base64},
-    transaction::{AccountMeta, Instruction},
+    runtime::accounts::{
+        ASSOCIATED_TOKEN_PROGRAM, MarketAccounts, associated_token_account, decode_key,
+    },
+    runtime::rpc::{DiscoveryError, RpcClient, decode_base64},
+    runtime::transaction::{AccountMeta, Instruction},
 };
 use borsh::BorshDeserialize;
 use dusk_adapter::liquidation::{EmergencyLiquidationQuote, FlashLiquidationQuote};
@@ -141,7 +143,7 @@ impl Context {
         }
         let program = key(&layout.program_id)?;
         let data = snapshot.owned(position, program)?;
-        if data.get(..8) != Some(crate::discovery::account_discriminator(kind).as_slice()) {
+        if data.get(..8) != Some(crate::runtime::rpc::account_discriminator(kind).as_slice()) {
             return Err("position discriminator".into());
         }
         let reader = layout.reader(kind).map_err(|e| e.to_string())?;
@@ -150,7 +152,7 @@ impl Context {
         let market_key = read_key("market")?;
         let market_data = snapshot.owned(market_key, program)?;
         if market_data.get(..8)
-            != Some(crate::discovery::account_discriminator("Market").as_slice())
+            != Some(crate::runtime::rpc::account_discriminator("Market").as_slice())
         {
             return Err("market discriminator".into());
         }
@@ -332,6 +334,7 @@ impl Context {
         if internal {
             accounts.extend(self.market.hlp_remaining_accounts());
         }
+        accounts.extend(self.market.oracle_remaining_accounts());
         Ok(Instruction {
             program_id: self.program,
             accounts,

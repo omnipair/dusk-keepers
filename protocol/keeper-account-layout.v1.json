@@ -1,9 +1,9 @@
 {
   "$schema": "./schemas/account-layout.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "health-only-2026-10-30-9d6e5373",
-  "programId": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X",
-  "idlSha256": "eb1081be876eab2721d962e277bb09da789b334abbf4ab6344b413a80b0fd894",
+  "protocolRevision": "devnet-2026-11-04-c7db901",
+  "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
+  "idlSha256": "1c980a9be65bd47fdbe3f90c6f50c004078c43c28e5c13321590c3e33ea618d0",
   "accounts": [
     {
       "name": "BorrowPosition",
@@ -63,158 +63,178 @@
     },
     {
       "name": "Market",
-      "sizeWithDiscriminator": 3128,
+      "sizeWithDiscriminator": 6101,
       "fields": [
         {
-          "path": "srlp_mint",
-          "offset": 9,
-          "size": 32
+          "path": "oracle.policy.format",
+          "offset": 8,
+          "size": 1
         },
         {
-          "path": "base_side.hlp_mint",
-          "offset": 74,
-          "size": 32
+          "path": "oracle.policy.lambda_bps",
+          "offset": 169,
+          "size": 2
         },
         {
-          "path": "quote_side.hlp_mint",
-          "offset": 619,
-          "size": 32
-        },
-        {
-          "path": "base_side.asset_mint",
+          "path": "oracle.policy.base_account",
           "offset": 41,
           "size": 32
         },
         {
-          "path": "base_side.asset_decimals",
+          "path": "oracle.policy.quote_account",
           "offset": 73,
+          "size": 32
+        },
+        {
+          "path": "srlp_mint",
+          "offset": 414,
+          "size": 32
+        },
+        {
+          "path": "base_side.hlp_mint",
+          "offset": 479,
+          "size": 32
+        },
+        {
+          "path": "quote_side.hlp_mint",
+          "offset": 1159,
+          "size": 32
+        },
+        {
+          "path": "base_side.asset_mint",
+          "offset": 446,
+          "size": 32
+        },
+        {
+          "path": "base_side.asset_decimals",
+          "offset": 478,
           "size": 1
         },
         {
           "path": "base_side.reserve_vault",
-          "offset": 106,
+          "offset": 511,
           "size": 32
         },
         {
           "path": "base_side.collateral_vault",
-          "offset": 138,
+          "offset": 543,
           "size": 32
         },
         {
           "path": "base_side.interest_vault",
-          "offset": 170,
+          "offset": 575,
           "size": 32
         },
         {
           "path": "quote_side.asset_mint",
-          "offset": 586,
+          "offset": 1126,
           "size": 32
         },
         {
           "path": "quote_side.asset_decimals",
-          "offset": 618,
+          "offset": 1158,
           "size": 1
         },
         {
           "path": "quote_side.reserve_vault",
-          "offset": 651,
+          "offset": 1191,
           "size": 32
         },
         {
           "path": "quote_side.collateral_vault",
-          "offset": 683,
+          "offset": 1223,
           "size": 32
         },
         {
           "path": "quote_side.interest_vault",
-          "offset": 715,
+          "offset": 1255,
           "size": 32
         },
         {
           "path": "base_side.reserves.live_reserve",
-          "offset": 210,
+          "offset": 615,
           "size": 8
         },
         {
           "path": "quote_side.reserves.live_reserve",
-          "offset": 755,
+          "offset": 1295,
           "size": 8
         },
         {
           "path": "base_hlp_vault.srlp_vault",
-          "offset": 1952,
+          "offset": 4901,
           "size": 32
         },
         {
           "path": "quote_hlp_vault.srlp_vault",
-          "offset": 2344,
+          "offset": 5293,
           "size": 32
         },
         {
           "path": "base_hlp_vault.hlp_supply",
-          "offset": 2032,
+          "offset": 4981,
           "size": 8
         },
         {
           "path": "base_hlp_vault.debt_principal",
-          "offset": 2024,
+          "offset": 4973,
           "size": 8
         },
         {
           "path": "quote_hlp_vault.debt_principal",
-          "offset": 2416,
+          "offset": 5365,
           "size": 8
         },
         {
           "path": "base_hlp_vault.debt_shares",
-          "offset": 2008,
+          "offset": 4957,
           "size": 16
         },
         {
           "path": "quote_hlp_vault.debt_shares",
-          "offset": 2400,
+          "offset": 5349,
           "size": 16
         },
         {
           "path": "quote_hlp_vault.hlp_supply",
-          "offset": 2424,
+          "offset": 5373,
           "size": 8
         },
         {
           "path": "base_hlp_vault.residual_exposure",
-          "offset": 2040,
+          "offset": 4989,
           "size": 16
         },
         {
           "path": "quote_hlp_vault.residual_exposure",
-          "offset": 2432,
+          "offset": 5381,
           "size": 16
         },
         {
           "path": "insurance.base_vault",
-          "offset": 2816,
+          "offset": 5765,
           "size": 32
         },
         {
           "path": "insurance.quote_vault",
-          "offset": 2848,
+          "offset": 5797,
           "size": 32
         },
         {
           "path": "params_hash",
-          "offset": 2966,
+          "offset": 5915,
           "size": 32
         },
         {
           "path": "last_update_slot",
-          "offset": 3118,
+          "offset": 6091,
           "size": 8
         }
       ]
     },
     {
       "name": "LeveragePosition",
-      "sizeWithDiscriminator": 328,
+      "sizeWithDiscriminator": 362,
       "fields": [
         {
           "path": "owner",

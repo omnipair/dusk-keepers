@@ -1,77 +1,47 @@
 # Flash/emergency keeper migration to Dusk #45
 
-## Current health-only candidate — 2026-10-30
+## Current devnet capture — 2026-11-04
 
-[Dusk PR #59](https://github.com/omnipair/dusk/pull/59), commit `9d6e5373`, removes
-liquidation episodes and registration. The active lock captures the new
-programs, regenerated interfaces and SDK 2.15.0-next.20261030. All lending and
-hLP bank fixtures are recaptured from that exact source and binary pair. The
-position layouts change; adopt the matching protocol and keeper artifacts
-as one candidate. This PR performs no deployment or live keeper activation.
-The rollout records below describe the previous development deployment.
+The active revision is `devnet-2026-11-04-c7db901`. Both executables and IDLs were
+captured from devnet; matching source `c7db901` supplies SDK
+`2.16.0-next.20261102` and fresh lending/hLP bank fixtures. The new Market layout
+includes oracle and tranche state. Generated offsets and remaining-account
+builders match this deployment. Source `e309197` on newer Dusk `main` includes
+the srLP rename, which is not yet represented by these deployed IDLs.
 
+| Program | Program ID | Upgrade slot |
+| --- | --- | --- |
+| Dusk | `5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ` | `517844520` |
+| Leverage delegate | `3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi` | `517825628` |
 
-**Candidate:** `devnet-2026-10-26-cd6f1ec`, source commit
-`77877d576018fd2bd8191d13f05534b0484e2282`. Lock status: `captured`.
-
-This capture includes #52's `fund_interest` and hLP flash ABI and no longer
-includes `rescue_hlp`. The separate `hlp-recovery` profile automates vault-wide
-flash repair and terminal closeout. This pin follows the completed devnet program
-upgrade; keeper services remain in shadow mode pending the frozen release gate.
-
-## Verified devnet deployment
-
-The upgradeable-loader metadata and downloaded program payloads match this capture:
-
-| Program | Program ID | Upgrade slot | Payload SHA-256 |
-| --- | --- | --- | --- |
-| Dusk | `JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X` | `515502278` | `21e3f3c4dd3e0e5b4fad85f69e0bae702b1209ab4fe1820f6bc86e81408d07ed` |
-| Leverage delegate | `AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv` | `515117216` | `4c1f7e1b326ff91d34d87edc888dee38bfde44058be50df3bb7ecdbe11845e1f` |
-
-Dusk's 3,519,968 payload bytes match `artifacts/dusk.so`; its program-data
-allocation has another 8,824 bytes, verified to be zero. The delegate's 1,149,896
-payload bytes match `artifacts/leverage_delegate.so` with no trailing padding.
-Both IDLs, the SDK archive and all five IDL compatibility fingerprints are
-unchanged from `bc09061b`. The SDK remains `2.14.2-devnet.20261025`, SHA-256
-`186c3d85c5a733da446c6f00301fefd0f36170336f1d8f4fdc9807ffc8c16d8c`.
-
-This revision includes the position-principal/share-burn and frozen hLP yield
-accounting fixes. Bank fixtures were recaptured from the exact source commit and
-execute the deployed payloads locally.
-
-The 27 October compatible repair sequence bounds emergency recovery proofs,
-restores concentrated reseeding after the final external srLP exit, and permits
-drained-market read previews. Only the
-Dusk executable changed. The delegate remains the previously deployed
-`cd6f1ec0` artifact, and its source/interface was not modified by the repair.
-The event revision and SDK archive remain unchanged. All lending and hLP bank
-fixtures were freshly captured and executed against the new Dusk binary;
-provenance was not applied to banks captured from the previous binary.
+See [the capture runbook](devnet-capture.md) for provenance, reproduction and
+limitations, and [the evidence manifest](../protocol/devnet-deployment.v1.json)
+for payload sizes and hashes. Previous candidate and deployment records remain
+in Git history and historical artifacts. The lock stays **captured**; this
+update performs no program deployment or live keeper activation.
 
 ## Service behavior
 
 | Profile | Native Rust action |
 | --- | --- |
-| `lending-trigger` | Read-only current-health monitoring; never signs a registration transaction. |
-| `lending-bidder` | Preview current health and ordinary borrowing fills and settle an atomic pair. |
-| `lending-settler` | Preview current health and permitted emergency partial/full borrowing settlement. |
+| `lending` | Preview borrowing health once, try ordinary atomic fills, then permitted emergency settlement when no acceptable ordinary route exists. Modes: `ordinary`, `emergency`, `both` (default). |
 | `leverage` | Preview current health, try ordinary leverage fills, then permitted emergency settlement. |
 | `hlp-recovery` | Preview both market-wide hLP vaults, attempt an inventory-funded atomic flash repair, then use terminal close only when a full quote permits it. |
 
-Existing profile names remain stable for service configuration. Auction instructions
+The standalone trigger, bidder, and settler profiles have been removed. Configure
+`KEEPER_PROFILE=lending`; see [the lending runbook](runbooks/lending.md). Auction instructions
 for these positions are gone; protocol revenue auctions remain a separate service.
 Run signing services with distinct wallets when a frozen release is authorized.
-The lending-trigger monitor uses a public preview identity and no signing key.
+Health monitoring is part of each execution worker; shadow mode uses a public identity and no signing key.
 
 Liquidation incentives depend only on current health. No distress episode or
 registration instruction exists. Each pass simulates `preview_liquidation_health`
 with read-only accounts, then independently previews an atomic fill. Advancing
 Unix time alone cannot increase either incentive. Healthy positions are rechecked
-every pass; final-notice markets get priority. The monitor-only `lending-trigger`
-profile never signs a health preview; bidder/settler/leverage submit execution.
+every pass; final-notice markets get priority. Health previews never produce signatures; lending/leverage submit execution.
 
 Every decision starts with fresh RPC position, market, both mint accounts, Clock,
-vault and hLP state. Indexer data never authorizes execution. Previews use the
+vault, hLP state and active oracle reports. Indexer data never authorizes execution. Previews use the
 program's symmetric-EMA eligibility and partial/full permissions. The keeper starts
 with bounded geometric sizes, measures complete-route execution profit, refines the
 best interval, and exhaustively scans the final 64-atom window so integer-rounding

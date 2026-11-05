@@ -286,14 +286,14 @@
         "owner": "2EszGfdkZaeUSwU8Mw4khpJ3y2eedErgiZX2jNCCYaWy",
         "orderId": "72623859790382856"
       },
-      "expectedAddress": "AhD9dKqhMeApE3DkscQMiFM6r3KvDbUEo4tuxUxvNXLf",
-      "expectedBump": 254
+      "expectedAddress": "3aMrjrJBwXKeEeDKWnquTdJA5ETXUFr8okEn4RjsVejU",
+      "expectedBump": 255
     },
     {
       "name": "leverage_delegate dusk_event_authority",
       "recipeKey": "leverage_delegate:dusk_event_authority",
       "inputs": {},
-      "expectedAddress": "5Up8vXjPvmYHQeCaucAhyXUSWRbJ64dDJsQAGg2BJB8Q",
+      "expectedAddress": "67ivSUwM4ZV213HX113WPp5JMNXaiHsmAjQMVcX95p19",
       "expectedBump": 255
     },
     {
@@ -305,8 +305,8 @@
         "targetHlpMint": "4qnv19NUrkqVbtJZut3TCy4FudCy5jfgrfJMKP4fACrD",
         "orderId": "72623859790382856"
       },
-      "expectedAddress": "23EFKDPFFaTJzE4c16ga2Qyqvqr7dfLCNwQyHoo9TpH5",
-      "expectedBump": 253
+      "expectedAddress": "EMtJCEEXYZhe8hPUC7mTN89Ud6iQNmXwB8FKFPQPp5CB",
+      "expectedBump": 255
     },
     {
       "name": "dusk market",
@@ -316,15 +316,15 @@
         "quoteAssetMint": "ES5SwuoAYbS8WzFGDuAqezp4w9zPyxg1cSTXkgccPrS8",
         "paramsHash": "1c2e7deab60101b4bb17bb1b3c96a1272bab1e359de0d62bbbf5025e5eac7fd8"
       },
-      "expectedAddress": "GftXnbmUMgR9S1Pagc4vppPQQmk8m5PTZVAMFDYDk1zQ",
+      "expectedAddress": "E6xbuSxr2HND8dNGufqd48g1P9BYatR463Dm5wjFywsc",
       "expectedBump": 255
     },
     {
       "name": "dusk futarchy_authority",
       "recipeKey": "dusk:futarchy_authority",
       "inputs": {},
-      "expectedAddress": "6ahW8Jmw4F1kzDxzA9vps9qrxMdjtQBCw3itSqYn9NZY",
-      "expectedBump": 254
+      "expectedAddress": "CSNPsoWEP6ssqQaqKuvbHq2RbX2RaRCpxBopaXMG7rQ1",
+      "expectedBump": 255
     },
     {
       "name": "dusk session",
@@ -332,15 +332,15 @@
       "inputs": {
         "position": "6RAKkz6gd1Sr382vUtatNx2ovWxYq9MJyDk3mo3QiPj4"
       },
-      "expectedAddress": "8dBXDkDEEuVP27ComwfMoXFdCUCrZuwdzCejU6ygcGQU",
-      "expectedBump": 254
+      "expectedAddress": "CLq9rBfFw2AVTntp5apupvvENvE8Wns3pNHqrYdSjP5k",
+      "expectedBump": 255
     },
     {
       "name": "dusk event_authority",
       "recipeKey": "dusk:event_authority",
       "inputs": {},
-      "expectedAddress": "5wiTA28gz5WFdEYxNVeZu288WCdZWzaonA1pnApLWSuh",
-      "expectedBump": 254
+      "expectedAddress": "6NA4zDzrbfkkuuzjKdZBQWx1C26Yc75wwN8pUTjJnRmv",
+      "expectedBump": 255
     },
     {
       "name": "dusk repayment_vault",
@@ -349,8 +349,8 @@
         "position": "6z5zyNSTKbaKCQV9eC4wsQzCZBuQaNdK66bts8PhZ1Bf",
         "debtMint": "7rDuQtFf2FfwtChaHvLrrAJb1249XcJUGDkkKe9XrS21"
       },
-      "expectedAddress": "6jnBbUHqMQ37cUfobWqoTskT18rzWSt4tSsfFDRQAcqq",
-      "expectedBump": 252
+      "expectedAddress": "35WFgSWKV1yTUgsRsmhth7JYdV8HodTsLtWZRbBYwvR6",
+      "expectedBump": 253
     },
     {
       "name": "dusk repayment_vault:begin_hlp_flash",
@@ -358,8 +358,8 @@
       "inputs": {
         "session": "H7t9pfgBRzjVRjaeY3JYLsByBKSEAqaLmaBZtCjeBPYN"
       },
-      "expectedAddress": "5oBSqcnTRev32HivgsnUMtj6Vxob2uk7LSj9h6fVdByY",
-      "expectedBump": 255
+      "expectedAddress": "GV2ok53P7Paw9eiaUH37t3HDaEpqJPzMH2wEvkRC61oj",
+      "expectedBump": 254
     },
     {
       "name": "dusk repayment_vault:settle_hlp_flash",
@@ -367,7 +367,7 @@
       "inputs": {
         "session": "9bvgRxvhdwuDCzSAvFP5HaMqAfqydEvULd2hsBN6kxDd"
       },
-      "expectedAddress": "DRmmFRpHuwXpYGpmUwhxuZAwaEZKf2puS4tJgWYBU1jZ",
+      "expectedAddress": "HkP9Uk3fVAficaiXitoPq696VPQbXrqE5xH9AbgFmYtW",
       "expectedBump": 255
     },
     {
@@ -379,7 +379,7 @@
         "namespaceAuthority": "FZZme4786Mp2RhSZF7RvHGkLmxfwqANFs7vyATznRk7V",
         "positionId": "4cxjy9EweZSD4Y3Zst7dpYCcKSQ27JDdzrMmBLR8gVbu"
       },
-      "expectedAddress": "DQ8XKpE5jMTXazSvu5885Y5q4MXbnGhTkbrBuZndDg1u",
+      "expectedAddress": "Evj6dLdqsg1V3f33av7mmFFpiNLoTcPMQGKXe9D5qBo9",
       "expectedBump": 255
     },
     {
@@ -389,7 +389,7 @@
         "market": "EGrkf7cgnJhTaDCPa2qx5iY1u2XM5B3rZE7c9NsGaT3C",
         "collateralMint": "8A2SZcybi6uUhWaNHbdSPB6Xmhn9hQRao4xrGpLfMgqk"
       },
-      "expectedAddress": "5ou4wgyp4V38cbMhyyMd1L7kydGVmDRdnno1DvS3vdLP",
+      "expectedAddress": "7TmLW4YHwt1A1S24YtQBqQaPSyZrugUT2YmPJLzbUSPb",
       "expectedBump": 252
     },
     {
@@ -400,7 +400,7 @@
         "owner": "5aVAtmZ51obJ3MKzvbDhuhKoXgEf3u72wpPJ2v7qPFf9",
         "orderId": "72623859790382856"
       },
-      "expectedAddress": "9sztbAVePn5vZuR1GGFkrsqdsF2dHHbnqxVG3qGDwcZq",
+      "expectedAddress": "EN4WYsA6K9SCVqP3cmCJa6fPjGg1n2Y1cboqhQzTQyoj",
       "expectedBump": 254
     },
     {
@@ -411,8 +411,8 @@
         "owner": "4UoXzJu7WFcZf7ZhfRb72DGZqYa5Wzop4s3mM8wakV3x",
         "orderId": "72623859790382856"
       },
-      "expectedAddress": "DzVjddRCVdbA7VGfSooUbrnUHRxhJbyykvwWwiWGufpX",
-      "expectedBump": 254
+      "expectedAddress": "J6Nnyuw67km6mNdheUe5HvYQtQmKZh7a5ZHiRQHh87tF",
+      "expectedBump": 253
     },
     {
       "name": "leverage_delegate order:before_stop_loss",
@@ -422,8 +422,8 @@
         "owner": "BbHX9tRNbRDkwkDTn8DKKhB1cz7LKVeuXAf1msRw7zVo",
         "orderId": "72623859790382856"
       },
-      "expectedAddress": "13EZXVDx5gzXqYJF9YRGQnJRVv7Xj6m2SdTHe6kdBEV3",
-      "expectedBump": 252
+      "expectedAddress": "EpcpnZogWNrg6ZHgZF8PkzFtAQV8AdE2dpyCDHFwHy6D",
+      "expectedBump": 253
     }
   ],
   "invalidPdaCases": [
@@ -502,7 +502,7 @@
       "name": "leverage_delegate:execute_leverage_entry_order dusk_program",
       "instructionKey": "leverage_delegate:execute_leverage_entry_order",
       "accountName": "dusk_program",
-      "expectedAddress": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X"
+      "expectedAddress": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ"
     },
     {
       "name": "leverage_delegate:execute_leverage_entry_order token_program",
@@ -526,7 +526,7 @@
       "name": "leverage_delegate:execute_hlp_order dusk_program",
       "instructionKey": "leverage_delegate:execute_hlp_order",
       "accountName": "dusk_program",
-      "expectedAddress": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X"
+      "expectedAddress": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ"
     },
     {
       "name": "leverage_delegate:execute_hlp_order token_program",
@@ -562,7 +562,7 @@
       "name": "dusk:settle_flash_liquidation program",
       "instructionKey": "dusk:settle_flash_liquidation",
       "accountName": "program",
-      "expectedAddress": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X"
+      "expectedAddress": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ"
     },
     {
       "name": "dusk:begin_flash_liquidation token_program",
@@ -592,7 +592,7 @@
       "name": "dusk:begin_flash_liquidation program",
       "instructionKey": "dusk:begin_flash_liquidation",
       "accountName": "program",
-      "expectedAddress": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X"
+      "expectedAddress": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ"
     },
     {
       "name": "dusk:emergency_liquidation token_program",
@@ -616,7 +616,7 @@
       "name": "dusk:emergency_liquidation program",
       "instructionKey": "dusk:emergency_liquidation",
       "accountName": "program",
-      "expectedAddress": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X"
+      "expectedAddress": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ"
     },
     {
       "name": "dusk:begin_hlp_flash token_program",
@@ -646,7 +646,7 @@
       "name": "dusk:begin_hlp_flash program",
       "instructionKey": "dusk:begin_hlp_flash",
       "accountName": "program",
-      "expectedAddress": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X"
+      "expectedAddress": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ"
     },
     {
       "name": "dusk:settle_hlp_flash token_program",
@@ -670,7 +670,7 @@
       "name": "dusk:settle_hlp_flash program",
       "instructionKey": "dusk:settle_hlp_flash",
       "accountName": "program",
-      "expectedAddress": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X"
+      "expectedAddress": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ"
     },
     {
       "name": "dusk:close_insolvent_hlp token_program",
@@ -688,13 +688,13 @@
       "name": "dusk:close_insolvent_hlp program",
       "instructionKey": "dusk:close_insolvent_hlp",
       "accountName": "program",
-      "expectedAddress": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X"
+      "expectedAddress": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ"
     },
     {
       "name": "dusk:delegated_close_leverage delegated_program",
       "instructionKey": "dusk:delegated_close_leverage",
       "accountName": "delegated_program",
-      "expectedAddress": "AXNfmZt5e1UM4daeTzW3H7zNo4boobBcnFm8RzJYxvAv"
+      "expectedAddress": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi"
     },
     {
       "name": "dusk:delegated_close_leverage instructions_sysvar",
@@ -718,7 +718,7 @@
       "name": "dusk:delegated_close_leverage program",
       "instructionKey": "dusk:delegated_close_leverage",
       "accountName": "program",
-      "expectedAddress": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X"
+      "expectedAddress": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ"
     },
     {
       "name": "dusk:settle_protocol_auction token_program",
@@ -736,19 +736,19 @@
       "name": "dusk:settle_protocol_auction program",
       "instructionKey": "dusk:settle_protocol_auction",
       "accountName": "program",
-      "expectedAddress": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X"
+      "expectedAddress": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ"
     },
     {
       "name": "dusk:queue_parameter_proposal program",
       "instructionKey": "dusk:queue_parameter_proposal",
       "accountName": "program",
-      "expectedAddress": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X"
+      "expectedAddress": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ"
     },
     {
       "name": "dusk:execute_parameter_proposal program",
       "instructionKey": "dusk:execute_parameter_proposal",
       "accountName": "program",
-      "expectedAddress": "JA8Zxxm4t4zopBL8e3dQQXWfQ3a5pBUPY9Sp9RnybV2X"
+      "expectedAddress": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ"
     }
   ]
 }

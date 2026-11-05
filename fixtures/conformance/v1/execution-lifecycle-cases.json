@@ -13,7 +13,7 @@
         "market": "market:meta-usdc",
         "target": "position:happy",
         "observedSlot": 100,
-        "protocolRevision": "health-only-2026-10-30-9d6e5373",
+        "protocolRevision": "devnet-2026-11-04-c7db901",
         "expectedStateHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
       },
       "events": [
@@ -59,7 +59,7 @@
         "market": "market:meta-usdc",
         "target": "position:race",
         "observedSlot": 200,
-        "protocolRevision": "health-only-2026-10-30-9d6e5373",
+        "protocolRevision": "devnet-2026-11-04-c7db901",
         "expectedStateHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
       },
       "events": [
@@ -91,7 +91,7 @@
         "market": "market:meta-usdc",
         "target": "position:expired-before-submit",
         "observedSlot": 300,
-        "protocolRevision": "health-only-2026-10-30-9d6e5373",
+        "protocolRevision": "devnet-2026-11-04-c7db901",
         "expectedStateHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
       },
       "events": [
@@ -150,7 +150,7 @@
         "market": "market:meta-usdc",
         "target": "obligation:unknown",
         "observedSlot": 400,
-        "protocolRevision": "health-only-2026-10-30-9d6e5373",
+        "protocolRevision": "devnet-2026-11-04-c7db901",
         "expectedStateHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
       },
       "events": [
@@ -211,7 +211,7 @@
         "market": "market:meta-usdc",
         "target": "auction:late",
         "observedSlot": 500,
-        "protocolRevision": "health-only-2026-10-30-9d6e5373",
+        "protocolRevision": "devnet-2026-11-04-c7db901",
         "expectedStateHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
       },
       "events": [
@@ -258,7 +258,7 @@
         "market": "market:meta-usdc",
         "target": "auction:lending:denied",
         "observedSlot": 600,
-        "protocolRevision": "health-only-2026-10-30-9d6e5373",
+        "protocolRevision": "devnet-2026-11-04-c7db901",
         "expectedStateHash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
       },
       "events": [
@@ -292,7 +292,7 @@
         "market": "market:meta-usdc",
         "target": "proposal:invalid-order",
         "observedSlot": 700,
-        "protocolRevision": "health-only-2026-10-30-9d6e5373",
+        "protocolRevision": "devnet-2026-11-04-c7db901",
         "expectedStateHash": "7777777777777777777777777777777777777777777777777777777777777777"
       },
       "events": [

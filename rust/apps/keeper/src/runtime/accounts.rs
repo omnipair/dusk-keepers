@@ -18,7 +18,7 @@ use dusk_adapter::{
     derive_program_address,
 };
 
-use crate::transaction::AccountMeta;
+use crate::runtime::transaction::AccountMeta;
 
 /// SPL associated token account program.
 pub const ASSOCIATED_TOKEN_PROGRAM: &str = "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";
@@ -46,13 +46,45 @@ pub struct MarketAccounts {
     /// Whether the market carries hLP that must be settled alongside any
     /// instruction that updates it.
     pub hlp_active: bool,
+    /// Authenticated by the program; captured in the keeper's fresh snapshot.
+    pub oracle_feeds: [Option<[u8; 32]>; 2],
 }
 
 impl MarketAccounts {
     pub fn decode(layout: &AccountLayoutManifest, address: [u8; 32], data: &[u8]) -> Option<Self> {
         let reader = layout.reader("Market").ok()?;
+        let weight = u16::from_le_bytes(
+            reader
+                .bytes("oracle.policy.lambda_bps", data)
+                .ok()?
+                .try_into()
+                .ok()?,
+        );
+        let mut oracle_feeds = [None, None];
+        if weight > 0 {
+            if weight >= 10_000 {
+                return None;
+            }
+            let format = reader.u8("oracle.policy.format", data).ok()?;
+            if !(1..=4).contains(&format) {
+                return None;
+            }
+            let base = reader.pubkey("oracle.policy.base_account", data).ok()?;
+            if base == [0; 32] {
+                return None;
+            }
+            oracle_feeds[0] = Some(base);
+            if format == 2 || format == 4 {
+                let quote = reader.pubkey("oracle.policy.quote_account", data).ok()?;
+                if quote == [0; 32] || quote == base {
+                    return None;
+                }
+                oracle_feeds[1] = Some(quote);
+            }
+        }
         Some(Self {
             address,
+            oracle_feeds,
             base_collateral_vault: reader.pubkey("base_side.collateral_vault", data).ok()?,
             base_insurance_vault: reader.pubkey("insurance.base_vault", data).ok()?,
             base_interest_vault: reader.pubkey("base_side.interest_vault", data).ok()?,
@@ -99,6 +131,17 @@ impl MarketAccounts {
         .into_iter()
         .map(AccountMeta::writable)
         .collect()
+    }
+
+    /// Oracle reports follow any positional hLP prefix and delegate hooks.
+    /// A retained zero-weight policy has no feed dependency.
+    pub fn oracle_remaining_accounts(&self) -> Vec<AccountMeta> {
+        self.oracle_feeds
+            .iter()
+            .flatten()
+            .copied()
+            .map(AccountMeta::readonly)
+            .collect()
     }
 
     /// The market's two sides, oriented by which one carries the debt.
@@ -309,6 +352,7 @@ mod tests {
     fn orientation_swaps_every_side() {
         let market = MarketAccounts {
             address: [0; 32],
+            oracle_feeds: [None, None],
             base_collateral_vault: [3; 32],
             base_insurance_vault: [5; 32],
             base_interest_vault: [4; 32],
@@ -348,6 +392,7 @@ mod tests {
     fn the_hlp_prefix_is_ordered_and_conditional() {
         let mut market = MarketAccounts {
             address: [0; 32],
+            oracle_feeds: [None, None],
             base_collateral_vault: [3; 32],
             base_insurance_vault: [5; 32],
             base_interest_vault: [4; 32],

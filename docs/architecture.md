@@ -31,7 +31,7 @@ executed concurrently by different job profiles.
 ## Service boundaries
 
 - **Leverage keeper:** leverage liquidation plus TP/SL. Liquidation supersedes stop-loss, which supersedes take-profit for a position.
-- **Lending trigger, bidder, and settler:** three independent services and wallets for opening liquidation, bidding into it, and final settlement. Each has its own budget, concurrency, and circuit breaker.
+- **Lending keeper:** one discovery and health pass selects an ordinary liquidation first, then an emergency route only if no acceptable ordinary route exists. `KEEPER_LENDING_MODE=ordinary|emergency|both` restricts selection. Errors abort selection; submission never falls through to another route. Health monitoring is available in shadow mode.
 - **Auction arbitrageur:** bids only when the quoted Jupiter exit, fees, priority fee, and conservative slippage leave the configured minimum profit.
 - **Lifecycle keeper:** lower-frequency market proposal/activation/LP-lock maintenance jobs; TypeScript may be live after parity and authorization tests.
 - **Sentinel:** non-signing liveness, protocol-provenance, slot-lag, circuit-breaker, and Rust/TypeScript parity monitor.
@@ -43,9 +43,9 @@ services write candidates and comparison results but never request signatures.
 
 Postgres is the audit ledger for discoveries, attempts, simulations, signatures,
 confirmations, and outcomes. A uniqueness constraint on `(protocol_revision,
-candidate_id, expected_state_hash)` makes retries explicit. Redis provides short
-leases only; loss of Redis availability pauses new live executions instead of
-falling back to in-memory coordination.
+candidate_id, expected_state_hash)` makes retries explicit. The liquidation/order submission path uses PostgreSQL advisory locks and a durable
+transaction journal. Pending signatures are reconciled before replacement. Redis
+is not used by this runtime.
 
 ## Adapters
 
@@ -54,5 +54,24 @@ fingerprints, and golden vectors. They do not import a moving checkout of the Du
 program crate. Adapter responsibilities are account decoding, PDA derivation,
 instruction construction, fee-aware arithmetic, and error classification.
 
-The current adapters expose the intended boundary but intentionally do not build
-transactions. That fail-closed gap must be completed before live mode can start.
+Rust builds and simulates native transactions. TypeScript provides independent
+codecs and reference checks; its service remains a non-signing scaffold. The
+captured protocol lock blocks live startup in both runtimes.
+
+## Source boundaries
+
+The native entry points are `rust/apps/keeper/src/workers/{lending,leverage,hlp,
+revenue,lifecycle,sentinel}/`. Each folder owns its domain's discovery or execution
+orchestration; leverage also owns delegated orders and hLP owns its vault plans.
+`workers/mod.rs` is the only profile dispatcher.
+
+`liquidation/` contains the shared borrowing/leverage engine, ordinary/emergency
+selection policy, atomic instruction plans, bounded size search, simulation and
+snapshot validation. Route selection returns one plan before submission starts.
+`runtime/` contains RPC transport, account resolution, the signer interface,
+transaction wire encoding and PostgreSQL submission/recovery. `config.rs` and
+`health.rs` keep configuration and HTTP reporting out of the workers.
+
+The six deployable profiles are lending, leverage, hLP recovery, revenue auctions,
+governance lifecycle and sentinel. The TypeScript service remains a scaffold;
+its codecs and shared fixtures validate protocol parity, not a second executor.

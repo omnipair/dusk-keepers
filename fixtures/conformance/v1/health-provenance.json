@@ -11,10 +11,10 @@
     "buildSha": null
   },
   "protocol": {
-    "revision": "health-only-2026-10-30-9d6e5373",
+    "revision": "devnet-2026-11-04-c7db901",
     "lockStatus": "captured",
-    "lockSha256": "5229f9228370359ec5369526a4ecdabcbf0b645c90f518cbfbe116c96509753e",
-    "sourceWorktreeFingerprintSha256": "fd0c0b00026c1a19aa2c9cbcb346ddfba646ef717f455f4118bf8b1f5bed8585"
+    "lockSha256": "02c550995e0b23fc6debeaba36eb05141d42f8b181fc792b38018b4082797cbb",
+    "sourceWorktreeFingerprintSha256": "795c805376213df22bb3431033617562c4a57d0c258dd6d655e80ae478e7abeb"
   },
   "dependencies": {
     "rpc": "unknown",
