@@ -60,6 +60,8 @@ const WANTED = {
     "base_hlp_vault.srlp_vault",
     "quote_hlp_vault.srlp_vault",
     "base_hlp_vault.hlp_supply",
+    "base_hlp_vault.srlp_shares",
+    "quote_hlp_vault.srlp_shares",
     "base_hlp_vault.debt_principal",
     "quote_hlp_vault.debt_principal",
     "base_hlp_vault.debt_shares",

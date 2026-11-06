@@ -176,6 +176,16 @@
           "size": 8
         },
         {
+          "path": "base_hlp_vault.srlp_shares",
+          "offset": 5266,
+          "size": 8
+        },
+        {
+          "path": "quote_hlp_vault.srlp_shares",
+          "offset": 5658,
+          "size": 8
+        },
+        {
           "path": "base_hlp_vault.debt_principal",
           "offset": 5306,
           "size": 8

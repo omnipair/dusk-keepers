@@ -16,6 +16,33 @@ use keeper_core::{OutcomeStatus, ReasonCode};
 use plan::HlpContext;
 type Result<T> = std::result::Result<T, String>;
 
+// A never-used side has no vault account to recover. A zero receipt supply
+// alone is insufficient: debt, common shares or residual exposure still matter.
+fn empty_hlp(layout: &AccountLayoutManifest, data: &[u8], target: u8) -> Result<bool> {
+    let side = match target {
+        0 => "base",
+        1 => "quote",
+        _ => return Err("invalid hLP side".into()),
+    };
+    let reader = layout.reader("Market").map_err(|e| e.to_string())?;
+    for field in [
+        "hlp_supply",
+        "debt_shares",
+        "srlp_shares",
+        "residual_exposure",
+    ] {
+        if reader
+            .bytes(&format!("{side}_hlp_vault.{field}"), data)
+            .map_err(|e| e.to_string())?
+            .iter()
+            .any(|byte| *byte != 0)
+        {
+            return Ok(false);
+        }
+    }
+    Ok(true)
+}
+
 pub struct HlpJob<'a> {
     pub client: &'a RpcClient,
     pub layout: &'a AccountLayoutManifest,
@@ -174,6 +201,13 @@ impl HlpJob<'_> {
         target_asset: u8,
     ) -> Result<Option<(Option<String>, String)>> {
         let (context, snapshot) = self.fresh_hlp(market, target_asset)?;
+        if empty_hlp(
+            self.layout,
+            snapshot.owned(market, context.program)?,
+            target_asset,
+        )? {
+            return Ok(None);
+        }
         let setup = context.setup(&snapshot)?;
         if !setup.is_empty() {
             return self
@@ -501,5 +535,46 @@ mod tests {
             try_hlp_recovery(|| Ok(Some("hlp_flash")), || panic!("already filled")),
             Ok(Some("hlp_flash"))
         );
+    }
+}
+
+#[cfg(test)]
+mod inactive_vault_tests {
+    use super::*;
+    #[test]
+    fn no_recovery_without_exposure_but_each_outstanding_ledger_remains_eligible() {
+        let layout = AccountLayoutManifest::from_json(include_str!(
+            "../../../../../../protocol/keeper-account-layout.v1.json"
+        ))
+        .unwrap();
+        let market = layout
+            .accounts
+            .iter()
+            .find(|row| row.name == "Market")
+            .unwrap();
+        for (target, side) in [(0, "base"), (1, "quote")] {
+            let mut data = vec![0; market.size_with_discriminator.unwrap()];
+            assert!(empty_hlp(&layout, &data, target).unwrap());
+            for name in [
+                "hlp_supply",
+                "debt_shares",
+                "srlp_shares",
+                "residual_exposure",
+            ] {
+                let field = market
+                    .fields
+                    .iter()
+                    .find(|field| field.path == format!("{side}_hlp_vault.{name}"))
+                    .unwrap();
+                data[field.offset] = 1;
+                assert!(
+                    !empty_hlp(&layout, &data, target).unwrap(),
+                    "{name} cannot disappear with an empty receipt supply"
+                );
+                data[field.offset] = 0;
+            }
+            assert!(empty_hlp(&layout, &data[..8], target).is_err());
+        }
+        assert!(empty_hlp(&layout, &[], 2).is_err());
     }
 }
