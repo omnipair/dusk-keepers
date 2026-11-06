@@ -1,9 +1,8 @@
 # Devnet capture — 6 November 2026
 
 The current revision is `devnet-2026-11-06-operators`, captured from the fresh
-Dusk and leverage-delegate deployment. Source
-`d8c7f89534b734792ec32af6914e53c3efeb04a9` matches the observed IDLs and supplies
-the bank fixture builders. The SDK artifact is downloaded from npm as
+Dusk and leverage-delegate deployment, updated for the compatible Dusk upgrade at finalized slot 519241008. Source
+`fda084dce13fdb99da0731d8c74861eefd7432fc` preserves the observed IDLs. Liquidation and hLP fixtures were regenerated from that exact source and execute the current captured binary. The SDK artifact is downloaded from npm as
 `@omnipair/dusk-sdk@2.18.0-next.20261106`; its integrity and SHA-256 are recorded
 in the protocol lock. Consumers install the published package normally.
 
@@ -18,8 +17,8 @@ addresses, upgrade slots, sizes and SHA-256 hashes. The validator cross-checks
 this evidence against the lock and artifacts offline. It does not prove the
 cluster has remained unchanged after capture. Matching IDLs and passing tests
 also do not constitute a reproducible-build attestation for the deployed bytes.
-The lock records the capture toolchain, including Surfpool 1.2.0. Sixteen
-native-plan RPC simulations passed on an isolated offline Surfpool with the exact
+The lock records the capture toolchain, including Surfpool 1.2.0. The original capture had sixteen
+native-plan RPC simulations pass on an isolated offline Surfpool with the exact
 captured binaries. The [recorded results](evidence/operator-surfpool-simulations.json)
 can be reproduced with an offline Surfpool on port 18899 and
 `node --experimental-strip-types scripts/rehearse-surfpool.mjs`.
