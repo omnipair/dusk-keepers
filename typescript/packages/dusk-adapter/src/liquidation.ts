@@ -127,7 +127,6 @@ export function resolveLiquidationAccounts(
       : m.key(`${collateral}_side.collateral_vault`),
     reserve_vault: m.key(`${debt}_side.reserve_vault`),
     interest_vault: m.key(`${debt}_side.interest_vault`),
-    insurance_vault: m.key(`insurance.${debt}_vault`),
     buyer_collateral_account: ata(buyer, collateralMint, cm.owner),
     buyer_refund_account: ata(buyer, debtMint, dm.owner),
     owner_debt_account: ata(owner, debtMint, dm.owner),
@@ -287,8 +286,7 @@ export function decodeLiquidationQuote(
   const fee = () => ({
     total: u64(),
     protocol: u64(),
-    insurance: u64(),
-    lp: u64(),
+    junior: u64(),
   });
   const rates = () => ({ buyerDiscountBps: u16(), emergencyRewardBps: u16() });
   let q: Record<string, any>;
@@ -319,15 +317,13 @@ export function decodeLiquidationQuote(
       rewardCredit: u64(),
       rewardDebit: u64(),
       fee: fee(),
-      insuranceFeeDebit: u64(),
+      juniorFeeDebit: u64(),
       revenueFeeDebit: u64(),
       ownerDebit: u64(),
       ownerCredit: u64(),
-      insuranceDebit: u64(),
       loss: {
         principalRepaid: u64(),
         interestPaid: u64(),
-        insuranceCredit: u64(),
         principalWrittenOff: u64(),
         interestCanceled: u64(),
         surplus: u64(),

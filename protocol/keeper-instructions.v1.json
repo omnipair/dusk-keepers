@@ -1,19 +1,19 @@
 {
   "$schema": "./schemas/instruction-contract.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "devnet-2026-11-04-c7db901",
+  "protocolRevision": "devnet-2026-11-06-operators",
   "programs": [
     {
       "name": "dusk",
-      "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
+      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
       "idlPath": "artifacts/dusk.json",
-      "idlSha256": "1c980a9be65bd47fdbe3f90c6f50c004078c43c28e5c13321590c3e33ea618d0"
+      "idlSha256": "b3839f330c3c7fd2097d90c4dc4537b67d19ad7deaf3feefacc577ddfbd17c35"
     },
     {
       "name": "leverage_delegate",
-      "programId": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
+      "programId": "B315E6hHTgDjHgCCPungLop2mkgv9SHkcBc9ZzALNxNY",
       "idlPath": "artifacts/leverage_delegate.json",
-      "idlSha256": "a208219d23675a973df89a45f23c5af1cbd2464bed2d8439324b4bc261e2f3fb"
+      "idlSha256": "9080b70c97dd48c937400bdcf554758bafc1faa1ef48fece619f52c299ab6386"
     }
   ],
   "actions": [
@@ -142,16 +142,16 @@
       "requiredOptionalAccounts": []
     },
     {
-      "action": "eligible_proposal_queue",
+      "action": "operator_revenue_archive_initialize",
       "jobKind": "lifecycle",
-      "primaryInstructionKey": "dusk:queue_parameter_proposal",
+      "primaryInstructionKey": "dusk:initialize_operator_revenue",
       "cpiInstructionKeys": [],
       "requiredOptionalAccounts": []
     },
     {
-      "action": "eligible_proposal_execute",
+      "action": "operator_bundle_execute",
       "jobKind": "lifecycle",
-      "primaryInstructionKey": "dusk:execute_parameter_proposal",
+      "primaryInstructionKey": "dusk:execute_operator_change",
       "cpiInstructionKeys": [],
       "requiredOptionalAccounts": []
     }
@@ -160,7 +160,7 @@
     {
       "key": "leverage_delegate:execute_leverage_entry_order",
       "program": "leverage_delegate",
-      "programId": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
+      "programId": "B315E6hHTgDjHgCCPungLop2mkgv9SHkcBc9ZzALNxNY",
       "instructionName": "execute_leverage_entry_order",
       "discriminatorHex": "63433961cc47ac90",
       "accounts": [
@@ -295,7 +295,7 @@
           "writable": false,
           "signer": false,
           "optional": false,
-          "fixedAddress": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ"
+          "fixedAddress": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2"
         },
         {
           "name": "fee_recipient",
@@ -330,7 +330,7 @@
     {
       "key": "leverage_delegate:execute_hlp_order",
       "program": "leverage_delegate",
-      "programId": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
+      "programId": "B315E6hHTgDjHgCCPungLop2mkgv9SHkcBc9ZzALNxNY",
       "instructionName": "execute_hlp_order",
       "discriminatorHex": "ba32b16ca8ca8ec9",
       "accounts": [
@@ -370,7 +370,7 @@
           "fixedAddress": null
         },
         {
-          "name": "ylp_mint",
+          "name": "srlp_mint",
           "writable": true,
           "signer": false,
           "optional": false,
@@ -419,7 +419,7 @@
           "fixedAddress": null
         },
         {
-          "name": "hlp_ylp_account",
+          "name": "hlp_srlp_account",
           "writable": true,
           "signer": false,
           "optional": false,
@@ -479,7 +479,7 @@
           "writable": false,
           "signer": false,
           "optional": false,
-          "fixedAddress": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ"
+          "fixedAddress": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2"
         },
         {
           "name": "fee_recipient",
@@ -507,7 +507,7 @@
     {
       "key": "dusk:settle_flash_liquidation",
       "program": "dusk",
-      "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
+      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
       "instructionName": "settle_flash_liquidation",
       "discriminatorHex": "a15d5938857c4f14",
       "accounts": [
@@ -569,13 +569,6 @@
         },
         {
           "name": "interest_vault",
-          "writable": true,
-          "signer": false,
-          "optional": false,
-          "fixedAddress": null
-        },
-        {
-          "name": "insurance_vault",
           "writable": true,
           "signer": false,
           "optional": false,
@@ -691,7 +684,7 @@
     {
       "key": "dusk:preview_flash_liquidation",
       "program": "dusk",
-      "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
+      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
       "instructionName": "preview_flash_liquidation",
       "discriminatorHex": "ee5e7af3d6aff603",
       "accounts": [
@@ -735,7 +728,7 @@
     {
       "key": "dusk:preview_emergency_liquidation",
       "program": "dusk",
-      "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
+      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
       "instructionName": "preview_emergency_liquidation",
       "discriminatorHex": "4bc8420070e61838",
       "accounts": [
@@ -786,7 +779,7 @@
     {
       "key": "dusk:preview_liquidation_health",
       "program": "dusk",
-      "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
+      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
       "instructionName": "preview_liquidation_health",
       "discriminatorHex": "7b9e787a5f1c06ac",
       "accounts": [
@@ -830,7 +823,7 @@
     {
       "key": "dusk:begin_flash_liquidation",
       "program": "dusk",
-      "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
+      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
       "instructionName": "begin_flash_liquidation",
       "discriminatorHex": "12f22f2acb2d62fc",
       "accounts": [
@@ -892,13 +885,6 @@
         },
         {
           "name": "interest_vault",
-          "writable": true,
-          "signer": false,
-          "optional": false,
-          "fixedAddress": null
-        },
-        {
-          "name": "insurance_vault",
           "writable": true,
           "signer": false,
           "optional": false,
@@ -1014,7 +1000,7 @@
     {
       "key": "dusk:emergency_liquidation",
       "program": "dusk",
-      "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
+      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
       "instructionName": "emergency_liquidation",
       "discriminatorHex": "185f76884dc22cf7",
       "accounts": [
@@ -1076,13 +1062,6 @@
         },
         {
           "name": "interest_vault",
-          "writable": true,
-          "signer": false,
-          "optional": false,
-          "fixedAddress": null
-        },
-        {
-          "name": "insurance_vault",
           "writable": true,
           "signer": false,
           "optional": false,
@@ -1184,7 +1163,7 @@
     {
       "key": "dusk:preview_hlp_flash",
       "program": "dusk",
-      "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
+      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
       "instructionName": "preview_hlp_flash",
       "discriminatorHex": "1aa47654e7569db0",
       "accounts": [
@@ -1221,7 +1200,7 @@
     {
       "key": "dusk:begin_hlp_flash",
       "program": "dusk",
-      "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
+      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
       "instructionName": "begin_hlp_flash",
       "discriminatorHex": "29cff767b43a830d",
       "accounts": [
@@ -1283,13 +1262,6 @@
         },
         {
           "name": "buyer_refund_account",
-          "writable": true,
-          "signer": false,
-          "optional": false,
-          "fixedAddress": null
-        },
-        {
-          "name": "insurance_vault",
           "writable": true,
           "signer": false,
           "optional": false,
@@ -1363,7 +1335,7 @@
     {
       "key": "dusk:settle_hlp_flash",
       "program": "dusk",
-      "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
+      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
       "instructionName": "settle_hlp_flash",
       "discriminatorHex": "d77c9968c35b76d1",
       "accounts": [
@@ -1431,13 +1403,6 @@
           "fixedAddress": null
         },
         {
-          "name": "insurance_vault",
-          "writable": true,
-          "signer": false,
-          "optional": false,
-          "fixedAddress": null
-        },
-        {
           "name": "token_program",
           "writable": false,
           "signer": false,
@@ -1498,7 +1463,7 @@
     {
       "key": "dusk:close_insolvent_hlp",
       "program": "dusk",
-      "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
+      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
       "instructionName": "close_insolvent_hlp",
       "discriminatorHex": "9eac308679a1c2a8",
       "accounts": [
@@ -1545,13 +1510,6 @@
           "fixedAddress": null
         },
         {
-          "name": "insurance_vault",
-          "writable": true,
-          "signer": false,
-          "optional": false,
-          "fixedAddress": null
-        },
-        {
           "name": "caller_bounty_account",
           "writable": true,
           "signer": false,
@@ -1559,14 +1517,14 @@
           "fixedAddress": null
         },
         {
-          "name": "ylp_mint",
+          "name": "srlp_mint",
           "writable": true,
           "signer": false,
           "optional": false,
           "fixedAddress": null
         },
         {
-          "name": "target_hlp_ylp_vault",
+          "name": "target_hlp_srlp_vault",
           "writable": true,
           "signer": false,
           "optional": false,
@@ -1605,7 +1563,7 @@
     {
       "key": "dusk:delegated_close_leverage",
       "program": "dusk",
-      "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
+      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
       "instructionName": "delegated_close_leverage",
       "discriminatorHex": "0eda6299a413308b",
       "accounts": [
@@ -1775,7 +1733,7 @@
     {
       "key": "leverage_delegate:before_take_profit",
       "program": "leverage_delegate",
-      "programId": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
+      "programId": "B315E6hHTgDjHgCCPungLop2mkgv9SHkcBc9ZzALNxNY",
       "instructionName": "before_take_profit",
       "discriminatorHex": "05236f00df83c11f",
       "accounts": [
@@ -1861,7 +1819,7 @@
     {
       "key": "leverage_delegate:after_close_order",
       "program": "leverage_delegate",
-      "programId": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
+      "programId": "B315E6hHTgDjHgCCPungLop2mkgv9SHkcBc9ZzALNxNY",
       "instructionName": "after_close_order",
       "discriminatorHex": "9ce0eefa5fe5eb3b",
       "accounts": [
@@ -1940,7 +1898,7 @@
     {
       "key": "leverage_delegate:before_stop_loss",
       "program": "leverage_delegate",
-      "programId": "3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi",
+      "programId": "B315E6hHTgDjHgCCPungLop2mkgv9SHkcBc9ZzALNxNY",
       "instructionName": "before_stop_loss",
       "discriminatorHex": "f63e52e8a8c7794e",
       "accounts": [
@@ -2026,7 +1984,7 @@
     {
       "key": "dusk:settle_protocol_auction",
       "program": "dusk",
-      "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
+      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
       "instructionName": "settle_protocol_auction",
       "discriminatorHex": "cecc208708164850",
       "accounts": [
@@ -2138,12 +2096,19 @@
       ]
     },
     {
-      "key": "dusk:queue_parameter_proposal",
+      "key": "dusk:initialize_operator_revenue",
       "program": "dusk",
-      "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
-      "instructionName": "queue_parameter_proposal",
-      "discriminatorHex": "c259a444fdfb156c",
+      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
+      "instructionName": "initialize_operator_revenue",
+      "discriminatorHex": "70d2b9085ad70f29",
       "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true,
+          "optional": false,
+          "fixedAddress": null
+        },
         {
           "name": "market",
           "writable": false,
@@ -2152,55 +2117,27 @@
           "fixedAddress": null
         },
         {
-          "name": "proposal",
+          "name": "revenue",
           "writable": true,
           "signer": false,
           "optional": false,
           "fixedAddress": null
         },
         {
-          "name": "ylp_mint",
+          "name": "system_program",
           "writable": false,
           "signer": false,
           "optional": false,
-          "fixedAddress": null
-        },
-        {
-          "name": "base_hlp_ylp_vault",
-          "writable": false,
-          "signer": false,
-          "optional": false,
-          "fixedAddress": null
-        },
-        {
-          "name": "quote_hlp_ylp_vault",
-          "writable": false,
-          "signer": false,
-          "optional": false,
-          "fixedAddress": null
-        },
-        {
-          "name": "event_authority",
-          "writable": false,
-          "signer": false,
-          "optional": false,
-          "fixedAddress": null
-        },
-        {
-          "name": "program",
-          "writable": false,
-          "signer": false,
-          "optional": false,
-          "fixedAddress": null
+          "fixedAddress": "11111111111111111111111111111111"
         }
       ]
     },
     {
-      "key": "dusk:execute_parameter_proposal",
+      "key": "dusk:execute_operator_change",
       "program": "dusk",
-      "programId": "5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ",
-      "instructionName": "execute_parameter_proposal",
-      "discriminatorHex": "2e6a707128ff9a1b",
+      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
+      "instructionName": "execute_operator_change",
+      "discriminatorHex": "72921b743d869723",
       "accounts": [
         {
           "name": "market",
@@ -2210,14 +2147,7 @@
           "fixedAddress": null
         },
         {
-          "name": "base_mint",
-          "writable": false,
-          "signer": false,
-          "optional": false,
-          "fixedAddress": null
-        },
-        {
-          "name": "quote_mint",
+          "name": "futarchy_authority",
           "writable": false,
           "signer": false,
           "optional": false,
@@ -2228,6 +2158,20 @@
           "writable": true,
           "signer": false,
           "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "accepting_operator",
+          "writable": false,
+          "signer": true,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "previous_revenue",
+          "writable": true,
+          "signer": false,
+          "optional": true,
           "fixedAddress": null
         },
         {

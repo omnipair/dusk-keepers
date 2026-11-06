@@ -1,6 +1,6 @@
+import { nativePlan } from "./helpers/native-planner.ts";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
-import { execFileSync } from "node:child_process";
 import test from "node:test";
 import {
   resolveLiquidationAccounts,
@@ -36,12 +36,7 @@ for (const file of readdirSync("fixtures/litesvm").filter((f) =>
       f.action === "flash"
         ? buildFlashPlan(contract, context, quote, f.maxRepayment)
         : buildEmergencyPlan(contract, context, quote);
-    const native = JSON.parse(
-      execFileSync("target/debug/dusk-keeper", ["--flash-plan"], {
-        input: JSON.stringify({ ...f, internal: true }),
-        encoding: "utf8",
-      }),
-    );
+    const native = nativePlan({ ...f, internal: true });
     assert.deepEqual(native.instructions, plan);
     assert.ok(plan.length >= 3);
     const healthPreview = liquidationInstruction(
@@ -50,12 +45,7 @@ for (const file of readdirSync("fixtures/litesvm").filter((f) =>
       "preview_liquidation_health",
       { debtAsset: f.debtAsset },
     );
-    const nativeHealth = JSON.parse(
-      execFileSync("target/debug/dusk-keeper", ["--flash-plan"], {
-        input: JSON.stringify({ ...f, action: "health" }),
-        encoding: "utf8",
-      }),
-    );
+    const nativeHealth = nativePlan({ ...f, action: "health" });
     assert.deepEqual(nativeHealth.instructions, [healthPreview]);
     assert.ok(healthPreview.accounts.every(meta => !meta.is_writable && !meta.is_signer));
     assert.ok(!plan.some(ix => Buffer.from(ix.data).equals(Buffer.from(healthPreview.data))));

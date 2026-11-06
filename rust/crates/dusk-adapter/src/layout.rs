@@ -27,6 +27,8 @@ pub struct AccountLayoutManifest {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AccountLayout {
+    #[serde(default)]
+    pub dynamic: Option<DynamicProposalLayout>,
     pub name: String,
     /// The account's exact size, when it has one.
     #[serde(default)]
@@ -36,6 +38,13 @@ pub struct AccountLayout {
     #[serde(default)]
     pub minimum_size: Option<usize>,
     pub fields: Vec<FieldLocation>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DynamicProposalLayout {
+    pub updates_offset: usize,
+    pub variant_payload_sizes: Vec<usize>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -263,7 +272,7 @@ mod tests {
             manifest.reader("BorrowPosition").unwrap().guard(),
             SizeGuard::Exact(_)
         ));
-        let proposal = manifest.reader("ParameterProposal").unwrap();
+        let proposal = manifest.reader("OperatorProposal").unwrap();
         assert!(matches!(proposal.guard(), SizeGuard::AtLeast(_)));
         // Longer than the minimum is fine; shorter is not.
         let long = vec![0_u8; proposal.size() + 500];

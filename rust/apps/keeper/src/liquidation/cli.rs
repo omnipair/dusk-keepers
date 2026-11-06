@@ -35,7 +35,6 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
                         &contract,
                         &s,
                         &HlpFlashQuote::try_from_slice(&quote)?,
-                        v["maxInsuranceDraw"].as_str().unwrap_or("0").parse()?,
                         v["maxSocializedLoss"].as_str().unwrap_or("0").parse()?,
                     )?
                     .0;
@@ -50,7 +49,6 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
             }
             Some("hlp_close") => c.close_insolvent(
                 &contract,
-                v["maxInsuranceDraw"].as_str().unwrap_or("0").parse()?,
                 v["maxSocializedLoss"].as_str().unwrap_or("0").parse()?,
                 v["minCallerBountyOut"].as_str().unwrap_or("0").parse()?,
             )?,

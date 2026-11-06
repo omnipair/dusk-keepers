@@ -21,8 +21,8 @@ export type JobAction =
   | "delegated_close_take_profit"
   | "delegated_close_stop_loss"
   | "protocol_revenue_auction_settle"
-  | "eligible_proposal_queue"
-  | "eligible_proposal_execute";
+  | "operator_revenue_archive_initialize"
+  | "operator_bundle_execute";
 
 export type JobKind =
   | "leverage_liquidation"

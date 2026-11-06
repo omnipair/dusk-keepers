@@ -1,3 +1,4 @@
+import { nativePlan } from "./helpers/native-planner.ts";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { execFileSync, spawnSync } from "node:child_process";
@@ -10,9 +11,7 @@ import { withOracle, base, quote, provider } from "./helpers/oracle-fixture.ts";
 const read = (path: string) => JSON.parse(readFileSync(path, "utf8"));
 const layout = read("protocol/keeper-account-layout.v1.json");
 const contract = read("protocol/keeper-instructions.v1.json");
-const native = (f: any) => JSON.parse(execFileSync("target/debug/dusk-keeper", ["--flash-plan"], {
-  input: JSON.stringify({ ...f, action: "health" }), encoding: "utf8",
-}));
+const native = (f: any) => nativePlan({ ...f, action: "health" });
 
 function fixture(format = 1, weight = 2500) {
   return withOracle(read("fixtures/litesvm/01-flash-BorrowPosition.json"), format, weight);
@@ -48,10 +47,7 @@ test("retained zero-weight oracle policy adds no feed dependency", async () => {
 test("unsupported positive-weight oracle policy fails closed in both planners", async () => {
   const { f } = await fixture(5);
   assert.throws(() => resolveLiquidationAccounts(layout, f.snapshot, f.position, f.buyer, f.kind, f.debtAsset), /oracle policy/);
-  const result = spawnSync("target/debug/dusk-keeper", ["--flash-plan"], {
-    input: JSON.stringify({ ...f, action: "health" }), encoding: "utf8",
-  });
-  assert.notEqual(result.status, 0);
+  assert.throws(() => nativePlan({ ...f, action: "health" }), /market layout/);
 });
 
 test("deployed program authenticates the keeper's oracle feed and rejects missing, stale, or wrong-owner reports", async () => {

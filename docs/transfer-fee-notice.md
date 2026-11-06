@@ -64,7 +64,7 @@ Epochs are read from Clock, not estimated as a fixed number of hours.
    cleanup. Reconcile an unknown submitted transaction before any new signing attempt.
 5. Escalate repeated unprofitable/unavailable routes, simulation failures, funding
    failures or activation with exposed debt. Preserve the loss waterfall after
-   activation; do not fake net credit or bypass insurance/write-off limits.
+   activation; do not fake net credit or bypass funded-loss/write-off limits.
 
 A canceled or rescheduled fee requires the same full recheck and can remove
 eligibility. Clear stale route/payment estimates. The authority can also cancel
@@ -89,4 +89,4 @@ Before enabling the eventual release, capture its final artifacts, verify the
 actual upgraded program and freeze that matching lock through the release gate.
 Run devnet notice-window and restart checks after that separately authorized
 upgrade. Preserve the loss waterfall for missed windows; do not bypass program
-health checks, payment floors or insurance limits to force cleanup.
+health checks, payment floors or funded-loss limits to force cleanup.

@@ -96,7 +96,6 @@ export type KeeperInstructionArguments =
         readonly targetAsset: number;
         readonly maxPayment: bigint;
         readonly allowFull: boolean;
-        readonly maxInsuranceDraw: bigint;
         readonly maxSocializedLoss: bigint;
         readonly maxCollateralDebit: bigint;
         readonly minCollateralCredit: bigint;
@@ -108,7 +107,6 @@ export type KeeperInstructionArguments =
       readonly specificationKey: "dusk:close_insolvent_hlp";
       readonly arguments: {
         readonly targetAsset: number;
-        readonly maxInsuranceDraw: bigint;
         readonly maxSocializedLoss: bigint;
         readonly minCallerBountyOut: bigint;
       };
@@ -133,8 +131,8 @@ export type KeeperInstructionArguments =
       readonly specificationKey: "dusk:settle_protocol_auction";
       readonly arguments: SettleProtocolAuctionArgs;
     }
-  | { readonly specificationKey: "dusk:queue_parameter_proposal" }
-  | { readonly specificationKey: "dusk:execute_parameter_proposal" };
+  | { readonly specificationKey: "dusk:initialize_operator_revenue" }
+  | { readonly specificationKey: "dusk:execute_operator_change" };
 
 export type InstructionEncodingErrorCode =
   | "unsupported_instruction"
@@ -233,7 +231,6 @@ export function encodeKeeperInstruction(
       writer.u8(request.arguments.targetAsset);
       writer.u64(request.arguments.maxPayment);
       writer.u8(request.arguments.allowFull ? 1 : 0);
-      writer.u64(request.arguments.maxInsuranceDraw);
       writer.u64(request.arguments.maxSocializedLoss);
       writer.u64(request.arguments.maxCollateralDebit);
       writer.u64(request.arguments.minCollateralCredit);
@@ -243,13 +240,12 @@ export function encodeKeeperInstruction(
       break;
     case "dusk:close_insolvent_hlp":
       writer.u8(request.arguments.targetAsset);
-      writer.u64(request.arguments.maxInsuranceDraw);
       writer.u64(request.arguments.maxSocializedLoss);
       writer.u64(request.arguments.minCallerBountyOut);
       break;
 
-    case "dusk:queue_parameter_proposal":
-    case "dusk:execute_parameter_proposal":
+    case "dusk:initialize_operator_revenue":
+    case "dusk:execute_operator_change":
       break;
     case "dusk:delegated_close_leverage":
       writer.u8(request.arguments.debtAsset);
@@ -403,7 +399,6 @@ export function parseKeeperInstructionArguments(
         "targetAsset",
         "maxPayment",
         "allowFull",
-        "maxInsuranceDraw",
         "maxSocializedLoss",
         "maxCollateralDebit",
         "minCollateralCredit",
@@ -419,7 +414,6 @@ export function parseKeeperInstructionArguments(
           ),
           maxPayment: decimalU64(argumentsValue.maxPayment),
           allowFull: booleanValue(argumentsValue.allowFull),
-          maxInsuranceDraw: decimalU64(argumentsValue.maxInsuranceDraw),
           maxSocializedLoss: decimalU64(argumentsValue.maxSocializedLoss),
           maxCollateralDebit: decimalU64(argumentsValue.maxCollateralDebit),
           minCollateralCredit: decimalU64(argumentsValue.minCollateralCredit),
@@ -436,7 +430,6 @@ export function parseKeeperInstructionArguments(
     case "dusk:close_insolvent_hlp":
       requireKeys(argumentsValue, [
         "targetAsset",
-        "maxInsuranceDraw",
         "maxSocializedLoss",
         "minCallerBountyOut",
       ]);
@@ -448,14 +441,13 @@ export function parseKeeperInstructionArguments(
             0xff,
             "targetAsset",
           ),
-          maxInsuranceDraw: decimalU64(argumentsValue.maxInsuranceDraw),
           maxSocializedLoss: decimalU64(argumentsValue.maxSocializedLoss),
           minCallerBountyOut: decimalU64(argumentsValue.minCallerBountyOut),
         },
       };
 
-    case "dusk:queue_parameter_proposal":
-    case "dusk:execute_parameter_proposal":
+    case "dusk:initialize_operator_revenue":
+    case "dusk:execute_operator_change":
       requireKeys(argumentsValue, []);
       return { specificationKey };
     case "dusk:delegated_close_leverage":

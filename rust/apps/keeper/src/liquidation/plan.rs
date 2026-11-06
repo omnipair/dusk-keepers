@@ -233,7 +233,6 @@ impl Context {
             ),
             ("reserve_vault".into(), sides.debt_reserve_vault),
             ("interest_vault".into(), sides.debt_interest_vault),
-            ("insurance_vault".into(), sides.debt_insurance_vault),
             (
                 "buyer_collateral_account".into(),
                 associated_token_account(buyer, collateral_token, sides.collateral_mint)

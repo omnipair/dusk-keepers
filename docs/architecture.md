@@ -33,7 +33,7 @@ executed concurrently by different job profiles.
 - **Leverage keeper:** leverage liquidation plus TP/SL. Liquidation supersedes stop-loss, which supersedes take-profit for a position.
 - **Lending keeper:** one discovery and health pass selects an ordinary liquidation first, then an emergency route only if no acceptable ordinary route exists. `KEEPER_LENDING_MODE=ordinary|emergency|both` restricts selection. Errors abort selection; submission never falls through to another route. Health monitoring is available in shadow mode.
 - **Auction arbitrageur:** bids only when the quoted Jupiter exit, fees, priority fee, and conservative slippage leave the configured minimum profit.
-- **Lifecycle keeper:** lower-frequency market proposal/activation/LP-lock maintenance jobs; TypeScript may be live after parity and authorization tests.
+- **Lifecycle keeper:** lower-frequency announced operator-bundle execution and revenue archival; TypeScript may be live after parity and authorization tests.
 - **Sentinel:** non-signing liveness, protocol-provenance, slot-lag, circuit-breaker, and Rust/TypeScript parity monitor.
 
 Each live service gets a paired shadow runtime in the other language. Shadow
@@ -73,5 +73,5 @@ transaction wire encoding and PostgreSQL submission/recovery. `config.rs` and
 `health.rs` keep configuration and HTTP reporting out of the workers.
 
 The six deployable profiles are lending, leverage, hLP recovery, revenue auctions,
-governance lifecycle and sentinel. The TypeScript service remains a scaffold;
+operator lifecycle and sentinel. The TypeScript service remains a scaffold;
 its codecs and shared fixtures validate protocol parity, not a second executor.

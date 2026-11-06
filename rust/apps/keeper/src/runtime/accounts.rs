@@ -38,8 +38,6 @@ pub struct MarketAccounts {
     pub quote_collateral_vault: [u8; 32],
     pub base_interest_vault: [u8; 32],
     pub quote_interest_vault: [u8; 32],
-    pub base_insurance_vault: [u8; 32],
-    pub quote_insurance_vault: [u8; 32],
     pub srlp_mint: [u8; 32],
     pub base_srlp_vault: [u8; 32],
     pub quote_srlp_vault: [u8; 32],
@@ -86,12 +84,10 @@ impl MarketAccounts {
             address,
             oracle_feeds,
             base_collateral_vault: reader.pubkey("base_side.collateral_vault", data).ok()?,
-            base_insurance_vault: reader.pubkey("insurance.base_vault", data).ok()?,
             base_interest_vault: reader.pubkey("base_side.interest_vault", data).ok()?,
             base_mint: reader.pubkey("base_side.asset_mint", data).ok()?,
             base_reserve_vault: reader.pubkey("base_side.reserve_vault", data).ok()?,
             quote_collateral_vault: reader.pubkey("quote_side.collateral_vault", data).ok()?,
-            quote_insurance_vault: reader.pubkey("insurance.quote_vault", data).ok()?,
             quote_interest_vault: reader.pubkey("quote_side.interest_vault", data).ok()?,
             quote_mint: reader.pubkey("quote_side.asset_mint", data).ok()?,
             quote_reserve_vault: reader.pubkey("quote_side.reserve_vault", data).ok()?,
@@ -152,7 +148,6 @@ impl MarketAccounts {
                 collateral_mint: self.quote_mint,
                 collateral_reserve_vault: self.quote_reserve_vault,
                 debt_interest_vault: self.base_interest_vault,
-                debt_insurance_vault: self.base_insurance_vault,
                 debt_mint: self.base_mint,
                 debt_reserve_vault: self.base_reserve_vault,
             }
@@ -162,7 +157,6 @@ impl MarketAccounts {
                 collateral_mint: self.base_mint,
                 collateral_reserve_vault: self.base_reserve_vault,
                 debt_interest_vault: self.quote_interest_vault,
-                debt_insurance_vault: self.quote_insurance_vault,
                 debt_mint: self.quote_mint,
                 debt_reserve_vault: self.quote_reserve_vault,
             }
@@ -181,7 +175,6 @@ pub struct OrientedMarket {
     #[allow(dead_code)]
     pub collateral_reserve_vault: [u8; 32],
     pub debt_interest_vault: [u8; 32],
-    pub debt_insurance_vault: [u8; 32],
     pub collateral_collateral_vault: [u8; 32],
 }
 
@@ -354,12 +347,10 @@ mod tests {
             address: [0; 32],
             oracle_feeds: [None, None],
             base_collateral_vault: [3; 32],
-            base_insurance_vault: [5; 32],
             base_interest_vault: [4; 32],
             base_mint: [1; 32],
             base_reserve_vault: [2; 32],
             quote_collateral_vault: [13; 32],
-            quote_insurance_vault: [15; 32],
             quote_interest_vault: [14; 32],
             base_srlp_vault: [6; 32],
             hlp_active: true,
@@ -375,11 +366,6 @@ mod tests {
         assert_eq!(quote_debt.debt_mint, market.quote_mint);
         assert_eq!(quote_debt.collateral_mint, market.base_mint);
         assert_ne!(base_debt.debt_reserve_vault, quote_debt.debt_reserve_vault);
-        assert_eq!(base_debt.debt_insurance_vault, market.base_insurance_vault);
-        assert_eq!(
-            quote_debt.debt_insurance_vault,
-            market.quote_insurance_vault
-        );
         assert_ne!(
             base_debt.collateral_reserve_vault,
             quote_debt.collateral_reserve_vault
@@ -394,14 +380,12 @@ mod tests {
             address: [0; 32],
             oracle_feeds: [None, None],
             base_collateral_vault: [3; 32],
-            base_insurance_vault: [5; 32],
             base_interest_vault: [4; 32],
             base_mint: [1; 32],
             base_reserve_vault: [2; 32],
             base_srlp_vault: [6; 32],
             hlp_active: true,
             quote_collateral_vault: [13; 32],
-            quote_insurance_vault: [15; 32],
             quote_interest_vault: [14; 32],
             quote_mint: [11; 32],
             quote_reserve_vault: [12; 32],
