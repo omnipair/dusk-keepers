@@ -180,7 +180,6 @@ impl HlpJob<'_> {
                 .submit_hlp(&context, &snapshot, "prepare_hlp_accounts", setup, false)
                 .map(Some);
         }
-        let max_insurance_draw = required_u64("KEEPER_HLP_MAX_INSURANCE_DRAW")?;
         let max_socialized_loss = required_u64("KEEPER_HLP_MAX_SOCIALIZED_LOSS")?;
         let max_payment_debit = required_u64("KEEPER_HLP_MAX_PAYMENT_DEBIT")?;
         let min_collateral_credit = required_u64("KEEPER_HLP_MIN_COLLATERAL_CREDIT")?;
@@ -189,13 +188,8 @@ impl HlpJob<'_> {
                 let Some(quote) = self.preview_hlp(&context, &snapshot)? else {
                     return Ok(None);
                 };
-                let (instructions, gross_payment) = context.flash_plan(
-                    self.contract,
-                    &snapshot,
-                    &quote,
-                    max_insurance_draw,
-                    max_socialized_loss,
-                )?;
+                let (instructions, gross_payment) =
+                    context.flash_plan(self.contract, &snapshot, &quote, max_socialized_loss)?;
                 let buyer_payment_balance = snapshot
                     .accounts
                     .get(&address(context.named["buyer_refund_account"]))
@@ -229,7 +223,6 @@ impl HlpJob<'_> {
                 // independently checks eligibility and the configured loss bounds.
                 let close = context.close_insolvent(
                     self.contract,
-                    max_insurance_draw,
                     max_socialized_loss,
                     required_u64("KEEPER_HLP_MIN_BOUNTY_OUT")?,
                 )?;
@@ -249,7 +242,7 @@ impl HlpJob<'_> {
         }
         Ok(Some((
             None,
-            "eligible but unfilled: hLP recovery did not meet configured payment, receipt, insurance, loss, or bounty bounds".into(),
+            "eligible but unfilled: hLP recovery did not meet configured payment, receipt, loss, or bounty bounds".into(),
         )))
     }
 

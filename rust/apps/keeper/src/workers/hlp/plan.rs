@@ -79,11 +79,6 @@ impl HlpContext {
         } else {
             market.base_reserve_vault
         };
-        let insurance_vault = if target_is_base {
-            market.quote_insurance_vault
-        } else {
-            market.base_insurance_vault
-        };
         let borrowed_interest_vault = if target_is_base {
             market.quote_interest_vault
         } else {
@@ -132,7 +127,6 @@ impl HlpContext {
             ("buyer_collateral_account".into(), buyer_collateral_account),
             ("buyer_refund_account".into(), buyer_refund_account),
             ("caller_bounty_account".into(), buyer_refund_account),
-            ("insurance_vault".into(), insurance_vault),
             ("borrowed_token_program".into(), debt_token),
             ("session".into(), session),
             ("repayment_vault".into(), repayment_vault),
@@ -249,7 +243,6 @@ impl HlpContext {
         contract: &InstructionContract,
         snapshot: &Snapshot,
         quote: &HlpFlashQuote,
-        max_insurance_draw: u64,
         max_socialized_loss: u64,
     ) -> Result<(Vec<Instruction>, u64)> {
         let prefix = crate::liquidation::plan::resources()?;
@@ -272,7 +265,6 @@ impl HlpContext {
                 target_asset: self.target_asset,
                 max_payment: quote.payment,
                 allow_full: quote.full,
-                max_insurance_draw,
                 max_socialized_loss,
                 max_collateral_debit: quote.collateral_debit,
                 min_collateral_credit: quote.collateral_credit,
@@ -291,7 +283,6 @@ impl HlpContext {
     pub fn close_insolvent(
         &self,
         contract: &InstructionContract,
-        max_insurance_draw: u64,
         max_socialized_loss: u64,
         min_caller_bounty_out: u64,
     ) -> Result<Vec<Instruction>> {
@@ -300,7 +291,6 @@ impl HlpContext {
             contract,
             Args::CloseInsolventHlp(CloseInsolventHlpArgs {
                 target_asset: self.target_asset,
-                max_insurance_draw,
                 max_socialized_loss,
                 min_caller_bounty_out,
             }),

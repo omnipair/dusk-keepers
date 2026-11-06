@@ -103,7 +103,6 @@ pub struct BeginHlpFlashArgs {
     pub target_asset: u8,
     pub max_payment: u64,
     pub allow_full: bool,
-    pub max_insurance_draw: u64,
     pub max_socialized_loss: u64,
     pub max_collateral_debit: u64,
     pub min_collateral_credit: u64,
@@ -115,7 +114,6 @@ struct BeginHlpFlashWire {
     target_asset: u8,
     max_payment: String,
     allow_full: bool,
-    max_insurance_draw: String,
     max_socialized_loss: String,
     max_collateral_debit: String,
     min_collateral_credit: String,
@@ -124,7 +122,6 @@ struct BeginHlpFlashWire {
 #[derive(Clone, Debug, BorshSerialize, Eq, PartialEq)]
 pub struct CloseInsolventHlpArgs {
     pub target_asset: u8,
-    pub max_insurance_draw: u64,
     pub max_socialized_loss: u64,
     pub min_caller_bounty_out: u64,
 }
@@ -132,7 +129,6 @@ pub struct CloseInsolventHlpArgs {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct CloseInsolventHlpWire {
     target_asset: u8,
-    max_insurance_draw: String,
     max_socialized_loss: String,
     min_caller_bounty_out: String,
 }
@@ -212,8 +208,8 @@ pub enum KeeperInstructionArguments {
     ExecuteHlpOrder(ExecuteOrderArgs),
     ExecuteEntryOrder(ExecuteEntryOrderArgs),
     SettleProtocolAuction(SettleProtocolAuctionArgs),
-    QueueParameterProposal,
-    ExecuteParameterProposal,
+    InitializeOperatorRevenue,
+    ExecuteOperatorChange,
 }
 
 impl KeeperInstructionArguments {
@@ -237,8 +233,8 @@ impl KeeperInstructionArguments {
             Self::ExecuteHlpOrder(_) => "leverage_delegate:execute_hlp_order",
             Self::ExecuteEntryOrder(_) => "leverage_delegate:execute_leverage_entry_order",
             Self::SettleProtocolAuction(_) => "dusk:settle_protocol_auction",
-            Self::QueueParameterProposal => "dusk:queue_parameter_proposal",
-            Self::ExecuteParameterProposal => "dusk:execute_parameter_proposal",
+            Self::InitializeOperatorRevenue => "dusk:initialize_operator_revenue",
+            Self::ExecuteOperatorChange => "dusk:execute_operator_change",
         }
     }
 
@@ -255,7 +251,7 @@ impl KeeperInstructionArguments {
             Self::SettleHlpFlash => return Ok(Vec::new()),
             Self::CloseInsolventHlp(value) => borsh::to_vec(value),
 
-            Self::QueueParameterProposal | Self::ExecuteParameterProposal => return Ok(Vec::new()),
+            Self::InitializeOperatorRevenue | Self::ExecuteOperatorChange => return Ok(Vec::new()),
             Self::DelegatedCloseLeverage(value) => borsh::to_vec(value),
             Self::BeforeTakeProfit(value)
             | Self::AfterCloseOrder(value)
@@ -411,7 +407,6 @@ pub fn parse_keeper_instruction_arguments(
                     target_asset: wire.target_asset,
                     max_payment: decimal_u64(&wire.max_payment)?,
                     allow_full: wire.allow_full,
-                    max_insurance_draw: decimal_u64(&wire.max_insurance_draw)?,
                     max_socialized_loss: decimal_u64(&wire.max_socialized_loss)?,
                     max_collateral_debit: decimal_u64(&wire.max_collateral_debit)?,
                     min_collateral_credit: decimal_u64(&wire.min_collateral_credit)?,
@@ -428,7 +423,6 @@ pub fn parse_keeper_instruction_arguments(
             Ok(KeeperInstructionArguments::CloseInsolventHlp(
                 CloseInsolventHlpArgs {
                     target_asset: wire.target_asset,
-                    max_insurance_draw: decimal_u64(&wire.max_insurance_draw)?,
                     max_socialized_loss: decimal_u64(&wire.max_socialized_loss)?,
                     min_caller_bounty_out: decimal_u64(&wire.min_caller_bounty_out)?,
                 },
@@ -482,13 +476,13 @@ pub fn parse_keeper_instruction_arguments(
                 },
             ))
         }
-        "dusk:queue_parameter_proposal" => {
+        "dusk:initialize_operator_revenue" => {
             parse_empty(value)?;
-            Ok(KeeperInstructionArguments::QueueParameterProposal)
+            Ok(KeeperInstructionArguments::InitializeOperatorRevenue)
         }
-        "dusk:execute_parameter_proposal" => {
+        "dusk:execute_operator_change" => {
             parse_empty(value)?;
-            Ok(KeeperInstructionArguments::ExecuteParameterProposal)
+            Ok(KeeperInstructionArguments::ExecuteOperatorChange)
         }
         _ => Err(InstructionEncodingError::new(
             InstructionEncodingErrorCode::UnsupportedInstruction,

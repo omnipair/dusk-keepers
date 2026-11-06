@@ -1,6 +1,6 @@
+import { nativePlan as planner } from "./native-planner.ts";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
-import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { LiteSVM } from "litesvm";
 import {
@@ -28,13 +28,6 @@ const coder = new BorshInstructionCoder(
   JSON.parse(readFileSync("artifacts/dusk.json", "utf8")),
 );
 const clockKey = "SysvarC1ock11111111111111111111111111111111";
-const planner = (f: any) =>
-  JSON.parse(
-    execFileSync("target/debug/dusk-keeper", ["--flash-plan"], {
-      input: JSON.stringify(f),
-      encoding: "utf8",
-    }),
-  );
 export function bank(f: any) {
   const svm = new LiteSVM()
     .withSigverify(false)

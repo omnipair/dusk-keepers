@@ -3,12 +3,13 @@
 Keeper runtimes for Dusk, pinned to the observed Solana devnet deployment and
 verified with shared conformance fixtures in Rust and TypeScript.
 
-The current capture is `devnet-2026-11-04-c7db901`. Its program IDs, IDLs and
-executable payloads were read directly from devnet. Source `c7db901` supplies the
-matching SDK and fixture builders; newer Dusk `main` (`e309197`) contains an srLP
-rename that was not present in the deployed IDLs at capture time. Keeper aliases
-continue to use srLP while encoding the deployed yLP names and PDA seeds.
-
+The current capture is `devnet-2026-11-06-operators`. Both program binaries and
+IDLs were read from the fresh devnet deployment. Source
+`d8c7f89534b734792ec32af6914e53c3efeb04a9` supplies the matching fixture builders.
+The SDK artifact is the registry-published `@omnipair/dusk-sdk@2.18.0-next.20261106`;
+it records provenance and is not a bundled runtime dependency. The active ABI uses
+srLP and operator/optional-manager authority, with no core LP voting or separate
+insurance fund.
 Rust implements lending, leveraged liquidation and orders, hLP recovery, revenue,
 lifecycle and sentinel workers. TypeScript provides independent protocol codecs
 and shadow reference checks. Active oracle policies add the required read-only
@@ -45,7 +46,7 @@ rust/apps/keeper/src/
     leverage/     Leveraged liquidation and conditional orders
     hlp/          Aggregate vault recovery and its transaction plans
     revenue/      Protocol revenue auctions
-    lifecycle/    Governance proposal transitions
+    lifecycle/    Announced operator bundle execution
     sentinel/     Read-only discovery and transfer-fee monitoring
   liquidation/    Shared lending/leverage engine, plans, search and simulation
   runtime/        RPC, accounts, signing, transaction encoding and journal

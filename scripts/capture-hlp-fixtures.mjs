@@ -76,7 +76,6 @@ const capture = String.raw`
       quoteBase64: quote
         ? program.coder.types.encode("hlpFlashQuote", quote).toString("base64")
         : "",
-      maxInsuranceDraw: "0",
       maxSocializedLoss: "18446744073709551615",
       minCallerBountyOut: "1",
       snapshot: { slot: Number(svm.getClock().slot), accounts },

@@ -67,10 +67,14 @@ const WANTED = {
     "quote_hlp_vault.hlp_supply",
     "base_hlp_vault.residual_exposure",
     "quote_hlp_vault.residual_exposure",
-    "insurance.base_vault",
-    "insurance.quote_vault",
     "params_hash",
     "last_update_slot",
+    "operator.authority",
+    "operator.manager",
+    "operator.epoch",
+    "operator.pending",
+    "operator.revenue_epoch",
+    "operator.revenue_recipient",
   ],
   LeveragePosition: [
     "owner",
@@ -97,7 +101,7 @@ const WANTED = {
     "buyback_auction.recipients.treasury",
     "buyback_auction.recipients.staking_vault",
   ],
-  ParameterProposal: ["market", "proposer", "nonce"],
+  OperatorProposal: ["market", "operator", "epoch", "nonce", "policy_version"],
 };
 
 const ORDER_WANTED = {
@@ -262,6 +266,10 @@ async function build(programName = "dusk", wanted = WANTED) {
 
     return {
       name: accountName,
+      ...(accountName === "OperatorProposal" ? { dynamic: {
+        updatesOffset: 8 + defined.type.fields.slice(0, defined.type.fields.findIndex(field => field.name === "updates")).reduce((sum, field) => sum + sizeOf(field.type,types,"OperatorProposal.prefix"),0),
+        variantPayloadSizes: types.get("MarketParameterUpdate").type.variants.map(variant => (variant.fields ?? []).reduce((sum, field) => sum + sizeOf(field.type ?? field,types,variant.name),0)),
+      } } : {}),
       ...(exactSize === null
         ? {
             minimumSize: located.reduce(

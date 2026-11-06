@@ -31,6 +31,8 @@ const inputNames = new Map([
   ["market.quote_side.asset_mint", "quoteAssetMint"],
   ["market.params_hash", "paramsHash"],
   ["market", "market"],
+  ["proposal.nonce", "proposalNonce"],
+  ["market.operator.revenue_epoch", "revenueEpoch"],
   ["borrow_position.position_id", "positionId"],
   ["leverage_position.position_id", "positionId"],
   ["collateral_mint", "collateralMint"],
@@ -272,8 +274,8 @@ function encodeVector(bytes) {
 
 function wireToIdlArguments(specificationKey, argumentsValue) {
   switch (specificationKey) {
-    case "dusk:queue_parameter_proposal":
-    case "dusk:execute_parameter_proposal":
+    case "dusk:initialize_operator_revenue":
+    case "dusk:execute_operator_change":
     case "dusk:settle_flash_liquidation":
       return {};
     case "dusk:settle_hlp_flash":
@@ -575,7 +577,6 @@ function buildEncodingCases(contract, idls) {
       targetAsset: 1,
       maxPayment: "1100",
       allowFull: false,
-      maxInsuranceDraw: "500",
       maxSocializedLoss: "250",
       maxCollateralDebit: "1200",
       minCollateralCredit: "900",
@@ -584,7 +585,6 @@ function buildEncodingCases(contract, idls) {
     "dusk:settle_hlp_flash": {},
     "dusk:close_insolvent_hlp": {
       targetAsset: 0,
-      maxInsuranceDraw: "500",
       maxSocializedLoss: "250",
       minCallerBountyOut: "1",
     },
@@ -603,8 +603,8 @@ function buildEncodingCases(contract, idls) {
       soldAmount: "1000",
       maxPaymentAmount: "950",
     },
-    "dusk:queue_parameter_proposal": {},
-    "dusk:execute_parameter_proposal": {},
+    "dusk:initialize_operator_revenue": {},
+    "dusk:execute_operator_change": {},
   };
 
   return contract.instructions.map((specification) => {
@@ -895,7 +895,7 @@ function buildFixtureBundle(contract, manifest, idls) {
       },
       {
         name: "unexpected no-argument field",
-        specificationKey: "dusk:queue_parameter_proposal",
+        specificationKey: "dusk:initialize_operator_revenue",
         arguments: { invented: true },
         expectedError: "invalid_arguments",
       },

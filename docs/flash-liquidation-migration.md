@@ -1,24 +1,24 @@
 # Flash/emergency keeper migration to Dusk #45
 
-## Current devnet capture — 2026-11-04
+## Current devnet capture — 2026-11-06
 
-The active revision is `devnet-2026-11-04-c7db901`. Both executables and IDLs were
-captured from devnet; matching source `c7db901` supplies SDK
-`2.16.0-next.20261102` and fresh lending/hLP bank fixtures. The new Market layout
-includes oracle and tranche state. Generated offsets and remaining-account
-builders match this deployment. Source `e309197` on newer Dusk `main` includes
-the srLP rename, which is not yet represented by these deployed IDLs.
+The active revision is `devnet-2026-11-06-operators`. The fresh deployment uses
+SDK `2.18.0-next.20261106`, published through Dusk's npm release workflow. Both
+executables and IDLs were captured from devnet; source
+`d8c7f89534b734792ec32af6914e53c3efeb04a9` supplies fresh lending/hLP fixtures.
+The layout uses srLP, operator authority and an optional manager. Core LP voting
+and the separate insurance vault/draw/donation paths have been removed. Funded
+principal losses pass through junior backing and then senior backing.
 
-| Program | Program ID | Upgrade slot |
+| Program | Program ID | Deployment slot |
 | --- | --- | --- |
-| Dusk | `5EuU8artxWthfER6GTUY52TfL1aRsQH2TH8DsdGCa8cJ` | `517844520` |
-| Leverage delegate | `3ChYvxNwJfr49PznzYKPmXLFUw5P2vUQZmbqqmyFJCYi` | `517825628` |
+| Dusk | `B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2` | `519164140` |
+| Leverage delegate | `B315E6hHTgDjHgCCPungLop2mkgv9SHkcBc9ZzALNxNY` | `519164379` |
 
-See [the capture runbook](devnet-capture.md) for provenance, reproduction and
-limitations, and [the evidence manifest](../protocol/devnet-deployment.v1.json)
-for payload sizes and hashes. Previous candidate and deployment records remain
-in Git history and historical artifacts. The lock stays **captured**; this
-update performs no program deployment or live keeper activation.
+See [the capture runbook](devnet-capture.md) and
+[the evidence manifest](../protocol/devnet-deployment.v1.json) for provenance,
+payload sizes and hashes. The lock stays **captured** and services keep their
+existing shadow mode. Signed activation requires the separate frozen release.
 
 ## Service behavior
 
@@ -68,7 +68,7 @@ searched route are explicitly reported as unfilled.
   and receives the target token quoted by the program. It verifies the complete
   begin/payment/settle transaction, the closed session, an empty isolated payment
   vault, wallet debit/credit bounds and changed market state. A full terminal
-  close has separate insurance, socialized-loss and bounty limits.
+  close has separate funded-loss and bounty limits.
 
 The native and TypeScript builders also accept externally supplied route
 instructions between begin and settle. The service currently implements the two
@@ -101,7 +101,6 @@ Use market-scoped workers when assets have different units/economics.
 | `KEEPER_HLP_MARKET` | Required single market public key for an `hlp-recovery` worker. |
 | `KEEPER_HLP_MAX_PAYMENT_DEBIT` | Maximum gross borrowed-token debit from the hLP keeper wallet. |
 | `KEEPER_HLP_MIN_COLLATERAL_CREDIT` | Minimum net target-token credit for a flash repair. |
-| `KEEPER_HLP_MAX_INSURANCE_DRAW` | Maximum insurance draw the worker authorizes for a full hLP settlement. |
 | `KEEPER_HLP_MAX_SOCIALIZED_LOSS` | Maximum principal loss the worker authorizes for a full hLP settlement. |
 | `KEEPER_HLP_MIN_BOUNTY_OUT` | Minimum borrowed-token bounty for the terminal-close fallback. |
 | `KEEPER_ORDER_MARKET` | Optional current market scope for conditional entry, TP/SL and hLP orders in the leverage worker. |

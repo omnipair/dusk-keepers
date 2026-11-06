@@ -102,14 +102,14 @@ const actionDefinitions = [
     primary: ["dusk", "settle_protocol_auction"],
   },
   {
-    action: "eligible_proposal_queue",
+    action: "operator_revenue_archive_initialize",
     jobKind: "lifecycle",
-    primary: ["dusk", "queue_parameter_proposal"],
+    primary: ["dusk", "initialize_operator_revenue"],
   },
   {
-    action: "eligible_proposal_execute",
+    action: "operator_bundle_execute",
     jobKind: "lifecycle",
-    primary: ["dusk", "execute_parameter_proposal"],
+    primary: ["dusk", "execute_operator_change"],
   },
 ];
 
@@ -240,8 +240,8 @@ function discriminator(specification) {
 function directInstructionData(specification) {
   const prefix = discriminator(specification);
   switch (specification.instructionName) {
-    case "queue_parameter_proposal":
-    case "execute_parameter_proposal":
+    case "initialize_operator_revenue":
+    case "execute_operator_change":
     case "settle_flash_liquidation":
       return prefix;
     case "settle_hlp_flash":
@@ -570,7 +570,7 @@ function buildFixtures(contract) {
       "wrong instruction name",
       "instruction_mismatch",
       (envelope) => {
-        envelope.primary.instructionName = "execute_parameter_proposal";
+        envelope.primary.instructionName = "execute_operator_change";
       },
     ),
     mutate(
@@ -603,7 +603,7 @@ function buildFixtures(contract) {
     ),
     mutate(
       validCases,
-      "eligible_proposal_queue",
+      "operator_revenue_archive_initialize",
       "missing required account",
       "missing_required_account",
       (envelope) => {
@@ -688,7 +688,7 @@ function buildFixtures(contract) {
     ),
     mutate(
       validCases,
-      "eligible_proposal_execute",
+      "operator_bundle_execute",
       "canonical parity changed",
       "parity_mismatch",
       (envelope) => {

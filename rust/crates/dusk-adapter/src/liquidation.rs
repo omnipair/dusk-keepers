@@ -61,14 +61,12 @@ pub struct LiquidationRates {
 pub struct LiquidationFeeAllocation {
     pub total: u64,
     pub protocol: u64,
-    pub insurance: u64,
-    pub lp: u64,
+    pub junior: u64,
 }
 #[derive(Clone, Debug, BorshDeserialize, BorshSerialize, PartialEq, Eq)]
 pub struct LiquidationLossAllocation {
     pub principal_repaid: u64,
     pub interest_paid: u64,
-    pub insurance_credit: u64,
     pub principal_written_off: u64,
     pub interest_canceled: u64,
     pub surplus: u64,
@@ -111,11 +109,10 @@ pub struct EmergencyLiquidationQuote {
     pub reward_credit: u64,
     pub reward_debit: u64,
     pub fee: LiquidationFeeAllocation,
-    pub insurance_fee_debit: u64,
+    pub junior_fee_debit: u64,
     pub revenue_fee_debit: u64,
     pub owner_debit: u64,
     pub owner_credit: u64,
-    pub insurance_debit: u64,
     pub loss: LiquidationLossAllocation,
     pub health_before: LiquidationHealth,
     pub health_after: LiquidationHealth,

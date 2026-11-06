@@ -36,8 +36,8 @@ pub enum JobAction {
     DelegatedCloseTakeProfit,
     DelegatedCloseStopLoss,
     ProtocolRevenueAuctionSettle,
-    EligibleProposalQueue,
-    EligibleProposalExecute,
+    OperatorRevenueArchiveInitialize,
+    OperatorBundleExecute,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]

@@ -10,7 +10,7 @@ concentrated liquidity.
 | Lending liquidation | Repay/seize bounds hold for both pool forms; competing worker loses lease or becomes an expected skip |
 | TP and SL | Unmet trigger does not sign; met trigger closes once; liquidation supersedes a simultaneous order |
 | Revenue auction | Bid executes only above net-profit floor; stale Jupiter quote and excess exposure are rejected |
-| Lifecycle | Authorized proposal/activation/LP-lock action succeeds; unauthorized signer and stale revision fail |
+| Lifecycle | Announced operator bundle executes after notice; successor acceptance and revenue archival hold; unauthorized signer and stale epoch/revision fail |
 
 Also cover Token-2022 transfer fees, expired blockhash, WebSocket disconnect with
 poll recovery, restart during confirmation, stale oracle, RPC lag, database/Redis

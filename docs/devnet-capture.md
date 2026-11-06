@@ -1,11 +1,11 @@
-# Devnet capture — 4 November 2026
+# Devnet capture — 6 November 2026
 
-The keeper targets the observed deployment, revision `devnet-2026-11-04-c7db901`.
-Dusk `main` was pulled to `e309197`; its srLP rename is newer than the deployed
-IDLs. A clean detached checkout of `c7db9013b9d751da5a734914e3efae203ccdf59b`
-has exactly matching vendored IDLs and supplies SDK `2.16.0-next.20261102` plus
-the fixture builders. The native keeper's srLP aliases preserve the deployed
-yLP instruction fields and PDA seeds.
+The current revision is `devnet-2026-11-06-operators`, captured from the fresh
+Dusk and leverage-delegate deployment. Source
+`d8c7f89534b734792ec32af6914e53c3efeb04a9` matches the observed IDLs and supplies
+the bank fixture builders. The SDK artifact is downloaded from npm as
+`@omnipair/dusk-sdk@2.18.0-next.20261106`; its integrity and SHA-256 are recorded
+in the protocol lock. Consumers install the published package normally.
 
 The capture reads the devnet genesis hash, upgradeable-loader Program and
 ProgramData accounts, and Anchor IDL accounts. It checks their owners and
@@ -18,8 +18,13 @@ addresses, upgrade slots, sizes and SHA-256 hashes. The validator cross-checks
 this evidence against the lock and artifacts offline. It does not prove the
 cluster has remained unchanged after capture. Matching IDLs and passing tests
 also do not constitute a reproducible-build attestation for the deployed bytes.
-The lock's toolchain describes the capture environment; Surfpool was unavailable
-and is recorded as null instead of inheriting a historical version.
+The lock records the capture toolchain, including Surfpool 1.2.0. Sixteen
+native-plan RPC simulations passed on an isolated offline Surfpool with the exact
+captured binaries. The [recorded results](evidence/operator-surfpool-simulations.json)
+can be reproduced with an offline Surfpool on port 18899 and
+`node --experimental-strip-types scripts/rehearse-surfpool.mjs`.
+This is simulation evidence, not the full signed E2E matrix
+required for a frozen live release.
 
 ## Reproduce
 
@@ -27,8 +32,9 @@ Use Node 24, the pinned Rust toolchain, Anchor 0.31.1, Solana's `cargo build-sbf
 and a clean source checkout with matching IDLs. Keep that checkout separate from
 the latest Dusk `main`. Run `node scripts/prepare_build.js` there before any Anchor
 commands, as required by Dusk's repository instructions. Install its locked
-dependencies, prepare `target/idl` and `target/types` from its tracked SDK IDLs
-and types, run `npm run check:dusk-sdk`, and pack `packages/dusk-sdk` with npm.
+dependencies, prepare its generated interfaces and run `npm run check:dusk-sdk`. Download the
+exact published SDK tarball from npm, verify its registry integrity and hash, and
+pass that file to the capture command.
 
 From the keeper repository:
 
@@ -78,10 +84,6 @@ separate frozen-lock release procedure are still required for a signed end-to-en
 test. It does not enable live mode or establish that the beta frontend currently
 uses this deployment.
 
-A read-only market scan on 4 November found one matching 6,101-byte Market,
-`8Ar6nVbzp3c3o7ByHXnRfYMc4RNfbrUSjPMcz57CEhDD`, with a normalized oracle policy
-and weight 5,000 bps. It also found the older 6,069-byte account
-`GXwH8XtZKZre23d7Hp8VkbuGgmXMfKo4riVKbK5uj3gZ`, which fails the current layout
-guard and is excluded from lending discovery. Recheck market and oracle state
-when selecting a test market; this observation is not a migration or freshness
-guarantee.
+The fresh smoke market is `EdqUE8D7JuTrdSAy4kpynjvcaKugguuyjHzC6vFvw3HD`.
+Re-fetch its state and oracle policy before selecting it for a test; this address
+is a deployment reference, not a freshness guarantee.

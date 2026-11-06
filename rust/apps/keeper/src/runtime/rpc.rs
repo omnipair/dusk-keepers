@@ -236,51 +236,6 @@ impl RpcClient {
         decode_base58_key(&response.value.blockhash)
     }
 
-    /// Simulate a signed transaction. `Ok(None)` means the program accepted it.
-    ///
-    /// The signature is not verified by the node here: the transaction is
-    /// signed before simulation anyway, and asking the node to verify adds a
-    /// failure mode that says nothing about whether the instruction would
-    /// succeed.
-    pub fn simulate(&self, transaction_base64: &str) -> Result<Option<String>, DiscoveryError> {
-        #[derive(Deserialize)]
-        struct Value {
-            value: Inner,
-        }
-        #[derive(Deserialize)]
-        struct Inner {
-            err: Option<serde_json::Value>,
-            logs: Option<Vec<String>>,
-        }
-        let response: Value = self.call(
-            "simulateTransaction",
-            serde_json::json!([
-                transaction_base64,
-                {
-                    "commitment": "confirmed",
-                    "encoding": "base64",
-                    "sigVerify": false,
-                    "replaceRecentBlockhash": true
-                }
-            ]),
-        )?;
-        let Some(error) = response.value.err else {
-            return Ok(None);
-        };
-        // The logs name the error; the `err` field only gives its number.
-        // Both are kept, because classification reads the name and a human
-        // reading an alert needs the raw form.
-        let named = response
-            .value
-            .logs
-            .unwrap_or_default()
-            .into_iter()
-            .filter(|line| line.contains("Error") || line.contains("failed"))
-            .collect::<Vec<_>>()
-            .join(" | ");
-        Ok(Some(format!("{error} {named}").trim().to_owned()))
-    }
-
     /// Simulate, and read named accounts as they would stand afterwards.
     ///
     /// Necessary rather than convenient: `fill_liquidation_auction` returns
