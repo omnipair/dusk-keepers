@@ -307,10 +307,10 @@ impl AccountAssembler<'_> {
             };
 
             metas.push(AccountMeta {
-                is_signer: account.signer,
                 // An omitted optional account is passed as the program id,
-                // which must not be marked writable however the instruction
-                // declares the slot.
+                // which must be readonly and non-signing regardless of the
+                // privileges declared for the optional slot.
+                is_signer: account.signer && !self.omitted.contains(&name),
                 is_writable: account.writable && !self.omitted.contains(&name),
                 pubkey,
             });
