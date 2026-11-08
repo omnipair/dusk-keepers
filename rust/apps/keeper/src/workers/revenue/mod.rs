@@ -130,7 +130,6 @@ impl ArbitrageurJob<'_> {
         )?;
         Ok(accounts
             .into_iter()
-            .filter(|(address, _)| crate::runtime::devnet::market_allowed(address))
             .filter_map(|(address, data)| MarketAccounts::decode(self.layout, address, &data))
             .collect())
     }

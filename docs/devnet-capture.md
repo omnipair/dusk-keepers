@@ -79,7 +79,7 @@ incorrectly owned reports. Runtime execution snapshots include active feeds so
 report changes participate in revalidation before signing.
 
 The native runtime supports an explicitly authorized local devnet test exception
-with `KEEPER_ALLOW_CAPTURED_DEVNET=1`; see the README for its required market,
+with `KEEPER_ALLOW_CAPTURED_DEVNET=1`; see the README for all-market discovery,
 transaction limits and deployment checks. Default startup still requires the
 frozen-lock release procedure for live execution. A funded wallet, matching
 frontend cluster and eligible positions/orders remain necessary for execution

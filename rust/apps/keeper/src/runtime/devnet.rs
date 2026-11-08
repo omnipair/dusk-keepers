@@ -35,14 +35,6 @@ pub fn enabled() -> bool {
     env::var("KEEPER_ALLOW_CAPTURED_DEVNET").as_deref() == Ok("1")
 }
 
-pub fn market_allowed(market: &[u8; 32]) -> bool {
-    !enabled()
-        || env::var("KEEPER_DEVNET_MARKET")
-            .ok()
-            .and_then(|value| super::accounts::decode_key(&value))
-            == Some(*market)
-}
-
 fn hash(bytes: &[u8]) -> String {
     format!("{:x}", Sha256::digest(bytes))
 }
@@ -88,10 +80,6 @@ fn check_program(program: &Program, accounts: &[serde_json::Value], full: bool) 
 
 /// Full verification at startup; upgrade metadata is rechecked each pass and send.
 pub fn verify(client: &RpcClient, full: bool) -> Result<()> {
-    env::var("KEEPER_DEVNET_MARKET")
-        .ok()
-        .and_then(|value| super::accounts::decode_key(&value))
-        .ok_or("devnet execution requires one KEEPER_DEVNET_MARKET")?;
     let lock_path = env::var("DUSK_PROTOCOL_LOCK").unwrap_or_else(|_| "protocol.lock.json".into());
     let lock = ProtocolLock::read(&lock_path).map_err(|e| e.to_string())?;
     if !matches!(lock.status, LockStatus::Captured | LockStatus::Frozen) {
@@ -187,9 +175,12 @@ pub fn prepare_wallet(
     if !enabled() || context.dry_run {
         return Err("wallet preparation requires explicit live devnet testing".into());
     }
+    // This target applies only to the one-off wallet preparation command.
+    // Worker discovery and execution cover every supported market.
+    let market = key(&env::var("KEEPER_PREPARE_MARKET")
+        .map_err(|_| "wallet preparation requires KEEPER_PREPARE_MARKET")?)?;
     recover_pending(client, &context.contract.protocol_revision, false)
         .map_err(|e| e.to_string())?;
-    let market = key(&env::var("KEEPER_DEVNET_MARKET").map_err(|_| "missing devnet market")?)?;
     let first = Snapshot::fetch(client, &[market], 0).map_err(|e| e.to_string())?;
     let decoded = MarketAccounts::decode(
         context.layout,

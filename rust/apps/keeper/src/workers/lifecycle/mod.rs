@@ -213,9 +213,6 @@ pub fn run(context: &super::WorkerContext<'_>) -> Result<Vec<AttemptReport>, Exe
     )?;
     let mut attempts = 0;
     for (market, data) in markets {
-        if !crate::runtime::devnet::market_allowed(&market) {
-            continue;
-        }
         let reader = context
             .layout
             .reader("Market")

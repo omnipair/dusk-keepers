@@ -15,7 +15,27 @@ import { resolveLiquidationAccounts } from "../packages/dusk-adapter/src/liquida
 const layout = JSON.parse(
   readFileSync("protocol/keeper-account-layout.v1.json", "utf8"),
 );
-for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mode = "both", rejectOrdinary = false, oracle = false } of [
+for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mode = "both", rejectOrdinary = false, oracle = false, devnetAllMarkets = false, maxSends = "4", debtShares = null, clockMismatch = false } of [
+  {
+    file: "01-flash-BorrowPosition.json", profile: "lending", expected: "flash",
+    settlement: "inventory", maxRepay: "18446744073709551615", minProfit: "0",
+    name: "devnet evaluates a market outside the obsolete selector", devnetAllMarkets: true,
+  },
+  {
+    file: "01-flash-BorrowPosition.json", profile: "lending", expected: "monitor",
+    settlement: "inventory", maxRepay: "1", minProfit: "0",
+    name: "exhausted transaction budget reports health without planning execution", maxSends: "0",
+  },
+  {
+    file: "01-flash-BorrowPosition.json", profile: "lending", expected: "healthy",
+    settlement: "inventory", maxRepay: "1", minProfit: "0",
+    name: "healthy positions recover a transient clock mismatch without liquidation probes", debtShares: 1n, clockMismatch: true,
+  },
+  {
+    file: "01-flash-BorrowPosition.json", profile: "lending", expected: "debt_free",
+    settlement: "inventory", maxRepay: "1", minProfit: "0",
+    name: "debt-free positions show collateral without inventing health ratios", debtShares: 0n,
+  },
   {
     file: "01-flash-BorrowPosition.json",
     profile: "lending",
@@ -114,6 +134,18 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mod
     const f = JSON.parse(readFileSync(`fixtures/litesvm/${file}`, "utf8"));
     const oracleState = oracle ? withOracle(f).state : null;
     const svm = bank(f);
+    if (debtShares !== null) {
+      const key = new PublicKey(f.position);
+      const account = svm.getAccount(key)!;
+      const data = Buffer.from(account.data);
+      const fields = layout.accounts.find((a: any) => a.name === f.kind).fields;
+      for (const path of ["fixed_base_shares", "fixed_quote_shares"]) {
+        const field = fields.find((f: any) => f.path === path);
+        data.fill(0, field.offset, field.offset + 16);
+        if (path === (f.debtAsset === 0 ? "fixed_base_shares" : "fixed_quote_shares")) data.writeBigUInt64LE(debtShares, field.offset);
+      }
+      svm.setAccount(key, { ...account, data });
+    }
     if (oracleState) {
       const clock = svm.getClock();
       const data = Buffer.alloc(145);
@@ -133,8 +165,10 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mod
     );
     const requests: string[] = [];
     let simulations = 0;
+    let clockMismatches = 0;
     const previewNames = ["preview_flash_liquidation", "preview_emergency_liquidation"];
     const previews: string[] = [];
+    const healthPreviews: { debt: bigint; collateralValue: bigint; maintenance: number }[] = [];
     const discriminator = (name: string) => createHash("sha256").update(`global:${name}`).digest().subarray(0, 8);
     const rpcAccount = (a: any) => {
       if (!a) return null;
@@ -170,6 +204,13 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mod
                 rpcAccount(svm.getAccount(new PublicKey(key))),
               ),
             };
+            if (clockMismatch && clockMismatches === 0 && p[0].includes(f.position) && p[0].includes("SysvarC1ock11111111111111111111111111111111")) {
+              const account = answer.value[p[0].indexOf("SysvarC1ock11111111111111111111111111111111")];
+              const data = Buffer.from(account.data[0], "base64");
+              data.writeBigUInt64LE(BigInt(context.slot) + 1n, 0);
+              account.data[0] = data.toString("base64");
+              clockMismatches++;
+            }
             break;
           case "getProgramAccounts": {
             const discriminator = p[1].filters[0].memcmp.bytes;
@@ -227,6 +268,10 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mod
             const failed = typeof outcome.err === "function";
             const meta = outcome.meta();
             const returned = meta.returnData();
+            if (!failed && tx.message.compiledInstructions.some(ix => Buffer.from(ix.data).subarray(0, 8).equals(discriminator("preview_liquidation_health")))) {
+              const data = Buffer.from(returned.data());
+              healthPreviews.push({ collateralValue: data.readBigUInt64LE(0), debt: data.readBigUInt64LE(8), maintenance: data.readUInt16LE(16) });
+            }
             const posts = new Map<string, any>(
               failed
                 ? []
@@ -296,6 +341,10 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mod
               KEEPER_PROFILE: profile,
               KEEPER_LENDING_MODE: mode,
               KEEPER_SHADOW_PUBLIC_KEY: f.buyer,
+              KEEPER_LOG_POSITIONS: "1",
+              KEEPER_ALLOW_CAPTURED_DEVNET: devnetAllMarkets ? "1" : "0",
+              KEEPER_MAX_SENDS_PER_PASS: maxSends,
+              KEEPER_DEVNET_MARKET: new PublicKey(Buffer.alloc(32, 240)).toBase58(),
               PORT: "0",
               SOLANA_RPC_HTTP_URL: endpoint,
               KEEPER_LIQUIDATION_LOOKUP_TABLE: lookupTable,
@@ -317,17 +366,39 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mod
       );
     }
     try {
+      const diagnostic = ["monitor", "healthy", "debt_free"].includes(expected);
+      const expectedOutput = expected === "monitor" ? /MONITOR ONLY: transaction budget used for this pass/
+        : expected === "healthy" ? /state=HEALTHY/
+        : expected === "debt_free" ? /state=DEBT_FREE health_factor=n\/a/
+        : expected === "unfilled" ? /eligible but unfilled/
+        : expected === "error" ? /injected unexpected ordinary failure/ : new RegExp(`shadow ${expected}`);
       const first = await once();
       assert.equal(first.code, 0, first.output);
-      assert.match(first.output, expected === "unfilled" ? /eligible but unfilled/ : expected === "error" ? /injected unexpected ordinary failure/ : new RegExp(`shadow ${expected}`));
+      assert.match(first.output, expectedOutput);
+      if (devnetAllMarkets) {
+        assert.match(first.output, /execution_scope=all_supported_markets/);
+        assert.ok(!first.output.includes("outside configured execution market"));
+      }
+      assert.ok(first.output.includes(`position_health kind=${f.kind} position=${f.position}`), first.output);
+      assert.ok(first.output.includes(`market=${context.named.market}`));
+      assert.match(first.output, /debt_mint=.+ collateral_mint=.+ snapshot_slot=\d+/);
+      if (expected !== "debt_free") {
+        assert.ok(healthPreviews.length > 0);
+        assert.ok(first.output.includes(`debt_raw=${healthPreviews[0].debt}`), "log must use indexed debt returned by the program");
+        assert.match(first.output, /liquidation_ltv_pct=\d+\.\d+ maintenance_pct=\d+\.\d+/);
+      }
       const advanced = svm.getClock();
       advanced.slot += 1n;
       advanced.unixTimestamp += 1n;
       svm.setClock(advanced);
       const second = await once();
       assert.equal(second.code, 0, second.output);
-      assert.match(second.output, expected === "unfilled" ? /eligible but unfilled/ : expected === "error" ? /injected unexpected ordinary failure/ : new RegExp(`shadow ${expected}`));
-      assert.ok(simulations >= 4);
+      assert.match(second.output, expectedOutput);
+      if (diagnostic) {
+        assert.deepEqual(previews, [], "position diagnostics must not plan a liquidation");
+        assert.equal(simulations, expected === "debt_free" ? 0 : 2);
+      } else assert.ok(simulations >= 4);
+      if (clockMismatch) assert.equal(clockMismatches, 1);
       if (oracle) assert.ok(oracleReads >= 2, "each fresh evaluation must fetch the active feed into its snapshot");
       if (mode === "emergency") assert.ok(!previews.includes("preview_flash_liquidation"));
       if (expected === "flash" || mode === "ordinary" || rejectOrdinary) assert.ok(!previews.includes("preview_emergency_liquidation"));

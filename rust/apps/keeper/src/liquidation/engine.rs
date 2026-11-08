@@ -1,6 +1,7 @@
 //! Shared position-liquidation engine used by lending and leverage workers.
 use super::{
     policy::{LiquidationMode, select_liquidation},
+    position_log,
     search::search_profitable,
     simulation,
     validation::*,
@@ -79,6 +80,12 @@ impl LiquidationJob<'_> {
                 .is_some_and(|k| self.priority_markets.contains(&k))
         });
         let mut attempted = 0;
+        if position_log::enabled() {
+            println!(
+                "position_scan kind={kind} discovered={} execution_scope=all_supported_markets",
+                positions.len()
+            );
+        }
         for (position, data) in positions {
             // Identity is a fixed owner/market prefix shared by wallet account
             // types. Full-layout readers intentionally reject retired shapes,
@@ -89,8 +96,15 @@ impl LiquidationJob<'_> {
                 .ok_or_else(|| {
                     ExecutionError::Assembly("position identity prefix is truncated".into())
                 })?;
-            if !active_markets.contains(&market) || !crate::runtime::devnet::market_allowed(&market)
-            {
+            let owner = data.get(8..40).and_then(|v| v.try_into().ok());
+            if !active_markets.contains(&market) {
+                position_log::unavailable(
+                    position,
+                    market,
+                    owner,
+                    kind,
+                    "market is missing or unsupported; no health evaluation or execution",
+                );
                 continue;
             }
             let sides = if kind == "LeveragePosition" {
@@ -103,11 +117,28 @@ impl LiquidationJob<'_> {
                 vec![0, 1]
             };
             for side in sides {
-                if send_limit_reached(attempted, self.max_sends) {
-                    return Ok(reports);
+                let limit_reached = send_limit_reached(attempted, self.max_sends);
+                if limit_reached {
+                    if !position_log::enabled() {
+                        return Ok(reports);
+                    }
+                    let reason = "MONITOR ONLY: transaction budget used for this pass";
+                    // Diagnostics only simulate health. No route selection,
+                    // signing or journal submission occurs after the pass limit.
+                    if let Err(error) = self.inspect_health(position, kind, side, Some(reason)) {
+                        position_log::unavailable(
+                            position,
+                            market,
+                            owner,
+                            kind,
+                            &format!("{reason}; {error}"),
+                        );
+                    }
+                    continue;
                 }
                 match self.attempt(position, kind, side) {
                     Ok(Some((signature, detail))) => {
+                        position_log::decision(position, side, &detail, signature.as_deref());
                         if counts_toward_send_limit(&detail) {
                             attempted += 1;
                         }
@@ -133,6 +164,7 @@ impl LiquidationJob<'_> {
                     }
                     Ok(None) => {}
                     Err(e) => {
+                        position_log::decision(position, side, &e, None);
                         attempted += 1;
                         reports.push(AttemptReport {
                             position: address(position),
@@ -250,15 +282,29 @@ impl LiquidationJob<'_> {
         }
         crate::liquidation::plan::decode_return(&value["value"]["returnData"], c.program).map(Some)
     }
-    fn attempt(
+    fn inspect_health(
         &self,
         position: [u8; 32],
         kind: &str,
         side: u8,
-    ) -> Result<Option<(Option<String>, String)>> {
-        let (c, s) = self.fresh(position, kind, side)?;
+        monitor_reason: Option<&str>,
+    ) -> Result<(Context, Snapshot, Option<LiquidationHealth>)> {
+        // A load-balanced RPC may transiently pair a Clock from a different
+        // bank with the account context. Retry the entire snapshot, never
+        // relax the equality check or merge accounts from separate reads.
+        let mut snapshot = self.fresh(position, kind, side);
+        for _ in 0..2 {
+            if snapshot.as_ref().err().map(String::as_str)
+                != Some("clock and RPC bank do not match")
+            {
+                break;
+            }
+            snapshot = self.fresh(position, kind, side);
+        }
+        let (c, s) = snapshot?;
         if c.shares == 0 {
-            return Ok(None);
+            position_log::health(&c, &s, None, None, monitor_reason);
+            return Ok((c, s, None));
         }
         let mut preview = crate::liquidation::plan::resources()?;
         preview.push(c.health_preview(self.contract)?);
@@ -271,6 +317,25 @@ impl LiquidationJob<'_> {
         }
         let health: LiquidationHealth =
             crate::liquidation::plan::decode_return(&result["value"]["returnData"], c.program)?;
+        position_log::health(
+            &c,
+            &s,
+            Some(&health),
+            result["context"]["slot"].as_u64(),
+            monitor_reason,
+        );
+        Ok((c, s, Some(health)))
+    }
+    fn attempt(
+        &self,
+        position: [u8; 32],
+        kind: &str,
+        side: u8,
+    ) -> Result<Option<(Option<String>, String)>> {
+        let (c, s, health) = self.inspect_health(position, kind, side, None)?;
+        let Some(health) = health else {
+            return Ok(None);
+        };
         if !health.eligible() {
             return Ok(None);
         }

@@ -578,10 +578,7 @@ impl OrderJob<'_> {
                     .get(40..72)
                     .and_then(|v| v.try_into().ok())
                     .ok_or_else(|| ExecutionError::Assembly("order identity prefix".into()))?;
-                if !active.contains(&market)
-                    || selected.is_some_and(|s| s != market)
-                    || !crate::runtime::devnet::market_allowed(&market)
-                {
+                if !active.contains(&market) || selected.is_some_and(|s| s != market) {
                     continue;
                 }
                 if attempted >= self.max_sends {
