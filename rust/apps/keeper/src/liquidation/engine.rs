@@ -442,6 +442,13 @@ impl LiquidationJob<'_> {
 
     fn emergency_plan(&self, c: &Context, s: &Snapshot) -> Result<Option<LiquidationPlan>> {
         let minimum_profit = required_u64("KEEPER_LIQUIDATION_MIN_PROFIT")?;
+        let slippage_bps = std::env::var("KEEPER_EMERGENCY_SLIPPAGE_BPS")
+            .unwrap_or_else(|_| "0".into())
+            .parse::<u16>()
+            .map_err(|_| "invalid KEEPER_EMERGENCY_SLIPPAGE_BPS")?;
+        // Validate even when no quote is available. The default retains the
+        // exact quoted limits; an operator must opt in to quote movement.
+        emergency_slippage_floor(0, slippage_bps)?;
         let partial =
             search_profitable(c.collateral.saturating_sub(1), minimum_profit, |amount| {
                 let Some(q) = self.preview::<EmergencyLiquidationQuote>(
@@ -452,13 +459,19 @@ impl LiquidationJob<'_> {
                 else {
                     return Ok(None);
                 };
-                let mut instructions = crate::liquidation::plan::resources()?;
-                instructions.push(c.emergency(self.contract, &q)?);
+                let instructions = self.emergency_instructions(c, &q, slippage_bps, 0)?;
                 Ok(self
                     .liquidation_profit(c, s, &instructions, false)?
-                    .map(|profit| (profit, instructions)))
+                    .map(|profit| (profit, q)))
             })?;
-        if let Some(instructions) = partial {
+        if let Some(quote) = partial {
+            // Score below-floor candidates during adaptive search, then put
+            // the configured profit floor into the chosen transaction itself.
+            let instructions =
+                self.emergency_instructions(c, &quote, slippage_bps, minimum_profit)?;
+            if !self.profitable(c, s, &instructions, minimum_profit, false)? {
+                return Err("selected emergency route failed protected revalidation".into());
+            }
             return Ok(Some(LiquidationPlan {
                 action: "emergency",
                 instructions,
@@ -472,8 +485,7 @@ impl LiquidationJob<'_> {
             s,
             c.preview_emergency(self.contract, c.collateral, true)?,
         )? {
-            let mut instructions = crate::liquidation::plan::resources()?;
-            instructions.push(c.emergency(self.contract, &q)?);
+            let instructions = self.emergency_instructions(c, &q, slippage_bps, minimum_profit)?;
             if self.profitable(c, s, &instructions, minimum_profit, true)? {
                 return Ok(Some(LiquidationPlan {
                     action: "emergency_full",
@@ -483,6 +495,22 @@ impl LiquidationJob<'_> {
             }
         }
         Ok(None)
+    }
+    fn emergency_instructions(
+        &self,
+        c: &Context,
+        q: &EmergencyLiquidationQuote,
+        slippage_bps: u16,
+        minimum_profit: u64,
+    ) -> Result<Vec<Instruction>> {
+        let mut instructions = crate::liquidation::plan::resources()?;
+        instructions.push(c.emergency_with_bounds(
+            self.contract,
+            q,
+            emergency_slippage_floor(q.reward_credit, slippage_bps)?.max(minimum_profit),
+            emergency_slippage_floor(q.swap_output, slippage_bps)?,
+        )?);
+        Ok(instructions)
     }
     fn inventory_mode(&self) -> Result<bool> {
         match std::env::var("KEEPER_FLASH_SETTLEMENT")

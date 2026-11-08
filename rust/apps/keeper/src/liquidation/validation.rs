@@ -9,6 +9,13 @@ pub(crate) fn required_u64(name: &str) -> Result<u64> {
         .parse()
         .map_err(|_| format!("invalid {name}"))
 }
+/// Ceil the discounted quote so rounding never exceeds the allowed tolerance.
+pub(super) fn emergency_slippage_floor(amount: u64, bps: u16) -> Result<u64> {
+    if bps > 10_000 {
+        return Err("KEEPER_EMERGENCY_SLIPPAGE_BPS must be between 0 and 10000 (100%)".into());
+    }
+    Ok((u128::from(amount) * u128::from(10_000 - bps)).div_ceil(10_000) as u64)
+}
 pub(crate) fn post_bytes(value: &serde_json::Value, index: usize) -> Result<Option<Vec<u8>>> {
     let a = value["value"]["accounts"]
         .as_array()
@@ -94,6 +101,9 @@ pub(super) fn expected_bound_rejection(value: &serde_json::Value) -> bool {
         "LiquidationRepayTooLarge",
         "LiquidationDoesNotImproveHealth",
         "InsufficientAmount",
+        // Tiny collateral probes can round the AMM output to zero. Reject
+        // that candidate without aborting refinement or the full-close preview.
+        "InsufficientOutputAmount",
         "InsufficientDebt",
         "SlippageExceeded",
         "InsufficientCashReserve0",
@@ -145,6 +155,21 @@ pub(super) fn zero_share_probe(value: &serde_json::Value) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn emergency_slippage_supports_the_full_percentage_range() {
+        assert_eq!(emergency_slippage_floor(270_634, 0).unwrap(), 270_634);
+        assert_eq!(emergency_slippage_floor(270_634, 10).unwrap(), 270_364);
+        assert_eq!(
+            emergency_slippage_floor(27_063_467, 10).unwrap(),
+            27_036_404
+        );
+        assert_eq!(emergency_slippage_floor(1, 100).unwrap(), 1);
+        assert_eq!(emergency_slippage_floor(1, 9_999).unwrap(), 1);
+        assert_eq!(emergency_slippage_floor(u64::MAX, 0).unwrap(), u64::MAX);
+        assert_eq!(emergency_slippage_floor(270_634, 10_000).unwrap(), 0);
+        assert_eq!(emergency_slippage_floor(u64::MAX, 10_000).unwrap(), 0);
+        assert!(emergency_slippage_floor(0, 10_001).is_err());
+    }
     #[test]
     fn signing_fingerprint_invalidates_epoch_and_schedule_changes() {
         let mut a = Snapshot {

@@ -15,7 +15,7 @@ import { resolveLiquidationAccounts } from "../packages/dusk-adapter/src/liquida
 const layout = JSON.parse(
   readFileSync("protocol/keeper-account-layout.v1.json", "utf8"),
 );
-for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mode = "both", rejectOrdinary = false, oracle = false, devnetAllMarkets = false, maxSends = "4", debtShares = null, clockMismatch = false } of [
+for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mode = "both", rejectOrdinary = false, rejectEmergencyDust = false, emergencySlippage = "0", driftEmergencyQuote = false, oracle = false, devnetAllMarkets = false, maxSends = "4", debtShares = null, clockMismatch = false } of [
   {
     file: "01-flash-BorrowPosition.json", profile: "lending", expected: "flash",
     settlement: "inventory", maxRepay: "18446744073709551615", minProfit: "0",
@@ -118,6 +118,41 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mod
     minProfit: "0",
     name: "leverage emergency",
   },
+  {
+    file: "03-emergency-LeveragePosition.json",
+    profile: "leverage",
+    expected: "emergency",
+    settlement: "inventory",
+    maxRepay: "18446744073709551615",
+    minProfit: "0",
+    rejectEmergencyDust: true,
+    name: "zero-output dust probe still reaches a valid full emergency liquidation",
+  },
+  {
+    file: "02-emergency-BorrowPosition.json", profile: "lending", expected: "unfilled",
+    settlement: "inventory", maxRepay: "18446744073709551615", minProfit: "0",
+    driftEmergencyQuote: true, name: "default zero slippage rejects a worse emergency quote",
+  },
+  {
+    file: "02-emergency-BorrowPosition.json", profile: "lending", expected: "emergency",
+    settlement: "inventory", maxRepay: "18446744073709551615", minProfit: "0",
+    driftEmergencyQuote: true, emergencySlippage: "10", name: "explicit tolerance accepts small emergency quote movement",
+  },
+  {
+    file: "02-emergency-BorrowPosition.json", profile: "lending", expected: "unfilled",
+    settlement: "inventory", maxRepay: "18446744073709551615", minProfit: "96",
+    driftEmergencyQuote: true, emergencySlippage: "10", name: "emergency tolerance preserves the configured profit floor",
+  },
+  {
+    file: "02-emergency-BorrowPosition.json", profile: "lending", expected: "emergency",
+    settlement: "inventory", maxRepay: "18446744073709551615", minProfit: "1",
+    driftEmergencyQuote: true, emergencySlippage: "10000", name: "100 percent emergency tolerance accepts execution",
+  },
+  {
+    file: "02-emergency-BorrowPosition.json", profile: "lending", expected: "unfilled",
+    settlement: "inventory", maxRepay: "18446744073709551615", minProfit: "96",
+    driftEmergencyQuote: true, emergencySlippage: "10000", name: "100 percent emergency tolerance still enforces minimum profit",
+  },
   // The geometric probes top out at seven atoms for this fixture. Adaptive
   // refinement must find the non-geometric 996-atom fill yielding eight.
   {
@@ -168,6 +203,9 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mod
     let clockMismatches = 0;
     const previewNames = ["preview_flash_liquidation", "preview_emergency_liquidation"];
     const previews: string[] = [];
+    let rejectedDustProbes = 0;
+    let fullEmergencyPreviews = 0;
+    const fullEmergencyBounds: { reward: bigint; output: bigint }[] = [];
     const healthPreviews: { debt: bigint; collateralValue: bigint; maintenance: number }[] = [];
     const discriminator = (name: string) => createHash("sha256").update(`global:${name}`).digest().subarray(0, 8);
     const rpcAccount = (a: any) => {
@@ -260,6 +298,25 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mod
             );
             const invoked = previewNames.filter((name) => tx.message.compiledInstructions.some((ix) => Buffer.from(ix.data).subarray(0, 8).equals(discriminator(name))));
             previews.push(...invoked);
+            for (const ix of tx.message.compiledInstructions) {
+              const data = Buffer.from(ix.data);
+              if (data.subarray(0, 8).equals(discriminator("emergency_liquidation")) && data[17]) {
+                fullEmergencyBounds.push({ reward: data.readBigUInt64LE(18), output: data.readBigUInt64LE(26) });
+              }
+            }
+            const emergency = tx.message.compiledInstructions.find(ix => Buffer.from(ix.data).subarray(0, 8).equals(discriminator("preview_emergency_liquidation")));
+            if (emergency) {
+              const data = Buffer.from(emergency.data);
+              if (data[17]) fullEmergencyPreviews++;
+              if (rejectEmergencyDust && data.readBigUInt64LE(9) === 1n && !data[17]) {
+                rejectedDustProbes++;
+                answer = { context, value: {
+                  err: { InstructionError: [2, { Custom: 6032 }] },
+                  logs: ["Program log: AnchorError thrown in programs/dusk/src/transitions/amm/mod.rs:1806. Error Code: InsufficientOutputAmount. Error Number: 6032. Error Message: Insufficient output amount."],
+                } };
+                break;
+              }
+            }
             if (rejectOrdinary && invoked.includes("preview_flash_liquidation")) {
               answer = { context, value: { err: "injected unexpected ordinary failure", logs: [] } };
               break;
@@ -300,6 +357,12 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mod
                 ),
               },
             };
+            if (driftEmergencyQuote && !failed && emergency && Buffer.from(emergency.data)[17]) {
+              // The execution bank delivers one atom less than the preview.
+              const quote = Buffer.from(answer.value.returnData.data[0], "base64");
+              quote.writeBigUInt64LE(quote.readBigUInt64LE(41) + 1n, 41);
+              answer.value.returnData.data[0] = quote.toString("base64");
+            }
             break;
           }
           default:
@@ -355,6 +418,7 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mod
               KEEPER_FLASH_MIN_COLLATERAL_CREDIT:
                 ["emergency", "unfilled", "error"].includes(expected) ? "18446744073709551615" : "1",
               KEEPER_LIQUIDATION_MIN_PROFIT: minProfit,
+              KEEPER_EMERGENCY_SLIPPAGE_BPS: emergencySlippage,
             },
           });
           let output = "";
@@ -399,6 +463,20 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mod
         assert.equal(simulations, expected === "debt_free" ? 0 : 2);
       } else assert.ok(simulations >= 4);
       if (clockMismatch) assert.equal(clockMismatches, 1);
+      if (rejectEmergencyDust) {
+        assert.equal(rejectedDustProbes, 2, "each pass must reach the dust-size rejection");
+        assert.equal(fullEmergencyPreviews, 2, "dust rejection must not abort the independent full-close preview");
+        assert.match(first.output, /shadow emergency_full/);
+        assert.ok(!first.output.includes("unexpected preview rejection"));
+      }
+      if (driftEmergencyQuote) {
+        assert.ok(fullEmergencyBounds.length >= 2);
+        for (const bounds of fullEmergencyBounds) {
+          assert.ok(bounds.reward >= BigInt(minProfit), "minimum profit must be enforced by the transaction");
+          assert.equal(bounds.output, emergencySlippage === "0" ? 9513n : emergencySlippage === "10000" ? 0n : 9504n);
+          if (emergencySlippage === "10000") assert.equal(bounds.reward, BigInt(minProfit));
+        }
+      }
       if (oracle) assert.ok(oracleReads >= 2, "each fresh evaluation must fetch the active feed into its snapshot");
       if (mode === "emergency") assert.ok(!previews.includes("preview_flash_liquidation"));
       if (expected === "flash" || mode === "ordinary" || rejectOrdinary) assert.ok(!previews.includes("preview_emergency_liquidation"));
