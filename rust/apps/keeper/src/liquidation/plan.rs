@@ -45,6 +45,8 @@ pub struct Account {
     pub owner: String,
     pub data: Vec<u8>,
     pub executable: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lamports: Option<u64>,
 }
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Snapshot {
@@ -97,6 +99,7 @@ impl Snapshot {
                     return Err(DiscoveryError::Malformed("snapshot encoding".into()));
                 }
                 Some(Account {
+                    lamports: v["lamports"].as_u64(),
                     owner: v["owner"]
                         .as_str()
                         .ok_or_else(|| DiscoveryError::Malformed("snapshot owner".into()))?

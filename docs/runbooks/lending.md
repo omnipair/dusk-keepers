@@ -20,9 +20,14 @@ devnet artifact update does not grant live release permissions. See the
 
 ## Economic bounds
 
-Ordinary execution requires `KEEPER_FLASH_MAX_REPAY`. Internal Dusk settlement
-(`KEEPER_FLASH_SETTLEMENT=dusk`, the default) also requires
-`KEEPER_LIQUIDATION_MIN_PROFIT` in debt-token atoms. Inventory settlement requires
+Ordinary execution requires `KEEPER_FLASH_MAX_REPAY`. Jupiter settlement
+(`KEEPER_FLASH_SETTLEMENT=jupiter`, the default) routes collateral through the
+Swap API V2 and settles externally in one transaction. It requires
+`KEEPER_LIQUIDATION_MIN_PROFIT` in debt-token atoms, as does explicit internal
+settlement (`KEEPER_FLASH_SETTLEMENT=dusk`). Jupiter is mainnet-only; set `dusk`
+explicitly for devnet. See [Jupiter routing](jupiter-routing.md) for configuration,
+supported instructions, verification and rollout limits. The leverage worker
+uses the same ordinary routing setting. Inventory settlement requires
 `KEEPER_FLASH_MARKET`, `KEEPER_FLASH_MAX_PAYMENT_DEBIT`, and
 `KEEPER_FLASH_MIN_COLLATERAL_CREDIT`. The market restriction scopes inventory
 purchases only; in `both` mode, other markets can still receive emergency evaluation.

@@ -13,6 +13,20 @@ pub struct Journal {
     client: Client,
 }
 impl Journal {
+    /// Discovery guard: do not spend external quote requests or select an
+    /// alternate route for work whose submitted outcome is still uncertain.
+    /// submit_locked remains the authoritative guard against concurrent races.
+    pub fn pending_sides(
+        &mut self,
+        revision: &str,
+    ) -> Result<std::collections::BTreeSet<([u8; 32], u8)>, String> {
+        self.client.query("SELECT position,debt_asset FROM keeper_flash_work WHERE revision=$1 AND outcome IN ('reserved','submitted_unknown')", &[&revision])
+            .map_err(|e| e.to_string())?.iter().map(|row| {
+                let position: String = row.get(0);
+                let side: i16 = row.get(1);
+                Ok((crate::liquidation::plan::key(&position)?, u8::try_from(side).map_err(|_| "invalid pending debt side")?))
+            }).collect()
+    }
     pub fn connect(url: &str) -> Result<Self, String> {
         // Local sockets may use NoTls; remote servers require certificate validation.
         let mut config: postgres::Config = url
@@ -175,6 +189,41 @@ impl Journal {
         blockhash: &str,
         last_valid_height: u64,
     ) -> Result<Option<String>, String> {
+        self.submit_before(
+            rpc,
+            signer,
+            revision,
+            position,
+            debt_asset,
+            market,
+            action,
+            slot,
+            state_hash,
+            message,
+            blockhash,
+            last_valid_height,
+            None,
+        )
+    }
+    /// A quote deadline applies only to new signatures; uncertain submitted
+    /// generations still reconcile/rebroadcast their exact recorded bytes.
+    #[allow(clippy::too_many_arguments)]
+    pub fn submit_before(
+        &mut self,
+        rpc: &RpcClient,
+        signer: &dyn TransactionSigner,
+        revision: &str,
+        position: &str,
+        debt_asset: u8,
+        market: &str,
+        action: &str,
+        slot: u64,
+        state_hash: &str,
+        message: &[u8],
+        blockhash: &str,
+        last_valid_height: u64,
+        deadline: Option<std::time::Instant>,
+    ) -> Result<Option<String>, String> {
         let lock_key = format!("{revision}:{position}:{debt_asset}");
         let locked: bool = self
             .client
@@ -200,6 +249,7 @@ impl Journal {
             message,
             blockhash,
             last_valid_height,
+            deadline,
         );
         let unlock = self.client.execute(
             "SELECT pg_advisory_unlock(hashtextextended($1,0))",
@@ -225,6 +275,7 @@ impl Journal {
         message: &[u8],
         blockhash: &str,
         last_valid_height: u64,
+        deadline: Option<std::time::Instant>,
     ) -> Result<Option<String>, String> {
         let side = i16::from(debt_asset);
         let pending=self.client.query_opt("SELECT work_key, signature, transaction_bytes, observed_slot, last_valid_height FROM keeper_flash_work WHERE revision=$1 AND position=$2 AND debt_asset=$3 AND outcome IN ('reserved','submitted_unknown')",&[&revision,&position,&side]).map_err(|e|e.to_string())?;
@@ -286,6 +337,14 @@ impl Journal {
         )
         .map_err(|e| e.to_string())?;
         tx.commit().map_err(|e| e.to_string())?;
+        if deadline.is_some_and(|t| std::time::Instant::now() >= t) {
+            self.finish(
+                &work,
+                "abandoned_before_submission",
+                &serde_json::json!({"reason":"quote expired before signing"}),
+            )?;
+            return Err("quote expired before signing; fresh evaluation required".into());
+        }
         let signature = signer.sign(message);
         let sig = bs58::encode(signature).into_string();
         let bytes = serialize_transaction(&[signature], message);
@@ -544,8 +603,18 @@ mod tests {
         let signer = CountingSigner(count.clone());
         let submit = |j: &mut Journal, message: &[u8]| {
             j.submit(
-                &rpc, &signer, "test", "position", 1, "market", "flash", 10, "state", message,
-                "hash", 100,
+                &rpc,
+                &signer,
+                "test",
+                "11111111111111111111111111111111",
+                1,
+                "market",
+                "flash",
+                10,
+                "state",
+                message,
+                "hash",
+                100,
             )
         };
         let mut competing = Journal::connect(&url).unwrap();
@@ -557,7 +626,7 @@ mod tests {
             .client
             .execute(
                 "SELECT pg_advisory_lock(hashtextextended($1,0))",
-                &[&"test:position:1"],
+                &[&"test:11111111111111111111111111111111:1"],
             )
             .unwrap();
         assert!(
@@ -570,7 +639,7 @@ mod tests {
             .client
             .execute(
                 "SELECT pg_advisory_unlock(hashtextextended($1,0))",
-                &[&"test:position:1"],
+                &[&"test:11111111111111111111111111111111:1"],
             )
             .unwrap();
         assert_eq!(submit(&mut journal, b"first").unwrap(), None);
@@ -587,6 +656,10 @@ mod tests {
             .unwrap();
         assert_eq!(row.get::<_, Vec<u8>>(0), b"first");
         assert_eq!(row.get::<_, String>(1), "submitted_unknown");
+        assert_eq!(
+            journal.pending_sides("test").unwrap(),
+            std::collections::BTreeSet::from([([0; 32], 1)])
+        );
         phase.store(3, Ordering::SeqCst);
         assert!(competing.recover(&rpc, "test").is_err());
         let pending: String = journal
@@ -627,6 +700,30 @@ mod tests {
                 "expired_absent"
             ]
         );
+        // Expiry after lease/reservation is checked immediately before signing.
+        assert!(journal.pending_sides("test").unwrap().is_empty());
+        let signed_before = count.load(Ordering::SeqCst);
+        let expired = journal.submit_before(
+            &rpc,
+            &signer,
+            "test",
+            "expired-position",
+            1,
+            "market",
+            "flash_jupiter",
+            10,
+            "state",
+            b"expired-jupiter",
+            "hash",
+            100,
+            Some(std::time::Instant::now()),
+        );
+        assert!(expired.unwrap_err().contains("expired before signing"));
+        assert_eq!(count.load(Ordering::SeqCst), signed_before);
+        let row = journal.client.query_one("SELECT outcome,signature,transaction_bytes FROM keeper_flash_work WHERE position='expired-position'", &[]).unwrap();
+        assert_eq!(row.get::<_, String>(0), "abandoned_before_submission");
+        assert!(row.get::<_, Option<String>>(1).is_none());
+        assert!(row.get::<_, Option<Vec<u8>>>(2).is_none());
         let _ = rpc.call::<serde_json::Value>("stop", serde_json::json!([]));
         handle.join().unwrap();
         journal

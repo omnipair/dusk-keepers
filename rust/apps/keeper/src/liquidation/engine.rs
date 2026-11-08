@@ -1,4 +1,5 @@
 //! Shared position-liquidation engine used by lending and leverage workers.
+mod jupiter;
 use super::{
     policy::{LiquidationMode, select_liquidation},
     position_log,
@@ -46,12 +47,22 @@ struct LiquidationPlan {
     action: &'static str,
     instructions: Vec<Instruction>,
     minimum_profit: u64,
+    route_state: Option<jupiter::RouteState>,
 }
 
 impl LiquidationJob<'_> {
     pub fn run_pass(&self) -> std::result::Result<Vec<AttemptReport>, ExecutionError> {
         let mut reports =
             recover_pending(self.client, &self.contract.protocol_revision, self.dry_run)?;
+        let pending = if self.dry_run {
+            BTreeSet::new()
+        } else {
+            Journal::connect(&std::env::var("DATABASE_URL").map_err(|_| {
+                ExecutionError::Assembly("DATABASE_URL is required before signing".into())
+            })?)
+            .and_then(|mut j| j.pending_sides(&self.contract.protocol_revision))
+            .map_err(ExecutionError::Assembly)?
+        };
         let kind = match self.kind {
             PositionKind::Borrowing => "BorrowPosition",
             PositionKind::Leverage => "LeveragePosition",
@@ -80,6 +91,13 @@ impl LiquidationJob<'_> {
                 .is_some_and(|k| self.priority_markets.contains(&k))
         });
         let mut attempted = 0;
+        let mut jupiter_budget = if self.liquidation_mode != LiquidationMode::Emergency
+            && settlement().map_err(ExecutionError::Assembly)? == Settlement::Jupiter
+        {
+            crate::routing::jupiter::Config::pass_budget().map_err(ExecutionError::Assembly)?
+        } else {
+            0
+        };
         if position_log::enabled() {
             println!(
                 "position_scan kind={kind} discovered={} execution_scope=all_supported_markets",
@@ -117,6 +135,15 @@ impl LiquidationJob<'_> {
                 vec![0, 1]
             };
             for side in sides {
+                if pending.contains(&(position, side)) {
+                    position_log::decision(
+                        position,
+                        side,
+                        "pending signature: awaiting reconciliation; no new route requested",
+                        None,
+                    );
+                    continue;
+                }
                 let limit_reached = send_limit_reached(attempted, self.max_sends);
                 if limit_reached {
                     if !position_log::enabled() {
@@ -136,7 +163,7 @@ impl LiquidationJob<'_> {
                     }
                     continue;
                 }
-                match self.attempt(position, kind, side) {
+                match self.attempt(position, kind, side, &mut jupiter_budget) {
                     Ok(Some((signature, detail))) => {
                         position_log::decision(position, side, &detail, signature.as_deref());
                         if counts_toward_send_limit(&detail) {
@@ -182,6 +209,15 @@ impl LiquidationJob<'_> {
         Ok(reports)
     }
     fn fresh(&self, position: [u8; 32], kind: &str, side: u8) -> Result<(Context, Snapshot)> {
+        self.fresh_with_extra(position, kind, side, &[])
+    }
+    fn fresh_with_extra(
+        &self,
+        position: [u8; 32],
+        kind: &str,
+        side: u8,
+        extra: &[[u8; 32]],
+    ) -> Result<(Context, Snapshot)> {
         let r = self.layout.reader(kind).map_err(|e| e.to_string())?;
         let first = Snapshot::fetch(self.client, &[position], 0).map_err(|e| e.to_string())?;
         let market = r
@@ -226,6 +262,9 @@ impl LiquidationJob<'_> {
             all.sort();
             all.dedup();
         }
+        all.extend_from_slice(extra);
+        all.sort();
+        all.dedup();
         let snapshot = Snapshot::fetch(self.client, &all, third.slot).map_err(|e| e.to_string())?;
         let c = Context::resolve(
             self.layout,
@@ -331,6 +370,7 @@ impl LiquidationJob<'_> {
         position: [u8; 32],
         kind: &str,
         side: u8,
+        jupiter_budget: &mut usize,
     ) -> Result<Option<(Option<String>, String)>> {
         let (c, s, health) = self.inspect_health(position, kind, side, None)?;
         let Some(health) = health else {
@@ -342,12 +382,12 @@ impl LiquidationJob<'_> {
         let setup = c.setup(&s)?;
         if !setup.is_empty() {
             return self
-                .submit(&c, &s, "prepare_accounts", setup, 0, false)
+                .submit(&c, &s, "prepare_accounts", setup, 0, None)
                 .map(Some);
         }
         let plan = select_liquidation(
             self.liquidation_mode,
-            || self.ordinary_plan(&c, &s, &health),
+            || self.ordinary_plan(&c, &s, &health, jupiter_budget),
             || self.emergency_plan(&c, &s),
         )?;
         if let Some(plan) = plan {
@@ -356,11 +396,11 @@ impl LiquidationJob<'_> {
             return self
                 .submit(
                     &c,
-                    &s,
+                    plan.route_state.as_ref().map_or(&s, |r| &r.snapshot),
                     plan.action,
                     plan.instructions,
                     plan.minimum_profit,
-                    true,
+                    plan.route_state.as_ref(),
                 )
                 .map(Some);
         }
@@ -372,7 +412,11 @@ impl LiquidationJob<'_> {
         c: &Context,
         s: &Snapshot,
         health: &LiquidationHealth,
+        jupiter_budget: &mut usize,
     ) -> Result<Option<LiquidationPlan>> {
+        if settlement()? == Settlement::Jupiter {
+            return self.jupiter_plan(c, s, health, jupiter_budget);
+        }
         let inventory = self.inventory_mode()?;
         if inventory {
             let market = std::env::var("KEEPER_FLASH_MARKET")
@@ -420,6 +464,7 @@ impl LiquidationJob<'_> {
                 action: "flash",
                 instructions,
                 minimum_profit,
+                route_state: None,
             }));
         }
         if cap >= health.debt
@@ -435,6 +480,7 @@ impl LiquidationJob<'_> {
                 action: "flash_full",
                 instructions,
                 minimum_profit,
+                route_state: None,
             }));
         }
         Ok(None)
@@ -476,6 +522,7 @@ impl LiquidationJob<'_> {
                 action: "emergency",
                 instructions,
                 minimum_profit,
+                route_state: None,
             }));
         }
         // A failed partial search never authorizes a full close. The program
@@ -491,6 +538,7 @@ impl LiquidationJob<'_> {
                     action: "emergency_full",
                     instructions,
                     minimum_profit,
+                    route_state: None,
                 }));
             }
         }
@@ -513,15 +561,9 @@ impl LiquidationJob<'_> {
         Ok(instructions)
     }
     fn inventory_mode(&self) -> Result<bool> {
-        match std::env::var("KEEPER_FLASH_SETTLEMENT")
-            .unwrap_or_else(|_| "dusk".into())
-            .as_str()
-        {
-            "dusk" => Ok(false),
-            "inventory" => Ok(true),
-            _ => Err("KEEPER_FLASH_SETTLEMENT must be dusk or inventory".into()),
-        }
+        Ok(settlement()? == Settlement::Inventory)
     }
+
     fn flash_plan(
         &self,
         c: &Context,
@@ -583,13 +625,19 @@ impl LiquidationJob<'_> {
         ixs: &[Instruction],
         full: bool,
     ) -> Result<Option<u64>> {
-        let post = [
+        let jupiter = ixs
+            .iter()
+            .any(|i| address(i.program_id) == crate::routing::jupiter::PROGRAM);
+        let mut post = vec![
             c.position,
             c.named["buyer_refund_account"],
             c.named["buyer_collateral_account"],
             c.named["session"],
             c.named["repayment_vault"],
         ];
+        if jupiter {
+            post.push(c.buyer);
+        }
         let value = self.simulate(c, s, ixs, &post)?;
         if !value["value"]["err"].is_null() {
             if compute_limit_rejection(&value) {
@@ -598,7 +646,9 @@ impl LiquidationJob<'_> {
                 );
                 return Ok(None);
             }
-            return if expected_bound_rejection(&value) {
+            return if expected_bound_rejection(&value)
+                || (jupiter && jupiter::slippage_rejection(&value, ixs))
+            {
                 Ok(None)
             } else {
                 Err(format!(
@@ -606,6 +656,20 @@ impl LiquidationJob<'_> {
                     value["value"]
                 ))
             };
+        }
+        if jupiter {
+            let before = s
+                .account(c.buyer)?
+                .lamports
+                .ok_or("missing payer SOL balance")?;
+            let after = value["value"]["accounts"][5]["lamports"]
+                .as_u64()
+                .ok_or("missing payer SOL post-state")?;
+            if before.saturating_sub(after)
+                > crate::routing::jupiter::Config::from_env()?.max_sol_debit
+            {
+                return Err("Jupiter transaction exceeds the separate SOL spending budget".into());
+            }
         }
         if post_bytes(&value, 3)?.is_some() {
             return Err("flash session did not close".into());
@@ -688,8 +752,10 @@ impl LiquidationJob<'_> {
         action: &str,
         ixs: Vec<Instruction>,
         minimum: u64,
-        liquidation: bool,
+        route_state: Option<&jupiter::RouteState>,
     ) -> Result<(Option<String>, String)> {
+        let liquidation = action != "prepare_accounts";
+        jupiter::check_deadline(route_state)?;
         if self.dry_run {
             if !liquidation && !self.simulate(c, s, &ixs, &[])?["value"]["err"].is_null() {
                 return Err("shadow account-preparation simulation rejected".into());
@@ -700,7 +766,15 @@ impl LiquidationJob<'_> {
             ));
         }
         // Re-read all safety-critical state, including both schedules and Clock.
-        let (fresh, now) = self.fresh(c.position, &c.kind, c.debt_asset)?;
+        let extra = if route_state.is_some() {
+            s.accounts
+                .keys()
+                .map(|k| key(k))
+                .collect::<Result<Vec<_>>>()?
+        } else {
+            vec![]
+        };
+        let (fresh, now) = self.fresh_with_extra(c.position, &c.kind, c.debt_asset, &extra)?;
         if state_hash(s, c.epoch)? != state_hash(&now, fresh.epoch)? {
             return Err("state or fee epoch changed; requote".into());
         }
@@ -731,7 +805,8 @@ impl LiquidationJob<'_> {
             &std::env::var("DATABASE_URL")
                 .map_err(|_| "DATABASE_URL is required before signing")?,
         )?;
-        let signature = journal.submit(
+        jupiter::check_deadline(route_state)?;
+        let signature = journal.submit_before(
             self.client,
             self.signer,
             &self.contract.protocol_revision,
@@ -744,6 +819,7 @@ impl LiquidationJob<'_> {
             &message,
             hash,
             height,
+            route_state.map(|state| state.expires_at),
         )?;
         Ok((
             signature,
@@ -770,5 +846,23 @@ mod tests {
             "shadow flash: simulated; no signature produced"
         ));
         assert!(!counts_toward_send_limit("eligible but unfilled: no route"));
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Settlement {
+    Jupiter,
+    Dusk,
+    Inventory,
+}
+fn settlement() -> Result<Settlement> {
+    match std::env::var("KEEPER_FLASH_SETTLEMENT")
+        .unwrap_or_else(|_| "jupiter".into())
+        .as_str()
+    {
+        "jupiter" => Ok(Settlement::Jupiter),
+        "dusk" => Ok(Settlement::Dusk),
+        "inventory" => Ok(Settlement::Inventory),
+        _ => Err("KEEPER_FLASH_SETTLEMENT must be jupiter, dusk or inventory".into()),
     }
 }

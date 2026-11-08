@@ -182,6 +182,7 @@ mod tests {
                 owner: "token".into(),
                 data: vec![1],
                 executable: false,
+                lamports: None,
             }),
         );
         let initial = state_hash(&a, 4).unwrap();
@@ -193,6 +194,7 @@ mod tests {
                 owner: "sysvar".into(),
                 data: vec![2],
                 executable: false,
+                lamports: None,
             }),
         );
         assert_eq!(initial, state_hash(&b, 4).unwrap());
