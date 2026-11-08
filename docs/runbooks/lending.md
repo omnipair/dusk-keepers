@@ -28,6 +28,12 @@ Ordinary execution requires `KEEPER_FLASH_MAX_REPAY`. Internal Dusk settlement
 purchases only; in `both` mode, other markets can still receive emergency evaluation.
 
 Emergency execution independently requires `KEEPER_LIQUIDATION_MIN_PROFIT`.
+`KEEPER_EMERGENCY_SLIPPAGE_BPS` optionally tolerates movement between the preview
+and execution quotes for both the reward and swap output. It defaults to `0`
+(exact quotes), accepts `0..10000` basis points, and never lowers the transaction's
+reward floor below `KEEPER_LIQUIDATION_MIN_PROFIT`. For example, `10` allows 0.1%.
+`10000` allows 100%: the quote-derived reward and swap-output floors become zero,
+while the configured minimum profit remains enforced on chain.
 An inventory purchase bound does not replace the emergency reward/profit bound.
 Full liquidation always requires an accepted full preview, regardless of whether
 partial searches found a route. Both mechanisms retain their pinned protocol

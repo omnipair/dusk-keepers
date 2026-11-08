@@ -9,6 +9,13 @@ pub(crate) fn required_u64(name: &str) -> Result<u64> {
         .parse()
         .map_err(|_| format!("invalid {name}"))
 }
+/// Ceil the discounted quote so rounding never exceeds the allowed tolerance.
+pub(super) fn emergency_slippage_floor(amount: u64, bps: u16) -> Result<u64> {
+    if bps > 10_000 {
+        return Err("KEEPER_EMERGENCY_SLIPPAGE_BPS must be between 0 and 10000 (100%)".into());
+    }
+    Ok((u128::from(amount) * u128::from(10_000 - bps)).div_ceil(10_000) as u64)
+}
 pub(crate) fn post_bytes(value: &serde_json::Value, index: usize) -> Result<Option<Vec<u8>>> {
     let a = value["value"]["accounts"]
         .as_array()
@@ -20,10 +27,53 @@ pub(crate) fn post_bytes(value: &serde_json::Value, index: usize) -> Result<Opti
     if a["data"][1] != "base64" {
         return Err("post-state encoding".into());
     }
+    // RPC simulation can return a reclaimed System account rather than null.
+    // Only the complete closed-account shape is equivalent to absence.
+    if a["lamports"].as_u64() == Some(0) {
+        if a["owner"] == "11111111111111111111111111111111"
+            && a["executable"] == false
+            && a["data"][0] == ""
+        {
+            return Ok(None);
+        }
+        return Err("invalid closed post-state".into());
+    }
     Ok(Some(
         crate::runtime::rpc::decode_base64(a["data"][0].as_str().ok_or("post-state data")?)
             .ok_or("post-state base64")?,
     ))
+}
+
+#[cfg(test)]
+mod post_state_tests {
+    use super::*;
+    use serde_json::json;
+    #[test]
+    fn accepts_null_and_reclaimed_system_account_but_not_invalid_closures() {
+        let closed = json!({"owner":"11111111111111111111111111111111", "executable":false, "lamports":0,"data":["","base64"]});
+        for account in [serde_json::Value::Null, closed.clone()] {
+            assert_eq!(
+                post_bytes(&json!({"value":{"accounts":[account]}}), 0).unwrap(),
+                None
+            );
+        }
+        for (field, value) in [
+            ("owner", json!("wrong")),
+            ("executable", json!(true)),
+            ("data", json!(["AQ==", "base64"])),
+        ] {
+            let mut account = closed.clone();
+            account[field] = value;
+            assert!(post_bytes(&json!({"value":{"accounts":[account]}}), 0).is_err());
+        }
+        let mut funded = closed;
+        funded["lamports"] = 1.into();
+        assert_eq!(
+            post_bytes(&json!({"value":{"accounts":[funded]}}), 0).unwrap(),
+            Some(vec![])
+        );
+        assert!(post_bytes(&json!({"value":{"accounts":[]}}), 0).is_err());
+    }
 }
 pub(crate) fn state_hash(s: &Snapshot, epoch: u64) -> Result<String> {
     let mut accounts = s.accounts.clone();
@@ -51,6 +101,9 @@ pub(super) fn expected_bound_rejection(value: &serde_json::Value) -> bool {
         "LiquidationRepayTooLarge",
         "LiquidationDoesNotImproveHealth",
         "InsufficientAmount",
+        // Tiny collateral probes can round the AMM output to zero. Reject
+        // that candidate without aborting refinement or the full-close preview.
+        "InsufficientOutputAmount",
         "InsufficientDebt",
         "SlippageExceeded",
         "InsufficientCashReserve0",
@@ -102,6 +155,21 @@ pub(super) fn zero_share_probe(value: &serde_json::Value) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn emergency_slippage_supports_the_full_percentage_range() {
+        assert_eq!(emergency_slippage_floor(270_634, 0).unwrap(), 270_634);
+        assert_eq!(emergency_slippage_floor(270_634, 10).unwrap(), 270_364);
+        assert_eq!(
+            emergency_slippage_floor(27_063_467, 10).unwrap(),
+            27_036_404
+        );
+        assert_eq!(emergency_slippage_floor(1, 100).unwrap(), 1);
+        assert_eq!(emergency_slippage_floor(1, 9_999).unwrap(), 1);
+        assert_eq!(emergency_slippage_floor(u64::MAX, 0).unwrap(), u64::MAX);
+        assert_eq!(emergency_slippage_floor(270_634, 10_000).unwrap(), 0);
+        assert_eq!(emergency_slippage_floor(u64::MAX, 10_000).unwrap(), 0);
+        assert!(emergency_slippage_floor(0, 10_001).is_err());
+    }
     #[test]
     fn signing_fingerprint_invalidates_epoch_and_schedule_changes() {
         let mut a = Snapshot {

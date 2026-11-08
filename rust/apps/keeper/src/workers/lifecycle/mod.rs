@@ -236,6 +236,10 @@ pub fn run(context: &super::WorkerContext<'_>) -> Result<Vec<AttemptReport>, Exe
                 .flat_map(|ix| ix.accounts.iter().map(|meta| meta.pubkey))
                 .collect::<Vec<_>>();
             keys.extend([market, proposal]);
+            // Compilation and pre-submit revalidation use the same table snapshot.
+            if let Ok(table) = std::env::var("KEEPER_LIQUIDATION_LOOKUP_TABLE") {
+                keys.push(key(&table)?);
+            }
             keys.sort();
             keys.dedup();
             let snapshot =

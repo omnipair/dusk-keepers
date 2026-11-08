@@ -1,6 +1,7 @@
 //! Shared position-liquidation engine used by lending and leverage workers.
 use super::{
     policy::{LiquidationMode, select_liquidation},
+    position_log,
     search::search_profitable,
     simulation,
     validation::*,
@@ -79,6 +80,12 @@ impl LiquidationJob<'_> {
                 .is_some_and(|k| self.priority_markets.contains(&k))
         });
         let mut attempted = 0;
+        if position_log::enabled() {
+            println!(
+                "position_scan kind={kind} discovered={} execution_scope=all_supported_markets",
+                positions.len()
+            );
+        }
         for (position, data) in positions {
             // Identity is a fixed owner/market prefix shared by wallet account
             // types. Full-layout readers intentionally reject retired shapes,
@@ -89,7 +96,15 @@ impl LiquidationJob<'_> {
                 .ok_or_else(|| {
                     ExecutionError::Assembly("position identity prefix is truncated".into())
                 })?;
+            let owner = data.get(8..40).and_then(|v| v.try_into().ok());
             if !active_markets.contains(&market) {
+                position_log::unavailable(
+                    position,
+                    market,
+                    owner,
+                    kind,
+                    "market is missing or unsupported; no health evaluation or execution",
+                );
                 continue;
             }
             let sides = if kind == "LeveragePosition" {
@@ -102,11 +117,28 @@ impl LiquidationJob<'_> {
                 vec![0, 1]
             };
             for side in sides {
-                if send_limit_reached(attempted, self.max_sends) {
-                    return Ok(reports);
+                let limit_reached = send_limit_reached(attempted, self.max_sends);
+                if limit_reached {
+                    if !position_log::enabled() {
+                        return Ok(reports);
+                    }
+                    let reason = "MONITOR ONLY: transaction budget used for this pass";
+                    // Diagnostics only simulate health. No route selection,
+                    // signing or journal submission occurs after the pass limit.
+                    if let Err(error) = self.inspect_health(position, kind, side, Some(reason)) {
+                        position_log::unavailable(
+                            position,
+                            market,
+                            owner,
+                            kind,
+                            &format!("{reason}; {error}"),
+                        );
+                    }
+                    continue;
                 }
                 match self.attempt(position, kind, side) {
                     Ok(Some((signature, detail))) => {
+                        position_log::decision(position, side, &detail, signature.as_deref());
                         if counts_toward_send_limit(&detail) {
                             attempted += 1;
                         }
@@ -120,6 +152,8 @@ impl LiquidationJob<'_> {
                             },
                             reason: if signature.is_some() {
                                 ReasonCode::Confirmed
+                            } else if !self.dry_run && counts_toward_send_limit(&detail) {
+                                ReasonCode::StateChanged
                             } else {
                                 ReasonCode::BoundsNotMet
                             },
@@ -130,6 +164,7 @@ impl LiquidationJob<'_> {
                     }
                     Ok(None) => {}
                     Err(e) => {
+                        position_log::decision(position, side, &e, None);
                         attempted += 1;
                         reports.push(AttemptReport {
                             position: address(position),
@@ -247,15 +282,29 @@ impl LiquidationJob<'_> {
         }
         crate::liquidation::plan::decode_return(&value["value"]["returnData"], c.program).map(Some)
     }
-    fn attempt(
+    fn inspect_health(
         &self,
         position: [u8; 32],
         kind: &str,
         side: u8,
-    ) -> Result<Option<(Option<String>, String)>> {
-        let (c, s) = self.fresh(position, kind, side)?;
+        monitor_reason: Option<&str>,
+    ) -> Result<(Context, Snapshot, Option<LiquidationHealth>)> {
+        // A load-balanced RPC may transiently pair a Clock from a different
+        // bank with the account context. Retry the entire snapshot, never
+        // relax the equality check or merge accounts from separate reads.
+        let mut snapshot = self.fresh(position, kind, side);
+        for _ in 0..2 {
+            if snapshot.as_ref().err().map(String::as_str)
+                != Some("clock and RPC bank do not match")
+            {
+                break;
+            }
+            snapshot = self.fresh(position, kind, side);
+        }
+        let (c, s) = snapshot?;
         if c.shares == 0 {
-            return Ok(None);
+            position_log::health(&c, &s, None, None, monitor_reason);
+            return Ok((c, s, None));
         }
         let mut preview = crate::liquidation::plan::resources()?;
         preview.push(c.health_preview(self.contract)?);
@@ -268,6 +317,25 @@ impl LiquidationJob<'_> {
         }
         let health: LiquidationHealth =
             crate::liquidation::plan::decode_return(&result["value"]["returnData"], c.program)?;
+        position_log::health(
+            &c,
+            &s,
+            Some(&health),
+            result["context"]["slot"].as_u64(),
+            monitor_reason,
+        );
+        Ok((c, s, Some(health)))
+    }
+    fn attempt(
+        &self,
+        position: [u8; 32],
+        kind: &str,
+        side: u8,
+    ) -> Result<Option<(Option<String>, String)>> {
+        let (c, s, health) = self.inspect_health(position, kind, side, None)?;
+        let Some(health) = health else {
+            return Ok(None);
+        };
         if !health.eligible() {
             return Ok(None);
         }
@@ -374,6 +442,13 @@ impl LiquidationJob<'_> {
 
     fn emergency_plan(&self, c: &Context, s: &Snapshot) -> Result<Option<LiquidationPlan>> {
         let minimum_profit = required_u64("KEEPER_LIQUIDATION_MIN_PROFIT")?;
+        let slippage_bps = std::env::var("KEEPER_EMERGENCY_SLIPPAGE_BPS")
+            .unwrap_or_else(|_| "0".into())
+            .parse::<u16>()
+            .map_err(|_| "invalid KEEPER_EMERGENCY_SLIPPAGE_BPS")?;
+        // Validate even when no quote is available. The default retains the
+        // exact quoted limits; an operator must opt in to quote movement.
+        emergency_slippage_floor(0, slippage_bps)?;
         let partial =
             search_profitable(c.collateral.saturating_sub(1), minimum_profit, |amount| {
                 let Some(q) = self.preview::<EmergencyLiquidationQuote>(
@@ -384,13 +459,19 @@ impl LiquidationJob<'_> {
                 else {
                     return Ok(None);
                 };
-                let mut instructions = crate::liquidation::plan::resources()?;
-                instructions.push(c.emergency(self.contract, &q)?);
+                let instructions = self.emergency_instructions(c, &q, slippage_bps, 0)?;
                 Ok(self
                     .liquidation_profit(c, s, &instructions, false)?
-                    .map(|profit| (profit, instructions)))
+                    .map(|profit| (profit, q)))
             })?;
-        if let Some(instructions) = partial {
+        if let Some(quote) = partial {
+            // Score below-floor candidates during adaptive search, then put
+            // the configured profit floor into the chosen transaction itself.
+            let instructions =
+                self.emergency_instructions(c, &quote, slippage_bps, minimum_profit)?;
+            if !self.profitable(c, s, &instructions, minimum_profit, false)? {
+                return Err("selected emergency route failed protected revalidation".into());
+            }
             return Ok(Some(LiquidationPlan {
                 action: "emergency",
                 instructions,
@@ -404,8 +485,7 @@ impl LiquidationJob<'_> {
             s,
             c.preview_emergency(self.contract, c.collateral, true)?,
         )? {
-            let mut instructions = crate::liquidation::plan::resources()?;
-            instructions.push(c.emergency(self.contract, &q)?);
+            let instructions = self.emergency_instructions(c, &q, slippage_bps, minimum_profit)?;
             if self.profitable(c, s, &instructions, minimum_profit, true)? {
                 return Ok(Some(LiquidationPlan {
                     action: "emergency_full",
@@ -415,6 +495,22 @@ impl LiquidationJob<'_> {
             }
         }
         Ok(None)
+    }
+    fn emergency_instructions(
+        &self,
+        c: &Context,
+        q: &EmergencyLiquidationQuote,
+        slippage_bps: u16,
+        minimum_profit: u64,
+    ) -> Result<Vec<Instruction>> {
+        let mut instructions = crate::liquidation::plan::resources()?;
+        instructions.push(c.emergency_with_bounds(
+            self.contract,
+            q,
+            emergency_slippage_floor(q.reward_credit, slippage_bps)?.max(minimum_profit),
+            emergency_slippage_floor(q.swap_output, slippage_bps)?,
+        )?);
+        Ok(instructions)
     }
     fn inventory_mode(&self) -> Result<bool> {
         match std::env::var("KEEPER_FLASH_SETTLEMENT")

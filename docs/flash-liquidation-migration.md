@@ -94,6 +94,7 @@ Use market-scoped workers when assets have different units/economics.
 | `KEEPER_FLASH_SETTLEMENT=dusk` | `dusk` or explicitly opted-in `inventory`. |
 | `KEEPER_FLASH_MAX_REPAY` | Positive maximum net debt repayment for ordinary fill probes. |
 | `KEEPER_LIQUIDATION_MIN_PROFIT` | Minimum simulated debt-token gain for internal/emergency execution. Account for SOL fees operationally; there is no built-in SOL exchange-rate feed. |
+| `KEEPER_EMERGENCY_SLIPPAGE_BPS` | Emergency reward/output quote tolerance, `0..10000` basis points (up to 100%); default `0`. The configured profit floor remains enforced on chain. |
 | `KEEPER_FLASH_MARKET` | Required single-market public key for inventory purchases. |
 | `KEEPER_FLASH_MAX_PAYMENT_DEBIT` | Required maximum gross wallet debit in inventory mode. |
 | `KEEPER_FLASH_MIN_COLLATERAL_CREDIT` | Required minimum net seized collateral in inventory mode. |

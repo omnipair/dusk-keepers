@@ -11,10 +11,10 @@
     "buildSha": null
   },
   "protocol": {
-    "revision": "devnet-2026-11-06-operators",
+    "revision": "devnet-2026-11-08-hlp-deposit",
     "lockStatus": "captured",
-    "lockSha256": "0706fd6a3fa844edfb495652c821d43725a17a9c9695e32f62e56563ba18e763",
-    "sourceWorktreeFingerprintSha256": "7bd480ce20367e2e10d76e8b6b0916064df336b73686bc5e93ea051dd382b2ea"
+    "lockSha256": "8d318ecd71cb6594defdf7375ce56b62b52d0da5c058eec138f7f83ec3e117e8",
+    "sourceWorktreeFingerprintSha256": "980dd8578507fb5efe88ec971cd0c8ee781ad2e3029ebf234783b4c7a23af218"
   },
   "dependencies": {
     "rpc": "unknown",

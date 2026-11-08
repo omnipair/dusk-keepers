@@ -3,6 +3,7 @@ pub mod cli;
 mod engine;
 pub mod plan;
 pub mod policy;
+mod position_log;
 mod search;
 pub mod simulation;
 mod validation;

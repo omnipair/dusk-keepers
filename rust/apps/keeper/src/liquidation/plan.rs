@@ -479,14 +479,23 @@ impl Context {
         c: &InstructionContract,
         q: &EmergencyLiquidationQuote,
     ) -> Result<Instruction> {
+        self.emergency_with_bounds(c, q, q.reward_credit, q.swap_output)
+    }
+    pub fn emergency_with_bounds(
+        &self,
+        c: &InstructionContract,
+        q: &EmergencyLiquidationQuote,
+        min_reward_credit: u64,
+        min_swap_output: u64,
+    ) -> Result<Instruction> {
         self.instruction(
             c,
             Args::EmergencyLiquidation(EmergencyLiquidationArgs {
                 debt_asset: self.debt_asset,
                 collateral_debit: q.collateral_debit,
                 full: q.full,
-                min_reward_credit: q.reward_credit,
-                min_swap_output: q.swap_output,
+                min_reward_credit,
+                min_swap_output,
             }),
             true,
         )

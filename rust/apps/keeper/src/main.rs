@@ -41,7 +41,18 @@ fn main() -> Result<(), Box<dyn Error>> {
     let lock = ProtocolLock::read(&config.protocol_lock)?;
 
     if config.mode == Mode::Live {
-        lock.assert_live_ready()?;
+        if runtime::devnet::enabled() {
+            if config.max_sends_per_pass != 1 {
+                return Err("devnet testing requires KEEPER_MAX_SENDS_PER_PASS=1".into());
+            }
+            let endpoint = env::var("SOLANA_RPC_HTTP_URL")?;
+            runtime::devnet::verify(&RpcClient::new(endpoint, Duration::from_secs(20)), true)?;
+            println!(
+                "verified explicit devnet test exception; frozen release gate remains required on other networks"
+            );
+        } else {
+            lock.assert_live_ready()?;
+        }
     }
 
     println!(
@@ -64,8 +75,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         .find(|program| program.name == "dusk")
         .and_then(|program| program.program_id.clone())
         .ok_or("protocol lock does not pin a dusk program id")?;
-
-    let snapshot = Arc::new(Mutex::new(Snapshot::default()));
 
     // A profile that signs needs a key; one that does not must never have
     // one. The sentinel is the whole reason this is a per-profile decision
@@ -123,9 +132,60 @@ fn main() -> Result<(), Box<dyn Error>> {
         Err(error) => return Err(Box::new(error)),
     };
 
+    if env::args().any(|arg| arg == "--prepare-devnet-wallet") {
+        if config.mode != Mode::Live {
+            return Err("wallet preparation requires live devnet mode".into());
+        }
+        let client = RpcClient::new(env::var("SOLANA_RPC_HTTP_URL")?, Duration::from_secs(20));
+        let priority_markets = std::collections::BTreeSet::new();
+        let context = workers::WorkerContext {
+            client: &client,
+            contract: contract.as_ref().ok_or("instruction contract required")?,
+            layout: layout.as_ref().ok_or("layout required")?,
+            resolver: resolver.as_ref().ok_or("resolver required")?,
+            signer: executor.as_deref().ok_or("wallet required")?,
+            program_id: decode_program_id(&dusk_program_id)?,
+            dry_run: false,
+            max_sends: 1,
+            priority_markets: &priority_markets,
+        };
+        let signature =
+            runtime::devnet::prepare_wallet(&client, &context, config.minimum_lamports)?;
+        println!(
+            "devnet wallet preparation finalized_signature={signature:?}; check journal for pending submissions or existing accounts"
+        );
+        return Ok(());
+    }
+
+    // Configuration is known before polling starts. A slow first RPC scan
+    // must not make a configured live signer look like a missing shadow key.
+    let endpoint = env::var("SOLANA_RPC_HTTP_URL")
+        .ok()
+        .filter(|value| !value.trim().is_empty());
+    let execution_configured =
+        executor.is_some() && contract.is_some() && layout.is_some() && resolver.is_some();
+    let execution_configuration_error = if config.profile == "sentinel" || execution_configured {
+        None
+    } else if config.mode == Mode::Shadow && executor.is_none() {
+        Some("shadow execution requires a valid KEEPER_SHADOW_PUBLIC_KEY".into())
+    } else {
+        Some(
+            "execution requires a signer and pinned instruction, layout, and resolution artifacts"
+                .into(),
+        )
+    };
+    let snapshot = Arc::new(Mutex::new(Snapshot {
+        execution_configured,
+        execution_configuration_error,
+        error: endpoint
+            .is_none()
+            .then(|| "SOLANA_RPC_HTTP_URL is not configured".into()),
+        ..Snapshot::default()
+    }));
+
     // Discovery runs even in shadow mode: reading is how the sentinel earns
     // trust before any profile is given a key.
-    if let Ok(endpoint) = env::var("SOLANA_RPC_HTTP_URL") {
+    if let Some(endpoint) = endpoint {
         let interval = env::var("DISCOVERY_INTERVAL_MS")
             .ok()
             .and_then(|value| value.parse().ok())
@@ -190,7 +250,6 @@ fn main() -> Result<(), Box<dyn Error>> {
                     resolver.as_ref(),
                 ) {
                     if let Ok(mut current) = shared.lock() {
-                        current.execution_configured = true;
                         current.execution_passes += 1;
                     }
                     run_execution_pass(
@@ -207,6 +266,10 @@ fn main() -> Result<(), Box<dyn Error>> {
                         dry_run,
                         &shared,
                     );
+                }
+
+                if let Ok(mut current) = shared.lock() {
+                    current.first_pass_complete = true;
                 }
 
                 if env::args().any(|a| a == "--once") {
@@ -283,6 +346,14 @@ fn run_execution_pass(
     shared: &Arc<Mutex<Snapshot>>,
 ) {
     if !dry_run {
+        if runtime::devnet::enabled()
+            && let Err(error) = runtime::devnet::verify(client, false)
+        {
+            if let Ok(mut current) = shared.lock() {
+                current.last_execution_error = Some(error);
+            }
+            return;
+        }
         match client.lamports(&signer.public_key_base58()) {
             Ok(balance) if balance < minimum_lamports => {
                 if let Ok(mut current) = shared.lock() {

@@ -1,7 +1,7 @@
 {
   "$schema": "./schemas/account-layout.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "devnet-2026-11-06-operators",
+  "protocolRevision": "devnet-2026-11-08-hlp-deposit",
   "programId": "B315E6hHTgDjHgCCPungLop2mkgv9SHkcBc9ZzALNxNY",
   "idlSha256": "9080b70c97dd48c937400bdcf554758bafc1faa1ef48fece619f52c299ab6386",
   "accounts": [

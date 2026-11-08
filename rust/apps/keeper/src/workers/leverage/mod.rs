@@ -5,7 +5,7 @@ use crate::{
     liquidation::{LiquidationJob, PositionKind, policy::LiquidationMode},
     runtime::execution::{AttemptReport, ExecutionError},
 };
-use keeper_core::OutcomeStatus;
+use keeper_core::{OutcomeStatus, ReasonCode};
 
 pub fn run(context: &WorkerContext<'_>) -> Result<Vec<AttemptReport>, ExecutionError> {
     let mut reports = LiquidationJob {
@@ -23,7 +23,14 @@ pub fn run(context: &WorkerContext<'_>) -> Result<Vec<AttemptReport>, ExecutionE
     let remaining = context.max_sends.saturating_sub(
         reports
             .iter()
-            .filter(|report| report.status == OutcomeStatus::Executed)
+            // A journaled send may still await finalization. It consumes the
+            // same pass budget as an executed or uncertain attempt.
+            .filter(|report| {
+                matches!(
+                    report.status,
+                    OutcomeStatus::Executed | OutcomeStatus::RetryableFailure
+                ) || report.reason == ReasonCode::StateChanged
+            })
             .count(),
     );
     if remaining > 0 {

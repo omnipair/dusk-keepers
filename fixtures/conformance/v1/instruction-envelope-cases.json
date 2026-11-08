@@ -9,7 +9,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-limit_entry_execute",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "limit_entry_execute",
           "jobKind": "limit_entry",
           "market": "58y6Xs6Ujqh68vFWrAXsPUcBv1YMqWJWgZsHT75aL24Y",
@@ -154,7 +154,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "b14a915dfb13ada2439cba5f7caf704fa41a1295b315e2af5dcb1f71537d1cbc"
+        "paritySha256": "14d37063e538ebb2bf8fb30fcb815471f58158dc6ff7a2fcb0c278a164cc7d5e"
       }
     },
     {
@@ -164,7 +164,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-hlp_order_execute",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "hlp_order_execute",
           "jobKind": "hlp_order",
           "market": "3hBMFrEN3Uo42vpS9JM5Zs4Cx92PTPZWiitHTQpEoGZ2",
@@ -327,7 +327,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "9799f3b87ad597153945192401d21e806d2653c487e10a191448c33dd30dd66e"
+        "paritySha256": "da64a6c829e05439c13ed5dc45bc3375b3feed88250f6c90557d3375c8316c36"
       }
     },
     {
@@ -337,7 +337,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-flash_liquidation_settle",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "flash_liquidation_settle",
           "jobKind": "lending_liquidation_bid",
           "market": "AEtZVM5c55RkzrqkuTBaHJsbZNkkTuN3ygAiJry8HyQf",
@@ -470,7 +470,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "0a0118cde43253bcfc9ebb4c84bc4e73e9025dc56f08a22b8c8078035e6c983e"
+        "paritySha256": "175f2ba7dd36be25f1315e0c3dd7f5637792194fcd09c23272a807d6e0a4f855"
       }
     },
     {
@@ -480,7 +480,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-flash_liquidation_preview",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "flash_liquidation_preview",
           "jobKind": "lending_liquidation_bid",
           "market": "HzUWCedXS7JYGNxQmLS5xkApxvQLXRQDgQLw1okk4wSF",
@@ -517,7 +517,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "b9a4fcea1a8bc5c26b8b68416f6695e6a8376f8ce8c9bd5f50339f2197f36ce3"
+        "paritySha256": "a274f4dafeb16db530e55e18310694b44b7c4410456b04d82cfe5ff3ef64ac30"
       }
     },
     {
@@ -527,7 +527,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-emergency_liquidation_preview",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "emergency_liquidation_preview",
           "jobKind": "lending_liquidation_settle",
           "market": "4r9ENwj9SAvNQCfXmxswGm4RyQdGmm3zUcHUyiCPCTqd",
@@ -570,7 +570,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "c8985057169e44f1fe2b98b5deded0af89c41b87911f5a241eb083cd7e990a45"
+        "paritySha256": "ad035c5da7fe173987767d39e76de1aeba3d3c45cfad37425379d5f0a72674ab"
       }
     },
     {
@@ -580,7 +580,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_health_preview",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "lending_health_preview",
           "jobKind": "lending_liquidation_bid",
           "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
@@ -617,7 +617,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "6d574866cab0b8d292911e9a4f38e9f9fad45da624006ed1874448c1e6c7fe25"
+        "paritySha256": "5246e0dfcf6e97854e93260974b8d6c256d8524ff72546f73950425b7f932ecf"
       }
     },
     {
@@ -627,7 +627,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_liquidation_bid",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "lending_liquidation_bid",
           "jobKind": "lending_liquidation_bid",
           "market": "FyVqcLFgZPoQ827oQwvnvNLnggyWNkgZdMsrPVx5xERy",
@@ -766,7 +766,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "5be65a05d48a162c548bed5333778a23b9187584e9222d3d14926c1e8d73e4ee"
+        "paritySha256": "20f44449dede8d344a9437b4256fa1942a3b6f1848a70799a64af9bfe7bd3ed6"
       }
     },
     {
@@ -776,7 +776,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_liquidation_floor_settle",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "lending_liquidation_floor_settle",
           "jobKind": "lending_liquidation_settle",
           "market": "28NFhr44HWvSdKUAi5g7PV6VapbJuqSEUJ1Zf2NK5sEe",
@@ -903,7 +903,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "e81510edb34eefe748f5a9ce80f3b3044a18b1d5dfe79602a794a0f0a333a0aa"
+        "paritySha256": "bbf398ba1d20ebb37749d46c40e56a0b212241a08bc31058bfef312c6cdf0c92"
       }
     },
     {
@@ -913,7 +913,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-leverage_liquidation",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "leverage_liquidation",
           "jobKind": "leverage_liquidation",
           "market": "ETPTSwgSN95hbe3tWqw96UqbpkSZ9v2XWvfyL7vRoPTZ",
@@ -950,7 +950,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "b3a03a7e0a1fe93feb7bf494604491ee61186a310359bf76823a167c86715df0"
+        "paritySha256": "15820f8513c0c21e5d151a05281c94b9c5af1697e09052a396765231940bf1ba"
       }
     },
     {
@@ -960,7 +960,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-hlp_flash_preview",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "hlp_flash_preview",
           "jobKind": "hlp_recovery",
           "market": "Dmq8tHo5XeGUpMWCqjgq157n2TJu2UsdYNkxmuvaALrH",
@@ -1003,7 +1003,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "cf80edf1eaca76e40ed472d3c9471f310d359618cbada0d826b6855f8818a48f"
+        "paritySha256": "746cfe67cf654cf47411117ce1873ccee921059de58df68e37efb6ca4607064d"
       }
     },
     {
@@ -1013,7 +1013,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-hlp_flash_begin",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "hlp_flash_begin",
           "jobKind": "hlp_recovery",
           "market": "Fy3cw3L3Ky8nmJjmNkvtRSENGLzdC82huiAk98NDYdsg",
@@ -1140,7 +1140,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "10aeb171208f92dfd7ea343087c0810ee52320e550a5a4eda59ac794f55ddd19"
+        "paritySha256": "738aa32ae5a4393858af1552cb46bccffe66b123fbd7c6c5f2fe5148ee58c8bd"
       }
     },
     {
@@ -1150,7 +1150,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-hlp_flash_settle",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "hlp_flash_settle",
           "jobKind": "hlp_recovery",
           "market": "AK475cMfSrxQtCakSccwYGyRJJN3rhYALhuf9eVhcJuJ",
@@ -1271,7 +1271,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "de91f5b80b85968bada12aae3999e765216044f4a7fe29d63440b9d8fd8e6e17"
+        "paritySha256": "9963862c235c3793122325ad9d9550d429caefe5d30116e221233cc99da18e33"
       }
     },
     {
@@ -1281,7 +1281,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-hlp_insolvent_close",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "hlp_insolvent_close",
           "jobKind": "hlp_recovery",
           "market": "J6zHYQRbdceBmWLXFeRvJJ1jf4mDGhXFgAKTjqg8yvgr",
@@ -1378,7 +1378,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "c3d5e07bae7bb365bf5c9b10aad65783c0e1db41d4ee8199e0ea47f1ed913e6f"
+        "paritySha256": "3560a4143f4cac48228bae883d68c4645409b67a20f1454cf9e5195fb0e62521"
       }
     },
     {
@@ -1388,7 +1388,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-delegated_close_take_profit",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "delegated_close_take_profit",
           "jobKind": "take_profit",
           "market": "3JSi3jkznPd3X6fCfd62EceVZmTkatZnCsxvmJYTgiwh",
@@ -1795,7 +1795,7 @@
             "remainingAccounts": []
           }
         ],
-        "paritySha256": "af682fe20cf15583f17fa098cc252df95da93a8d4d8b8f9265a8500b1eea64f8"
+        "paritySha256": "77ac5ec3fce3573fce8178c53edf862c827557d383a6d96db43c1283e71b71c2"
       }
     },
     {
@@ -1805,7 +1805,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-delegated_close_stop_loss",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "delegated_close_stop_loss",
           "jobKind": "stop_loss",
           "market": "8PB15EEhUh5AQoMyQKorgGGNiNLYTHkW3NZQchDuRGLh",
@@ -2212,7 +2212,7 @@
             "remainingAccounts": []
           }
         ],
-        "paritySha256": "f27a06fa5cc270d31409f1f2bb336663e913d1ed8093540b16943ab1fa7b151b"
+        "paritySha256": "f3b6dde9ebbc977df97dc3f0d0c3c3451a25ad8ebd51d96227aa86752f251429"
       }
     },
     {
@@ -2222,7 +2222,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-protocol_revenue_auction_settle",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "protocol_revenue_auction_settle",
           "jobKind": "auction_bid",
           "market": "23uE62bbfpdBoJE1ByN1TiSkMEYsDkt9pDS2huKSmkXF",
@@ -2331,7 +2331,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "3e63f11e8b89036bad9c6b8608783098c64bcc18e3721b17dde500822dea2a6f"
+        "paritySha256": "8a3a7d84bae496f812355bdaa7a4f023bc4e361ec790e43cba44530b0663a038"
       }
     },
     {
@@ -2341,7 +2341,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-operator_revenue_archive_initialize",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "operator_revenue_archive_initialize",
           "jobKind": "lifecycle",
           "market": "8XKYnigkKRvtjugg6D1itqjsyHAnJU8wR7dbtN8JenA8",
@@ -2384,7 +2384,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "815433158ab3dd7cdb2150ebc5de24d5cded9e19179a7028cd87afe352ab8194"
+        "paritySha256": "f5b37643ad3141d60951812e4e38cb7ecc4cc5a9e986e2440e39eec374230a96"
       }
     },
     {
@@ -2394,7 +2394,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-operator_bundle_execute",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "operator_bundle_execute",
           "jobKind": "lifecycle",
           "market": "7N8j5Pcy4wMSM1BSopY9p9zAkG4aN6Ur7nvjVmpUgjCt",
@@ -2443,7 +2443,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "4e7335a708b721af8c8bb8a5df1b9bdbc9895a28852882d4dd5d9fa08cf8fd9b"
+        "paritySha256": "3bc46ba13d8abab31b75196372d8f3a15250b0c580f757b18bf21991c477e36f"
       }
     }
   ],
@@ -2493,7 +2493,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "6d574866cab0b8d292911e9a4f38e9f9fad45da624006ed1874448c1e6c7fe25"
+        "paritySha256": "5246e0dfcf6e97854e93260974b8d6c256d8524ff72546f73950425b7f932ecf"
       }
     },
     {
@@ -2504,7 +2504,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_health_preview",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "lending_health_preview",
           "jobKind": "take_profit",
           "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
@@ -2541,7 +2541,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "6d574866cab0b8d292911e9a4f38e9f9fad45da624006ed1874448c1e6c7fe25"
+        "paritySha256": "5246e0dfcf6e97854e93260974b8d6c256d8524ff72546f73950425b7f932ecf"
       }
     },
     {
@@ -2552,7 +2552,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_health_preview",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "lending_health_preview",
           "jobKind": "lending_liquidation_bid",
           "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
@@ -2589,7 +2589,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "6d574866cab0b8d292911e9a4f38e9f9fad45da624006ed1874448c1e6c7fe25"
+        "paritySha256": "5246e0dfcf6e97854e93260974b8d6c256d8524ff72546f73950425b7f932ecf"
       }
     },
     {
@@ -2600,7 +2600,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_health_preview",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "lending_health_preview",
           "jobKind": "lending_liquidation_bid",
           "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
@@ -2637,7 +2637,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "6d574866cab0b8d292911e9a4f38e9f9fad45da624006ed1874448c1e6c7fe25"
+        "paritySha256": "5246e0dfcf6e97854e93260974b8d6c256d8524ff72546f73950425b7f932ecf"
       }
     },
     {
@@ -2648,7 +2648,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_health_preview",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "lending_health_preview",
           "jobKind": "lending_liquidation_bid",
           "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
@@ -2685,7 +2685,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "6d574866cab0b8d292911e9a4f38e9f9fad45da624006ed1874448c1e6c7fe25"
+        "paritySha256": "5246e0dfcf6e97854e93260974b8d6c256d8524ff72546f73950425b7f932ecf"
       }
     },
     {
@@ -2696,7 +2696,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_health_preview",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "lending_health_preview",
           "jobKind": "lending_liquidation_bid",
           "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
@@ -2733,7 +2733,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "6d574866cab0b8d292911e9a4f38e9f9fad45da624006ed1874448c1e6c7fe25"
+        "paritySha256": "5246e0dfcf6e97854e93260974b8d6c256d8524ff72546f73950425b7f932ecf"
       }
     },
     {
@@ -2744,7 +2744,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-operator_revenue_archive_initialize",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "operator_revenue_archive_initialize",
           "jobKind": "lifecycle",
           "market": "8XKYnigkKRvtjugg6D1itqjsyHAnJU8wR7dbtN8JenA8",
@@ -2781,7 +2781,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "815433158ab3dd7cdb2150ebc5de24d5cded9e19179a7028cd87afe352ab8194"
+        "paritySha256": "f5b37643ad3141d60951812e4e38cb7ecc4cc5a9e986e2440e39eec374230a96"
       }
     },
     {
@@ -2792,7 +2792,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_health_preview",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "lending_health_preview",
           "jobKind": "lending_liquidation_bid",
           "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
@@ -2829,7 +2829,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "6d574866cab0b8d292911e9a4f38e9f9fad45da624006ed1874448c1e6c7fe25"
+        "paritySha256": "5246e0dfcf6e97854e93260974b8d6c256d8524ff72546f73950425b7f932ecf"
       }
     },
     {
@@ -2840,7 +2840,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_health_preview",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "lending_health_preview",
           "jobKind": "lending_liquidation_bid",
           "market": "5UDPBJjm1FPLbb51VS3BhfXVq5NCRBsEtR4KGvwyQpUL",
@@ -2877,7 +2877,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "6d574866cab0b8d292911e9a4f38e9f9fad45da624006ed1874448c1e6c7fe25"
+        "paritySha256": "5246e0dfcf6e97854e93260974b8d6c256d8524ff72546f73950425b7f932ecf"
       }
     },
     {
@@ -2888,7 +2888,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-lending_liquidation_bid",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "lending_liquidation_bid",
           "jobKind": "lending_liquidation_bid",
           "market": "FyVqcLFgZPoQ827oQwvnvNLnggyWNkgZdMsrPVx5xERy",
@@ -3027,7 +3027,7 @@
           "remainingAccounts": []
         },
         "cpiHooks": [],
-        "paritySha256": "5be65a05d48a162c548bed5333778a23b9187584e9222d3d14926c1e8d73e4ee"
+        "paritySha256": "20f44449dede8d344a9437b4256fa1942a3b6f1848a70799a64af9bfe7bd3ed6"
       }
     },
     {
@@ -3038,7 +3038,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-delegated_close_take_profit",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "delegated_close_take_profit",
           "jobKind": "take_profit",
           "market": "3JSi3jkznPd3X6fCfd62EceVZmTkatZnCsxvmJYTgiwh",
@@ -3439,7 +3439,7 @@
             "remainingAccounts": []
           }
         ],
-        "paritySha256": "af682fe20cf15583f17fa098cc252df95da93a8d4d8b8f9265a8500b1eea64f8"
+        "paritySha256": "77ac5ec3fce3573fce8178c53edf862c827557d383a6d96db43c1283e71b71c2"
       }
     },
     {
@@ -3450,7 +3450,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-delegated_close_take_profit",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "delegated_close_take_profit",
           "jobKind": "take_profit",
           "market": "3JSi3jkznPd3X6fCfd62EceVZmTkatZnCsxvmJYTgiwh",
@@ -3857,7 +3857,7 @@
             "remainingAccounts": []
           }
         ],
-        "paritySha256": "af682fe20cf15583f17fa098cc252df95da93a8d4d8b8f9265a8500b1eea64f8"
+        "paritySha256": "77ac5ec3fce3573fce8178c53edf862c827557d383a6d96db43c1283e71b71c2"
       }
     },
     {
@@ -3868,7 +3868,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-delegated_close_stop_loss",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "delegated_close_stop_loss",
           "jobKind": "stop_loss",
           "market": "8PB15EEhUh5AQoMyQKorgGGNiNLYTHkW3NZQchDuRGLh",
@@ -4275,7 +4275,7 @@
             "remainingAccounts": []
           }
         ],
-        "paritySha256": "f27a06fa5cc270d31409f1f2bb336663e913d1ed8093540b16943ab1fa7b151b"
+        "paritySha256": "f3b6dde9ebbc977df97dc3f0d0c3c3451a25ad8ebd51d96227aa86752f251429"
       }
     },
     {
@@ -4286,7 +4286,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-delegated_close_stop_loss",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "delegated_close_stop_loss",
           "jobKind": "stop_loss",
           "market": "8PB15EEhUh5AQoMyQKorgGGNiNLYTHkW3NZQchDuRGLh",
@@ -4693,7 +4693,7 @@
             "remainingAccounts": []
           }
         ],
-        "paritySha256": "f27a06fa5cc270d31409f1f2bb336663e913d1ed8093540b16943ab1fa7b151b"
+        "paritySha256": "f3b6dde9ebbc977df97dc3f0d0c3c3451a25ad8ebd51d96227aa86752f251429"
       }
     },
     {
@@ -4704,7 +4704,7 @@
         "intent": {
           "schemaVersion": 1,
           "intentId": "intent-operator_bundle_execute",
-          "protocolRevision": "devnet-2026-11-06-operators",
+          "protocolRevision": "devnet-2026-11-08-hlp-deposit",
           "action": "operator_bundle_execute",
           "jobKind": "lifecycle",
           "market": "7N8j5Pcy4wMSM1BSopY9p9zAkG4aN6Ur7nvjVmpUgjCt",

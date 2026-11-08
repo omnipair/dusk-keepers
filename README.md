@@ -3,9 +3,9 @@
 Keeper runtimes for Dusk, pinned to the observed Solana devnet deployment and
 verified with shared conformance fixtures in Rust and TypeScript.
 
-The current capture is `devnet-2026-11-06-operators`. The compatible Dusk upgrade at finalized slot 519241008 was recaptured from chain; the delegate and both IDLs are unchanged. The lock pins source
-`fda084dce13fdb99da0731d8c74861eefd7432fc`. Liquidation and hLP bank fixtures were regenerated from that source and tested against the current captured binary.
-The SDK artifact is the registry-published `@omnipair/dusk-sdk@2.18.0-next.20261106`;
+The current capture is `devnet-2026-11-08-hlp-deposit`. The compatible Dusk upgrade at finalized slot 519909294 was recaptured from chain; the delegate and both IDLs are unchanged. The lock pins source
+`84c2a6997c795fb062c9bafb77680f8271a6f86d`. Liquidation and hLP bank fixtures were regenerated from that source and tested against the current captured binary.
+The SDK artifact is the registry-published `@omnipair/dusk-sdk@2.18.2-next.20261108`;
 it records provenance and is not a bundled runtime dependency. The active ABI uses
 srLP and operator/optional-manager authority, with no core LP voting or separate
 insurance fund.
@@ -15,8 +15,10 @@ and shadow reference checks. Active oracle policies add the required read-only
 reports to liquidation, hLP and order instructions and fresh execution snapshots.
 
 The lock remains **captured** and defaults to **shadow mode**. Local bank tests
-execute the downloaded devnet binaries. Live signing still requires the separate
-frozen-lock release gate. See [the devnet capture record](docs/devnet-capture.md)
+execute the downloaded devnet binaries. Live signing normally requires the separate
+frozen-lock release gate. An explicitly enabled native devnet test verifies the
+network and captured deployment, discovers all active supported markets and retains
+durable journaling and transaction limits. See [the devnet capture record](docs/devnet-capture.md)
 and [the flash migration runbook](docs/flash-liquidation-migration.md).
 
 ## What is here
@@ -97,10 +99,45 @@ node scripts/generate-account-layout.mjs --write
 ## Safety state
 
 `protocol.lock.json` is `captured`: all program, IDL, SDK, and compatibility
-hashes are real and validated, while both adapters still reject live mode. Move
+hashes are real and validated. Normal live startup still rejects this lock; the
+native runtime has the explicit devnet-only test exception described below. Move
 it to `frozen` only through
 [`docs/runbooks/protocol-upgrade.md`](docs/runbooks/protocol-upgrade.md) after the
 full Surfpool and cross-runtime gates pass.
+
+For authorized local devnet testing, set `KEEPER_MODE=live`,
+`KEEPER_ALLOW_CAPTURED_DEVNET=1` and `KEEPER_MAX_SENDS_PER_PASS=1`.
+Execution covers all active supported markets; `KEEPER_DEVNET_MARKET` is no longer
+used. Leave the optional `KEEPER_ORDER_MARKET` unset to cover orders in all markets.
+Provide `SOLANA_RPC_HTTP_URL`, `DATABASE_URL`,
+`KEEPER_SIGNER_KEY_PATH` and the profile's spending bounds. Auction testing also
+requires `KEEPER_AUCTION_MAX_PAYMENT` in raw payment-token units. Startup hashes
+the deployed programs and IDL accounts against the capture, and every pass and
+broadcast rechecks the genesis and upgrade metadata. Deployment drift stops
+execution until it is reviewed and recaptured. The sentinel remains wallet-free.
+
+For one-off wallet preparation, additionally set `KEEPER_PREPARE_MARKET` to the
+market whose token accounts you need. `dusk-keeper --prepare-devnet-wallet` creates missing
+standard SPL base/quote token accounts through simulation, the durable journal
+and the configured signer. It preserves the SOL reserve; the journal records
+pending and finalized outcomes. This is wallet preparation, not a liquidation or
+order-execution test. The lock stays `captured`, and this exception provides no
+release authorization for other networks.
+
+Set `KEEPER_LOG_POSITIONS=1` for detailed lending and leverage terminal output on
+every pass. It prints position/owner/market addresses, debt and collateral in
+their token units, raw debt, debt shares, mint addresses, snapshot/preview slots,
+LTV, maintenance, health factor and the execution decision. Debt and collateral
+value come from the program's health preview; collateral value is denominated
+in the debt token, not USD. The displayed health factor is
+`collateral_value × (1 − maintenance_bps / 10000) / debt`; liquidation is eligible
+at or below one. Displayed ratios are truncated, while eligibility uses the exact
+integer check. Debt-free positions have no health ratio.
+
+Healthy positions remain visible. Supported positions evaluated after the pass's transaction budget is consumed
+receive health previews marked `MONITOR ONLY`; diagnostics never select a route
+or submit a transaction. Missing/unsupported markets and failed previews report
+why health is unavailable. Logging does not change eligibility or execution limits.
 
 ## Mutable transfer-fee notice handling
 
