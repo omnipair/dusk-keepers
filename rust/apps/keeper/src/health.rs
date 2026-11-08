@@ -15,12 +15,15 @@ pub(crate) struct Snapshot {
     pub fee_notice_error: Option<String>,
     pub error: Option<String>,
     pub passes: u64,
+    /// Readiness waits for discovery, fee monitoring, and execution checks.
+    pub first_pass_complete: bool,
     /// Execution counters. Sent is deliberately separate from evaluated: on a
     /// healthy market the first climbs and the second does not, and an
     /// operator needs to see that the keeper is working rather than idle.
     pub evaluated: u64,
     pub execution_passes: u64,
     pub execution_configured: bool,
+    pub execution_configuration_error: Option<String>,
     pub sent: u64,
     pub last_signature: Option<String>,
     pub last_execution_error: Option<String>,
@@ -87,8 +90,8 @@ fn respond(
         optional_json(snapshot.last_skip_detail.as_deref())
     );
     let observed = format!(
-        "{observed},\"executionConfigured\":{},\"executionPasses\":{}",
-        snapshot.execution_configured, snapshot.execution_passes
+        "{observed},\"executionConfigured\":{},\"executionPasses\":{},\"firstPassComplete\":{}",
+        snapshot.execution_configured, snapshot.execution_passes, snapshot.first_pass_complete
     );
     let reasons = serde_json::to_string(&snapshot.last_reasons).unwrap_or_else(|_| "{}".to_owned());
     let observed = format!("{observed},\"lastReasons\":{reasons}");
@@ -113,10 +116,10 @@ fn respond(
                 .as_deref()
                 .or(snapshot.fee_notice_error.as_deref())
                 .or(snapshot.last_execution_error.as_deref())
+                .or(snapshot.execution_configuration_error.as_deref())
                 .or_else(|| {
-                    (profile != "sentinel" && !snapshot.execution_configured).then_some(
-                        "execution is not configured; shadow profiles require a public identity",
-                    )
+                    (profile != "sentinel" && !snapshot.execution_configured)
+                        .then_some("execution is not configured")
                 });
             match blocked {
                 Some(reason) => (
@@ -126,7 +129,7 @@ fn respond(
                         serde_json::Value::String(reason.to_owned())
                     ),
                 ),
-                None if snapshot.passes == 0 => (
+                None if !snapshot.first_pass_complete => (
                     "503 Service Unavailable",
                     format!(
                         "{{\"status\":\"starting\",\"profile\":\"{profile}\",\"protocolRevision\":\"{revision}\",{observed}}}"

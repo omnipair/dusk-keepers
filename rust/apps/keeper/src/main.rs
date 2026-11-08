@@ -76,8 +76,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         .and_then(|program| program.program_id.clone())
         .ok_or("protocol lock does not pin a dusk program id")?;
 
-    let snapshot = Arc::new(Mutex::new(Snapshot::default()));
-
     // A profile that signs needs a key; one that does not must never have
     // one. The sentinel is the whole reason this is a per-profile decision
     // rather than a global switch.
@@ -159,9 +157,35 @@ fn main() -> Result<(), Box<dyn Error>> {
         return Ok(());
     }
 
+    // Configuration is known before polling starts. A slow first RPC scan
+    // must not make a configured live signer look like a missing shadow key.
+    let endpoint = env::var("SOLANA_RPC_HTTP_URL")
+        .ok()
+        .filter(|value| !value.trim().is_empty());
+    let execution_configured =
+        executor.is_some() && contract.is_some() && layout.is_some() && resolver.is_some();
+    let execution_configuration_error = if config.profile == "sentinel" || execution_configured {
+        None
+    } else if config.mode == Mode::Shadow && executor.is_none() {
+        Some("shadow execution requires a valid KEEPER_SHADOW_PUBLIC_KEY".into())
+    } else {
+        Some(
+            "execution requires a signer and pinned instruction, layout, and resolution artifacts"
+                .into(),
+        )
+    };
+    let snapshot = Arc::new(Mutex::new(Snapshot {
+        execution_configured,
+        execution_configuration_error,
+        error: endpoint
+            .is_none()
+            .then(|| "SOLANA_RPC_HTTP_URL is not configured".into()),
+        ..Snapshot::default()
+    }));
+
     // Discovery runs even in shadow mode: reading is how the sentinel earns
     // trust before any profile is given a key.
-    if let Ok(endpoint) = env::var("SOLANA_RPC_HTTP_URL") {
+    if let Some(endpoint) = endpoint {
         let interval = env::var("DISCOVERY_INTERVAL_MS")
             .ok()
             .and_then(|value| value.parse().ok())
@@ -226,7 +250,6 @@ fn main() -> Result<(), Box<dyn Error>> {
                     resolver.as_ref(),
                 ) {
                     if let Ok(mut current) = shared.lock() {
-                        current.execution_configured = true;
                         current.execution_passes += 1;
                     }
                     run_execution_pass(
@@ -243,6 +266,10 @@ fn main() -> Result<(), Box<dyn Error>> {
                         dry_run,
                         &shared,
                     );
+                }
+
+                if let Ok(mut current) = shared.lock() {
+                    current.first_pass_complete = true;
                 }
 
                 if env::args().any(|a| a == "--once") {
