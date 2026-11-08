@@ -15,8 +15,10 @@ and shadow reference checks. Active oracle policies add the required read-only
 reports to liquidation, hLP and order instructions and fresh execution snapshots.
 
 The lock remains **captured** and defaults to **shadow mode**. Local bank tests
-execute the downloaded devnet binaries. Live signing still requires the separate
-frozen-lock release gate. See [the devnet capture record](docs/devnet-capture.md)
+execute the downloaded devnet binaries. Live signing normally requires the separate
+frozen-lock release gate. An explicitly enabled native devnet test verifies the
+network and captured deployment, restricts execution to one market and retains
+durable journaling and transaction limits. See [the devnet capture record](docs/devnet-capture.md)
 and [the flash migration runbook](docs/flash-liquidation-migration.md).
 
 ## What is here
@@ -97,10 +99,27 @@ node scripts/generate-account-layout.mjs --write
 ## Safety state
 
 `protocol.lock.json` is `captured`: all program, IDL, SDK, and compatibility
-hashes are real and validated, while both adapters still reject live mode. Move
+hashes are real and validated. Normal live startup still rejects this lock; the
+native runtime has the explicit devnet-only test exception described below. Move
 it to `frozen` only through
 [`docs/runbooks/protocol-upgrade.md`](docs/runbooks/protocol-upgrade.md) after the
 full Surfpool and cross-runtime gates pass.
+
+For authorized local devnet testing, set `KEEPER_MODE=live`,
+`KEEPER_ALLOW_CAPTURED_DEVNET=1`, `KEEPER_DEVNET_MARKET` to one market and
+`KEEPER_MAX_SENDS_PER_PASS=1`. Provide `SOLANA_RPC_HTTP_URL`, `DATABASE_URL`,
+`KEEPER_SIGNER_KEY_PATH` and the profile's spending bounds. Auction testing also
+requires `KEEPER_AUCTION_MAX_PAYMENT` in raw payment-token units. Startup hashes
+the deployed programs and IDL accounts against the capture, and every pass and
+broadcast rechecks the genesis and upgrade metadata. Deployment drift stops
+execution until it is reviewed and recaptured. The sentinel remains wallet-free.
+
+With the same environment, `dusk-keeper --prepare-devnet-wallet` creates missing
+standard SPL base/quote token accounts through simulation, the durable journal
+and the configured signer. It preserves the SOL reserve; the journal records
+pending and finalized outcomes. This is wallet preparation, not a liquidation or
+order-execution test. The lock stays `captured`, and this exception provides no
+release authorization for other networks.
 
 ## Mutable transfer-fee notice handling
 

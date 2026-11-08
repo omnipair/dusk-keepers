@@ -78,11 +78,12 @@ bank test verifies successful health preview and rejection of omitted, stale or
 incorrectly owned reports. Runtime execution snapshots include active feeds so
 report changes participate in revalidation before signing.
 
-This update prepares ABI compatibility and shadow testing. A funded devnet wallet,
-chosen test market, matching frontend cluster, explicit execution bounds and the
-separate frozen-lock release procedure are still required for a signed end-to-end
-test. It does not enable live mode or establish that the beta frontend currently
-uses this deployment.
+The native runtime supports an explicitly authorized local devnet test exception
+with `KEEPER_ALLOW_CAPTURED_DEVNET=1`; see the README for its required market,
+transaction limits and deployment checks. Default startup still requires the
+frozen-lock release procedure for live execution. A funded wallet, matching
+frontend cluster and eligible positions/orders remain necessary for execution
+tests. This capture does not establish which deployment the beta frontend uses.
 
 The fresh smoke market is `EdqUE8D7JuTrdSAy4kpynjvcaKugguuyjHzC6vFvw3HD`.
 Re-fetch its state and oracle policy before selecting it for a test; this address

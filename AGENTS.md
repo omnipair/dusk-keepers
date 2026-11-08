@@ -1,6 +1,7 @@
 # Keeper repository guardrails
 
 - `captured` protocol locks allow fixtures, shadow runtimes, and Surfpool work only. A live runtime must require `frozen`, verify every artifact/fingerprint, and pass the explicit live-release gate. Never weaken this check to unblock deployment.
+- User-authorized local devnet testing may explicitly opt in with `KEEPER_ALLOW_CAPTURED_DEVNET=1`: verify devnet genesis and exact captured deployment, scope execution to one market, retain signing limits and PostgreSQL journaling, and recheck deployment before submission. This exception never freezes a captured lock or authorizes another network.
 - JSON Schemas, protocol artifacts, and golden fixtures are the cross-language contract. Rust and TypeScript implementations stay native and must pass the same fixtures; do not share implementation source across languages.
 - Indexer data may discover candidates but can never authorize execution. Re-read every safety-critical account through direct RPC immediately before evaluation, simulation, and any re-sign.
 - Persist the work item, ordered attempt events, signing generation, and outcome in PostgreSQL. Acquire the distributed lease before signing. Live mode must pause when either store is unavailable; never fall back to process-local locking.

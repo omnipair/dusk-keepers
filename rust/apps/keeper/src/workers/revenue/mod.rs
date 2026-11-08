@@ -130,6 +130,7 @@ impl ArbitrageurJob<'_> {
         )?;
         Ok(accounts
             .into_iter()
+            .filter(|(address, _)| crate::runtime::devnet::market_allowed(address))
             .filter_map(|(address, data)| MarketAccounts::decode(self.layout, address, &data))
             .collect())
     }
@@ -352,6 +353,21 @@ impl ArbitrageurJob<'_> {
 
         let ceiling =
             (paid as u128).saturating_mul((10_000 + self.policy.slippage_bps) as u128) / 10_000;
+        if crate::runtime::devnet::enabled() {
+            let maximum = crate::liquidation::required_u64("KEEPER_AUCTION_MAX_PAYMENT")
+                .map_err(ExecutionError::Assembly)?;
+            if ceiling > u128::from(maximum) {
+                return Ok(AttemptReport {
+                    debt_mint: label,
+                    detail: Some("auction exceeds devnet payment cap".into()),
+                    position: market_key,
+                    race: None,
+                    reason: ReasonCode::BoundsNotMet,
+                    signature: None,
+                    status: OutcomeStatus::Skipped,
+                });
+            }
+        }
         let (sending, _) = self.settle_instruction(
             market,
             futarchy,

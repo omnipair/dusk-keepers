@@ -41,7 +41,18 @@ fn main() -> Result<(), Box<dyn Error>> {
     let lock = ProtocolLock::read(&config.protocol_lock)?;
 
     if config.mode == Mode::Live {
-        lock.assert_live_ready()?;
+        if runtime::devnet::enabled() {
+            if config.max_sends_per_pass != 1 {
+                return Err("devnet testing requires KEEPER_MAX_SENDS_PER_PASS=1".into());
+            }
+            let endpoint = env::var("SOLANA_RPC_HTTP_URL")?;
+            runtime::devnet::verify(&RpcClient::new(endpoint, Duration::from_secs(20)), true)?;
+            println!(
+                "verified explicit devnet test exception; frozen release gate remains required on other networks"
+            );
+        } else {
+            lock.assert_live_ready()?;
+        }
     }
 
     println!(
@@ -122,6 +133,31 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
         Err(error) => return Err(Box::new(error)),
     };
+
+    if env::args().any(|arg| arg == "--prepare-devnet-wallet") {
+        if config.mode != Mode::Live {
+            return Err("wallet preparation requires live devnet mode".into());
+        }
+        let client = RpcClient::new(env::var("SOLANA_RPC_HTTP_URL")?, Duration::from_secs(20));
+        let priority_markets = std::collections::BTreeSet::new();
+        let context = workers::WorkerContext {
+            client: &client,
+            contract: contract.as_ref().ok_or("instruction contract required")?,
+            layout: layout.as_ref().ok_or("layout required")?,
+            resolver: resolver.as_ref().ok_or("resolver required")?,
+            signer: executor.as_deref().ok_or("wallet required")?,
+            program_id: decode_program_id(&dusk_program_id)?,
+            dry_run: false,
+            max_sends: 1,
+            priority_markets: &priority_markets,
+        };
+        let signature =
+            runtime::devnet::prepare_wallet(&client, &context, config.minimum_lamports)?;
+        println!(
+            "devnet wallet preparation finalized_signature={signature:?}; check journal for pending submissions or existing accounts"
+        );
+        return Ok(());
+    }
 
     // Discovery runs even in shadow mode: reading is how the sentinel earns
     // trust before any profile is given a key.
@@ -283,6 +319,14 @@ fn run_execution_pass(
     shared: &Arc<Mutex<Snapshot>>,
 ) {
     if !dry_run {
+        if runtime::devnet::enabled()
+            && let Err(error) = runtime::devnet::verify(client, false)
+        {
+            if let Ok(mut current) = shared.lock() {
+                current.last_execution_error = Some(error);
+            }
+            return;
+        }
         match client.lamports(&signer.public_key_base58()) {
             Ok(balance) if balance < minimum_lamports => {
                 if let Ok(mut current) = shared.lock() {

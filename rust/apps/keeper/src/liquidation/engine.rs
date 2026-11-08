@@ -89,7 +89,8 @@ impl LiquidationJob<'_> {
                 .ok_or_else(|| {
                     ExecutionError::Assembly("position identity prefix is truncated".into())
                 })?;
-            if !active_markets.contains(&market) {
+            if !active_markets.contains(&market) || !crate::runtime::devnet::market_allowed(&market)
+            {
                 continue;
             }
             let sides = if kind == "LeveragePosition" {
