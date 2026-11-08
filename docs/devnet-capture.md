@@ -1,9 +1,9 @@
-# Devnet capture — 6 November 2026
+# Devnet capture — 8 November 2026
 
-The current revision is `devnet-2026-11-06-operators`, captured from the fresh
-Dusk and leverage-delegate deployment, updated for the compatible Dusk upgrade at finalized slot 519241008. Source
-`fda084dce13fdb99da0731d8c74861eefd7432fc` preserves the observed IDLs. Liquidation and hLP fixtures were regenerated from that exact source and execute the current captured binary. The SDK artifact is downloaded from npm as
-`@omnipair/dusk-sdk@2.18.0-next.20261106`; its integrity and SHA-256 are recorded
+The current revision is `devnet-2026-11-08-hlp-deposit`, captured from the fresh
+Dusk and leverage-delegate deployment, updated for the compatible Dusk upgrade at finalized slot 519909294. Source
+`84c2a6997c795fb062c9bafb77680f8271a6f86d` preserves the observed IDLs. Liquidation and hLP fixtures were regenerated from that exact source and execute the current captured binary. The SDK artifact is downloaded from npm as
+`@omnipair/dusk-sdk@2.18.2-next.20261108`; its SHA-256 is recorded
 in the protocol lock. Consumers install the published package normally.
 
 The capture reads the devnet genesis hash, upgradeable-loader Program and
@@ -17,10 +17,11 @@ addresses, upgrade slots, sizes and SHA-256 hashes. The validator cross-checks
 this evidence against the lock and artifacts offline. It does not prove the
 cluster has remained unchanged after capture. Matching IDLs and passing tests
 also do not constitute a reproducible-build attestation for the deployed bytes.
-The lock records the capture toolchain, including Surfpool 1.2.0. The original capture had sixteen
-native-plan RPC simulations pass on an isolated offline Surfpool with the exact
+The lock records the capture toolchain, including Surfpool 1.2.0. Sixteen
+native-plan RPC simulations passed on an isolated offline Surfpool with the exact
 captured binaries. The [recorded results](evidence/operator-surfpool-simulations.json)
-can be reproduced with an offline Surfpool on port 18899 and
+can be reproduced with an offline Surfpool on port 18899, using
+`--block-production-mode transaction` so wall-clock ticks do not overwrite fixture clocks, and
 `node --experimental-strip-types scripts/rehearse-surfpool.mjs`.
 This is simulation evidence, not the full signed E2E matrix
 required for a frozen live release.

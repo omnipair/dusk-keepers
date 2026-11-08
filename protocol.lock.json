@@ -1,21 +1,21 @@
 {
   "$schema": "./protocol/schemas/protocol-lock.schema.json",
   "schemaVersion": 1,
-  "revision": "devnet-2026-11-06-operators",
+  "revision": "devnet-2026-11-08-hlp-deposit",
   "status": "captured",
-  "generatedAt": "2026-11-06T08:47:23.016Z",
+  "generatedAt": "2026-11-08T11:56:29.919Z",
   "source": {
     "repository": "https://github.com/omnipair/dusk",
-    "branch": "fix/interest-fee-checks",
-    "gitCommit": "fda084dce13fdb99da0731d8c74861eefd7432fc",
-    "worktreeFingerprintSha256": "7bd480ce20367e2e10d76e8b6b0916064df336b73686bc5e93ea051dd382b2ea"
+    "branch": "(detached)",
+    "gitCommit": "84c2a6997c795fb062c9bafb77680f8271a6f86d",
+    "worktreeFingerprintSha256": "980dd8578507fb5efe88ec971cd0c8ee781ad2e3029ebf234783b4c7a23af218"
   },
   "toolchain": {
     "anchor": "anchor-cli 0.31.1",
-    "rust": "rustc 1.97.1 (8bab26f4f 2026-07-14)",
-    "solana": "solana-cli 4.1.0-rc.1 (src:5efbb999; feat:c763ae0a, client:Agave)",
+    "rust": "rustc 1.95.0 (59807616e 2026-04-14)",
+    "solana": "solana-cli 3.1.15 (src:40a31afe; feat:687058115, client:Agave)",
     "surfpool": "surfpool 1.2.0",
-    "node": "v24.9.0"
+    "node": "v24.22.2"
   },
   "programs": [
     {
@@ -23,7 +23,7 @@
       "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
       "binary": {
         "path": "artifacts/dusk.so",
-        "sha256": "c6df2029bc428a13697fbc7260e125d8d53cdc623a63cd8ba122e6db5fb5f276"
+        "sha256": "fa19c1ff8677e3ac9f798acf8f88948ee3803a886edb25c3d779c777984cb3a6"
       },
       "idl": {
         "path": "artifacts/dusk.json",
@@ -45,7 +45,7 @@
   ],
   "sdk": {
     "path": "artifacts/dusk-sdk.tgz",
-    "sha256": "f78066543b0605720115c04a0b9c5b54f383e953944b84476a3fa3127194caff"
+    "sha256": "9e73a1f24c9f95276d0120e0923ddc073c26d2fa8919f1c23975eabc29c8b8e2"
   },
   "compatibility": {
     "accountLayoutFingerprintSha256": "f9e3b5fe41ce5d5b1eb44b0660c64ee62d9a538c1507336aa6e3646d9ad1cb60",
