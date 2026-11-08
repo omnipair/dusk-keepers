@@ -20,10 +20,53 @@ pub(crate) fn post_bytes(value: &serde_json::Value, index: usize) -> Result<Opti
     if a["data"][1] != "base64" {
         return Err("post-state encoding".into());
     }
+    // RPC simulation can return a reclaimed System account rather than null.
+    // Only the complete closed-account shape is equivalent to absence.
+    if a["lamports"].as_u64() == Some(0) {
+        if a["owner"] == "11111111111111111111111111111111"
+            && a["executable"] == false
+            && a["data"][0] == ""
+        {
+            return Ok(None);
+        }
+        return Err("invalid closed post-state".into());
+    }
     Ok(Some(
         crate::runtime::rpc::decode_base64(a["data"][0].as_str().ok_or("post-state data")?)
             .ok_or("post-state base64")?,
     ))
+}
+
+#[cfg(test)]
+mod post_state_tests {
+    use super::*;
+    use serde_json::json;
+    #[test]
+    fn accepts_null_and_reclaimed_system_account_but_not_invalid_closures() {
+        let closed = json!({"owner":"11111111111111111111111111111111", "executable":false, "lamports":0,"data":["","base64"]});
+        for account in [serde_json::Value::Null, closed.clone()] {
+            assert_eq!(
+                post_bytes(&json!({"value":{"accounts":[account]}}), 0).unwrap(),
+                None
+            );
+        }
+        for (field, value) in [
+            ("owner", json!("wrong")),
+            ("executable", json!(true)),
+            ("data", json!(["AQ==", "base64"])),
+        ] {
+            let mut account = closed.clone();
+            account[field] = value;
+            assert!(post_bytes(&json!({"value":{"accounts":[account]}}), 0).is_err());
+        }
+        let mut funded = closed;
+        funded["lamports"] = 1.into();
+        assert_eq!(
+            post_bytes(&json!({"value":{"accounts":[funded]}}), 0).unwrap(),
+            Some(vec![])
+        );
+        assert!(post_bytes(&json!({"value":{"accounts":[]}}), 0).is_err());
+    }
 }
 pub(crate) fn state_hash(s: &Snapshot, epoch: u64) -> Result<String> {
     let mut accounts = s.accounts.clone();

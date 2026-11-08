@@ -120,6 +120,8 @@ impl LiquidationJob<'_> {
                             },
                             reason: if signature.is_some() {
                                 ReasonCode::Confirmed
+                            } else if !self.dry_run && counts_toward_send_limit(&detail) {
+                                ReasonCode::StateChanged
                             } else {
                                 ReasonCode::BoundsNotMet
                             },

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
-import { execFileSync, spawn } from "node:child_process";
+import { spawn } from "node:child_process";
 import { createServer } from "node:http";
 import bs58 from "bs58";
 import { createHash } from "node:crypto";
@@ -21,6 +21,7 @@ import {
   createAssociatedTokenAccountIdempotentInstruction,
 } from "@solana/spl-token";
 import { bank, result } from "./helpers/liquidation-bank.ts";
+import { nativePlan } from "./helpers/native-planner.ts";
 
 const dusk = JSON.parse(readFileSync("artifacts/dusk.json", "utf8"));
 const delegate = JSON.parse(
@@ -129,13 +130,7 @@ function plan(
     executor: executor.toBase58(),
     snapshot: snapshot(svm, [...Object.keys(fixture.bank), order.toBase58()]),
   };
-  const call = () =>
-    JSON.parse(
-      execFileSync("target/debug/dusk-keeper", ["--order-plan"], {
-        input: JSON.stringify(input),
-        encoding: "utf8",
-      }),
-    );
+  const call = () => nativePlan(input, "--order-plan");
   let value = call();
   input.snapshot = snapshot(svm, [
     ...Object.keys(input.snapshot.accounts),

@@ -24,9 +24,13 @@ use dusk_adapter::{
 use keeper_core::{OutcomeStatus, ReasonCode};
 
 use crate::{
-    liquidation::plan::token_amount,
+    liquidation::{
+        plan::{Snapshot, address, key, token_amount},
+        simulation, state_hash,
+    },
     runtime::accounts::{AccountAssembler, MarketAccounts, associated_token_account, decode_key},
     runtime::execution::{AttemptReport, ExecutionError, classify_simulation_failure},
+    runtime::flash_journal::{Journal, recover_pending},
     runtime::rpc::{RpcClient, account_discriminator},
     runtime::signer::TransactionSigner,
     runtime::transaction::{Instruction, base64, compile_message, serialize_transaction},
@@ -248,8 +252,8 @@ impl ArbitrageurJob<'_> {
         let blockhash = self.client.latest_blockhash()?;
         let message = compile_message(self.signer.public_key(), &[instruction], blockhash)
             .map_err(|error| ExecutionError::Assembly(error.to_string()))?;
-        let signature = self.signer.sign(&message);
-        Ok(base64(&serialize_transaction(&[signature], &message)))
+        // Price measurement never signs. The durable journal owns signing.
+        Ok(base64(&serialize_transaction(&[[0; 64]], &message)))
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -356,17 +360,106 @@ impl ArbitrageurJob<'_> {
             sold_is_base,
             u64::try_from(ceiling).unwrap_or(u64::MAX),
         )?;
-        let encoded = self.encode(sending)?;
-
-        match self.client.send_transaction(&encoded) {
+        let submitted = (|| -> Result<Option<String>, String> {
+            let mut keys = sending
+                .accounts
+                .iter()
+                .map(|account| account.pubkey)
+                .collect::<Vec<_>>();
+            keys.sort();
+            keys.dedup();
+            if let Ok(table) = env::var("KEEPER_LIQUIDATION_LOOKUP_TABLE") {
+                keys.push(key(&table)?);
+                keys.sort();
+                keys.dedup();
+            }
+            let snapshot = Snapshot::fetch(self.client, &keys, 0).map_err(|e| e.to_string())?;
+            let plan = vec![sending];
+            let simulated = simulation::simulate_for(
+                self.client,
+                self.signer.public_key(),
+                &snapshot,
+                &plan,
+                &[],
+            )?;
+            if !simulated["value"]["err"].is_null() {
+                return Err("bounded auction simulation rejected".into());
+            }
+            let fresh =
+                Snapshot::fetch(self.client, &keys, snapshot.slot).map_err(|e| e.to_string())?;
+            let fingerprint = state_hash(&fresh, 0)?;
+            if fingerprint != state_hash(&snapshot, 0)? {
+                return Err("auction state changed; requote".into());
+            }
+            let checked = simulation::simulate_for(
+                self.client,
+                self.signer.public_key(),
+                &fresh,
+                &plan,
+                &[],
+            )?;
+            if !checked["value"]["err"].is_null() {
+                return Err("auction pre-submit simulation rejected".into());
+            }
+            let block: serde_json::Value = self
+                .client
+                .call(
+                    "getLatestBlockhash",
+                    serde_json::json!([{"commitment":"confirmed","minContextSlot":fresh.slot}]),
+                )
+                .map_err(|e| e.to_string())?;
+            let hash = block["value"]["blockhash"]
+                .as_str()
+                .ok_or("blockhash missing")?;
+            let height = block["value"]["lastValidBlockHeight"]
+                .as_u64()
+                .ok_or("block height missing")?;
+            let message = simulation::compile_message_for(
+                self.signer.public_key(),
+                &fresh,
+                &plan,
+                key(hash)?,
+            )?;
+            if serialize_transaction(&[[0; 64]], &message).len() > 1232 {
+                return Err("auction transaction exceeds packet limit".into());
+            }
+            let mut journal = Journal::connect(
+                &env::var("DATABASE_URL").map_err(|_| "DATABASE_URL is required before signing")?,
+            )?;
+            journal.submit(
+                self.client,
+                self.signer,
+                &self.contract.protocol_revision,
+                &address(market.address),
+                u8::from(!sold_is_base),
+                &address(market.address),
+                &format!("auction:{label}"),
+                fresh.slot,
+                &fingerprint,
+                &message,
+                hash,
+                height,
+            )
+        })();
+        match submitted {
             Ok(signature) => Ok(AttemptReport {
                 debt_mint: label,
-                detail: Some(format!("settled, paying at most {ceiling}")),
+                detail: Some(format!(
+                    "auction journaled, paying at most {ceiling}; awaiting finalized reconciliation"
+                )),
                 position: market_key,
                 race: None,
-                reason: ReasonCode::Confirmed,
-                signature: Some(signature),
-                status: OutcomeStatus::Executed,
+                reason: if signature.is_some() {
+                    ReasonCode::Confirmed
+                } else {
+                    ReasonCode::StateChanged
+                },
+                status: if signature.is_some() {
+                    OutcomeStatus::Executed
+                } else {
+                    OutcomeStatus::Skipped
+                },
+                signature,
             }),
             Err(error) => {
                 let detail = error.to_string();
@@ -386,7 +479,8 @@ impl ArbitrageurJob<'_> {
 
     pub fn run_pass(&self) -> Result<Vec<AttemptReport>, ExecutionError> {
         let futarchy = self.futarchy()?;
-        let mut reports = Vec::new();
+        let mut reports =
+            recover_pending(self.client, &self.contract.protocol_revision, self.dry_run)?;
         let mut sent = 0_usize;
 
         for market in self.markets()? {
@@ -398,7 +492,13 @@ impl ArbitrageurJob<'_> {
                         }
                         let report =
                             self.attempt(&market, &futarchy, lane, source, sold_is_base)?;
-                        if report.status == OutcomeStatus::Executed {
+                        // A submission failure can mean an unknown landed transaction.
+                        // Reserve the pass budget for it until journal reconciliation.
+                        if matches!(
+                            report.status,
+                            OutcomeStatus::Executed | OutcomeStatus::RetryableFailure
+                        ) || report.reason == ReasonCode::StateChanged
+                        {
                             sent += 1;
                         }
                         reports.push(report);
