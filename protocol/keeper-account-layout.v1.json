@@ -1,9 +1,9 @@
 {
   "$schema": "./schemas/account-layout.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "devnet-2026-11-08-hlp-deposit",
+  "protocolRevision": "devnet-2026-11-09-combined-layout14",
   "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
-  "idlSha256": "b3839f330c3c7fd2097d90c4dc4537b67d19ad7deaf3feefacc577ddfbd17c35",
+  "idlSha256": "ab181b0a459f95b659d088882bcc9288d78a6117bde2064432c0c7878282f0a3",
   "accounts": [
     {
       "name": "BorrowPosition",
@@ -63,7 +63,7 @@
     },
     {
       "name": "Market",
-      "sizeWithDiscriminator": 6440,
+      "sizeWithDiscriminator": 6442,
       "fields": [
         {
           "path": "oracle.policy.format",
@@ -162,102 +162,102 @@
         },
         {
           "path": "base_hlp_vault.srlp_vault",
-          "offset": 5234,
+          "offset": 5236,
           "size": 32
         },
         {
           "path": "quote_hlp_vault.srlp_vault",
-          "offset": 5626,
+          "offset": 5628,
           "size": 32
         },
         {
           "path": "base_hlp_vault.hlp_supply",
-          "offset": 5314,
+          "offset": 5316,
           "size": 8
         },
         {
           "path": "base_hlp_vault.srlp_shares",
-          "offset": 5266,
+          "offset": 5268,
           "size": 8
         },
         {
           "path": "quote_hlp_vault.srlp_shares",
-          "offset": 5658,
+          "offset": 5660,
           "size": 8
         },
         {
           "path": "base_hlp_vault.debt_principal",
-          "offset": 5306,
+          "offset": 5308,
           "size": 8
         },
         {
           "path": "quote_hlp_vault.debt_principal",
-          "offset": 5698,
+          "offset": 5700,
           "size": 8
         },
         {
           "path": "base_hlp_vault.debt_shares",
-          "offset": 5290,
+          "offset": 5292,
           "size": 16
         },
         {
           "path": "quote_hlp_vault.debt_shares",
-          "offset": 5682,
+          "offset": 5684,
           "size": 16
         },
         {
           "path": "quote_hlp_vault.hlp_supply",
-          "offset": 5706,
+          "offset": 5708,
           "size": 8
         },
         {
           "path": "base_hlp_vault.residual_exposure",
-          "offset": 5322,
+          "offset": 5324,
           "size": 16
         },
         {
           "path": "quote_hlp_vault.residual_exposure",
-          "offset": 5714,
+          "offset": 5716,
           "size": 16
         },
         {
           "path": "params_hash",
-          "offset": 6098,
+          "offset": 6100,
           "size": 32
         },
         {
           "path": "last_update_slot",
-          "offset": 6430,
+          "offset": 6432,
           "size": 8
         },
         {
           "path": "operator.authority",
-          "offset": 6162,
+          "offset": 6164,
           "size": 32
         },
         {
           "path": "operator.manager",
-          "offset": 6194,
+          "offset": 6196,
           "size": 32
         },
         {
           "path": "operator.epoch",
-          "offset": 6226,
+          "offset": 6228,
           "size": 8
         },
         {
           "path": "operator.pending",
-          "offset": 6250,
+          "offset": 6252,
           "size": 32
         },
         {
           "path": "operator.revenue_epoch",
-          "offset": 6234,
+          "offset": 6236,
           "size": 8
         },
         {
           "path": "operator.revenue_recipient",
-          "offset": 6314,
+          "offset": 6316,
           "size": 32
         }
       ]
@@ -361,7 +361,7 @@
         "variantPayloadSizes": [
           87,
           20,
-          26,
+          28,
           32,
           2,
           8,

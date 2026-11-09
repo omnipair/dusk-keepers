@@ -1,9 +1,9 @@
 {
   "$schema": "./schemas/account-layout.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "devnet-2026-11-08-hlp-deposit",
+  "protocolRevision": "devnet-2026-11-09-combined-layout14",
   "programId": "B315E6hHTgDjHgCCPungLop2mkgv9SHkcBc9ZzALNxNY",
-  "idlSha256": "9080b70c97dd48c937400bdcf554758bafc1faa1ef48fece619f52c299ab6386",
+  "idlSha256": "94680eeda232507985c72b5d1ac6fb6851b9e961c286c600a6d969167283815d",
   "accounts": [
     {
       "name": "LeverageOrder",
