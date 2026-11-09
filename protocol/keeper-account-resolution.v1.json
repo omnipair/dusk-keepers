@@ -1,17 +1,17 @@
 {
   "$schema": "./schemas/account-resolution-manifest.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "devnet-2026-11-09-combined-layout14",
+  "protocolRevision": "devnet-2026-11-09-fresh-layout14",
   "programs": [
     {
       "name": "dusk",
-      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
-      "idlSha256": "ab181b0a459f95b659d088882bcc9288d78a6117bde2064432c0c7878282f0a3"
+      "programId": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
+      "idlSha256": "51941c72652354fa4ee6357c8b9b04388f89ddd4dda317fa201dff75fbbcc1e7"
     },
     {
       "name": "leverage_delegate",
-      "programId": "B315E6hHTgDjHgCCPungLop2mkgv9SHkcBc9ZzALNxNY",
-      "idlSha256": "94680eeda232507985c72b5d1ac6fb6851b9e961c286c600a6d969167283815d"
+      "programId": "AXUucZuwuCu6voVQGf6tYMQ5LoRwLr9u4ESLpiPqqHbX",
+      "idlSha256": "f74ab61a5e0375d369bcf06338f9056f02dd85b5d07128c21b3e90596255b9a3"
     }
   ],
   "staticAccounts": [
@@ -24,7 +24,7 @@
     {
       "instructionKey": "leverage_delegate:execute_leverage_entry_order",
       "accountName": "dusk_program",
-      "address": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
+      "address": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
       "source": "idl_fixed_address"
     },
     {
@@ -48,7 +48,7 @@
     {
       "instructionKey": "leverage_delegate:execute_hlp_order",
       "accountName": "dusk_program",
-      "address": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
+      "address": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
       "source": "idl_fixed_address"
     },
     {
@@ -84,7 +84,7 @@
     {
       "instructionKey": "dusk:settle_flash_liquidation",
       "accountName": "program",
-      "address": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
+      "address": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
       "source": "instruction_program"
     },
     {
@@ -114,7 +114,7 @@
     {
       "instructionKey": "dusk:begin_flash_liquidation",
       "accountName": "program",
-      "address": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
+      "address": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
       "source": "instruction_program"
     },
     {
@@ -138,7 +138,7 @@
     {
       "instructionKey": "dusk:emergency_liquidation",
       "accountName": "program",
-      "address": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
+      "address": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
       "source": "instruction_program"
     },
     {
@@ -168,7 +168,7 @@
     {
       "instructionKey": "dusk:begin_hlp_flash",
       "accountName": "program",
-      "address": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
+      "address": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
       "source": "instruction_program"
     },
     {
@@ -192,7 +192,7 @@
     {
       "instructionKey": "dusk:settle_hlp_flash",
       "accountName": "program",
-      "address": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
+      "address": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
       "source": "instruction_program"
     },
     {
@@ -210,13 +210,13 @@
     {
       "instructionKey": "dusk:close_insolvent_hlp",
       "accountName": "program",
-      "address": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
+      "address": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
       "source": "instruction_program"
     },
     {
       "instructionKey": "dusk:delegated_close_leverage",
       "accountName": "delegated_program",
-      "address": "B315E6hHTgDjHgCCPungLop2mkgv9SHkcBc9ZzALNxNY",
+      "address": "AXUucZuwuCu6voVQGf6tYMQ5LoRwLr9u4ESLpiPqqHbX",
       "source": "action_cpi_program"
     },
     {
@@ -240,7 +240,7 @@
     {
       "instructionKey": "dusk:delegated_close_leverage",
       "accountName": "program",
-      "address": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
+      "address": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
       "source": "instruction_program"
     },
     {
@@ -258,7 +258,7 @@
     {
       "instructionKey": "dusk:settle_protocol_auction",
       "accountName": "program",
-      "address": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
+      "address": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
       "source": "instruction_program"
     },
     {
@@ -270,7 +270,7 @@
     {
       "instructionKey": "dusk:execute_operator_change",
       "accountName": "program",
-      "address": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
+      "address": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
       "source": "instruction_program"
     }
   ],
@@ -278,7 +278,7 @@
     {
       "key": "leverage_delegate:order",
       "program": "leverage_delegate",
-      "programId": "B315E6hHTgDjHgCCPungLop2mkgv9SHkcBc9ZzALNxNY",
+      "programId": "AXUucZuwuCu6voVQGf6tYMQ5LoRwLr9u4ESLpiPqqHbX",
       "usages": [
         {
           "instructionKey": "leverage_delegate:execute_leverage_entry_order",
@@ -316,7 +316,7 @@
     {
       "key": "leverage_delegate:dusk_event_authority",
       "program": "leverage_delegate",
-      "programId": "B315E6hHTgDjHgCCPungLop2mkgv9SHkcBc9ZzALNxNY",
+      "programId": "AXUucZuwuCu6voVQGf6tYMQ5LoRwLr9u4ESLpiPqqHbX",
       "usages": [
         {
           "instructionKey": "leverage_delegate:execute_leverage_entry_order",
@@ -343,7 +343,7 @@
     {
       "key": "leverage_delegate:order:execute_hlp_order",
       "program": "leverage_delegate",
-      "programId": "B315E6hHTgDjHgCCPungLop2mkgv9SHkcBc9ZzALNxNY",
+      "programId": "AXUucZuwuCu6voVQGf6tYMQ5LoRwLr9u4ESLpiPqqHbX",
       "usages": [
         {
           "instructionKey": "leverage_delegate:execute_hlp_order",
@@ -387,7 +387,7 @@
     {
       "key": "dusk:market",
       "program": "dusk",
-      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
+      "programId": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
       "usages": [
         {
           "instructionKey": "dusk:settle_flash_liquidation",
@@ -505,7 +505,7 @@
     {
       "key": "dusk:futarchy_authority",
       "program": "dusk",
-      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
+      "programId": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
       "usages": [
         {
           "instructionKey": "dusk:settle_flash_liquidation",
@@ -560,7 +560,7 @@
     {
       "key": "dusk:session",
       "program": "dusk",
-      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
+      "programId": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
       "usages": [
         {
           "instructionKey": "dusk:settle_flash_liquidation",
@@ -594,7 +594,7 @@
     {
       "key": "dusk:event_authority",
       "program": "dusk",
-      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
+      "programId": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
       "usages": [
         {
           "instructionKey": "dusk:settle_flash_liquidation",
@@ -670,7 +670,7 @@
     {
       "key": "dusk:repayment_vault",
       "program": "dusk",
-      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
+      "programId": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
       "usages": [
         {
           "instructionKey": "dusk:begin_flash_liquidation",
@@ -702,7 +702,7 @@
     {
       "key": "dusk:repayment_vault:begin_hlp_flash",
       "program": "dusk",
-      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
+      "programId": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
       "usages": [
         {
           "instructionKey": "dusk:begin_hlp_flash",
@@ -728,7 +728,7 @@
     {
       "key": "dusk:repayment_vault:settle_hlp_flash",
       "program": "dusk",
-      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
+      "programId": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
       "usages": [
         {
           "instructionKey": "dusk:settle_hlp_flash",
@@ -754,7 +754,7 @@
     {
       "key": "dusk:leverage_position",
       "program": "dusk",
-      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
+      "programId": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
       "usages": [
         {
           "instructionKey": "dusk:delegated_close_leverage",
@@ -798,7 +798,7 @@
     {
       "key": "dusk:leverage_collateral_vault",
       "program": "dusk",
-      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
+      "programId": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
       "usages": [
         {
           "instructionKey": "dusk:delegated_close_leverage",
@@ -830,7 +830,7 @@
     {
       "key": "leverage_delegate:order:before_take_profit",
       "program": "leverage_delegate",
-      "programId": "B315E6hHTgDjHgCCPungLop2mkgv9SHkcBc9ZzALNxNY",
+      "programId": "AXUucZuwuCu6voVQGf6tYMQ5LoRwLr9u4ESLpiPqqHbX",
       "usages": [
         {
           "instructionKey": "leverage_delegate:before_take_profit",
@@ -868,7 +868,7 @@
     {
       "key": "leverage_delegate:order:after_close_order",
       "program": "leverage_delegate",
-      "programId": "B315E6hHTgDjHgCCPungLop2mkgv9SHkcBc9ZzALNxNY",
+      "programId": "AXUucZuwuCu6voVQGf6tYMQ5LoRwLr9u4ESLpiPqqHbX",
       "usages": [
         {
           "instructionKey": "leverage_delegate:after_close_order",
@@ -906,7 +906,7 @@
     {
       "key": "leverage_delegate:order:before_stop_loss",
       "program": "leverage_delegate",
-      "programId": "B315E6hHTgDjHgCCPungLop2mkgv9SHkcBc9ZzALNxNY",
+      "programId": "AXUucZuwuCu6voVQGf6tYMQ5LoRwLr9u4ESLpiPqqHbX",
       "usages": [
         {
           "instructionKey": "leverage_delegate:before_stop_loss",
@@ -944,7 +944,7 @@
     {
       "key": "dusk:revenue",
       "program": "dusk",
-      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
+      "programId": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
       "usages": [
         {
           "instructionKey": "dusk:initialize_operator_revenue",
@@ -976,7 +976,7 @@
     {
       "key": "dusk:proposal",
       "program": "dusk",
-      "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
+      "programId": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
       "usages": [
         {
           "instructionKey": "dusk:execute_operator_change",

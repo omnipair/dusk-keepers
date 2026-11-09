@@ -1,9 +1,9 @@
 {
   "$schema": "./schemas/account-layout.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "devnet-2026-11-09-combined-layout14",
-  "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
-  "idlSha256": "ab181b0a459f95b659d088882bcc9288d78a6117bde2064432c0c7878282f0a3",
+  "protocolRevision": "devnet-2026-11-09-fresh-layout14",
+  "programId": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
+  "idlSha256": "51941c72652354fa4ee6357c8b9b04388f89ddd4dda317fa201dff75fbbcc1e7",
   "accounts": [
     {
       "name": "BorrowPosition",

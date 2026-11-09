@@ -1,134 +1,134 @@
 {
   "schemaVersion": 1,
-  "protocolRevision": "devnet-2026-11-09-combined-layout14",
+  "protocolRevision": "devnet-2026-11-09-fresh-layout14",
   "validator": "surfpool",
   "kind": "native-plan-rpc-simulation",
   "cases": [
     {
       "fixture": "fixtures/litesvm/01-flash-BorrowPosition.json",
-      "sourceCommit": "9eec8ad6c33824edc33624fe9df05e50c293b528",
+      "sourceCommit": "2b6311f4b4f8c1678edee72e8a3dbd1ff3f467b5",
       "action": "flash",
-      "slot": 10002,
-      "computeUnits": 401849,
+      "slot": 38086,
+      "computeUnits": 404849,
       "status": "passed"
     },
     {
       "fixture": "fixtures/litesvm/02-emergency-BorrowPosition.json",
-      "sourceCommit": "9eec8ad6c33824edc33624fe9df05e50c293b528",
+      "sourceCommit": "2b6311f4b4f8c1678edee72e8a3dbd1ff3f467b5",
       "action": "emergency",
-      "slot": 20003,
+      "slot": 38186,
       "computeUnits": 256769,
       "status": "passed"
     },
     {
       "fixture": "fixtures/litesvm/03-emergency-LeveragePosition.json",
-      "sourceCommit": "9eec8ad6c33824edc33624fe9df05e50c293b528",
+      "sourceCommit": "2b6311f4b4f8c1678edee72e8a3dbd1ff3f467b5",
       "action": "emergency",
-      "slot": 21004,
+      "slot": 38286,
       "computeUnits": 294610,
       "status": "passed"
     },
     {
       "fixture": "fixtures/litesvm/04-flash-BorrowPosition.json",
-      "sourceCommit": "9eec8ad6c33824edc33624fe9df05e50c293b528",
+      "sourceCommit": "2b6311f4b4f8c1678edee72e8a3dbd1ff3f467b5",
       "action": "flash",
-      "slot": 33005,
+      "slot": 38386,
       "computeUnits": 390261,
       "status": "passed"
     },
     {
       "fixture": "fixtures/litesvm/05-flash-LeveragePosition.json",
-      "sourceCommit": "9eec8ad6c33824edc33624fe9df05e50c293b528",
+      "sourceCommit": "2b6311f4b4f8c1678edee72e8a3dbd1ff3f467b5",
       "action": "flash",
-      "slot": 33105,
-      "computeUnits": 401157,
+      "slot": 38486,
+      "computeUnits": 396657,
       "status": "passed"
     },
     {
       "fixture": "fixtures/litesvm/06-flash-LeveragePosition.json",
-      "sourceCommit": "9eec8ad6c33824edc33624fe9df05e50c293b528",
+      "sourceCommit": "2b6311f4b4f8c1678edee72e8a3dbd1ff3f467b5",
       "action": "flash",
-      "slot": 33205,
-      "computeUnits": 439378,
+      "slot": 38586,
+      "computeUnits": 442378,
       "status": "passed"
     },
     {
       "fixture": "fixtures/litesvm/07-flash-LeveragePosition.json",
-      "sourceCommit": "9eec8ad6c33824edc33624fe9df05e50c293b528",
+      "sourceCommit": "2b6311f4b4f8c1678edee72e8a3dbd1ff3f467b5",
       "action": "flash",
-      "slot": 35008,
+      "slot": 38686,
       "computeUnits": 372495,
       "status": "passed"
     },
     {
       "fixture": "fixtures/litesvm/08-flash-LeveragePosition.json",
-      "sourceCommit": "9eec8ad6c33824edc33624fe9df05e50c293b528",
+      "sourceCommit": "2b6311f4b4f8c1678edee72e8a3dbd1ff3f467b5",
       "action": "flash",
-      "slot": 35108,
-      "computeUnits": 700049,
+      "slot": 38786,
+      "computeUnits": 715049,
       "status": "passed"
     },
     {
       "fixture": "fixtures/litesvm/09-emergency-LeveragePosition.json",
-      "sourceCommit": "9eec8ad6c33824edc33624fe9df05e50c293b528",
+      "sourceCommit": "2b6311f4b4f8c1678edee72e8a3dbd1ff3f467b5",
       "action": "emergency",
-      "slot": 35208,
-      "computeUnits": 950093,
+      "slot": 38886,
+      "computeUnits": 954593,
       "status": "passed"
     },
     {
       "fixture": "fixtures/litesvm/10-flash-LeveragePosition.json",
-      "sourceCommit": "9eec8ad6c33824edc33624fe9df05e50c293b528",
+      "sourceCommit": "2b6311f4b4f8c1678edee72e8a3dbd1ff3f467b5",
       "action": "flash",
-      "slot": 37010,
-      "computeUnits": 372988,
+      "slot": 38986,
+      "computeUnits": 383488,
       "status": "passed"
     },
     {
       "fixture": "fixtures/litesvm/11-flash-LeveragePosition.json",
-      "sourceCommit": "9eec8ad6c33824edc33624fe9df05e50c293b528",
+      "sourceCommit": "2b6311f4b4f8c1678edee72e8a3dbd1ff3f467b5",
       "action": "flash",
-      "slot": 37110,
-      "computeUnits": 348565,
+      "slot": 39086,
+      "computeUnits": 341065,
       "status": "passed"
     },
     {
       "fixture": "fixtures/litesvm/12-flash-LeveragePosition.json",
-      "sourceCommit": "9eec8ad6c33824edc33624fe9df05e50c293b528",
+      "sourceCommit": "2b6311f4b4f8c1678edee72e8a3dbd1ff3f467b5",
       "action": "flash",
-      "slot": 37210,
-      "computeUnits": 333604,
+      "slot": 39186,
+      "computeUnits": 326104,
       "status": "passed"
     },
     {
       "fixture": "fixtures/litesvm/13-flash-LeveragePosition.json",
-      "sourceCommit": "9eec8ad6c33824edc33624fe9df05e50c293b528",
+      "sourceCommit": "2b6311f4b4f8c1678edee72e8a3dbd1ff3f467b5",
       "action": "flash",
-      "slot": 37310,
-      "computeUnits": 333604,
+      "slot": 39286,
+      "computeUnits": 326104,
       "status": "passed"
     },
     {
       "fixture": "fixtures/hlp-litesvm/01-hlp_flash.json",
-      "sourceCommit": "9eec8ad6c33824edc33624fe9df05e50c293b528",
+      "sourceCommit": "2b6311f4b4f8c1678edee72e8a3dbd1ff3f467b5",
       "action": "hlp_flash",
-      "slot": 37410,
-      "computeUnits": 449315,
+      "slot": 39386,
+      "computeUnits": 441815,
       "status": "passed"
     },
     {
       "fixture": "fixtures/hlp-litesvm/02-hlp_flash.json",
-      "sourceCommit": "9eec8ad6c33824edc33624fe9df05e50c293b528",
+      "sourceCommit": "2b6311f4b4f8c1678edee72e8a3dbd1ff3f467b5",
       "action": "hlp_flash",
-      "slot": 37510,
-      "computeUnits": 442611,
+      "slot": 39486,
+      "computeUnits": 448611,
       "status": "passed"
     },
     {
       "fixture": "fixtures/hlp-litesvm/03-hlp_close.json",
-      "sourceCommit": "9eec8ad6c33824edc33624fe9df05e50c293b528",
+      "sourceCommit": "2b6311f4b4f8c1678edee72e8a3dbd1ff3f467b5",
       "action": "hlp_close",
-      "slot": 37610,
+      "slot": 39586,
       "computeUnits": 167071,
       "status": "passed"
     }

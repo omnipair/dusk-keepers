@@ -1,25 +1,24 @@
-# Layout-14 protocol compatibility
+# Fresh devnet protocol compatibility
 
-This capture pins the finalized Dusk/delegate programs at slots 520272736 and
-520273794, with the generated IDLs and registry-published SDK 2.19.0-next.20261109.
-The SDK archive SHA-256 is
-`086ea70869c175e1fefcd5c062d693e92d699479dcc6602732ab0f857e14590a`.
-The source fingerprint covers program source; SDK 2.20's checked builders do not
-change either program ABI and are not a runtime dependency of the keepers.
+The active capture is `devnet-2026-11-09-fresh-layout14`, from program source
+`2b6311f4b4f8c1678edee72e8a3dbd1ff3f467b5`. Dusk and the delegate were finalized
+at slots 520349136 and 520350149. Both fresh markets were created after the
+complete revision boundary, 520350150. Previous program and IDL accounts were
+archived and closed to reclaim rent.
 
-Market layout 14 adds the independent utilization band. Account offsets,
-instruction/account-resolution contracts and cross-language vectors are
-regenerated from the IDLs. Liquidation and hLP banks are recaptured through the
-program's instruction tests. Old layout-13 market accounts cannot be operated;
-new discovery must use the new indexer revision and fresh supported markets.
+The captured SDK is the registry-published `2.21.0-next.20261109` artifact, SHA-256
+`645f872b2d786195f9153f5b784776159400ec7ca6d735d442875be70e9b7116`.
+Keepers read the IDLs and use native Rust/TypeScript implementations. Contracts,
+account layouts, PDA vectors and liquidation/hLP banks are regenerated for the
+fresh program IDs. Market layout 14 and the junior-exit behavior are unchanged
+from the combined release: cancel during notice, then request a replacement
+with a full notice; capital remains junior until conversion.
 
-Validation includes native Rust tests, 215 TypeScript/SVM tests, PostgreSQL
-lease/signing-generation recovery, and 16 offline Surfpool liquidation/hLP
-plan simulations recorded in `docs/evidence/operator-surfpool-simulations.json`.
-The lock remains captured: these checks do not claim the complete live-release
-matrix in `docs/runbooks/surfpool-e2e.md`, nor Jupiter mainnet-fork acceptance.
-Keep hosted services non-signing until the frozen-lock and live-release gates
-pass. Do not enable the local captured-devnet signing exception on hosted services.
+Validation passed 215 TypeScript/SVM tests, 69 native Rust tests, the PostgreSQL
+lease/signing-generation recovery test and all 16 offline Surfpool simulations
+recorded in `docs/evidence/operator-surfpool-simulations.json`.
 
-Devnet uses `KEEPER_FLASH_SETTLEMENT=dusk`; hosted Jupiter serves mainnet.
-This is deployment configuration, with no protocol or adapter bypass.
+The lock remains captured. Hosted services retain their existing shadow mode;
+this does not claim the complete frozen-lock live-release matrix or Jupiter
+mainnet-fork acceptance. No signing guard is weakened. Devnet retains
+`KEEPER_FLASH_SETTLEMENT=dusk`, since hosted Jupiter serves mainnet.
