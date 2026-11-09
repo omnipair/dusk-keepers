@@ -1,9 +1,9 @@
 {
   "$schema": "./schemas/account-layout.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "devnet-2026-11-09-combined-layout14",
-  "programId": "B315E6hHTgDjHgCCPungLop2mkgv9SHkcBc9ZzALNxNY",
-  "idlSha256": "94680eeda232507985c72b5d1ac6fb6851b9e961c286c600a6d969167283815d",
+  "protocolRevision": "devnet-2026-11-09-fresh-layout14",
+  "programId": "AXUucZuwuCu6voVQGf6tYMQ5LoRwLr9u4ESLpiPqqHbX",
+  "idlSha256": "f74ab61a5e0375d369bcf06338f9056f02dd85b5d07128c21b3e90596255b9a3",
   "accounts": [
     {
       "name": "LeverageOrder",
