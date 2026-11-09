@@ -59,6 +59,32 @@ pub fn account_discriminator(account_name: &str) -> [u8; 8] {
     discriminator
 }
 
+fn market_filters(
+    manifest: &dusk_adapter::layout::AccountLayoutManifest,
+) -> Result<Vec<serde_json::Value>, DiscoveryError> {
+    let market = manifest
+        .accounts
+        .iter()
+        .find(|entry| entry.name == "Market")
+        .ok_or_else(|| DiscoveryError::Malformed("Missing market layout".into()))?;
+    let size = market
+        .size_with_discriminator
+        .ok_or_else(|| DiscoveryError::Malformed("Market must have an exact layout size".into()))?;
+    let version = market
+        .expected_version
+        .ok_or_else(|| DiscoveryError::Malformed("Missing supported market version".into()))?;
+    let field = market
+        .fields
+        .iter()
+        .find(|field| field.path == "version" && field.size == 1 && field.offset < size)
+        .ok_or_else(|| DiscoveryError::Malformed("Missing market version offset".into()))?;
+    Ok(vec![
+        serde_json::json!({"memcmp":{"offset":0,"bytes":bs58::encode(account_discriminator("Market")).into_string()}}),
+        serde_json::json!({"dataSize":size}),
+        serde_json::json!({"memcmp":{"offset":field.offset,"bytes":bs58::encode([version]).into_string()}}),
+    ])
+}
+
 pub struct RpcClient {
     endpoint: String,
     agent: ureq::Agent,
@@ -177,19 +203,33 @@ impl RpcClient {
         program_id: &str,
         discriminator: [u8; 8],
     ) -> Result<ProgramAccountData, DiscoveryError> {
-        let encoded = bs58::encode(discriminator).into_string();
+        self.program_accounts_filtered(
+            program_id,
+            vec![serde_json::json!({
+                "memcmp": { "offset": 0, "bytes": bs58::encode(discriminator).into_string() }
+            })],
+        )
+    }
+
+    /// Select only the exact market layout the pinned IDL supports. Archived
+    /// accounts under the same program ID must not enter keeper discovery.
+    pub fn market_accounts(
+        &self,
+        layout: &dusk_adapter::layout::AccountLayoutManifest,
+    ) -> Result<ProgramAccountData, DiscoveryError> {
+        self.program_accounts_filtered(&layout.program_id, market_filters(layout)?)
+    }
+
+    fn program_accounts_filtered(
+        &self,
+        program_id: &str,
+        filters: Vec<serde_json::Value>,
+    ) -> Result<ProgramAccountData, DiscoveryError> {
         let accounts: Vec<ProgramAccount> = self.call(
             "getProgramAccounts",
-            serde_json::json!([
-                program_id,
-                {
-                    "encoding": "base64",
-                    "commitment": "confirmed",
-                    "filters": [
-                        { "memcmp": { "offset": 0, "bytes": encoded } }
-                    ]
-                }
-            ]),
+            serde_json::json!([program_id, {
+                "encoding": "base64", "commitment": "confirmed", "filters": filters
+            }]),
         )?;
         let mut decoded = Vec::with_capacity(accounts.len());
         for entry in accounts {
@@ -383,6 +423,75 @@ mod tests {
         let borrow = account_discriminator("BorrowPosition");
         assert_ne!(market, borrow);
         assert_eq!(market, account_discriminator("Market"));
+    }
+
+    #[test]
+    fn market_discovery_sends_pinned_size_and_version_filters() {
+        use std::{
+            io::{Read, Write},
+            net::TcpListener,
+        };
+        let layout = dusk_adapter::layout::AccountLayoutManifest::from_json(include_str!(
+            "../../../../../protocol/keeper-account-layout.v1.json"
+        ))
+        .unwrap();
+        let market = layout
+            .accounts
+            .iter()
+            .find(|entry| entry.name == "Market")
+            .unwrap();
+        let offset = market
+            .fields
+            .iter()
+            .find(|field| field.path == "version")
+            .unwrap()
+            .offset;
+        let size = market.size_with_discriminator.unwrap();
+        let version = market.expected_version.unwrap();
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let client = RpcClient::new(
+            format!("http://{}", listener.local_addr().unwrap()),
+            Duration::from_secs(5),
+        );
+        let server = std::thread::spawn(move || {
+            let (mut stream, _) = listener.accept().unwrap();
+            let mut request = Vec::new();
+            loop {
+                let mut chunk = [0; 4096];
+                let count = stream.read(&mut chunk).unwrap();
+                assert!(count > 0);
+                request.extend_from_slice(&chunk[..count]);
+                if let Some(body) = request.windows(4).position(|window| window == b"\r\n\r\n")
+                    && let Ok(json) =
+                        serde_json::from_slice::<serde_json::Value>(&request[body + 4..])
+                {
+                    assert_eq!(json["method"], "getProgramAccounts");
+                    let filters = json["params"][1]["filters"].as_array().unwrap();
+                    assert_eq!(filters.len(), 3);
+                    assert!(filters.contains(&serde_json::json!({"dataSize":size})));
+                    assert!(filters.contains(&serde_json::json!({"memcmp":{"offset":offset,"bytes":bs58::encode([version]).into_string()}})));
+                    break;
+                }
+            }
+            let body = r#"{"jsonrpc":"2.0","id":1,"result":[]}"#;
+            write!(
+                stream,
+                "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+                body.len(),
+                body
+            )
+            .unwrap();
+        });
+        assert!(client.market_accounts(&layout).unwrap().is_empty());
+        server.join().unwrap();
+        let mut missing = layout;
+        missing
+            .accounts
+            .iter_mut()
+            .find(|entry| entry.name == "Market")
+            .unwrap()
+            .expected_version = None;
+        assert!(market_filters(&missing).is_err());
     }
 
     #[test]

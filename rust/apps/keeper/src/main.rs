@@ -217,7 +217,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 }
 
                 if let Some(layout) = layout.as_ref() {
-                    match fee_notice::monitor(&client, &dusk_program_id, layout) {
+                    match fee_notice::monitor(&client, layout) {
                         Ok(notices) => {
                             if !notices.final_notice_mints.is_empty() {
                                 println!(

@@ -38,6 +38,7 @@ const WANTED = {
 
   ],
   Market: [
+    "version",
     "oracle.policy.format",
     "oracle.policy.lambda_bps",
     "oracle.policy.base_account",
@@ -268,6 +269,15 @@ async function build(programName = "dusk", wanted = WANTED) {
 
     return {
       name: accountName,
+      ...(accountName === "Market" ? {
+        expectedVersion: (() => {
+          const constant = idl.constants.find(entry => entry.name === "MARKET_LAYOUT_VERSION");
+          assert.ok(constant && /^\d+$/.test(constant.value), "Market layout version is missing");
+          const version = Number(constant.value);
+          assert.ok(Number.isSafeInteger(version) && version >= 0 && version <= 255, "Invalid market version");
+          return version;
+        })(),
+      } : {}),
       ...(accountName === "OperatorProposal" ? { dynamic: {
         updatesOffset: 8 + defined.type.fields.slice(0, defined.type.fields.findIndex(field => field.name === "updates")).reduce((sum, field) => sum + sizeOf(field.type,types,"OperatorProposal.prefix"),0),
         variantPayloadSizes: types.get("MarketParameterUpdate").type.variants.map(variant => (variant.fields ?? []).reduce((sum, field) => sum + sizeOf(field.type ?? field,types,variant.name),0)),

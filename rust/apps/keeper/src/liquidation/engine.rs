@@ -74,7 +74,7 @@ impl LiquidationJob<'_> {
             .map_err(|e| ExecutionError::Assembly(e.to_string()))?;
         let active_markets: BTreeSet<_> = self
             .client
-            .program_accounts(program, account_discriminator("Market"))?
+            .market_accounts(self.layout)?
             .into_iter()
             .filter_map(|(address, data)| {
                 crate::runtime::accounts::MarketAccounts::decode(self.layout, address, &data)

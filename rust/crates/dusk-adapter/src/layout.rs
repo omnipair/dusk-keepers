@@ -28,6 +28,8 @@ pub struct AccountLayoutManifest {
 #[serde(rename_all = "camelCase")]
 pub struct AccountLayout {
     #[serde(default)]
+    pub expected_version: Option<u8>,
+    #[serde(default)]
     pub dynamic: Option<DynamicProposalLayout>,
     pub name: String,
     /// The account's exact size, when it has one.
