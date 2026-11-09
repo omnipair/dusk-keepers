@@ -63,8 +63,14 @@
     },
     {
       "name": "Market",
+      "expectedVersion": 14,
       "sizeWithDiscriminator": 6442,
       "fields": [
+        {
+          "path": "version",
+          "offset": 413,
+          "size": 1
+        },
         {
           "path": "oracle.policy.format",
           "offset": 8,

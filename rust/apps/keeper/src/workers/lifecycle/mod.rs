@@ -207,10 +207,7 @@ pub fn run(context: &super::WorkerContext<'_>) -> Result<Vec<AttemptReport>, Exe
         &context.contract.protocol_revision,
         context.dry_run,
     )?;
-    let markets = context.client.program_accounts(
-        &address(context.program_id),
-        account_discriminator("Market"),
-    )?;
+    let markets = context.client.market_accounts(context.layout)?;
     let mut attempts = 0;
     for (market, data) in markets {
         let reader = context

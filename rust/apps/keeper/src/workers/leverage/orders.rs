@@ -553,9 +553,7 @@ impl OrderJob<'_> {
     > {
         use crate::runtime::execution::ExecutionError;
         let orders = order_layout().map_err(ExecutionError::Assembly)?;
-        let markets = self
-            .client
-            .program_accounts(&self.layout.program_id, account_discriminator("Market"))?;
+        let markets = self.client.market_accounts(self.layout)?;
         let active: std::collections::BTreeSet<_> = markets
             .into_iter()
             .filter_map(|(address, data)| {

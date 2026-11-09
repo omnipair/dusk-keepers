@@ -1,5 +1,5 @@
 //! Poll mints AND Clock: entering the last notice epoch does not write the mint.
-use crate::runtime::rpc::{DiscoveryError, RpcClient, account_discriminator};
+use crate::runtime::rpc::{DiscoveryError, RpcClient};
 use dusk_adapter::{
     AccountLayoutManifest,
     transfer_fees::{CLOCK, FeePhase, decode_clock_epoch, decode_mint_fees},
@@ -118,7 +118,6 @@ fn read_fees_once(
 
 pub fn monitor(
     client: &RpcClient,
-    program: &str,
     layout: &AccountLayoutManifest,
 ) -> Result<NoticeMonitor, DiscoveryError> {
     let reader = layout
@@ -126,7 +125,7 @@ pub fn monitor(
         .map_err(|e| DiscoveryError::Malformed(e.to_string()))?;
     let mut mints = BTreeSet::new();
     let mut market_mints = Vec::new();
-    for (market, data) in client.program_accounts(program, account_discriminator("Market"))? {
+    for (market, data) in client.market_accounts(layout)? {
         for side in ["base_side.asset_mint", "quote_side.asset_mint"] {
             let mint = reader
                 .pubkey(side, &data)

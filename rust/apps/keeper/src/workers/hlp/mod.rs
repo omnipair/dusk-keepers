@@ -5,7 +5,7 @@ use crate::{
     liquidation::{compute_limit_rejection, post_bytes, required_u64, simulation, state_hash},
     runtime::execution::{AttemptReport, ExecutionError},
     runtime::flash_journal::{Journal, recover_pending},
-    runtime::rpc::{RpcClient, account_discriminator},
+    runtime::rpc::RpcClient,
     runtime::signer::TransactionSigner,
     runtime::transaction::{Instruction, serialize_transaction},
 };
@@ -61,9 +61,7 @@ impl HlpJob<'_> {
             )
         })?;
         let configured_market_key = key(&configured_market).map_err(ExecutionError::Assembly)?;
-        let mut markets = self
-            .client
-            .program_accounts(&self.layout.program_id, account_discriminator("Market"))?;
+        let mut markets = self.client.market_accounts(self.layout)?;
         markets.retain(|(market, _)| *market == configured_market_key);
         let mut attempted = 0usize;
         for (market, _) in markets {
