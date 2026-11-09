@@ -5,10 +5,7 @@
 //! message, sign it, encode it. A keeper's dependency set is part of its
 //! attack surface, and this file is small enough to read in full.
 //!
-//! Only the legacy format is produced. Address lookup tables would let a
-//! keeper reference more accounts than fit here, but no instruction it sends
-//! comes close to the limit, and the versioned format is worth adding when
-//! something needs it rather than in advance.
+//! Supports legacy and v0 messages with multiple address lookup tables.
 
 use std::{error::Error, fmt};
 
@@ -224,6 +221,23 @@ pub fn compile_v0_message(
     table: [u8; 32],
     addresses: &[[u8; 32]],
 ) -> Result<Vec<u8>, TransactionError> {
+    compile_v0_message_with_tables(
+        fee_payer,
+        instructions,
+        recent_blockhash,
+        &[(table, addresses.to_vec())],
+    )
+}
+
+/// Tables must be verified against fresh RPC data before use. A key present in
+/// multiple tables is loaded once, from the first table. Runtime ordering is all
+/// writable loaded keys across tables, followed by all readonly loaded keys.
+pub fn compile_v0_message_with_tables(
+    fee_payer: [u8; 32],
+    instructions: &[Instruction],
+    recent_blockhash: [u8; 32],
+    tables: &[([u8; 32], Vec<[u8; 32]>)],
+) -> Result<Vec<u8>, TransactionError> {
     let legacy = compile_message(fee_payer, instructions, recent_blockhash)?;
     let mut offset = 3;
     let mut count = 0usize;
@@ -246,8 +260,8 @@ pub fn compile_v0_message(
     let ro_others = legacy[2] as usize;
     let programs: Vec<_> = instructions.iter().map(|i| i.program_id).collect();
     let mut statics = Vec::new();
-    let mut writable = Vec::new();
-    let mut readonly = Vec::new();
+    let mut writable = vec![Vec::new(); tables.len()];
+    let mut readonly = vec![Vec::new(); tables.len()];
     for (index, k) in keys.iter().enumerate() {
         let writable_flag = if index < signers {
             index < signers - ro_signers
@@ -256,14 +270,16 @@ pub fn compile_v0_message(
         };
         if index >= signers
             && !programs.contains(k)
-            && let Some(i) = addresses.iter().position(|a| a == k)
+            && let Some((t, i)) = tables.iter().enumerate().find_map(|(t, (_, addresses))| {
+                addresses.iter().position(|a| a == k).map(|i| (t, i))
+            })
         {
-            let i =
-                u8::try_from(i).map_err(|_| TransactionError::TooManyAccounts(addresses.len()))?;
+            let i = u8::try_from(i)
+                .map_err(|_| TransactionError::TooManyAccounts(tables[t].1.len()))?;
             if writable_flag {
-                writable.push((i, *k));
+                writable[t].push((i, *k));
             } else {
-                readonly.push((i, *k));
+                readonly[t].push((i, *k));
             }
             continue;
         }
@@ -272,14 +288,14 @@ pub fn compile_v0_message(
     let all: Vec<_> = statics
         .iter()
         .copied()
-        .chain(writable.iter().map(|(_, k)| *k))
-        .chain(readonly.iter().map(|(_, k)| *k))
+        .chain(writable.iter().flatten().map(|(_, k)| *k))
+        .chain(readonly.iter().flatten().map(|(_, k)| *k))
         .collect();
     let mut out = vec![
         0x80,
         signers as u8,
         ro_signers as u8,
-        (ro_others - readonly.len()) as u8,
+        (ro_others - readonly.iter().map(Vec::len).sum::<usize>()) as u8,
     ];
     push_compact_u16(&mut out, statics.len() as u16);
     for k in statics {
@@ -296,12 +312,17 @@ pub fn compile_v0_message(
         push_compact_u16(&mut out, ix.data.len() as u16);
         out.extend(&ix.data);
     }
-    out.push(1);
-    out.extend(table);
-    push_compact_u16(&mut out, writable.len() as u16);
-    out.extend(writable.iter().map(|(i, _)| i));
-    push_compact_u16(&mut out, readonly.len() as u16);
-    out.extend(readonly.iter().map(|(i, _)| i));
+    let used = (0..tables.len())
+        .filter(|&t| !writable[t].is_empty() || !readonly[t].is_empty())
+        .collect::<Vec<_>>();
+    push_compact_u16(&mut out, used.len() as u16);
+    for t in used {
+        out.extend(tables[t].0);
+        push_compact_u16(&mut out, writable[t].len() as u16);
+        out.extend(writable[t].iter().map(|(i, _)| i));
+        push_compact_u16(&mut out, readonly[t].len() as u16);
+        out.extend(readonly[t].iter().map(|(i, _)| i));
+    }
     Ok(out)
 }
 

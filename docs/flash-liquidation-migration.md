@@ -91,7 +91,7 @@ Use market-scoped workers when assets have different units/economics.
 | --- | --- |
 | `KEEPER_MODE=shadow` | Simulate only; candidate locks cannot enter live mode. |
 | `KEEPER_SHADOW_PUBLIC_KEY` | Public buyer identity; shadow does not load a private key. |
-| `KEEPER_FLASH_SETTLEMENT=dusk` | `dusk` or explicitly opted-in `inventory`. |
+| `KEEPER_FLASH_SETTLEMENT=jupiter` | Default ordinary route; explicit `dusk` for internal settlement/devnet, or `inventory`. See [Jupiter routing](runbooks/jupiter-routing.md). |
 | `KEEPER_FLASH_MAX_REPAY` | Positive maximum net debt repayment for ordinary fill probes. |
 | `KEEPER_LIQUIDATION_MIN_PROFIT` | Minimum simulated debt-token gain for internal/emergency execution. Account for SOL fees operationally; there is no built-in SOL exchange-rate feed. |
 | `KEEPER_EMERGENCY_SLIPPAGE_BPS` | Emergency reward/output quote tolerance, `0..10000` basis points (up to 100%); default `0`. The configured profit floor remains enforced on chain. |

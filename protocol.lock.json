@@ -1,21 +1,21 @@
 {
   "$schema": "./protocol/schemas/protocol-lock.schema.json",
   "schemaVersion": 1,
-  "revision": "devnet-2026-11-08-hlp-deposit",
+  "revision": "devnet-2026-11-09-combined-layout14",
   "status": "captured",
-  "generatedAt": "2026-11-08T11:56:29.919Z",
+  "generatedAt": "2026-11-09T07:34:33.999Z",
   "source": {
     "repository": "https://github.com/omnipair/dusk",
-    "branch": "(detached)",
-    "gitCommit": "84c2a6997c795fb062c9bafb77680f8271a6f86d",
-    "worktreeFingerprintSha256": "980dd8578507fb5efe88ec971cd0c8ee781ad2e3029ebf234783b4c7a23af218"
+    "branch": "feat/sdk-checked-builders-release",
+    "gitCommit": "9eec8ad6c33824edc33624fe9df05e50c293b528",
+    "worktreeFingerprintSha256": "12d9d7c3575ceb6a90e15b65172628111d8377d2c148dd5bdceb80f1d26f4f53"
   },
   "toolchain": {
     "anchor": "anchor-cli 0.31.1",
-    "rust": "rustc 1.95.0 (59807616e 2026-04-14)",
-    "solana": "solana-cli 3.1.15 (src:40a31afe; feat:687058115, client:Agave)",
+    "rust": "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+    "solana": "solana-cli 4.1.0-rc.1 (src:5efbb999; feat:c763ae0a, client:Agave)",
     "surfpool": "surfpool 1.2.0",
-    "node": "v24.22.2"
+    "node": "v24.9.0"
   },
   "programs": [
     {
@@ -23,11 +23,11 @@
       "programId": "B3vxDQmtKFxfh6hmfLRWKaHZR2w4UPw18XJCTbfrrBa2",
       "binary": {
         "path": "artifacts/dusk.so",
-        "sha256": "fa19c1ff8677e3ac9f798acf8f88948ee3803a886edb25c3d779c777984cb3a6"
+        "sha256": "203b84a68af65be247ebff7c9357751c0e658f847baab7c43378a8c8f46878cd"
       },
       "idl": {
         "path": "artifacts/dusk.json",
-        "sha256": "b3839f330c3c7fd2097d90c4dc4537b67d19ad7deaf3feefacc577ddfbd17c35"
+        "sha256": "ab181b0a459f95b659d088882bcc9288d78a6117bde2064432c0c7878282f0a3"
       }
     },
     {
@@ -35,23 +35,23 @@
       "programId": "B315E6hHTgDjHgCCPungLop2mkgv9SHkcBc9ZzALNxNY",
       "binary": {
         "path": "artifacts/leverage_delegate.so",
-        "sha256": "01aef2d292131b5c93b5c23fd4e6deb6e4f0fdbd7f17e46f5279e55f7028a001"
+        "sha256": "f4507703bc9eb71176d151027e2653d8f39aba0724840d53d3b1e25cb4414f19"
       },
       "idl": {
         "path": "artifacts/leverage_delegate.json",
-        "sha256": "9080b70c97dd48c937400bdcf554758bafc1faa1ef48fece619f52c299ab6386"
+        "sha256": "94680eeda232507985c72b5d1ac6fb6851b9e961c286c600a6d969167283815d"
       }
     }
   ],
   "sdk": {
     "path": "artifacts/dusk-sdk.tgz",
-    "sha256": "9e73a1f24c9f95276d0120e0923ddc073c26d2fa8919f1c23975eabc29c8b8e2"
+    "sha256": "086ea70869c175e1fefcd5c062d693e92d699479dcc6602732ab0f857e14590a"
   },
   "compatibility": {
-    "accountLayoutFingerprintSha256": "f9e3b5fe41ce5d5b1eb44b0660c64ee62d9a538c1507336aa6e3646d9ad1cb60",
-    "instructionFingerprintSha256": "6dd637427d607a89e872d9552b15825aaf4544f5f50b61dcda4cb254168e0831",
-    "eventFingerprintSha256": "4ded9c3b60848bd7c81bb2925a3bf7b989fc136303f780c375fb7789d464b397",
+    "accountLayoutFingerprintSha256": "b0d2274b6dbeb7d0dbb2a9231b025c074199009660332fae142feba41639e1eb",
+    "instructionFingerprintSha256": "01002251dcc4220ee4d6408042deb711b5dccbd95735afdb40e74714f16b8dc9",
+    "eventFingerprintSha256": "0681e6191fd9be61c4c6426340a89daa721308b856410f4af0357764bc2876b3",
     "errorFingerprintSha256": "c33729392d3baa262c31ff9d379bd5faeecd1ff7db48e0eea39c3a2ee2cdc46f",
-    "pdaFingerprintSha256": "12b69eab0e292ffd02a91f4e8390f9305ce4068ae72677914573eaf6184d0af0"
+    "pdaFingerprintSha256": "72ab6f09f4b8d9546e9277988950cba9cdd6107bfdab74ea10aadc613da46134"
   }
 }

@@ -1,11 +1,11 @@
 # Captured protocol artifacts
 
-`protocol.lock.json` pins the 4 November 2026 Solana devnet capture, revision
-`devnet-2026-11-04-c7db901`, status **captured**. `dusk.so` and
+`protocol.lock.json` pins the 9 November 2026 Solana devnet capture, revision
+`devnet-2026-11-09-combined-layout14`, status **captured**. `dusk.so` and
 `leverage_delegate.so` are the complete deployed ProgramData payloads after the
 45-byte metadata header, including allocation padding. Their IDLs were fetched
-from the programs' Anchor IDL accounts and match source `c7db901` exactly.
-The SDK archive is `2.16.0-next.20261102`, built and tested from that source.
+from the programs' Anchor IDL accounts and match source `9eec8ad6c33824edc33624fe9df05e50c293b528` exactly.
+The SDK archive is the registry-published `2.19.0-next.20261109`, verified against its registry integrity and both generated IDLs.
 
 [Deployment evidence](../protocol/devnet-deployment.v1.json) records program IDs,
 ProgramData and IDL addresses, observed and upgrade slots, sizes and hashes.

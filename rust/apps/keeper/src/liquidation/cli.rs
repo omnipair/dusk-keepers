@@ -100,7 +100,23 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
         (c.buyer, c.named, ixs)
     };
     let legacy = crate::runtime::transaction::compile_message(payer, &ixs, [0; 32])?;
-    let message = if let Some(table) = v["lookupTable"].as_str() {
+    let message = if let Some(tables) = v["lookupTables"].as_array() {
+        let tables = tables
+            .iter()
+            .map(|t| {
+                Ok((
+                    key(t["address"].as_str().ok_or("lookup table address")?)?,
+                    t["addresses"]
+                        .as_array()
+                        .ok_or("lookup addresses")?
+                        .iter()
+                        .map(|a| key(a.as_str().unwrap_or("")))
+                        .collect::<Result<Vec<_>, _>>()?,
+                ))
+            })
+            .collect::<Result<Vec<_>, String>>()?;
+        crate::runtime::transaction::compile_v0_message_with_tables(payer, &ixs, [0; 32], &tables)?
+    } else if let Some(table) = v["lookupTable"].as_str() {
         let addresses = v["lookupAddresses"]
             .as_array()
             .ok_or("lookup addresses")?

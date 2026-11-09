@@ -65,6 +65,12 @@ pub struct RpcClient {
 }
 
 impl RpcClient {
+    pub(crate) fn is_loopback(&self) -> bool {
+        ["http://127.0.0.1:", "http://localhost:", "http://[::1]:"]
+            .iter()
+            .any(|prefix| self.endpoint.starts_with(prefix))
+    }
+
     pub fn new(endpoint: impl Into<String>, timeout: Duration) -> Self {
         Self {
             endpoint: endpoint.into(),
