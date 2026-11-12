@@ -43,6 +43,8 @@ pub struct LiquidationJob<'a> {
     pub max_sends: usize,
     pub priority_markets: &'a BTreeSet<[u8; 32]>,
 }
+type PreparedPlan = (Context, Snapshot, LiquidationPlan);
+
 struct LiquidationPlan {
     action: &'static str,
     instructions: Vec<Instruction>,
@@ -387,10 +389,10 @@ impl LiquidationJob<'_> {
         }
         let plan = select_liquidation(
             self.liquidation_mode,
-            || self.ordinary_plan(&c, &s, &health, jupiter_budget),
-            || self.emergency_plan(&c, &s),
+            || self.ordinary_with_refresh(c, s, health, jupiter_budget),
+            || self.emergency_with_refresh(position, kind, side),
         )?;
-        if let Some(plan) = plan {
+        if let Some((c, s, plan)) = plan {
             // Once a plan enters submission, every outcome returns to the journal.
             // Submission errors and unknown signatures never select another route.
             return self
@@ -407,15 +409,85 @@ impl LiquidationJob<'_> {
         Ok(Some((None, "eligible but unfilled: no adaptively searched permitted route met the configured payment/profit bounds".into())))
     }
 
+    fn ordinary_with_refresh(
+        &self,
+        c: Context,
+        s: Snapshot,
+        health: LiquidationHealth,
+        jupiter_budget: &mut usize,
+    ) -> Result<Option<PreparedPlan>> {
+        let mut jupiter_builds = if settlement()? == Settlement::Jupiter {
+            crate::routing::jupiter::Config::from_env()?.attempts
+        } else {
+            0
+        };
+        if let Some(plan) =
+            self.ordinary_plan(&c, &s, &health, jupiter_budget, &mut jupiter_builds, false)?
+        {
+            return Ok(Some((c, s, plan)));
+        }
+        position_log::decision(
+            c.position,
+            c.debt_asset,
+            "ordinary_fallback: refreshing state and health before full liquidation",
+            None,
+        );
+        let (c, s, health) = self.inspect_health(c.position, &c.kind, c.debt_asset, None)?;
+        let Some(health) = health.filter(|health| health.eligible()) else {
+            return Ok(None);
+        };
+        if !c.setup(&s)?.is_empty() {
+            return Err(
+                "wallet accounts changed during full-liquidation refresh; retry next pass".into(),
+            );
+        }
+        let plan =
+            self.ordinary_plan(&c, &s, &health, jupiter_budget, &mut jupiter_builds, true)?;
+        Ok(plan.map(|plan| (c, s, plan)))
+    }
+
+    fn emergency_with_refresh(
+        &self,
+        position: [u8; 32],
+        kind: &str,
+        side: u8,
+    ) -> Result<Option<PreparedPlan>> {
+        position_log::decision(
+            position,
+            side,
+            "emergency_eligibility: refreshing state and health before emergency liquidation",
+            None,
+        );
+        let (c, s, health) = self.inspect_health(position, kind, side, None)?;
+        if !health.is_some_and(|health| health.emergency_allowed()) {
+            position_log::decision(
+                position,
+                side,
+                "emergency_unavailable: refreshed health is outside emergency eligibility",
+                None,
+            );
+            return Ok(None);
+        }
+        if !c.setup(&s)?.is_empty() {
+            return Err("wallet accounts changed during emergency refresh; retry next pass".into());
+        }
+        // Eligibility is only a prefilter. The on-chain preview must separately
+        // approve the size, health improvement and any full-close permission.
+        let plan = self.emergency_plan(&c, &s)?;
+        Ok(plan.map(|plan| (c, s, plan)))
+    }
+
     fn ordinary_plan(
         &self,
         c: &Context,
         s: &Snapshot,
         health: &LiquidationHealth,
         jupiter_budget: &mut usize,
+        jupiter_builds: &mut usize,
+        full_only: bool,
     ) -> Result<Option<LiquidationPlan>> {
         if settlement()? == Settlement::Jupiter {
-            return self.jupiter_plan(c, s, health, jupiter_budget);
+            return self.jupiter_plan(c, s, health, jupiter_budget, jupiter_builds, full_only);
         }
         let inventory = self.inventory_mode()?;
         if inventory {
@@ -435,37 +507,61 @@ impl LiquidationJob<'_> {
         if cap == 0 {
             return Err("KEEPER_FLASH_MAX_REPAY must be positive".into());
         }
-        let partial = search_profitable(cap.min(health.debt), minimum_profit, |repay| {
-            let Some(q) = self.preview::<FlashLiquidationQuote>(
-                c,
-                s,
-                c.preview_flash(self.contract, repay, false)?,
-            )?
-            else {
+        if !full_only {
+            let mut rejected = false;
+            let partial = search_profitable(cap.min(health.debt), minimum_profit, |repay| {
+                if rejected {
+                    return Ok(None);
+                }
+                let Some(q) = self.preview::<FlashLiquidationQuote>(
+                    c,
+                    s,
+                    c.preview_flash(self.contract, repay, false)?,
+                )?
+                else {
+                    return Ok(None);
+                };
+                // Score without the final floor, then rebuild and recheck the winner
+                // with that floor enforced on chain.
+                let Some(ixs) = self.flash_plan(c, s, &q, repay, 0)? else {
+                    return Ok(None);
+                };
+                let profit = self.liquidation_profit(c, s, &ixs, q.full)?;
+                // Expected execution rejection ends this search. Further candidates
+                // must use a fresh snapshot; unexpected errors propagate above.
+                rejected = profit.is_none();
+                Ok(profit.map(|profit| (profit, (repay, q))))
+            })?;
+            if rejected {
+                position_log::decision(
+                    c.position,
+                    c.debt_asset,
+                    "partial_simulation_rejected: discarding quote before full-liquidation refresh",
+                    None,
+                );
                 return Ok(None);
-            };
-            // Score without the final floor, then rebuild and recheck the winner
-            // with that floor enforced on chain.
-            let Some(ixs) = self.flash_plan(c, s, &q, repay, 0)? else {
-                return Ok(None);
-            };
-            Ok(self
-                .liquidation_profit(c, s, &ixs, q.full)?
-                .map(|profit| (profit, (repay, q))))
-        })?;
-        if let Some((repay, quote)) = partial {
-            let instructions = self
-                .flash_plan(c, s, &quote, repay, minimum_profit)?
-                .ok_or("selected flash route no longer meets configured bounds")?;
-            if !self.profitable(c, s, &instructions, minimum_profit, false)? {
-                return Err("selected flash route failed protected revalidation".into());
             }
-            return Ok(Some(LiquidationPlan {
-                action: "flash",
-                instructions,
-                minimum_profit,
-                route_state: None,
-            }));
+            if let Some((repay, quote)) = partial {
+                let instructions = self
+                    .flash_plan(c, s, &quote, repay, minimum_profit)?
+                    .ok_or("selected flash route no longer meets configured bounds")?;
+                if !self.profitable(c, s, &instructions, minimum_profit, false)? {
+                    position_log::decision(
+                        c.position,
+                        c.debt_asset,
+                        "partial_revalidation_rejected: discarding quote before full-liquidation refresh",
+                        None,
+                    );
+                    return Ok(None);
+                }
+                return Ok(Some(LiquidationPlan {
+                    action: "flash",
+                    instructions,
+                    minimum_profit,
+                    route_state: None,
+                }));
+            }
+            return Ok(None);
         }
         if cap >= health.debt
             && let Some(q) = self.preview::<FlashLiquidationQuote>(

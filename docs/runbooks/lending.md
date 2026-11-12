@@ -44,6 +44,26 @@ Full liquidation always requires an accepted full preview, regardless of whether
 partial searches found a route. Both mechanisms retain their pinned protocol
 eligibility and loss-allocation rules.
 
+## Simulation fallback
+
+An expected partial execution rejection (including final plan revalidation)
+ends partial size searching for that attempt. The keeper discards the quote,
+re-reads the position, market, wallet, oracle and fee accounts, and previews
+health again before trying a full ordinary liquidation. The full preview must
+independently permit closing the position; a partial rejection is not permission.
+
+If no full ordinary route passes and `KEEPER_LENDING_MODE=both`, the keeper
+refreshes again and checks emergency eligibility before searching emergency
+sizes. The pinned emergency threshold is equity at or below 70% of maintenance.
+The on-chain emergency preview and execution simulation must still approve the
+size, health improvement, payment and reward bounds. Logs identify each refresh
+and explain when emergency is unavailable. This sequence is bounded to one
+partial phase, one full phase and one emergency phase per position attempt.
+
+Unexpected program errors, RPC failures and invariant failures abort the attempt.
+Once a selected plan enters submission, no failure triggers another route;
+pending signatures must be reconciled before a later attempt.
+
 ## Submission and recovery
 
 Route selection finishes before submission. An unexpected preview, RPC, or

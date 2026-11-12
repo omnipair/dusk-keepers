@@ -41,6 +41,8 @@ impl LiquidationJob<'_> {
         s: &Snapshot,
         health: &LiquidationHealth,
         pass_budget: &mut usize,
+        position_budget: &mut usize,
+        full_only: bool,
     ) -> Result<Option<LiquidationPlan>> {
         let config = Config::from_env()?;
         let minimum_profit = required_u64("KEEPER_LIQUIDATION_MIN_PROFIT")?;
@@ -59,18 +61,22 @@ impl LiquidationJob<'_> {
             return Err("Jupiter requires mainnet or an opted-in local shadow fork; configure KEEPER_FLASH_SETTLEMENT=dusk for devnet".into());
         }
         let client = Client::new(&config);
-        let mut builds = config.attempts;
         // HTTP-backed search has its own small budget, not the 256-probe local
         // adaptive search. Reserve a candidate for independently permitted full
         // liquidation; no failure of a partial preview authorizes a full close.
         let full_allowed = cap >= health.debt;
         let partial_count = config.attempts.saturating_sub(usize::from(full_allowed));
+        let mut builds = if full_only {
+            *position_budget
+        } else {
+            position_budget.saturating_sub(usize::from(full_allowed))
+        };
         let mut candidates: Vec<_> = super::super::search::slices(cap.min(health.debt))
             .into_iter()
-            .take(partial_count)
+            .take(if full_only { 0 } else { partial_count })
             .map(|a| (a, false))
             .collect();
-        if full_allowed {
+        if full_only && full_allowed {
             candidates.push((cap, true));
         }
         for (repay, full) in candidates {
@@ -96,6 +102,7 @@ impl LiquidationJob<'_> {
                     break;
                 }
                 builds -= 1;
+                *position_budget -= 1;
                 let Some(route) = client.build(&config, &request, max_accounts, pass_budget)?
                 else {
                     break;
@@ -181,6 +188,11 @@ impl LiquidationJob<'_> {
                         minimum_profit,
                         route_state: Some(state),
                     }));
+                }
+                // Refresh before full liquidation after an expected partial
+                // execution rejection; never recycle the failed route or quote.
+                if !full {
+                    return Ok(None);
                 }
                 break;
             }

@@ -15,7 +15,21 @@ import { resolveLiquidationAccounts } from "../packages/dusk-adapter/src/liquida
 const layout = JSON.parse(
   readFileSync("protocol/keeper-account-layout.v1.json", "utf8"),
 );
-for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mode = "both", rejectOrdinary = false, rejectEmergencyDust = false, emergencySlippage = "0", driftEmergencyQuote = false, oracle = false, devnetAllMarkets = false, maxSends = "4", debtShares = null, clockMismatch = false } of [
+for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mode = "both", rejectOrdinary = false, rejectEmergencyDust = false, emergencySlippage = "0", driftEmergencyQuote = false, oracle = false, devnetAllMarkets = false, maxSends = "4", debtShares = null, clockMismatch = false, fallback = null, fallbackAfter = 1, rejectFull = false, refreshedHealth = null, refreshRpcError = false, unexpectedExecution = false } of [
+  ...[
+    { name: "partial execution rejection refreshes before full inventory liquidation", expected: "flash_full" },
+    { name: "selected partial revalidation refreshes before full inventory liquidation", expected: "flash_full", fallbackAfter: 2 },
+    { name: "rejected full liquidation refreshes before eligible emergency fallback", expected: "emergency", rejectFull: true },
+    { name: "ordinary-only full rejection never enters emergency", expected: "unfilled", rejectFull: true, mode: "ordinary", file: "01-flash-BorrowPosition.json", profile: "lending" },
+    { name: "fresh health below emergency threshold skips emergency probes", expected: "unfilled", rejectFull: true, refreshedHealth: "ordinary_only" },
+    { name: "recovered position stops fallback after refresh", expected: "unfilled", refreshedHealth: "healthy" },
+    { name: "failed snapshot refresh never uses the stale full quote", expected: "error", refreshRpcError: true },
+    { name: "unexpected partial execution error never triggers fallback", expected: "error", unexpectedExecution: true },
+  ].map(scenario => ({
+    file: "05-flash-LeveragePosition.json", profile: "leverage", settlement: "inventory",
+    maxRepay: "18446744073709551615", minProfit: "0", fallback: "execution",
+    ...scenario,
+  })),
   {
     file: "01-flash-BorrowPosition.json", profile: "lending", expected: "flash",
     settlement: "inventory", maxRepay: "18446744073709551615", minProfit: "0",
@@ -200,6 +214,13 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mod
     );
     const requests: string[] = [];
     let simulations = 0;
+    let partialExecutions = 0;
+    let fallbackInjected = false;
+    let refreshReads = 0;
+    let fullPreviewCalls = 0;
+    let fullExecutionCalls = 0;
+    let emergencyAfterRefresh = false;
+    let eventTrace: string[] = [];
     let clockMismatches = 0;
     const previewNames = ["preview_flash_liquidation", "preview_emergency_liquidation"];
     const previews: string[] = [];
@@ -235,6 +256,11 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mod
             answer = context.slot;
             break;
           case "getMultipleAccounts":
+            if (fallbackInjected) {
+              refreshReads++;
+              eventTrace.push("refresh_read");
+              if (refreshRpcError) throw new Error("injected snapshot refresh failure");
+            }
             if (p[0].includes(oracleFeed.toBase58())) oracleReads++;
             answer = {
               context,
@@ -304,8 +330,55 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mod
                 fullEmergencyBounds.push({ reward: data.readBigUInt64LE(18), output: data.readBigUInt64LE(26) });
               }
             }
+            const flashPreview = tx.message.compiledInstructions.find(ix => Buffer.from(ix.data).subarray(0, 8).equals(discriminator("preview_flash_liquidation")));
+            const flashBegin = tx.message.compiledInstructions.find(ix => Buffer.from(ix.data).subarray(0, 8).equals(discriminator("begin_flash_liquidation")));
+            const fullPreview = flashPreview && Buffer.from(flashPreview.data)[17] === 1;
+            // Begin has a 32-byte position key, debt side and four u64 bounds.
+            const fullExecution = flashBegin && Buffer.from(flashBegin.data)[73] === 1;
+            const rejection = (name: string, code: number) => ({ context, value: {
+              err: { InstructionError: [2, { Custom: code }] },
+              logs: [`Program log: AnchorError occurred. Error Code: ${name}. Error Number: ${code}.`],
+            } });
+            if (fallback && flashBegin && !fullExecution) {
+              partialExecutions++;
+              if (partialExecutions === fallbackAfter) {
+                fallbackInjected = true;
+                eventTrace.push("partial_rejected");
+                if (unexpectedExecution) {
+                  answer = { context, value: { err: "injected unexpected ordinary failure", logs: [] } };
+                  break;
+                }
+                // A new bank makes this position insolvent, permitting a full
+                // close. The keeper must fetch it instead of reusing the quote.
+                const positionKey = new PublicKey(f.position);
+                const position = svm.getAccount(positionKey)!;
+                const data = Buffer.from(position.data);
+                const collateralPath = f.kind === "LeveragePosition" ? "collateral_amount" : f.debtAsset === 0 ? "quote_collateral" : "base_collateral";
+                const field = layout.accounts.find((a: any) => a.name === f.kind).fields.find((v: any) => v.path === collateralPath);
+                data.writeBigUInt64LE(data.readBigUInt64LE(field.offset) / 4n, field.offset);
+                svm.setAccount(positionKey, { ...position, data });
+                const clock = svm.getClock(); clock.slot += 1n; clock.unixTimestamp += 1n; svm.setClock(clock);
+                answer = rejection("LiquidationDoesNotImproveHealth", 6138);
+                break;
+              }
+            }
+            if (fallback && fullPreview) {
+              fullPreviewCalls++;
+              eventTrace.push("full_preview");
+              assert.ok(refreshReads > 0, "full preview must follow a fresh account snapshot");
+            }
+            if (fallback && fullExecution) {
+              fullExecutionCalls++;
+              eventTrace.push("full_execution");
+              if (rejectFull) { answer = rejection("LiquidationDoesNotImproveHealth", 6138); break; }
+            }
             const emergency = tx.message.compiledInstructions.find(ix => Buffer.from(ix.data).subarray(0, 8).equals(discriminator("preview_emergency_liquidation")));
             if (emergency) {
+              if (fallback) {
+                assert.ok(fullExecutionCalls > 0, "emergency cannot precede the full attempt");
+                assert.ok(eventTrace.lastIndexOf("refresh_read") > eventTrace.lastIndexOf("full_execution"), "emergency must use another fresh snapshot");
+                emergencyAfterRefresh = true;
+              }
               const data = Buffer.from(emergency.data);
               if (data[17]) fullEmergencyPreviews++;
               if (rejectEmergencyDust && data.readBigUInt64LE(9) === 1n && !data[17]) {
@@ -357,6 +430,13 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mod
                 ),
               },
             };
+            if (fallbackInjected && refreshedHealth && !failed && tx.message.compiledInstructions.some(ix => Buffer.from(ix.data).subarray(0, 8).equals(discriminator("preview_liquidation_health")))) {
+              const data = Buffer.from(answer.value.returnData.data[0], "base64");
+              data.writeBigUInt64LE(100_000n, 0);
+              data.writeBigUInt64LE(refreshedHealth === "healthy" ? 90_000n : 94_400n, 8);
+              data.writeUInt16LE(700, 16);
+              answer.value.returnData.data[0] = data.toString("base64");
+            }
             if (driftEmergencyQuote && !failed && emergency && Buffer.from(emergency.data)[17]) {
               // The execution bank delivers one atom less than the preview.
               const quote = Buffer.from(answer.value.returnData.data[0], "base64");
@@ -416,7 +496,7 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mod
               KEEPER_FLASH_MAX_REPAY: maxRepay,
               KEEPER_FLASH_MAX_PAYMENT_DEBIT: "18446744073709551615",
               KEEPER_FLASH_MIN_COLLATERAL_CREDIT:
-                ["emergency", "unfilled", "error"].includes(expected) ? "18446744073709551615" : "1",
+                !fallback && ["emergency", "unfilled", "error"].includes(expected) ? "18446744073709551615" : "1",
               KEEPER_LIQUIDATION_MIN_PROFIT: minProfit,
               KEEPER_EMERGENCY_SLIPPAGE_BPS: emergencySlippage,
             },
@@ -435,7 +515,7 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mod
         : expected === "healthy" ? /state=HEALTHY/
         : expected === "debt_free" ? /state=DEBT_FREE health_factor=n\/a/
         : expected === "unfilled" ? /eligible but unfilled/
-        : expected === "error" ? /injected unexpected ordinary failure/ : new RegExp(`shadow ${expected}`);
+        : expected === "error" ? (refreshRpcError ? /injected snapshot refresh failure/ : /injected unexpected ordinary failure/) : new RegExp(`shadow ${expected}`);
       const first = await once();
       assert.equal(first.code, 0, first.output);
       assert.match(first.output, expectedOutput);
@@ -450,6 +530,27 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mod
         assert.ok(healthPreviews.length > 0);
         assert.ok(first.output.includes(`debt_raw=${healthPreviews[0].debt}`), "log must use indexed debt returned by the program");
         assert.match(first.output, /liquidation_ltv_pct=\d+\.\d+ maintenance_pct=\d+\.\d+/);
+      }
+      if (fallback) {
+        assert.equal(partialExecutions, fallbackAfter, first.output);
+        assert.ok(fallbackInjected);
+        assert.ok(!requests.includes("sendTransaction"));
+        if (unexpectedExecution) {
+          assert.equal(refreshReads, 0); assert.equal(fullPreviewCalls, 0);
+          assert.ok(!previews.includes("preview_emergency_liquidation"));
+        } else if (refreshRpcError || refreshedHealth === "healthy") {
+          assert.ok(refreshReads > 0); assert.equal(fullPreviewCalls, 0);
+          assert.ok(!previews.includes("preview_emergency_liquidation"));
+        } else {
+          assert.equal(fullPreviewCalls, 1, first.output);
+          assert.equal(fullExecutionCalls, 1, first.output);
+          assert.ok(eventTrace.indexOf("refresh_read") > eventTrace.indexOf("partial_rejected"));
+          assert.ok(eventTrace.indexOf("full_preview") > eventTrace.indexOf("refresh_read"));
+          assert.equal(emergencyAfterRefresh, expected === "emergency", first.output);
+        }
+        if (refreshedHealth === "ordinary_only") assert.match(first.output, /emergency_unavailable/);
+        assert.ok(!first.output.includes("selected flash route failed protected revalidation"));
+        return;
       }
       const advanced = svm.getClock();
       advanced.slot += 1n;
