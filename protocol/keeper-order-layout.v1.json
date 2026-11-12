@@ -1,7 +1,7 @@
 {
   "$schema": "./schemas/account-layout.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "devnet-2026-11-12-fresh-layout15",
+  "protocolRevision": "devnet-2026-11-12-109580f6",
   "programId": "A1aX1f3fx9x43FVYunRp25pu6HBczmYz1obEW9jZCf2B",
   "idlSha256": "c0fee6f69a234a68d5de140ac289a286a90a811132a4bd29c41d71f3e580405d",
   "accounts": [
