@@ -1,7 +1,7 @@
 # Captured layout-15 protocol artifacts
 
-[The protocol lock](../protocol.lock.json) pins the local layout-15 release candidate. Both SBPF v0 executables and both Anchor IDLs were captured from the signed Dusk source in the lock. The SDK archive is the corresponding local pack of `2.21.0-next.20261112`.
+The [protocol lock](../protocol.lock.json) pins the finalized devnet executable upgrade from [Dusk #98](https://github.com/omnipair/dusk/pull/98). Both executables include the allocation padding read from ProgramData. The IDLs and published SDK archive match the original layout-15 release byte for byte.
 
-Use `npm run check` to verify the artifacts and the generated account, instruction and adapter contracts. The captured lock permits fixtures, Surfpool and shadow evaluation. The live gate still requires a finalized devnet capture and a reviewed frozen lock.
+The [deployment capture](../protocol/devnet-deployment.v1.json) records the two upgrade slots, executable hashes, and IDL accounts. The liquidation and hLP bank fixtures run against those captured executables.
 
-After deployment and SDK publication, follow the [capture runbook](../docs/devnet-capture.md) to record both deployed executables, the matching IDL accounts and the published SDK. The historical snapshots, Git bundles, generated types and hash-named binaries retain their original provenance.
+Run `npm run check` to verify artifacts and generated contracts. This lock is captured and permits shadow evaluation. The live gate requires a reviewed frozen lock.
