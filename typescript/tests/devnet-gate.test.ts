@@ -30,7 +30,7 @@ for (const condition of ["normal live", "wrong network", "wrong deployment", "ex
         SOLANA_RPC_HTTP_URL: `http://127.0.0.1:${(server.address() as any).port}`,
       };
       if (condition !== "normal live") env.KEEPER_ALLOW_CAPTURED_DEVNET = "1";
-      const expected = { "normal live": /NotFrozen/, "wrong network": /refuses this network/, "wrong deployment": /account identity changed/, "excess sends": /MAX_SENDS_PER_PASS=1/ }[condition];
+      const expected = { "normal live": /NotFrozen/, "wrong network": /refuses this network/, "wrong deployment": /devnet dusk Program \w+ account is missing/, "excess sends": /MAX_SENDS_PER_PASS=1/ }[condition];
       await assert.rejects(execute("target/debug/dusk-keeper", ["--check"], { env, timeout: 20000 }), (error: any) => expected.test(error.stderr));
       assert.ok(!requests.includes("sendTransaction"));
       if (["normal live", "excess sends"].includes(condition)) assert.equal(requests.length, 0);
@@ -40,7 +40,9 @@ for (const condition of ["normal live", "wrong network", "wrong deployment", "ex
   });
 }
 
-test("verified devnet live startup accepts all markets without a market selector", async () => {
+for (const missing of [undefined, "programId", "programData", "idlAccount"] as const) {
+test(missing ? `devnet startup identifies a closed ${missing} account before loading a signer`
+  : "verified devnet live startup accepts all markets without a market selector", async () => {
   const root = mkdtempSync(join(tmpdir(), "dusk-all-markets-"));
   const deployment = JSON.parse(readFileSync("protocol/devnet-deployment.v1.json", "utf8"));
   const lock = JSON.parse(readFileSync("protocol.lock.json", "utf8"));
@@ -63,6 +65,7 @@ test("verified devnet live startup accepts all markets without a market selector
     accounts.set(program.programData, account(Buffer.concat([header, binary]), loader));
     accounts.set(program.idlAccount, account(idl, program.programId));
   }
+  if (missing) accounts.delete(deployment.programs[0][missing]);
   const requests: string[] = [];
   const server = createServer(async (req, res) => {
     const chunks: Buffer[] = [];
@@ -81,7 +84,7 @@ test("verified devnet live startup accepts all markets without a market selector
     copyFileSync("protocol.lock.json", join(root, "protocol.lock.json"));
     writeFileSync(join(root, "protocol/devnet-deployment.v1.json"), JSON.stringify(deployment));
     await new Promise<void>(resolve => server.listen(0, "127.0.0.1", resolve));
-    const { stdout } = await execute("target/debug/dusk-keeper", ["--check"], {
+    const startup = execute("target/debug/dusk-keeper", ["--check"], {
       env: {
         PATH: process.env.PATH, KEEPER_MODE: "live", KEEPER_PROFILE: "lending",
         KEEPER_ALLOW_CAPTURED_DEVNET: "1", KEEPER_MAX_SENDS_PER_PASS: "1",
@@ -89,13 +92,25 @@ test("verified devnet live startup accepts all markets without a market selector
         SOLANA_RPC_HTTP_URL: `http://127.0.0.1:${(server.address() as any).port}`,
       }, timeout: 20000,
     });
-    assert.match(stdout, /verified explicit devnet test exception/);
-    assert.match(stdout, /profile=lending mode=live/);
-    assert.equal(requests.filter(method => method === "getMultipleAccounts").length, deployment.programs.length);
-    assert.equal(requests.filter(method => method === "getAccountInfo").length, deployment.programs.length);
-    assert.ok(!requests.includes("sendTransaction"));
+    if (missing) {
+      await assert.rejects(startup, (error: any) => {
+        const kind = { programId: "Program", programData: "ProgramData", idlAccount: "IDL" }[missing];
+        assert.ok(error.stderr.includes(`dusk ${kind} ${deployment.programs[0][missing]} account is missing`));
+        assert.ok(error.stderr.includes(`runtime revision ${deployment.protocolRevision}`));
+        assert.match(error.stderr, /refresh the runtime's protocol.lock.json, protocol\/ and artifacts\/ together/);
+        return true;
+      });
+    } else {
+      const { stdout } = await startup;
+      assert.match(stdout, /verified explicit devnet test exception/);
+      assert.match(stdout, /profile=lending mode=live/);
+      assert.equal(requests.filter(method => method === "getMultipleAccounts").length, deployment.programs.length);
+      assert.equal(requests.filter(method => method === "getAccountInfo").length, deployment.programs.length);
+    }
+    assert.ok(requests.every(method => ["getGenesisHash", "getMultipleAccounts", "getAccountInfo"].includes(method)));
   } finally {
     if (server.listening) await new Promise<void>(resolve => server.close(() => resolve()));
     rmSync(root, { recursive: true, force: true });
   }
 });
+}

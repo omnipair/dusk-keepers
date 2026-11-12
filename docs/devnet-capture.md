@@ -1,10 +1,9 @@
-# Devnet capture — 8 November 2026
+# Devnet capture
 
-The current revision is `devnet-2026-11-08-hlp-deposit`, captured from the fresh
-Dusk and leverage-delegate deployment, updated for the compatible Dusk upgrade at finalized slot 519909294. Source
-`84c2a6997c795fb062c9bafb77680f8271a6f86d` preserves the observed IDLs. Liquidation and hLP fixtures were regenerated from that exact source and execute the current captured binary. The SDK artifact is downloaded from npm as
-`@omnipair/dusk-sdk@2.18.2-next.20261108`; its SHA-256 is recorded
-in the protocol lock. Consumers install the published package normally.
+The [protocol lock](../protocol.lock.json) records the current revision, source
+commit and published SDK archive. The [artifact notes](../artifacts/README.md)
+describe that release. Liquidation and hLP bank fixtures execute the captured
+binaries; generated instruction contracts and account layouts use the pinned IDLs.
 
 The capture reads the devnet genesis hash, upgradeable-loader Program and
 ProgramData accounts, and Anchor IDL accounts. It checks their owners and
@@ -17,14 +16,37 @@ addresses, upgrade slots, sizes and SHA-256 hashes. The validator cross-checks
 this evidence against the lock and artifacts offline. It does not prove the
 cluster has remained unchanged after capture. Matching IDLs and passing tests
 also do not constitute a reproducible-build attestation for the deployed bytes.
-The lock records the capture toolchain, including Surfpool 1.2.0. Sixteen
-native-plan RPC simulations passed on an isolated offline Surfpool with the exact
-captured binaries. The [recorded results](evidence/operator-surfpool-simulations.json)
+The lock records the capture toolchain. Sixteen native-plan RPC simulations were
+recorded for the November 8 capture on an isolated offline Surfpool. These
+[historical results](evidence/operator-surfpool-simulations.json)
+do not validate later captures. The rehearsal
 can be reproduced with an offline Surfpool on port 18899, using
 `--block-production-mode transaction` so wall-clock ticks do not overwrite fixture clocks, and
 `node --experimental-strip-types scripts/rehearse-surfpool.mjs`.
 This is simulation evidence, not the full signed E2E matrix
 required for a frozen live release.
+
+## Recover a stale local runtime
+
+`devnet ... account is missing` or `account identity changed` means a captured
+Program, ProgramData or IDL account no longer matches the chain. A redeployment
+can close the old ProgramData and IDL accounts while leaving the executable
+Program account present. The error names the account and runtime revision;
+execution remains blocked.
+
+Pull the reviewed keeper capture for the current deployment and rebuild the
+keeper. If the launcher uses a separate runtime directory, pulling the checkout
+alone does not update it. With the workers stopped, install the rebuilt binary,
+`protocol.lock.json`, `protocol/` and `artifacts/` as one matching bundle, and
+refresh any launcher manifest that pins its binary hash. Preserve the wallets
+and PostgreSQL journal.
+
+Run `dusk-keeper --check` from the installed runtime directory with the same live
+devnet environment used by the launcher. With `KEEPER_ALLOW_CAPTURED_DEVNET=1`,
+this verifies the network and captured deployment before returning, without
+loading a signer or starting workers. Check every enabled profile before
+restarting. If the reviewed capture still differs from devnet, recapture and
+validate it using the procedure below; do not bypass the deployment check.
 
 ## Reproduce
 
@@ -85,6 +107,6 @@ frozen-lock release procedure for live execution. A funded wallet, matching
 frontend cluster and eligible positions/orders remain necessary for execution
 tests. This capture does not establish which deployment the beta frontend uses.
 
-The fresh smoke market is `EdqUE8D7JuTrdSAy4kpynjvcaKugguuyjHzC6vFvw3HD`.
-Re-fetch its state and oracle policy before selecting it for a test; this address
-is a deployment reference, not a freshness guarantee.
+Discover smoke markets under the program ID in the current capture. Markets from
+an older deployment are not targets for the replacement program. Re-fetch each
+market's state and oracle policy before selecting it for a test.

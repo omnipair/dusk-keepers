@@ -39,9 +39,23 @@ fn hash(bytes: &[u8]) -> String {
     format!("{:x}", Sha256::digest(bytes))
 }
 
-fn account_bytes(account: &serde_json::Value, owner: &str, executable: bool) -> Result<Vec<u8>> {
+fn account_bytes(
+    account: &serde_json::Value,
+    owner: &str,
+    executable: bool,
+    description: &str,
+) -> Result<Vec<u8>> {
+    let refresh = "refresh the runtime's protocol.lock.json, protocol/ and artifacts/ together from a verified devnet capture";
+    if account.is_null() {
+        return Err(format!(
+            "devnet {description} account is missing (possibly closed during redeployment); {refresh}"
+        ));
+    }
     if account["owner"] != owner || account["executable"] != executable {
-        return Err("devnet deployment account identity changed".into());
+        return Err(format!(
+            "devnet {description} account identity changed: expected owner={owner} executable={executable}, observed owner={} executable={}; {refresh}",
+            account["owner"], account["executable"]
+        ));
     }
     if account["data"][1] != "base64" {
         return Err("devnet deployment account encoding".into());
@@ -58,8 +72,18 @@ fn check_program(program: &Program, accounts: &[serde_json::Value], full: bool) 
     if accounts.len() != 2 {
         return Err("incomplete devnet deployment snapshot".into());
     }
-    let executable = account_bytes(&accounts[0], LOADER, true)?;
-    let data = account_bytes(&accounts[1], LOADER, false)?;
+    let executable = account_bytes(
+        &accounts[0],
+        LOADER,
+        true,
+        &format!("{} Program {}", program.name, program.program_id),
+    )?;
+    let data = account_bytes(
+        &accounts[1],
+        LOADER,
+        false,
+        &format!("{} ProgramData {}", program.name, program.program_data),
+    )?;
     if executable.len() != 36
         || executable[..4] != 2u32.to_le_bytes()
         || bs58::encode(&executable[4..36]).into_string() != program.program_data
@@ -145,10 +169,27 @@ pub fn verify(client: &RpcClient, full: bool) -> Result<()> {
                 .as_array()
                 .ok_or("missing devnet program accounts")?,
             full,
-        )?;
+        )
+        .map_err(|error| {
+            format!(
+                "{error} (runtime revision {})",
+                deployment.protocol_revision
+            )
+        })?;
         if full {
             let response: serde_json::Value = client.call("getAccountInfo", serde_json::json!([observed.idl_account,{"encoding":"base64","commitment":"confirmed","minContextSlot":response["context"]["slot"]}])).map_err(|e| e.to_string())?;
-            let bytes = account_bytes(&response["value"], &observed.program_id, false)?;
+            let bytes = account_bytes(
+                &response["value"],
+                &observed.program_id,
+                false,
+                &format!("{} IDL {}", observed.name, observed.idl_account),
+            )
+            .map_err(|error| {
+                format!(
+                    "{error} (runtime revision {})",
+                    deployment.protocol_revision
+                )
+            })?;
             if hash(&bytes) != observed.idl_account_sha256 {
                 return Err(format!("{} deployed IDL changed", observed.name));
             }
@@ -315,6 +356,18 @@ mod tests {
             serde_json::json!({"owner":LOADER,"executable":false,"data":[base64(&data),"base64"]}),
         ];
         assert!(check_program(&program, &accounts, true).is_ok());
+        for full in [false, true] {
+            for (index, kind, address) in [
+                (0, "Program", &program.program_id),
+                (1, "ProgramData", &program.program_data),
+            ] {
+                let mut closed = accounts.clone();
+                closed[index] = serde_json::Value::Null;
+                let error = check_program(&program, &closed, full).unwrap_err();
+                assert!(error.contains(&format!("dusk {kind} {address} account is missing")));
+                assert!(error.contains("refresh the runtime's protocol.lock.json"));
+            }
+        }
         for index in [4, 45] {
             let mut changed = data.clone();
             changed[index] ^= 1;
@@ -324,11 +377,34 @@ mod tests {
         }
         let mut broken = accounts.clone();
         broken[1]["owner"] = "wrong".into();
-        assert!(check_program(&program, &broken, false).is_err());
+        let error = check_program(&program, &broken, false).unwrap_err();
+        assert!(error.contains(&format!("dusk ProgramData {}", program.program_data)));
+        assert!(error.contains(&format!("expected owner={LOADER} executable=false")));
+        assert!(error.contains("observed owner=\"wrong\" executable=false"));
+        let mut broken = accounts.clone();
+        broken[0]["executable"] = false.into();
+        assert!(
+            check_program(&program, &broken, true)
+                .unwrap_err()
+                .contains("account identity changed")
+        );
         let mut pointer = executable.clone();
         pointer[4] ^= 1;
         let mut broken = accounts.clone();
         broken[0]["data"][0] = base64(&pointer).into();
         assert!(check_program(&program, &broken, false).is_err());
+    }
+
+    #[test]
+    fn missing_idl_identifies_the_account_and_requires_a_capture_refresh() {
+        let error = account_bytes(
+            &serde_json::Value::Null,
+            "program-owner",
+            false,
+            "leverage_delegate IDL idl-address",
+        )
+        .unwrap_err();
+        assert!(error.contains("leverage_delegate IDL idl-address account is missing"));
+        assert!(error.contains("verified devnet capture"));
     }
 }
