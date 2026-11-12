@@ -2,36 +2,36 @@
   "schemaVersion": 1,
   "cluster": "devnet",
   "genesisHash": "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG",
-  "capturedAt": "2026-11-09T10:40:35.610Z",
-  "protocolRevision": "devnet-2026-11-09-fresh-layout14",
-  "sourceCommit": "2b6311f4b4f8c1678edee72e8a3dbd1ff3f467b5",
+  "capturedAt": "2026-11-12T07:17:58.708Z",
+  "protocolRevision": "devnet-2026-11-12-fresh-layout15",
+  "sourceCommit": "5733739e7b1e1de389ccd86c964638aa145c5dd7",
   "artifactOrigin": "upgradeable-loader-programdata",
   "sourceVerification": "Vendored IDLs match the deployed IDLs exactly. Source is used for SDK and fixture construction; this is not a reproducible-build attestation.",
   "binaryEncoding": "Entire ProgramData payload after its 45-byte metadata header, including allocation padding.",
   "programs": [
     {
       "name": "dusk",
-      "programId": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
-      "programData": "J5CdybdVhnLVx5fAKGioQTkDt1apnppNVLK5E9Kwvdpt",
-      "observedSlot": 520354869,
-      "lastUpgradeSlot": 520349136,
-      "binaryBytes": 5042536,
-      "binarySha256": "e53a4f57a9b2f7e7b7a891c82205acb235d077874508361b302c4f906cc67782",
-      "idlAccount": "631oExAVubnEeTzKy5xWjn3WVvEHKyfUfZsD7Es46ePB",
-      "idlSha256": "51941c72652354fa4ee6357c8b9b04388f89ddd4dda317fa201dff75fbbcc1e7",
-      "idlAccountSha256": "644b3033ec768ae0e85f0b6f5cead4cc5611a71c3698a0acdad212e24e4d710b"
+      "programId": "G6VzihcGWCxt1nujxtKPB4oUYz36GPR2t5mLdXEH8yYN",
+      "programData": "2ML7GeSMY3he5fRaPWXrVDDJVm2TXkfCkybUbn9CLVR9",
+      "observedSlot": 521385133,
+      "lastUpgradeSlot": 521372176,
+      "binaryBytes": 4773600,
+      "binarySha256": "2289b2726a6c7d564600d363255dc5ea47b7ca66e2ea4c04527c9552d10addd7",
+      "idlAccount": "98vQzq88u3pQHKmYMCTEoStd2qWFdJ4s2833hwxLnY29",
+      "idlSha256": "c4a1e2cdfa0fc63a5136f7fff6d81fe1698ffcb51a3ffda01fe38b581b3d6863",
+      "idlAccountSha256": "faac9b53b130edde76cf9ac3c2c3ea77394e4ef5f1a0a51eaaec5dd6f2c5f7c5"
     },
     {
       "name": "leverage_delegate",
-      "programId": "AXUucZuwuCu6voVQGf6tYMQ5LoRwLr9u4ESLpiPqqHbX",
-      "programData": "6vKp7krBBWw8xS43N3sEdDpABMQoJEoEbnu9MgSo58pZ",
-      "observedSlot": 520354887,
-      "lastUpgradeSlot": 520350149,
-      "binaryBytes": 1484096,
-      "binarySha256": "0bc237839c24b1629493299f501855dd8ee9ad1abbd21ec8e4785c2255ef389b",
-      "idlAccount": "86FWpnPYVn71T48vkyTr4JyRbg8GcsCeG1ycsJjitLwS",
-      "idlSha256": "f74ab61a5e0375d369bcf06338f9056f02dd85b5d07128c21b3e90596255b9a3",
-      "idlAccountSha256": "e708dee8875e6565ceb406c81d0e7533b95e904c7f69b6e9f1a1b22288e1080c"
+      "programId": "A1aX1f3fx9x43FVYunRp25pu6HBczmYz1obEW9jZCf2B",
+      "programData": "HjYHFmDXFgg6mKiAM6pYYDffptK7fqEJC15c2xWvJ9Q4",
+      "observedSlot": 521385149,
+      "lastUpgradeSlot": 521376643,
+      "binaryBytes": 1395552,
+      "binarySha256": "55ccf30ceffc2b660ff53c59d1b3b0417f8f3a6697d6acc850bb05b709902f8d",
+      "idlAccount": "scpkvQQT1EPcXmSp8MqKEk38SrXVHEowNXexzkjRfDc",
+      "idlSha256": "c0fee6f69a234a68d5de140ac289a286a90a811132a4bd29c41d71f3e580405d",
+      "idlAccountSha256": "4349ffc27f664f13f3a09980cbb215da8bbc1b6c5d12af465c7a4f8d55a97bf1"
     }
   ]
 }

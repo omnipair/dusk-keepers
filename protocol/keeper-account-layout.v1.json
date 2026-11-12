@@ -1,9 +1,9 @@
 {
   "$schema": "./schemas/account-layout.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "devnet-2026-11-09-fresh-layout14",
-  "programId": "2rYBVfGubUVbHrLeut6Dn4A9ShM695dGSPCErdsGo16Y",
-  "idlSha256": "51941c72652354fa4ee6357c8b9b04388f89ddd4dda317fa201dff75fbbcc1e7",
+  "protocolRevision": "devnet-2026-11-12-fresh-layout15",
+  "programId": "G6VzihcGWCxt1nujxtKPB4oUYz36GPR2t5mLdXEH8yYN",
+  "idlSha256": "c4a1e2cdfa0fc63a5136f7fff6d81fe1698ffcb51a3ffda01fe38b581b3d6863",
   "accounts": [
     {
       "name": "BorrowPosition",
@@ -63,7 +63,7 @@
     },
     {
       "name": "Market",
-      "expectedVersion": 14,
+      "expectedVersion": 15,
       "sizeWithDiscriminator": 6442,
       "fields": [
         {
