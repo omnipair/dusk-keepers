@@ -1,14 +1,14 @@
 {
   "$schema": "./protocol/schemas/protocol-lock.schema.json",
   "schemaVersion": 1,
-  "revision": "devnet-2026-11-12-109580f6",
+  "revision": "devnet-2026-11-13-20ec7d04",
   "status": "captured",
-  "generatedAt": "2026-11-12T12:42:07.467Z",
+  "generatedAt": "2026-11-13T04:50:44.108Z",
   "source": {
     "repository": "https://github.com/omnipair/dusk",
-    "branch": "perf/oracle-binary-size",
-    "gitCommit": "109580f668fe38318969c1278e58b7337ef10660",
-    "worktreeFingerprintSha256": "67a9e0cd89768613c7889b71ebe4c3d5bc65644f0e91ccf454fba2fefcce7985"
+    "branch": "feat/devnet-short-notice",
+    "gitCommit": "20ec7d04e2ee3d497e1c84a6d91a7736b62a3065",
+    "worktreeFingerprintSha256": "83c0d76ef1588e681ebe842792a8e109a38f8694db7def01ed4fbb3df7766124"
   },
   "toolchain": {
     "anchor": "anchor-cli 0.31.1",
@@ -23,7 +23,7 @@
       "programId": "G6VzihcGWCxt1nujxtKPB4oUYz36GPR2t5mLdXEH8yYN",
       "binary": {
         "path": "artifacts/dusk.so",
-        "sha256": "0787d82960b0bcdf5be72433077916e1177981b56e56a1c7844f845b0cd9afea"
+        "sha256": "6cefd492df0519c4b71a2e3ee205e2724701e84540445eec306a1933f56cd157"
       },
       "idl": {
         "path": "artifacts/dusk.json",
