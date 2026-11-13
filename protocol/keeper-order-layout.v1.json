@@ -1,9 +1,9 @@
 {
   "$schema": "./schemas/account-layout.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "devnet-2026-11-13-3b4260e6",
-  "programId": "A1aX1f3fx9x43FVYunRp25pu6HBczmYz1obEW9jZCf2B",
-  "idlSha256": "c0fee6f69a234a68d5de140ac289a286a90a811132a4bd29c41d71f3e580405d",
+  "protocolRevision": "devnet-2026-11-14-main-grid",
+  "programId": "5yeZJw1bNer5jq4GVNa7ifsgnM7ivxXQLCK6ro8EJ3Ue",
+  "idlSha256": "5002372874ae748cee7cec31db1960b0d615fc250df6c87a56bd9ae052583d81",
   "accounts": [
     {
       "name": "LeverageOrder",
@@ -38,6 +38,11 @@
           "path": "close_bps",
           "offset": 129,
           "size": 2
+        },
+        {
+          "path": "min_owner_payout",
+          "offset": 131,
+          "size": 8
         }
       ]
     },

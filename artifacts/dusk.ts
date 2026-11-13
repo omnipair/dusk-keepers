@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/dusk.json`.
  */
 export type Dusk = {
-  "address": "358bjJKXWxeAXAzteX1xTgyd9JNnjtzW8fnwCS8Da1mv",
+  "address": "9gEvWS1Vqxmd9qr9w5KpEN2PGcn9DN1rE5NptD1ZcqXH",
   "metadata": {
     "name": "dusk",
     "version": "2.0.0",
@@ -132,6 +132,16 @@ export type Dusk = {
               },
               {
                 "kind": "account",
+                "path": "leverage_position.owner",
+                "account": "leveragePosition"
+              },
+              {
+                "kind": "account",
+                "path": "leverage_position.namespace_authority",
+                "account": "leveragePosition"
+              },
+              {
+                "kind": "account",
                 "path": "leverage_position.position_id",
                 "account": "leveragePosition"
               }
@@ -140,6 +150,9 @@ export type Dusk = {
         },
         {
           "name": "debtMint"
+        },
+        {
+          "name": "collateralMint"
         },
         {
           "name": "debtReserveVault",
@@ -164,6 +177,9 @@ export type Dusk = {
         },
         {
           "name": "owner",
+          "docs": [
+            "Token payer; need not own the leverage position."
+          ],
           "writable": true,
           "signer": true
         },
@@ -278,7 +294,7 @@ export type Dusk = {
           "name": "quoteMint"
         },
         {
-          "name": "ylpMint",
+          "name": "srlpMint",
           "writable": true
         },
         {
@@ -298,7 +314,7 @@ export type Dusk = {
           "writable": true
         },
         {
-          "name": "ownerYlpAccount",
+          "name": "ownerSrlpAccount",
           "writable": true
         },
         {
@@ -372,18 +388,30 @@ export type Dusk = {
       ]
     },
     {
-      "name": "bidLiquidationAuction",
+      "name": "announceOperatorChange",
+      "docs": [
+        "Announce one atomic change. An optional manager may propose parameters only; LP balances grant no authority."
+      ],
       "discriminator": [
-        6,
-        223,
-        30,
-        228,
-        147,
-        197,
-        27,
-        49
+        119,
+        10,
+        131,
+        39,
+        87,
+        242,
+        115,
+        110
       ],
       "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "operator",
+          "signer": true
+        },
         {
           "name": "market",
           "writable": true,
@@ -422,100 +450,28 @@ export type Dusk = {
           }
         },
         {
-          "name": "futarchyAuthority",
+          "name": "proposal",
+          "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "const",
                 "value": [
-                  102,
-                  117,
-                  116,
-                  97,
+                  111,
+                  112,
+                  101,
                   114,
+                  97,
+                  116,
+                  111,
+                  114,
+                  95,
                   99,
                   104,
-                  121,
-                  95,
                   97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "liquidator",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "debtAssetMint"
-        },
-        {
-          "name": "collateralAssetMint"
-        },
-        {
-          "name": "reserveVault",
-          "writable": true
-        },
-        {
-          "name": "interestVault",
-          "writable": true
-        },
-        {
-          "name": "collateralVault",
-          "writable": true
-        },
-        {
-          "name": "insuranceVault",
-          "writable": true
-        },
-        {
-          "name": "collateralInsuranceVault",
-          "writable": true
-        },
-        {
-          "name": "liquidatorDebtAccount",
-          "writable": true
-        },
-        {
-          "name": "liquidatorCollateralAccount",
-          "writable": true
-        },
-        {
-          "name": "borrowPosition",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  98,
-                  111,
-                  114,
-                  114,
-                  111,
-                  119,
-                  95,
-                  112,
-                  111,
-                  115,
-                  105,
-                  116,
-                  105,
-                  111,
                   110,
-                  95,
-                  118,
-                  50
+                  103,
+                  101
                 ]
               },
               {
@@ -523,29 +479,15 @@ export type Dusk = {
                 "path": "market"
               },
               {
-                "kind": "account",
-                "path": "borrow_position.position_id",
-                "account": "borrowPosition"
+                "kind": "arg",
+                "path": "args.nonce"
               }
             ]
           }
         },
         {
-          "name": "referralPartner",
-          "optional": true
-        },
-        {
-          "name": "referralAccrual",
-          "writable": true,
-          "optional": true
-        },
-        {
-          "name": "tokenProgram",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-        },
-        {
-          "name": "token2022Program",
-          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
         },
         {
           "name": "eventAuthority",
@@ -585,7 +527,443 @@ export type Dusk = {
           "name": "args",
           "type": {
             "defined": {
-              "name": "bidLiquidationAuctionArgs"
+              "name": "announceOperatorChangeArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "beginFlashLiquidation",
+      "discriminator": [
+        18,
+        242,
+        47,
+        42,
+        203,
+        45,
+        98,
+        252
+      ],
+      "accounts": [
+        {
+          "name": "accounts",
+          "accounts": [
+            {
+              "name": "market",
+              "writable": true,
+              "pda": {
+                "seeds": [
+                  {
+                    "kind": "const",
+                    "value": [
+                      109,
+                      97,
+                      114,
+                      107,
+                      101,
+                      116,
+                      95,
+                      118,
+                      50
+                    ]
+                  },
+                  {
+                    "kind": "account",
+                    "path": "market.base_side.asset_mint",
+                    "account": "market"
+                  },
+                  {
+                    "kind": "account",
+                    "path": "market.quote_side.asset_mint",
+                    "account": "market"
+                  },
+                  {
+                    "kind": "account",
+                    "path": "market.params_hash",
+                    "account": "market"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "borrowPosition",
+              "writable": true,
+              "optional": true
+            },
+            {
+              "name": "leveragePosition",
+              "writable": true,
+              "optional": true
+            },
+            {
+              "name": "buyer",
+              "writable": true,
+              "signer": true
+            },
+            {
+              "name": "collateralMint"
+            },
+            {
+              "name": "debtMint"
+            },
+            {
+              "name": "collateralVault",
+              "writable": true
+            },
+            {
+              "name": "reserveVault",
+              "writable": true
+            },
+            {
+              "name": "interestVault",
+              "writable": true
+            },
+            {
+              "name": "buyerCollateralAccount",
+              "writable": true
+            },
+            {
+              "name": "buyerRefundAccount",
+              "writable": true
+            },
+            {
+              "name": "ownerDebtAccount",
+              "writable": true
+            },
+            {
+              "name": "futarchyAuthority",
+              "pda": {
+                "seeds": [
+                  {
+                    "kind": "const",
+                    "value": [
+                      102,
+                      117,
+                      116,
+                      97,
+                      114,
+                      99,
+                      104,
+                      121,
+                      95,
+                      97,
+                      117,
+                      116,
+                      104,
+                      111,
+                      114,
+                      105,
+                      116,
+                      121
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "name": "referralPartner",
+              "optional": true
+            },
+            {
+              "name": "referralAccrual",
+              "writable": true,
+              "optional": true
+            },
+            {
+              "name": "tokenProgram",
+              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+            },
+            {
+              "name": "token2022Program",
+              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+            },
+            {
+              "name": "debtTokenProgram"
+            }
+          ]
+        },
+        {
+          "name": "session",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  108,
+                  105,
+                  113,
+                  117,
+                  105,
+                  100,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110,
+                  45,
+                  115,
+                  101,
+                  115,
+                  115,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "args.position"
+              }
+            ]
+          }
+        },
+        {
+          "name": "repaymentVault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  108,
+                  105,
+                  113,
+                  117,
+                  105,
+                  100,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110,
+                  45,
+                  112,
+                  97,
+                  121,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "args.position"
+              },
+              {
+                "kind": "account",
+                "path": "accounts.debt_mint",
+                "account": "flashLiquidationAccounts"
+              }
+            ]
+          }
+        },
+        {
+          "name": "instructions",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "eventAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "beginFlashLiquidationArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "beginHlpFlash",
+      "docs": [
+        "Release hLP target collateral, bound to an exact top-level settlement",
+        "later in this same transaction. No routing program is privileged."
+      ],
+      "discriminator": [
+        41,
+        207,
+        247,
+        103,
+        180,
+        58,
+        131,
+        13
+      ],
+      "accounts": [
+        {
+          "name": "accounts",
+          "accounts": [
+            {
+              "name": "market",
+              "writable": true
+            },
+            {
+              "name": "futarchyAuthority"
+            },
+            {
+              "name": "buyer",
+              "writable": true,
+              "signer": true
+            },
+            {
+              "name": "targetMint"
+            },
+            {
+              "name": "borrowedMint"
+            },
+            {
+              "name": "targetReserve",
+              "writable": true
+            },
+            {
+              "name": "borrowedReserve",
+              "writable": true
+            },
+            {
+              "name": "buyerCollateralAccount",
+              "writable": true
+            },
+            {
+              "name": "buyerRefundAccount",
+              "writable": true
+            },
+            {
+              "name": "tokenProgram",
+              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+            },
+            {
+              "name": "token2022Program",
+              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+            },
+            {
+              "name": "borrowedTokenProgram"
+            }
+          ]
+        },
+        {
+          "name": "session",
+          "writable": true
+        },
+        {
+          "name": "repaymentVault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  104,
+                  108,
+                  112,
+                  45,
+                  102,
+                  108,
+                  97,
+                  115,
+                  104,
+                  45,
+                  112,
+                  97,
+                  121,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "session"
+              }
+            ]
+          }
+        },
+        {
+          "name": "instructions",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "eventAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "beginHlpFlashArgs"
             }
           }
         }
@@ -724,6 +1102,11 @@ export type Dusk = {
               },
               {
                 "kind": "account",
+                "path": "borrow_position.owner",
+                "account": "borrowPosition"
+              },
+              {
+                "kind": "account",
                 "path": "borrow_position.position_id",
                 "account": "borrowPosition"
               }
@@ -785,6 +1168,505 @@ export type Dusk = {
           "type": {
             "defined": {
               "name": "borrowArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "burnRetiredHlpReceipt",
+      "discriminator": [
+        186,
+        145,
+        76,
+        141,
+        32,
+        30,
+        63,
+        95
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.base_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.quote_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.params_hash",
+                "account": "market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "retiredMint",
+          "writable": true
+        },
+        {
+          "name": "cohort",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  104,
+                  108,
+                  112,
+                  95,
+                  99,
+                  111,
+                  104,
+                  111,
+                  114,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "retiredMint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "ownerHlpAccount",
+          "writable": true
+        },
+        {
+          "name": "baseYieldAccount",
+          "writable": true
+        },
+        {
+          "name": "quoteYieldAccount",
+          "writable": true
+        },
+        {
+          "name": "token2022Program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "eventAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "burnRetiredHlpReceiptArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "burnRetiredJunior",
+      "discriminator": [
+        180,
+        25,
+        139,
+        146,
+        47,
+        20,
+        168,
+        135
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.base_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.quote_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.params_hash",
+                "account": "market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "signer": true
+        },
+        {
+          "name": "retiredMint",
+          "writable": true
+        },
+        {
+          "name": "cohort",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  117,
+                  110,
+                  105,
+                  111,
+                  114,
+                  95,
+                  99,
+                  111,
+                  104,
+                  111,
+                  114,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "retiredMint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "ownerJunior",
+          "writable": true
+        },
+        {
+          "name": "baseYield",
+          "writable": true
+        },
+        {
+          "name": "quoteYield",
+          "writable": true
+        },
+        {
+          "name": "exit",
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "token2022Program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "eventAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "burnRetiredJuniorArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "checkpointIncome",
+      "discriminator": [
+        48,
+        103,
+        250,
+        65,
+        201,
+        100,
+        178,
+        237
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.base_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.quote_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.params_hash",
+                "account": "market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "lpMint"
+        },
+        {
+          "name": "ownerLp"
+        },
+        {
+          "name": "yieldAccount",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "checkpointIncomeArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "claimOperatorRevenue",
+      "docs": [
+        "Permissionlessly pay earned interest fees to the immutable recipient ATA."
+      ],
+      "discriminator": [
+        189,
+        47,
+        169,
+        137,
+        23,
+        73,
+        221,
+        37
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.base_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.quote_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.params_hash",
+                "account": "market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "revenue",
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "recipient"
+        },
+        {
+          "name": "assetMint"
+        },
+        {
+          "name": "interestVault",
+          "writable": true
+        },
+        {
+          "name": "recipientAssetAccount",
+          "writable": true
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token2022Program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "eventAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "claimOperatorRevenueArgs"
             }
           }
         }
@@ -973,84 +1855,59 @@ export type Dusk = {
       "args": []
     },
     {
-      "name": "claimYield",
+      "name": "closeInsolventHlp",
+      "docs": [
+        "Permissionlessly closes an hLP whose current-slot symmetric-EMA backing",
+        "cannot cover funding debt. Native recovery uses EMA price, smoothed depth,",
+        "concentration and configured fees. Recovery protects principal first;",
+        "junior absorbs principal loss before senior; unpaid interest is canceled.",
+        "Realized funding interest is cash-limited and funds the bounded caller",
+        "reward. Existing funded holder claims remain claimable after cleanup."
+      ],
       "discriminator": [
-        49,
-        74,
-        111,
-        7,
-        186,
-        22,
-        61,
-        165
+        158,
+        172,
+        48,
+        134,
+        121,
+        161,
+        194,
+        168
       ],
       "accounts": [
         {
           "name": "market",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  109,
-                  97,
-                  114,
-                  107,
-                  101,
-                  116,
-                  95,
-                  118,
-                  50
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "market.base_side.asset_mint",
-                "account": "market"
-              },
-              {
-                "kind": "account",
-                "path": "market.quote_side.asset_mint",
-                "account": "market"
-              },
-              {
-                "kind": "account",
-                "path": "market.params_hash",
-                "account": "market"
-              }
-            ]
-          }
+          "writable": true
         },
         {
-          "name": "owner",
+          "name": "futarchyAuthority"
+        },
+        {
+          "name": "caller",
           "writable": true,
           "signer": true
         },
         {
-          "name": "assetMint"
+          "name": "borrowedMint"
         },
         {
-          "name": "lpMint"
-        },
-        {
-          "name": "ownerLpAccount",
+          "name": "borrowedReserveVault",
           "writable": true
         },
         {
-          "name": "reserveVault",
+          "name": "borrowedInterestVault",
           "writable": true
         },
         {
-          "name": "interestVault",
+          "name": "callerBountyAccount",
           "writable": true
         },
         {
-          "name": "recipientAssetAccount",
+          "name": "srlpMint",
           "writable": true
         },
         {
-          "name": "yieldAccount",
+          "name": "targetHlpSrlpVault",
           "writable": true
         },
         {
@@ -1099,7 +1956,7 @@ export type Dusk = {
           "name": "args",
           "type": {
             "defined": {
-              "name": "claimYieldArgs"
+              "name": "closeInsolventHlpArgs"
             }
           }
         }
@@ -1162,6 +2019,16 @@ export type Dusk = {
               {
                 "kind": "account",
                 "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "leverage_position.owner",
+                "account": "leveragePosition"
+              },
+              {
+                "kind": "account",
+                "path": "leverage_position.namespace_authority",
+                "account": "leveragePosition"
               },
               {
                 "kind": "account",
@@ -1234,6 +2101,22 @@ export type Dusk = {
           "writable": true
         },
         {
+          "name": "delegateFeeRecipient",
+          "docs": [
+            "Protocol treasury token account for delegated close order fees."
+          ],
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "delegateExecutorAccount",
+          "docs": [
+            "Executor-owned token account for delegated close incentives."
+          ],
+          "writable": true,
+          "optional": true
+        },
+        {
           "name": "referralPartner",
           "optional": true
         },
@@ -1254,6 +2137,10 @@ export type Dusk = {
           "name": "authority",
           "writable": true,
           "signer": true
+        },
+        {
+          "name": "instructionsSysvar",
+          "address": "Sysvar1nstructions1111111111111111111111111"
         },
         {
           "name": "tokenProgram",
@@ -1371,6 +2258,252 @@ export type Dusk = {
           "type": {
             "defined": {
               "name": "closeLeverageDelegationArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "compoundJuniorSeed",
+      "discriminator": [
+        145,
+        120,
+        244,
+        44,
+        0,
+        37,
+        243,
+        36
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.base_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.quote_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.params_hash",
+                "account": "market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "futarchyAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  117,
+                  116,
+                  97,
+                  114,
+                  99,
+                  104,
+                  121,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "juniorMint"
+        },
+        {
+          "name": "eventAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "configureProtocolAuction",
+      "discriminator": [
+        169,
+        178,
+        239,
+        169,
+        228,
+        103,
+        127,
+        127
+      ],
+      "accounts": [
+        {
+          "name": "authoritySigner",
+          "signer": true
+        },
+        {
+          "name": "futarchyAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  117,
+                  116,
+                  97,
+                  114,
+                  99,
+                  104,
+                  121,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.base_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.quote_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.params_hash",
+                "account": "market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "eventAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "configureProtocolAuctionArgs"
             }
           }
         }
@@ -1506,6 +2639,178 @@ export type Dusk = {
       ]
     },
     {
+      "name": "convertTranche",
+      "discriminator": [
+        192,
+        218,
+        132,
+        202,
+        247,
+        23,
+        75,
+        230
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "futarchyAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  117,
+                  116,
+                  97,
+                  114,
+                  99,
+                  104,
+                  121,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "seniorMint",
+          "writable": true
+        },
+        {
+          "name": "juniorMint",
+          "writable": true
+        },
+        {
+          "name": "ownerSenior",
+          "writable": true
+        },
+        {
+          "name": "ownerJunior",
+          "writable": true
+        },
+        {
+          "name": "exit",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  117,
+                  110,
+                  105,
+                  111,
+                  114,
+                  95,
+                  101,
+                  120,
+                  105,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              },
+              {
+                "kind": "account",
+                "path": "juniorMint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "seniorBaseYield",
+          "writable": true
+        },
+        {
+          "name": "seniorQuoteYield",
+          "writable": true
+        },
+        {
+          "name": "juniorBaseYield",
+          "writable": true
+        },
+        {
+          "name": "juniorQuoteYield",
+          "writable": true
+        },
+        {
+          "name": "token2022Program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "eventAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "action",
+          "type": {
+            "defined": {
+              "name": "trancheAction"
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "createLeverageDelegation",
       "discriminator": [
         189,
@@ -1586,6 +2891,16 @@ export type Dusk = {
               {
                 "kind": "account",
                 "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "leverage_position.owner",
+                "account": "leveragePosition"
+              },
+              {
+                "kind": "account",
+                "path": "leverage_position.namespace_authority",
+                "account": "leveragePosition"
               },
               {
                 "kind": "account",
@@ -1688,294 +3003,6 @@ export type Dusk = {
       ]
     },
     {
-      "name": "createParameterProposal",
-      "discriminator": [
-        124,
-        27,
-        59,
-        125,
-        164,
-        214,
-        56,
-        132
-      ],
-      "accounts": [
-        {
-          "name": "proposer",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "market",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  109,
-                  97,
-                  114,
-                  107,
-                  101,
-                  116,
-                  95,
-                  118,
-                  50
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "market.base_side.asset_mint",
-                "account": "market"
-              },
-              {
-                "kind": "account",
-                "path": "market.quote_side.asset_mint",
-                "account": "market"
-              },
-              {
-                "kind": "account",
-                "path": "market.params_hash",
-                "account": "market"
-              }
-            ]
-          }
-        },
-        {
-          "name": "proposal",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  112,
-                  97,
-                  114,
-                  97,
-                  109,
-                  101,
-                  116,
-                  101,
-                  114,
-                  95,
-                  112,
-                  114,
-                  111,
-                  112,
-                  111,
-                  115,
-                  97,
-                  108
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "market"
-              },
-              {
-                "kind": "account",
-                "path": "proposer"
-              },
-              {
-                "kind": "arg",
-                "path": "args.nonce"
-              }
-            ]
-          }
-        },
-        {
-          "name": "proposalSupport",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  112,
-                  114,
-                  111,
-                  112,
-                  111,
-                  115,
-                  97,
-                  108,
-                  95,
-                  115,
-                  117,
-                  112,
-                  112,
-                  111,
-                  114,
-                  116
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "proposal"
-              },
-              {
-                "kind": "account",
-                "path": "proposer"
-              }
-            ]
-          }
-        },
-        {
-          "name": "ylpMint",
-          "writable": true
-        },
-        {
-          "name": "proposerYlpAccount",
-          "writable": true
-        },
-        {
-          "name": "baseYieldAccount",
-          "writable": true
-        },
-        {
-          "name": "quoteYieldAccount",
-          "writable": true
-        },
-        {
-          "name": "baseHlpYlpVault",
-          "docs": [
-            "Token-2022 yLP vault by the handler; an existing vault is fully parsed",
-            "and validated before proposal state changes."
-          ],
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  104,
-                  108,
-                  112,
-                  95,
-                  121,
-                  108,
-                  112,
-                  95,
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "market"
-              },
-              {
-                "kind": "account",
-                "path": "market.base_side.hlp_mint",
-                "account": "market"
-              },
-              {
-                "kind": "account",
-                "path": "ylpMint"
-              }
-            ]
-          }
-        },
-        {
-          "name": "quoteHlpYlpVault",
-          "docs": [
-            "hLP yLP vault above."
-          ],
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  104,
-                  108,
-                  112,
-                  95,
-                  121,
-                  108,
-                  112,
-                  95,
-                  118,
-                  97,
-                  117,
-                  108,
-                  116
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "market"
-              },
-              {
-                "kind": "account",
-                "path": "market.quote_side.hlp_mint",
-                "account": "market"
-              },
-              {
-                "kind": "account",
-                "path": "ylpMint"
-              }
-            ]
-          }
-        },
-        {
-          "name": "token2022Program",
-          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
-        },
-        {
-          "name": "systemProgram",
-          "address": "11111111111111111111111111111111"
-        },
-        {
-          "name": "eventAuthority",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  95,
-                  95,
-                  101,
-                  118,
-                  101,
-                  110,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "program"
-        }
-      ],
-      "args": [
-        {
-          "name": "args",
-          "type": {
-            "defined": {
-              "name": "createParameterProposalArgs"
-            }
-          }
-        }
-      ]
-    },
-    {
       "name": "decreaseLeverage",
       "discriminator": [
         177,
@@ -2034,6 +3061,16 @@ export type Dusk = {
               },
               {
                 "kind": "account",
+                "path": "leverage_position.owner",
+                "account": "leveragePosition"
+              },
+              {
+                "kind": "account",
+                "path": "leverage_position.namespace_authority",
+                "account": "leveragePosition"
+              },
+              {
+                "kind": "account",
                 "path": "leverage_position.position_id",
                 "account": "leveragePosition"
               }
@@ -2056,6 +3093,10 @@ export type Dusk = {
         },
         {
           "name": "debtInterestVault",
+          "writable": true
+        },
+        {
+          "name": "ownerDebtAccount",
           "writable": true
         },
         {
@@ -2111,6 +3152,10 @@ export type Dusk = {
           "name": "owner",
           "writable": true,
           "signer": true
+        },
+        {
+          "name": "instructionsSysvar",
+          "address": "Sysvar1nstructions1111111111111111111111111"
         },
         {
           "name": "tokenProgram",
@@ -2224,6 +3269,16 @@ export type Dusk = {
               },
               {
                 "kind": "account",
+                "path": "leverage_position.owner",
+                "account": "leveragePosition"
+              },
+              {
+                "kind": "account",
+                "path": "leverage_position.namespace_authority",
+                "account": "leveragePosition"
+              },
+              {
+                "kind": "account",
                 "path": "leverage_position.position_id",
                 "account": "leveragePosition"
               }
@@ -2293,6 +3348,22 @@ export type Dusk = {
           "writable": true
         },
         {
+          "name": "delegateFeeRecipient",
+          "docs": [
+            "Protocol treasury token account for delegated close order fees."
+          ],
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "delegateExecutorAccount",
+          "docs": [
+            "Executor-owned token account for delegated close incentives."
+          ],
+          "writable": true,
+          "optional": true
+        },
+        {
           "name": "referralPartner",
           "optional": true
         },
@@ -2313,6 +3384,10 @@ export type Dusk = {
           "name": "authority",
           "writable": true,
           "signer": true
+        },
+        {
+          "name": "instructionsSysvar",
+          "address": "Sysvar1nstructions1111111111111111111111111"
         },
         {
           "name": "tokenProgram",
@@ -2417,6 +3492,36 @@ export type Dusk = {
           }
         },
         {
+          "name": "futarchyAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  117,
+                  116,
+                  97,
+                  114,
+                  99,
+                  104,
+                  121,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
           "name": "owner",
           "writable": true,
           "signer": true
@@ -2463,6 +3568,10 @@ export type Dusk = {
               {
                 "kind": "account",
                 "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "owner"
               },
               {
                 "kind": "arg",
@@ -2559,7 +3668,7 @@ export type Dusk = {
           "name": "quoteMint"
         },
         {
-          "name": "ylpMint",
+          "name": "srlpMint",
           "writable": true
         },
         {
@@ -2583,7 +3692,7 @@ export type Dusk = {
           "writable": true
         },
         {
-          "name": "hlpYlpAccount",
+          "name": "hlpSrlpAccount",
           "docs": [
             "authority are all validated before any market mutation. A System-owned",
             "empty PDA is initialized inline by the deposit handler."
@@ -2655,16 +3764,20 @@ export type Dusk = {
       ]
     },
     {
-      "name": "executeParameterProposal",
+      "name": "donateCollateral",
+      "docs": [
+        "Adds the signer's tokens to an existing borrow position without granting",
+        "the donor ownership or withdrawal rights. The recorded owner is unchanged."
+      ],
       "discriminator": [
-        46,
+        237,
+        234,
+        205,
+        84,
+        177,
         106,
-        112,
-        113,
-        40,
-        255,
-        154,
-        27
+        198,
+        38
       ],
       "accounts": [
         {
@@ -2705,8 +3818,482 @@ export type Dusk = {
           }
         },
         {
-          "name": "proposal",
+          "name": "futarchyAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  117,
+                  116,
+                  97,
+                  114,
+                  99,
+                  104,
+                  121,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "assetMint"
+        },
+        {
+          "name": "collateralVault",
           "writable": true
+        },
+        {
+          "name": "ownerAssetAccount",
+          "writable": true
+        },
+        {
+          "name": "borrowPosition",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  114,
+                  114,
+                  111,
+                  119,
+                  95,
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "borrow_position.owner",
+                "account": "borrowPosition"
+              },
+              {
+                "kind": "account",
+                "path": "borrow_position.position_id",
+                "account": "borrowPosition"
+              }
+            ]
+          }
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token2022Program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "eventAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "donateCollateralArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "emergencyLiquidation",
+      "discriminator": [
+        24,
+        95,
+        118,
+        136,
+        77,
+        194,
+        44,
+        247
+      ],
+      "accounts": [
+        {
+          "name": "accounts",
+          "accounts": [
+            {
+              "name": "market",
+              "writable": true,
+              "pda": {
+                "seeds": [
+                  {
+                    "kind": "const",
+                    "value": [
+                      109,
+                      97,
+                      114,
+                      107,
+                      101,
+                      116,
+                      95,
+                      118,
+                      50
+                    ]
+                  },
+                  {
+                    "kind": "account",
+                    "path": "market.base_side.asset_mint",
+                    "account": "market"
+                  },
+                  {
+                    "kind": "account",
+                    "path": "market.quote_side.asset_mint",
+                    "account": "market"
+                  },
+                  {
+                    "kind": "account",
+                    "path": "market.params_hash",
+                    "account": "market"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "borrowPosition",
+              "writable": true,
+              "optional": true
+            },
+            {
+              "name": "leveragePosition",
+              "writable": true,
+              "optional": true
+            },
+            {
+              "name": "buyer",
+              "writable": true,
+              "signer": true
+            },
+            {
+              "name": "collateralMint"
+            },
+            {
+              "name": "debtMint"
+            },
+            {
+              "name": "collateralVault",
+              "writable": true
+            },
+            {
+              "name": "reserveVault",
+              "writable": true
+            },
+            {
+              "name": "interestVault",
+              "writable": true
+            },
+            {
+              "name": "buyerCollateralAccount",
+              "writable": true
+            },
+            {
+              "name": "buyerRefundAccount",
+              "writable": true
+            },
+            {
+              "name": "ownerDebtAccount",
+              "writable": true
+            },
+            {
+              "name": "futarchyAuthority",
+              "pda": {
+                "seeds": [
+                  {
+                    "kind": "const",
+                    "value": [
+                      102,
+                      117,
+                      116,
+                      97,
+                      114,
+                      99,
+                      104,
+                      121,
+                      95,
+                      97,
+                      117,
+                      116,
+                      104,
+                      111,
+                      114,
+                      105,
+                      116,
+                      121
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "name": "referralPartner",
+              "optional": true
+            },
+            {
+              "name": "referralAccrual",
+              "writable": true,
+              "optional": true
+            },
+            {
+              "name": "tokenProgram",
+              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+            },
+            {
+              "name": "token2022Program",
+              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+            },
+            {
+              "name": "debtTokenProgram"
+            }
+          ]
+        },
+        {
+          "name": "collateralReserveVault",
+          "writable": true
+        },
+        {
+          "name": "instructions",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "eventAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "emergencyLiquidationArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "executeOperatorChange",
+      "docs": [
+        "Permissionless execution after the full exit notice. A new authority accepts a handoff by signing."
+      ],
+      "discriminator": [
+        114,
+        146,
+        27,
+        116,
+        61,
+        134,
+        151,
+        35
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.base_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.quote_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.params_hash",
+                "account": "market"
+              }
+            ]
+          },
+          "relations": [
+            "proposal"
+          ]
+        },
+        {
+          "name": "futarchyAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  117,
+                  116,
+                  97,
+                  114,
+                  99,
+                  104,
+                  121,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "proposal",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  112,
+                  101,
+                  114,
+                  97,
+                  116,
+                  111,
+                  114,
+                  95,
+                  99,
+                  104,
+                  97,
+                  110,
+                  103,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "proposal.nonce",
+                "account": "operatorProposal"
+              }
+            ]
+          }
+        },
+        {
+          "name": "acceptingOperator",
+          "signer": true,
+          "optional": true
+        },
+        {
+          "name": "previousRevenue",
+          "writable": true,
+          "optional": true
         },
         {
           "name": "eventAuthority",
@@ -2742,6 +4329,389 @@ export type Dusk = {
         }
       ],
       "args": []
+    },
+    {
+      "name": "fundInterest",
+      "docs": [
+        "Fund accrued public LP interest from available cash, settle both hLP",
+        "funding gaps from their new income, and publish remaining holder yield."
+      ],
+      "discriminator": [
+        108,
+        148,
+        82,
+        224,
+        231,
+        52,
+        86,
+        59
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "futarchyAuthority"
+        },
+        {
+          "name": "caller",
+          "signer": true
+        },
+        {
+          "name": "baseMint"
+        },
+        {
+          "name": "quoteMint"
+        },
+        {
+          "name": "baseReserveVault",
+          "writable": true
+        },
+        {
+          "name": "quoteReserveVault",
+          "writable": true
+        },
+        {
+          "name": "baseInterestVault",
+          "writable": true
+        },
+        {
+          "name": "quoteInterestVault",
+          "writable": true
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token2022Program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "eventAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "fundInterestArgs"
+            }
+          }
+        }
+      ],
+      "returns": {
+        "defined": {
+          "name": "fundInterestReceipt"
+        }
+      }
+    },
+    {
+      "name": "fundJuniorSeed",
+      "discriminator": [
+        245,
+        198,
+        220,
+        232,
+        96,
+        64,
+        51,
+        71
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.base_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.quote_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.params_hash",
+                "account": "market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "assetMint"
+        },
+        {
+          "name": "reserveVault",
+          "writable": true
+        },
+        {
+          "name": "interestVault",
+          "writable": true
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token2022Program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "eventAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "harvest",
+      "discriminator": [
+        228,
+        241,
+        31,
+        182,
+        53,
+        169,
+        59,
+        199
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.base_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.quote_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.params_hash",
+                "account": "market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "futarchyAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  117,
+                  116,
+                  97,
+                  114,
+                  99,
+                  104,
+                  121,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "docs": [
+            "LP holder identity. Its signature is not required when the designated",
+            "recipient or harvest authority signs instead."
+          ]
+        },
+        {
+          "name": "caller",
+          "docs": [
+            "The LP holder, designated recipient, or harvest authority. Checked in validation."
+          ],
+          "signer": true
+        },
+        {
+          "name": "assetMint"
+        },
+        {
+          "name": "lpMint"
+        },
+        {
+          "name": "ownerLpAccount",
+          "writable": true
+        },
+        {
+          "name": "reserveVault",
+          "writable": true
+        },
+        {
+          "name": "interestVault",
+          "writable": true
+        },
+        {
+          "name": "recipientAssetAccount",
+          "writable": true
+        },
+        {
+          "name": "yieldAccount",
+          "writable": true
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token2022Program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "eventAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "harvestArgs"
+            }
+          }
+        }
+      ]
     },
     {
       "name": "increaseLeverage",
@@ -2862,6 +4832,16 @@ export type Dusk = {
               },
               {
                 "kind": "account",
+                "path": "leverage_position.owner",
+                "account": "leveragePosition"
+              },
+              {
+                "kind": "account",
+                "path": "leverage_position.namespace_authority",
+                "account": "leveragePosition"
+              },
+              {
+                "kind": "account",
                 "path": "leverage_position.position_id",
                 "account": "leveragePosition"
               }
@@ -2926,6 +4906,18 @@ export type Dusk = {
           "name": "owner",
           "writable": true,
           "signer": true
+        },
+        {
+          "name": "ownerDebtAccount",
+          "docs": [
+            "Required only when margin_amount is positive; always owned by the position owner."
+          ],
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "instructionsSysvar",
+          "address": "Sysvar1nstructions1111111111111111111111111"
         },
         {
           "name": "tokenProgram",
@@ -3035,38 +5027,38 @@ export type Dusk = {
               {
                 "kind": "const",
                 "value": [
-                  30,
-                  198,
-                  73,
-                  255,
-                  177,
-                  239,
-                  53,
-                  26,
-                  189,
-                  245,
-                  158,
-                  226,
-                  167,
-                  183,
-                  246,
-                  221,
-                  30,
-                  28,
-                  81,
-                  246,
-                  125,
-                  59,
-                  35,
-                  168,
-                  135,
-                  79,
-                  228,
+                  128,
+                  234,
+                  227,
                   164,
-                  248,
-                  149,
+                  200,
+                  104,
+                  117,
+                  6,
+                  140,
+                  85,
+                  145,
+                  118,
+                  172,
                   245,
-                  53
+                  179,
+                  164,
+                  219,
+                  182,
+                  59,
+                  3,
+                  226,
+                  63,
+                  106,
+                  237,
+                  237,
+                  52,
+                  27,
+                  32,
+                  17,
+                  146,
+                  142,
+                  148
                 ]
               }
             ],
@@ -3126,16 +5118,16 @@ export type Dusk = {
       ]
     },
     {
-      "name": "initializeLpMetadata",
+      "name": "initializeJunior",
       "discriminator": [
-        214,
-        99,
-        201,
-        159,
-        220,
+        179,
+        239,
+        121,
+        100,
         88,
         74,
-        27
+        12,
+        66
       ],
       "accounts": [
         {
@@ -3144,126 +5136,131 @@ export type Dusk = {
           "signer": true
         },
         {
-          "name": "market"
-        },
-        {
-          "name": "lpMint",
+          "name": "market",
           "writable": true
         },
         {
-          "name": "lpTokenMetadata",
+          "name": "juniorMint",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "const",
                 "value": [
+                  106,
+                  117,
+                  110,
+                  105,
+                  111,
+                  114,
+                  95,
                   109,
-                  101,
-                  116,
-                  97,
-                  100,
-                  97,
-                  116,
-                  97
-                ]
-              },
-              {
-                "kind": "const",
-                "value": [
-                  11,
-                  112,
-                  101,
-                  177,
-                  227,
-                  209,
-                  124,
-                  69,
-                  56,
-                  157,
-                  82,
-                  127,
-                  107,
-                  4,
-                  195,
-                  205,
-                  88,
-                  184,
-                  108,
-                  115,
-                  26,
-                  160,
-                  253,
-                  181,
-                  73,
-                  182,
-                  209,
-                  188,
-                  3,
-                  248,
-                  41,
-                  70
+                  105,
+                  110,
+                  116
                 ]
               },
               {
                 "kind": "account",
-                "path": "lpMint"
+                "path": "market"
+              },
+              {
+                "kind": "arg",
+                "path": "args.generation"
               }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                11,
-                112,
-                101,
-                177,
-                227,
-                209,
-                124,
-                69,
-                56,
-                157,
-                82,
-                127,
-                107,
-                4,
-                195,
-                205,
-                88,
-                184,
-                108,
-                115,
-                26,
-                160,
-                253,
-                181,
-                73,
-                182,
-                209,
-                188,
-                3,
-                248,
-                41,
-                70
-              ]
-            }
+            ]
           }
         },
         {
-          "name": "systemProgram",
-          "address": "11111111111111111111111111111111"
+          "name": "cohort",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  117,
+                  110,
+                  105,
+                  111,
+                  114,
+                  95,
+                  99,
+                  111,
+                  104,
+                  111,
+                  114,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "juniorMint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "previousCohort",
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "tokenMetadata",
+          "writable": true
         },
         {
           "name": "sysvarInstructions",
           "address": "Sysvar1nstructions1111111111111111111111111"
         },
         {
+          "name": "tokenMetadataProgram",
+          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+        },
+        {
           "name": "token2022Program",
           "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
         {
-          "name": "tokenMetadataProgram",
-          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "eventAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
         }
       ],
       "args": [
@@ -3271,7 +5268,7 @@ export type Dusk = {
           "name": "args",
           "type": {
             "defined": {
-              "name": "initializeLpMetadataArgs"
+              "name": "initializeJuniorArgs"
             }
           }
         }
@@ -3340,13 +5337,313 @@ export type Dusk = {
           "name": "quoteMint"
         },
         {
-          "name": "ylpMint"
+          "name": "srlpMint",
+          "writable": true
         },
         {
-          "name": "baseHlpMint"
+          "name": "baseHlpMint",
+          "writable": true
         },
         {
-          "name": "quoteHlpMint"
+          "name": "quoteHlpMint",
+          "writable": true
+        },
+        {
+          "name": "srlpTokenMetadata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "const",
+                "value": [
+                  11,
+                  112,
+                  101,
+                  177,
+                  227,
+                  209,
+                  124,
+                  69,
+                  56,
+                  157,
+                  82,
+                  127,
+                  107,
+                  4,
+                  195,
+                  205,
+                  88,
+                  184,
+                  108,
+                  115,
+                  26,
+                  160,
+                  253,
+                  181,
+                  73,
+                  182,
+                  209,
+                  188,
+                  3,
+                  248,
+                  41,
+                  70
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "srlpMint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                11,
+                112,
+                101,
+                177,
+                227,
+                209,
+                124,
+                69,
+                56,
+                157,
+                82,
+                127,
+                107,
+                4,
+                195,
+                205,
+                88,
+                184,
+                108,
+                115,
+                26,
+                160,
+                253,
+                181,
+                73,
+                182,
+                209,
+                188,
+                3,
+                248,
+                41,
+                70
+              ]
+            }
+          }
+        },
+        {
+          "name": "baseHlpTokenMetadata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "const",
+                "value": [
+                  11,
+                  112,
+                  101,
+                  177,
+                  227,
+                  209,
+                  124,
+                  69,
+                  56,
+                  157,
+                  82,
+                  127,
+                  107,
+                  4,
+                  195,
+                  205,
+                  88,
+                  184,
+                  108,
+                  115,
+                  26,
+                  160,
+                  253,
+                  181,
+                  73,
+                  182,
+                  209,
+                  188,
+                  3,
+                  248,
+                  41,
+                  70
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "baseHlpMint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                11,
+                112,
+                101,
+                177,
+                227,
+                209,
+                124,
+                69,
+                56,
+                157,
+                82,
+                127,
+                107,
+                4,
+                195,
+                205,
+                88,
+                184,
+                108,
+                115,
+                26,
+                160,
+                253,
+                181,
+                73,
+                182,
+                209,
+                188,
+                3,
+                248,
+                41,
+                70
+              ]
+            }
+          }
+        },
+        {
+          "name": "quoteHlpTokenMetadata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "const",
+                "value": [
+                  11,
+                  112,
+                  101,
+                  177,
+                  227,
+                  209,
+                  124,
+                  69,
+                  56,
+                  157,
+                  82,
+                  127,
+                  107,
+                  4,
+                  195,
+                  205,
+                  88,
+                  184,
+                  108,
+                  115,
+                  26,
+                  160,
+                  253,
+                  181,
+                  73,
+                  182,
+                  209,
+                  188,
+                  3,
+                  248,
+                  41,
+                  70
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "quoteHlpMint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                11,
+                112,
+                101,
+                177,
+                227,
+                209,
+                124,
+                69,
+                56,
+                157,
+                82,
+                127,
+                107,
+                4,
+                195,
+                205,
+                88,
+                184,
+                108,
+                115,
+                26,
+                160,
+                253,
+                181,
+                73,
+                182,
+                209,
+                188,
+                3,
+                248,
+                41,
+                70
+              ]
+            }
+          }
         },
         {
           "name": "market",
@@ -3559,66 +5856,6 @@ export type Dusk = {
           }
         },
         {
-          "name": "baseInsuranceVault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  105,
-                  110,
-                  115,
-                  117,
-                  114,
-                  97,
-                  110,
-                  99,
-                  101
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "market"
-              },
-              {
-                "kind": "account",
-                "path": "baseMint"
-              }
-            ]
-          }
-        },
-        {
-          "name": "quoteInsuranceVault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  105,
-                  110,
-                  115,
-                  117,
-                  114,
-                  97,
-                  110,
-                  99,
-                  101
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "market"
-              },
-              {
-                "kind": "account",
-                "path": "quoteMint"
-              }
-            ]
-          }
-        },
-        {
           "name": "baseInterestVault",
           "writable": true,
           "pda": {
@@ -3710,6 +5947,14 @@ export type Dusk = {
           "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
         {
+          "name": "sysvarInstructions",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+        },
+        {
           "name": "eventAuthority",
           "pda": {
             "seeds": [
@@ -3752,6 +5997,108 @@ export type Dusk = {
           }
         }
       ]
+    },
+    {
+      "name": "initializeOperatorRevenue",
+      "docs": [
+        "Prepare a recipient archive with a separate funded payer."
+      ],
+      "discriminator": [
+        112,
+        210,
+        185,
+        8,
+        90,
+        215,
+        15,
+        41
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "market",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.base_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.quote_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.params_hash",
+                "account": "market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "revenue",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  112,
+                  101,
+                  114,
+                  97,
+                  116,
+                  111,
+                  114,
+                  95,
+                  114,
+                  101,
+                  118,
+                  101,
+                  110,
+                  117,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.operator.revenue_epoch",
+                "account": "market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
     },
     {
       "name": "initializeReferralAccrual",
@@ -3947,6 +6294,36 @@ export type Dusk = {
           }
         },
         {
+          "name": "futarchyAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  117,
+                  116,
+                  97,
+                  114,
+                  99,
+                  104,
+                  121,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
           "name": "lpMint"
         },
         {
@@ -3966,98 +6343,6 @@ export type Dusk = {
         {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": [
-        {
-          "name": "args",
-          "type": {
-            "defined": {
-              "name": "initializeYieldAccountsArgs"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "liquidateLeverage",
-      "discriminator": [
-        188,
-        132,
-        10,
-        83,
-        171,
-        78,
-        116,
-        41
-      ],
-      "accounts": [
-        {
-          "name": "market",
-          "writable": true
-        },
-        {
-          "name": "futarchyAuthority"
-        },
-        {
-          "name": "positionOwner",
-          "writable": true
-        },
-        {
-          "name": "leveragePosition",
-          "writable": true
-        },
-        {
-          "name": "debtMint"
-        },
-        {
-          "name": "collateralMint"
-        },
-        {
-          "name": "debtReserveVault",
-          "writable": true
-        },
-        {
-          "name": "collateralReserveVault",
-          "writable": true
-        },
-        {
-          "name": "debtInterestVault",
-          "writable": true
-        },
-        {
-          "name": "leverageCollateralVault",
-          "writable": true
-        },
-        {
-          "name": "liquidatorDebtAccount",
-          "writable": true
-        },
-        {
-          "name": "ownerDebtAccount",
-          "writable": true
-        },
-        {
-          "name": "referralPartner",
-          "optional": true
-        },
-        {
-          "name": "referralAccrual",
-          "writable": true,
-          "optional": true
-        },
-        {
-          "name": "liquidator",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "tokenProgram",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-        },
-        {
-          "name": "token2022Program",
-          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
         {
           "name": "eventAuthority",
@@ -4097,7 +6382,7 @@ export type Dusk = {
           "name": "args",
           "type": {
             "defined": {
-              "name": "liquidateLeverageArgs"
+              "name": "initializeYieldAccountsArgs"
             }
           }
         }
@@ -4125,6 +6410,15 @@ export type Dusk = {
         },
         {
           "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "payer",
+          "docs": [
+            "Pays account rent. Ordinary opens pass `owner` again; delegated opens",
+            "use the keeper without transferring position ownership to it."
+          ],
           "writable": true,
           "signer": true
         },
@@ -4164,6 +6458,10 @@ export type Dusk = {
         {
           "name": "referralAccrual",
           "optional": true
+        },
+        {
+          "name": "instructionsSysvar",
+          "address": "Sysvar1nstructions1111111111111111111111111"
         },
         {
           "name": "tokenProgram",
@@ -4216,6 +6514,163 @@ export type Dusk = {
           "type": {
             "defined": {
               "name": "openLeverageArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "openLiquidityGates",
+      "docs": [
+        "Permissionless launch adapters use the same fully-backed seeding path",
+        "as ordinary srLP deposits. The initializer is the one-shot authority;",
+        "after this succeeds, subsequent liquidity is permissionless."
+      ],
+      "discriminator": [
+        84,
+        83,
+        110,
+        45,
+        185,
+        4,
+        186,
+        222
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "futarchyAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  117,
+                  116,
+                  97,
+                  114,
+                  99,
+                  104,
+                  121,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "baseMint"
+        },
+        {
+          "name": "quoteMint"
+        },
+        {
+          "name": "srlpMint",
+          "writable": true
+        },
+        {
+          "name": "baseReserveVault",
+          "writable": true
+        },
+        {
+          "name": "quoteReserveVault",
+          "writable": true
+        },
+        {
+          "name": "ownerBaseAccount",
+          "writable": true
+        },
+        {
+          "name": "ownerQuoteAccount",
+          "writable": true
+        },
+        {
+          "name": "ownerSrlpAccount",
+          "writable": true
+        },
+        {
+          "name": "baseYieldAccount",
+          "docs": [
+            "any liquidity mutation."
+          ],
+          "writable": true
+        },
+        {
+          "name": "quoteYieldAccount",
+          "docs": [
+            "any liquidity mutation."
+          ],
+          "writable": true
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token2022Program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "eventAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "addLiquidityArgs"
             }
           }
         }
@@ -4450,17 +6905,685 @@ export type Dusk = {
               },
               {
                 "kind": "account",
+                "path": "borrow_position.owner",
+                "account": "borrowPosition"
+              },
+              {
+                "kind": "account",
                 "path": "borrow_position.position_id",
                 "account": "borrowPosition"
               }
             ]
           }
+        },
+        {
+          "name": "baseMint",
+          "docs": [
+            "Liquidation values each side's collateral after its mint's current",
+            "transfer fee, so the preview reads both mints."
+          ]
+        },
+        {
+          "name": "quoteMint"
         }
       ],
       "args": [],
       "returns": {
         "defined": {
           "name": "borrowPositionPreview"
+        }
+      }
+    },
+    {
+      "name": "previewBorrowPositionCapacity",
+      "discriminator": [
+        117,
+        63,
+        148,
+        138,
+        201,
+        37,
+        189,
+        1
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.base_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.quote_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.params_hash",
+                "account": "market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "borrowPosition",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  114,
+                  114,
+                  111,
+                  119,
+                  95,
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "borrow_position.owner",
+                "account": "borrowPosition"
+              },
+              {
+                "kind": "account",
+                "path": "borrow_position.position_id",
+                "account": "borrowPosition"
+              }
+            ]
+          }
+        },
+        {
+          "name": "collateralAssetMint"
+        },
+        {
+          "name": "debtAssetMint"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "previewBorrowPositionCapacityArgs"
+            }
+          }
+        }
+      ],
+      "returns": {
+        "defined": {
+          "name": "borrowPositionCapacityPreview"
+        }
+      }
+    },
+    {
+      "name": "previewEmergencyLiquidation",
+      "discriminator": [
+        75,
+        200,
+        66,
+        0,
+        112,
+        230,
+        24,
+        56
+      ],
+      "accounts": [
+        {
+          "name": "preview",
+          "accounts": [
+            {
+              "name": "market",
+              "pda": {
+                "seeds": [
+                  {
+                    "kind": "const",
+                    "value": [
+                      109,
+                      97,
+                      114,
+                      107,
+                      101,
+                      116,
+                      95,
+                      118,
+                      50
+                    ]
+                  },
+                  {
+                    "kind": "account",
+                    "path": "market.base_side.asset_mint",
+                    "account": "market"
+                  },
+                  {
+                    "kind": "account",
+                    "path": "market.quote_side.asset_mint",
+                    "account": "market"
+                  },
+                  {
+                    "kind": "account",
+                    "path": "market.params_hash",
+                    "account": "market"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "borrowPosition",
+              "optional": true
+            },
+            {
+              "name": "leveragePosition",
+              "optional": true
+            },
+            {
+              "name": "collateralMint"
+            },
+            {
+              "name": "debtMint"
+            }
+          ]
+        },
+        {
+          "name": "futarchyAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  117,
+                  116,
+                  97,
+                  114,
+                  99,
+                  104,
+                  121,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "previewEmergencyLiquidationArgs"
+            }
+          }
+        }
+      ],
+      "returns": {
+        "defined": {
+          "name": "emergencyLiquidationQuote"
+        }
+      }
+    },
+    {
+      "name": "previewFlashAmmLiquidation",
+      "docs": [
+        "Preview the final debt-token payout when the paired Dusk AMM funds an",
+        "atomic flash liquidation settlement."
+      ],
+      "discriminator": [
+        219,
+        117,
+        70,
+        133,
+        93,
+        227,
+        129,
+        173
+      ],
+      "accounts": [
+        {
+          "name": "preview",
+          "accounts": [
+            {
+              "name": "market",
+              "pda": {
+                "seeds": [
+                  {
+                    "kind": "const",
+                    "value": [
+                      109,
+                      97,
+                      114,
+                      107,
+                      101,
+                      116,
+                      95,
+                      118,
+                      50
+                    ]
+                  },
+                  {
+                    "kind": "account",
+                    "path": "market.base_side.asset_mint",
+                    "account": "market"
+                  },
+                  {
+                    "kind": "account",
+                    "path": "market.quote_side.asset_mint",
+                    "account": "market"
+                  },
+                  {
+                    "kind": "account",
+                    "path": "market.params_hash",
+                    "account": "market"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "borrowPosition",
+              "optional": true
+            },
+            {
+              "name": "leveragePosition",
+              "optional": true
+            },
+            {
+              "name": "collateralMint"
+            },
+            {
+              "name": "debtMint"
+            }
+          ]
+        },
+        {
+          "name": "futarchyAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  117,
+                  116,
+                  97,
+                  114,
+                  99,
+                  104,
+                  121,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "previewFlashAmmLiquidationArgs"
+            }
+          }
+        }
+      ],
+      "returns": {
+        "defined": {
+          "name": "flashAmmLiquidationQuote"
+        }
+      }
+    },
+    {
+      "name": "previewFlashLiquidation",
+      "discriminator": [
+        238,
+        94,
+        122,
+        243,
+        214,
+        175,
+        246,
+        3
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.base_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.quote_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.params_hash",
+                "account": "market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "borrowPosition",
+          "optional": true
+        },
+        {
+          "name": "leveragePosition",
+          "optional": true
+        },
+        {
+          "name": "collateralMint"
+        },
+        {
+          "name": "debtMint"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "previewFlashLiquidationArgs"
+            }
+          }
+        }
+      ],
+      "returns": {
+        "defined": {
+          "name": "flashLiquidationQuote"
+        }
+      }
+    },
+    {
+      "name": "previewHlpDepositCapacity",
+      "discriminator": [
+        183,
+        4,
+        20,
+        188,
+        148,
+        193,
+        129,
+        195
+      ],
+      "accounts": [
+        {
+          "name": "market"
+        },
+        {
+          "name": "futarchyAuthority"
+        },
+        {
+          "name": "baseMint"
+        },
+        {
+          "name": "quoteMint"
+        },
+        {
+          "name": "targetHlpMint"
+        }
+      ],
+      "args": [],
+      "returns": {
+        "defined": {
+          "name": "hlpDepositCapacityPreview"
+        }
+      }
+    },
+    {
+      "name": "previewHlpFlash",
+      "docs": [
+        "Quote the fixed net payment for vault-wide atomic external hLP recovery."
+      ],
+      "discriminator": [
+        26,
+        164,
+        118,
+        84,
+        231,
+        86,
+        157,
+        176
+      ],
+      "accounts": [
+        {
+          "name": "market"
+        },
+        {
+          "name": "futarchyAuthority"
+        },
+        {
+          "name": "targetMint"
+        },
+        {
+          "name": "borrowedMint"
+        }
+      ],
+      "args": [
+        {
+          "name": "targetAsset",
+          "type": "u8"
+        }
+      ],
+      "returns": {
+        "defined": {
+          "name": "hlpFlashQuote"
+        }
+      }
+    },
+    {
+      "name": "previewHlpOrderTrigger",
+      "discriminator": [
+        98,
+        114,
+        204,
+        124,
+        206,
+        245,
+        4,
+        57
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.base_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.quote_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.params_hash",
+                "account": "market"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "previewHlpOrderTriggerArgs"
+            }
+          }
+        }
+      ],
+      "returns": {
+        "defined": {
+          "name": "hlpOrderTriggerPreview"
+        }
+      }
+    },
+    {
+      "name": "previewLiquidationHealth",
+      "docs": [
+        "Read current liquidation health without starting an episode or mutating accounts."
+      ],
+      "discriminator": [
+        123,
+        158,
+        120,
+        122,
+        95,
+        28,
+        6,
+        172
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.base_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.quote_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.params_hash",
+                "account": "market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "borrowPosition",
+          "optional": true
+        },
+        {
+          "name": "leveragePosition",
+          "optional": true
+        },
+        {
+          "name": "collateralMint"
+        },
+        {
+          "name": "debtMint"
+        }
+      ],
+      "args": [
+        {
+          "name": "debtAsset",
+          "type": "u8"
+        }
+      ],
+      "returns": {
+        "defined": {
+          "name": "liquidationHealth"
         }
       }
     },
@@ -4625,20 +7748,170 @@ export type Dusk = {
       }
     },
     {
-      "name": "queueParameterProposal",
+      "name": "removeLiquidity",
       "discriminator": [
-        194,
-        89,
-        164,
-        68,
-        253,
-        251,
-        21,
+        80,
+        85,
+        209,
+        72,
+        24,
+        206,
+        177,
         108
       ],
       "accounts": [
         {
           "name": "market",
+          "writable": true
+        },
+        {
+          "name": "futarchyAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  117,
+                  116,
+                  97,
+                  114,
+                  99,
+                  104,
+                  121,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "baseMint"
+        },
+        {
+          "name": "quoteMint"
+        },
+        {
+          "name": "srlpMint",
+          "writable": true
+        },
+        {
+          "name": "baseReserveVault",
+          "writable": true
+        },
+        {
+          "name": "quoteReserveVault",
+          "writable": true
+        },
+        {
+          "name": "ownerBaseAccount",
+          "writable": true
+        },
+        {
+          "name": "ownerQuoteAccount",
+          "writable": true
+        },
+        {
+          "name": "ownerSrlpAccount",
+          "writable": true
+        },
+        {
+          "name": "baseYieldAccount",
+          "writable": true
+        },
+        {
+          "name": "quoteYieldAccount",
+          "writable": true
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token2022Program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "eventAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "removeLiquidityArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "removeMarketManager",
+      "docs": [
+        "Immediately revoke the optional manager and its pending change, preserving owner announcements."
+      ],
+      "discriminator": [
+        241,
+        96,
+        2,
+        41,
+        224,
+        50,
+        155,
+        174
+      ],
+      "accounts": [
+        {
+          "name": "operator",
+          "signer": true
+        },
+        {
+          "name": "market",
+          "writable": true,
           "pda": {
             "seeds": [
               {
@@ -4672,19 +7945,6 @@ export type Dusk = {
               }
             ]
           }
-        },
-        {
-          "name": "proposal",
-          "writable": true
-        },
-        {
-          "name": "ylpMint"
-        },
-        {
-          "name": "baseHlpYlpVault"
-        },
-        {
-          "name": "quoteHlpYlpVault"
         },
         {
           "name": "eventAuthority",
@@ -4722,16 +7982,232 @@ export type Dusk = {
       "args": []
     },
     {
-      "name": "removeLeverageMargin",
+      "name": "repay",
       "discriminator": [
-        245,
-        142,
-        114,
-        58,
-        238,
-        20,
+        234,
+        103,
         67,
-        107
+        82,
+        208,
+        234,
+        219,
+        166
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.base_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.quote_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.params_hash",
+                "account": "market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "futarchyAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  117,
+                  116,
+                  97,
+                  114,
+                  99,
+                  104,
+                  121,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "docs": [
+            "Token payer; need not own the borrow position."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "debtAssetMint"
+        },
+        {
+          "name": "collateralAssetMint"
+        },
+        {
+          "name": "reserveVault",
+          "writable": true
+        },
+        {
+          "name": "interestVault",
+          "writable": true
+        },
+        {
+          "name": "ownerDebtAccount",
+          "writable": true
+        },
+        {
+          "name": "borrowPosition",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  114,
+                  114,
+                  111,
+                  119,
+                  95,
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "borrow_position.owner",
+                "account": "borrowPosition"
+              },
+              {
+                "kind": "account",
+                "path": "borrow_position.position_id",
+                "account": "borrowPosition"
+              }
+            ]
+          }
+        },
+        {
+          "name": "referralPartner",
+          "optional": true
+        },
+        {
+          "name": "referralAccrual",
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token2022Program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "eventAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "repayArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "repayLeverage",
+      "docs": [
+        "Repays leverage from the signer's tokens without quoting or selling collateral.",
+        "The update event's closeout_value is zero (unquoted)."
+      ],
+      "discriminator": [
+        155,
+        110,
+        230,
+        251,
+        39,
+        169,
+        47,
+        22
       ],
       "accounts": [
         {
@@ -4840,6 +8316,16 @@ export type Dusk = {
               },
               {
                 "kind": "account",
+                "path": "leverage_position.owner",
+                "account": "leveragePosition"
+              },
+              {
+                "kind": "account",
+                "path": "leverage_position.namespace_authority",
+                "account": "leveragePosition"
+              },
+              {
+                "kind": "account",
                 "path": "leverage_position.position_id",
                 "account": "leveragePosition"
               }
@@ -4857,11 +8343,27 @@ export type Dusk = {
           "writable": true
         },
         {
+          "name": "debtInterestVault",
+          "writable": true
+        },
+        {
           "name": "ownerDebtAccount",
           "writable": true
         },
         {
+          "name": "referralPartner",
+          "optional": true
+        },
+        {
+          "name": "referralAccrual",
+          "writable": true,
+          "optional": true
+        },
+        {
           "name": "owner",
+          "docs": [
+            "Token payer; need not own the leverage position."
+          ],
           "writable": true,
           "signer": true
         },
@@ -4911,135 +8413,26 @@ export type Dusk = {
           "name": "args",
           "type": {
             "defined": {
-              "name": "removeLeverageMarginArgs"
+              "name": "addLeverageMarginArgs"
             }
           }
         }
       ]
     },
     {
-      "name": "removeLiquidity",
-      "discriminator": [
-        80,
-        85,
-        209,
-        72,
-        24,
-        206,
-        177,
-        108
+      "name": "resolveOperatorChange",
+      "docs": [
+        "The operator may cancel any bundle; a manager may cancel its own. Anyone may close obsolete proposals."
       ],
-      "accounts": [
-        {
-          "name": "market",
-          "writable": true
-        },
-        {
-          "name": "owner",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "baseMint"
-        },
-        {
-          "name": "quoteMint"
-        },
-        {
-          "name": "ylpMint",
-          "writable": true
-        },
-        {
-          "name": "baseReserveVault",
-          "writable": true
-        },
-        {
-          "name": "quoteReserveVault",
-          "writable": true
-        },
-        {
-          "name": "ownerBaseAccount",
-          "writable": true
-        },
-        {
-          "name": "ownerQuoteAccount",
-          "writable": true
-        },
-        {
-          "name": "ownerYlpAccount",
-          "writable": true
-        },
-        {
-          "name": "baseYieldAccount",
-          "writable": true
-        },
-        {
-          "name": "quoteYieldAccount",
-          "writable": true
-        },
-        {
-          "name": "tokenProgram",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-        },
-        {
-          "name": "token2022Program",
-          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
-        },
-        {
-          "name": "eventAuthority",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  95,
-                  95,
-                  101,
-                  118,
-                  101,
-                  110,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "program"
-        }
-      ],
-      "args": [
-        {
-          "name": "args",
-          "type": {
-            "defined": {
-              "name": "removeLiquidityArgs"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "repay",
       "discriminator": [
-        234,
-        103,
-        67,
-        82,
+        173,
+        4,
         208,
-        234,
         219,
-        166
+        60,
+        231,
+        129,
+        124
       ],
       "accounts": [
         {
@@ -5077,23 +8470,74 @@ export type Dusk = {
                 "account": "market"
               }
             ]
-          }
+          },
+          "relations": [
+            "proposal"
+          ]
         },
         {
-          "name": "futarchyAuthority",
+          "name": "proposal",
+          "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "const",
                 "value": [
-                  102,
-                  117,
-                  116,
-                  97,
+                  111,
+                  112,
+                  101,
                   114,
+                  97,
+                  116,
+                  111,
+                  114,
+                  95,
                   99,
                   104,
-                  121,
+                  97,
+                  110,
+                  103,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "proposal.nonce",
+                "account": "operatorProposal"
+              }
+            ]
+          }
+        },
+        {
+          "name": "rentRefund",
+          "writable": true,
+          "relations": [
+            "proposal"
+          ]
+        },
+        {
+          "name": "operator",
+          "signer": true,
+          "optional": true
+        },
+        {
+          "name": "eventAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
                   95,
                   97,
                   117,
@@ -5110,51 +8554,105 @@ export type Dusk = {
           }
         },
         {
-          "name": "owner",
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "cancel",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "rollIncomeEpoch",
+      "discriminator": [
+        4,
+        217,
+        228,
+        135,
+        97,
+        80,
+        174,
+        100
+      ],
+      "accounts": [
+        {
+          "name": "payer",
           "writable": true,
           "signer": true
         },
         {
-          "name": "debtAssetMint"
-        },
-        {
-          "name": "reserveVault",
+          "name": "market",
           "writable": true
         },
         {
-          "name": "interestVault",
+          "name": "incomeEpoch",
           "writable": true
         },
         {
-          "name": "ownerDebtAccount",
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "rollIncomeEpochArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "rotateHlpCohort",
+      "discriminator": [
+        163,
+        66,
+        186,
+        91,
+        40,
+        131,
+        194,
+        235
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "market",
           "writable": true
         },
         {
-          "name": "borrowPosition",
+          "name": "oldHlpMint"
+        },
+        {
+          "name": "newHlpMint",
+          "writable": true
+        },
+        {
+          "name": "oldCohort",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "const",
                 "value": [
-                  98,
-                  111,
-                  114,
-                  114,
-                  111,
-                  119,
-                  95,
+                  104,
+                  108,
                   112,
-                  111,
-                  115,
-                  105,
-                  116,
-                  105,
-                  111,
-                  110,
                   95,
-                  118,
-                  50
+                  99,
+                  111,
+                  104,
+                  111,
+                  114,
+                  116
                 ]
               },
               {
@@ -5163,28 +8661,125 @@ export type Dusk = {
               },
               {
                 "kind": "account",
-                "path": "borrow_position.position_id",
-                "account": "borrowPosition"
+                "path": "oldHlpMint"
               }
             ]
           }
         },
         {
-          "name": "referralPartner",
-          "optional": true
-        },
-        {
-          "name": "referralAccrual",
+          "name": "newTokenMetadata",
           "writable": true,
-          "optional": true
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "const",
+                "value": [
+                  11,
+                  112,
+                  101,
+                  177,
+                  227,
+                  209,
+                  124,
+                  69,
+                  56,
+                  157,
+                  82,
+                  127,
+                  107,
+                  4,
+                  195,
+                  205,
+                  88,
+                  184,
+                  108,
+                  115,
+                  26,
+                  160,
+                  253,
+                  181,
+                  73,
+                  182,
+                  209,
+                  188,
+                  3,
+                  248,
+                  41,
+                  70
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "newHlpMint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                11,
+                112,
+                101,
+                177,
+                227,
+                209,
+                124,
+                69,
+                56,
+                157,
+                82,
+                127,
+                107,
+                4,
+                195,
+                205,
+                88,
+                184,
+                108,
+                115,
+                26,
+                160,
+                253,
+                181,
+                73,
+                182,
+                209,
+                188,
+                3,
+                248,
+                41,
+                70
+              ]
+            }
+          }
         },
         {
-          "name": "tokenProgram",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+          "name": "sysvarInstructions",
+          "address": "Sysvar1nstructions1111111111111111111111111"
         },
         {
           "name": "token2022Program",
           "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
         },
         {
           "name": "eventAuthority",
@@ -5224,7 +8819,7 @@ export type Dusk = {
           "name": "args",
           "type": {
             "defined": {
-              "name": "repayArgs"
+              "name": "rotateHlpCohortArgs"
             }
           }
         }
@@ -5247,7 +8842,7 @@ export type Dusk = {
           "name": "authoritySigner",
           "writable": true,
           "signer": true,
-          "address": "2iXtA8oeZqUU5pofxK971TCEvFGfems2AcDRaZHKD2pQ"
+          "address": "3YL87sTCrHMB6DYKorE9CCN4dL45kZPahoREcMLDY6QV"
         },
         {
           "name": "futarchyAuthority",
@@ -5287,6 +8882,118 @@ export type Dusk = {
           "type": {
             "defined": {
               "name": "setGlobalReduceOnlyArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "setHarvestAuthority",
+      "docs": [
+        "Set or revoke a harvest caller independently of the yield recipient.",
+        "Only the LP owner may update this authority; `None` revokes it."
+      ],
+      "discriminator": [
+        59,
+        181,
+        149,
+        163,
+        99,
+        148,
+        106,
+        133
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.base_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.quote_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.params_hash",
+                "account": "market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "assetMint"
+        },
+        {
+          "name": "lpMint"
+        },
+        {
+          "name": "yieldAccount",
+          "writable": true
+        },
+        {
+          "name": "eventAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "setHarvestAuthorityArgs"
             }
           }
         }
@@ -5345,7 +9052,7 @@ export type Dusk = {
         {
           "name": "authoritySigner",
           "signer": true,
-          "address": "2iXtA8oeZqUU5pofxK971TCEvFGfems2AcDRaZHKD2pQ"
+          "address": "3YL87sTCrHMB6DYKorE9CCN4dL45kZPahoREcMLDY6QV"
         },
         {
           "name": "eventAuthority",
@@ -5595,180 +9302,208 @@ export type Dusk = {
       ]
     },
     {
-      "name": "settleLiquidationAuctionFloor",
+      "name": "settleFlashLiquidation",
       "discriminator": [
-        46,
+        161,
         93,
-        87,
-        78,
-        85,
-        49,
-        137,
-        121
+        89,
+        56,
+        133,
+        124,
+        79,
+        20
       ],
       "accounts": [
         {
-          "name": "market",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  109,
-                  97,
-                  114,
-                  107,
-                  101,
-                  116,
-                  95,
-                  118,
-                  50
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "market.base_side.asset_mint",
-                "account": "market"
-              },
-              {
-                "kind": "account",
-                "path": "market.quote_side.asset_mint",
-                "account": "market"
-              },
-              {
-                "kind": "account",
-                "path": "market.params_hash",
-                "account": "market"
-              }
-            ]
-          }
-        },
-        {
-          "name": "futarchyAuthority",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  102,
-                  117,
-                  116,
-                  97,
-                  114,
-                  99,
-                  104,
-                  121,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
+          "name": "accounts",
+          "accounts": [
+            {
+              "name": "market",
+              "writable": true,
+              "pda": {
+                "seeds": [
+                  {
+                    "kind": "const",
+                    "value": [
+                      109,
+                      97,
+                      114,
+                      107,
+                      101,
+                      116,
+                      95,
+                      118,
+                      50
+                    ]
+                  },
+                  {
+                    "kind": "account",
+                    "path": "market.base_side.asset_mint",
+                    "account": "market"
+                  },
+                  {
+                    "kind": "account",
+                    "path": "market.quote_side.asset_mint",
+                    "account": "market"
+                  },
+                  {
+                    "kind": "account",
+                    "path": "market.params_hash",
+                    "account": "market"
+                  }
                 ]
               }
-            ]
-          }
+            },
+            {
+              "name": "borrowPosition",
+              "writable": true,
+              "optional": true
+            },
+            {
+              "name": "leveragePosition",
+              "writable": true,
+              "optional": true
+            },
+            {
+              "name": "buyer",
+              "writable": true,
+              "signer": true
+            },
+            {
+              "name": "collateralMint"
+            },
+            {
+              "name": "debtMint"
+            },
+            {
+              "name": "collateralVault",
+              "writable": true
+            },
+            {
+              "name": "reserveVault",
+              "writable": true
+            },
+            {
+              "name": "interestVault",
+              "writable": true
+            },
+            {
+              "name": "buyerCollateralAccount",
+              "writable": true
+            },
+            {
+              "name": "buyerRefundAccount",
+              "writable": true
+            },
+            {
+              "name": "ownerDebtAccount",
+              "writable": true
+            },
+            {
+              "name": "futarchyAuthority",
+              "pda": {
+                "seeds": [
+                  {
+                    "kind": "const",
+                    "value": [
+                      102,
+                      117,
+                      116,
+                      97,
+                      114,
+                      99,
+                      104,
+                      121,
+                      95,
+                      97,
+                      117,
+                      116,
+                      104,
+                      111,
+                      114,
+                      105,
+                      116,
+                      121
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "name": "referralPartner",
+              "optional": true
+            },
+            {
+              "name": "referralAccrual",
+              "writable": true,
+              "optional": true
+            },
+            {
+              "name": "tokenProgram",
+              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+            },
+            {
+              "name": "token2022Program",
+              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+            },
+            {
+              "name": "debtTokenProgram"
+            }
+          ]
         },
         {
-          "name": "liquidator",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "debtAssetMint"
-        },
-        {
-          "name": "collateralAssetMint"
-        },
-        {
-          "name": "reserveVault",
-          "writable": true
-        },
-        {
-          "name": "interestVault",
-          "writable": true
-        },
-        {
-          "name": "collateralVault",
-          "writable": true
-        },
-        {
-          "name": "insuranceVault",
-          "writable": true
-        },
-        {
-          "name": "collateralInsuranceVault",
-          "writable": true
-        },
-        {
-          "name": "liquidatorDebtAccount",
-          "writable": true
-        },
-        {
-          "name": "liquidatorCollateralAccount",
-          "writable": true
-        },
-        {
-          "name": "borrowPosition",
+          "name": "session",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "const",
                 "value": [
-                  98,
-                  111,
-                  114,
-                  114,
-                  111,
-                  119,
-                  95,
-                  112,
-                  111,
-                  115,
+                  108,
                   105,
+                  113,
+                  117,
+                  105,
+                  100,
+                  97,
                   116,
                   105,
                   111,
                   110,
-                  95,
-                  118,
-                  50
+                  45,
+                  115,
+                  101,
+                  115,
+                  115,
+                  105,
+                  111,
+                  110
                 ]
               },
               {
                 "kind": "account",
-                "path": "market"
-              },
-              {
-                "kind": "account",
-                "path": "borrow_position.position_id",
-                "account": "borrowPosition"
+                "path": "session.position",
+                "account": "liquidationSession"
               }
             ]
           }
         },
         {
-          "name": "referralPartner",
-          "optional": true
+          "name": "repaymentVault",
+          "writable": true
         },
         {
-          "name": "referralAccrual",
+          "name": "collateralReserveVault",
+          "docs": [
+            "Supplying the canonical opposite reserve selects direct Dusk execution",
+            "with principal repayment netted inside the AMM settlement."
+          ],
           "writable": true,
           "optional": true
         },
         {
-          "name": "tokenProgram",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-        },
-        {
-          "name": "token2022Program",
-          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+          "name": "instructions",
+          "address": "Sysvar1nstructions1111111111111111111111111"
         },
         {
           "name": "eventAuthority",
@@ -5803,16 +9538,150 @@ export type Dusk = {
           "name": "program"
         }
       ],
-      "args": [
+      "args": []
+    },
+    {
+      "name": "settleHlpFlash",
+      "docs": [
+        "Verify the fixed payment and restore the vault's opposite-token hedge."
+      ],
+      "discriminator": [
+        215,
+        124,
+        153,
+        104,
+        195,
+        91,
+        118,
+        209
+      ],
+      "accounts": [
         {
-          "name": "args",
-          "type": {
-            "defined": {
-              "name": "settleLiquidationAuctionFloorArgs"
+          "name": "accounts",
+          "accounts": [
+            {
+              "name": "market",
+              "writable": true
+            },
+            {
+              "name": "futarchyAuthority"
+            },
+            {
+              "name": "buyer",
+              "writable": true,
+              "signer": true
+            },
+            {
+              "name": "targetMint"
+            },
+            {
+              "name": "borrowedMint"
+            },
+            {
+              "name": "targetReserve",
+              "writable": true
+            },
+            {
+              "name": "borrowedReserve",
+              "writable": true
+            },
+            {
+              "name": "buyerCollateralAccount",
+              "writable": true
+            },
+            {
+              "name": "buyerRefundAccount",
+              "writable": true
+            },
+            {
+              "name": "tokenProgram",
+              "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+            },
+            {
+              "name": "token2022Program",
+              "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+            },
+            {
+              "name": "borrowedTokenProgram"
             }
+          ]
+        },
+        {
+          "name": "session",
+          "writable": true
+        },
+        {
+          "name": "repaymentVault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  104,
+                  108,
+                  112,
+                  45,
+                  102,
+                  108,
+                  97,
+                  115,
+                  104,
+                  45,
+                  112,
+                  97,
+                  121,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "session"
+              }
+            ]
           }
+        },
+        {
+          "name": "instructions",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "eventAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
         }
-      ]
+      ],
+      "args": []
     },
     {
       "name": "settleProtocolAuction",
@@ -5927,9 +9796,6 @@ export type Dusk = {
           "writable": true
         },
         {
-          "name": "referenceMarket"
-        },
-        {
           "name": "tokenProgram",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
@@ -5976,176 +9842,6 @@ export type Dusk = {
           "type": {
             "defined": {
               "name": "settleProtocolAuctionArgs"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "supportParameterProposal",
-      "discriminator": [
-        151,
-        82,
-        42,
-        209,
-        219,
-        155,
-        3,
-        9
-      ],
-      "accounts": [
-        {
-          "name": "supporter",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "market",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  109,
-                  97,
-                  114,
-                  107,
-                  101,
-                  116,
-                  95,
-                  118,
-                  50
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "market.base_side.asset_mint",
-                "account": "market"
-              },
-              {
-                "kind": "account",
-                "path": "market.quote_side.asset_mint",
-                "account": "market"
-              },
-              {
-                "kind": "account",
-                "path": "market.params_hash",
-                "account": "market"
-              }
-            ]
-          }
-        },
-        {
-          "name": "proposal",
-          "writable": true
-        },
-        {
-          "name": "proposalSupport",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  112,
-                  114,
-                  111,
-                  112,
-                  111,
-                  115,
-                  97,
-                  108,
-                  95,
-                  115,
-                  117,
-                  112,
-                  112,
-                  111,
-                  114,
-                  116
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "proposal"
-              },
-              {
-                "kind": "account",
-                "path": "supporter"
-              }
-            ]
-          }
-        },
-        {
-          "name": "ylpMint",
-          "writable": true
-        },
-        {
-          "name": "supporterYlpAccount",
-          "writable": true
-        },
-        {
-          "name": "baseYieldAccount",
-          "writable": true
-        },
-        {
-          "name": "quoteYieldAccount",
-          "writable": true
-        },
-        {
-          "name": "baseHlpYlpVault"
-        },
-        {
-          "name": "quoteHlpYlpVault"
-        },
-        {
-          "name": "token2022Program",
-          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
-        },
-        {
-          "name": "systemProgram",
-          "address": "11111111111111111111111111111111"
-        },
-        {
-          "name": "eventAuthority",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  95,
-                  95,
-                  101,
-                  118,
-                  101,
-                  110,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "program"
-        }
-      ],
-      "args": [
-        {
-          "name": "args",
-          "type": {
-            "defined": {
-              "name": "supportParameterProposalArgs"
             }
           }
         }
@@ -6259,6 +9955,13 @@ export type Dusk = {
           "writable": true
         },
         {
+          "name": "instructionsSysvar",
+          "docs": [
+            "during the configured launch rate-limit window."
+          ],
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
           "name": "tokenProgram",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
@@ -6309,102 +10012,6 @@ export type Dusk = {
           }
         }
       ]
-    },
-    {
-      "name": "triggerLiquidationAuction",
-      "discriminator": [
-        181,
-        172,
-        83,
-        88,
-        101,
-        55,
-        246,
-        111
-      ],
-      "accounts": [
-        {
-          "name": "market",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  109,
-                  97,
-                  114,
-                  107,
-                  101,
-                  116,
-                  95,
-                  118,
-                  50
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "market.base_side.asset_mint",
-                "account": "market"
-              },
-              {
-                "kind": "account",
-                "path": "market.quote_side.asset_mint",
-                "account": "market"
-              },
-              {
-                "kind": "account",
-                "path": "market.params_hash",
-                "account": "market"
-              }
-            ]
-          }
-        },
-        {
-          "name": "borrowPosition",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  98,
-                  111,
-                  114,
-                  114,
-                  111,
-                  119,
-                  95,
-                  112,
-                  111,
-                  115,
-                  105,
-                  116,
-                  105,
-                  111,
-                  110,
-                  95,
-                  118,
-                  50
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "market"
-              },
-              {
-                "kind": "account",
-                "path": "borrow_position.position_id",
-                "account": "borrowPosition"
-              }
-            ]
-          }
-        },
-        {
-          "name": "debtAssetMint"
-        }
-      ],
-      "args": []
     },
     {
       "name": "updateFutarchyAuthority",
@@ -6551,6 +10158,16 @@ export type Dusk = {
               },
               {
                 "kind": "account",
+                "path": "leverage_position.owner",
+                "account": "leveragePosition"
+              },
+              {
+                "kind": "account",
+                "path": "leverage_position.namespace_authority",
+                "account": "leveragePosition"
+              },
+              {
+                "kind": "account",
                 "path": "leverage_position.position_id",
                 "account": "leveragePosition"
               }
@@ -6640,6 +10257,111 @@ export type Dusk = {
           "type": {
             "defined": {
               "name": "updateLeverageDelegationArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "updateLpMetadata",
+      "discriminator": [
+        189,
+        1,
+        111,
+        232,
+        230,
+        30,
+        12,
+        245
+      ],
+      "accounts": [
+        {
+          "name": "operator",
+          "signer": true
+        },
+        {
+          "name": "market",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.base_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.quote_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.params_hash",
+                "account": "market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "lpMint"
+        },
+        {
+          "name": "tokenMetadata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "tokenMetadataProgram"
+              },
+              {
+                "kind": "account",
+                "path": "lpMint"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "tokenMetadataProgram"
+            }
+          }
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "initializeLpMetadataArgs"
             }
           }
         }
@@ -6832,134 +10554,6 @@ export type Dusk = {
       ]
     },
     {
-      "name": "updateProtocolAuctionRoute",
-      "discriminator": [
-        37,
-        160,
-        194,
-        28,
-        53,
-        78,
-        43,
-        119
-      ],
-      "accounts": [
-        {
-          "name": "authoritySigner",
-          "signer": true
-        },
-        {
-          "name": "futarchyAuthority",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  102,
-                  117,
-                  116,
-                  97,
-                  114,
-                  99,
-                  104,
-                  121,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "market",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  109,
-                  97,
-                  114,
-                  107,
-                  101,
-                  116,
-                  95,
-                  118,
-                  50
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "market.base_side.asset_mint",
-                "account": "market"
-              },
-              {
-                "kind": "account",
-                "path": "market.quote_side.asset_mint",
-                "account": "market"
-              },
-              {
-                "kind": "account",
-                "path": "market.params_hash",
-                "account": "market"
-              }
-            ]
-          }
-        },
-        {
-          "name": "eventAuthority",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  95,
-                  95,
-                  101,
-                  118,
-                  101,
-                  110,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "program"
-        }
-      ],
-      "args": [
-        {
-          "name": "args",
-          "type": {
-            "defined": {
-              "name": "updateProtocolAuctionRouteArgs"
-            }
-          }
-        }
-      ]
-    },
-    {
       "name": "updateProtocolRevenue",
       "discriminator": [
         176,
@@ -7114,6 +10708,184 @@ export type Dusk = {
       ]
     },
     {
+      "name": "withdrawAllCollateral",
+      "docs": [
+        "Sweeps both collateral balances and closes a debt-free borrow position.",
+        "Balances are read during execution so prior dust donations cannot block closure."
+      ],
+      "discriminator": [
+        37,
+        185,
+        159,
+        214,
+        37,
+        30,
+        163,
+        146
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.base_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.quote_side.asset_mint",
+                "account": "market"
+              },
+              {
+                "kind": "account",
+                "path": "market.params_hash",
+                "account": "market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "borrowPosition",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  114,
+                  114,
+                  111,
+                  119,
+                  95,
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110,
+                  95,
+                  118,
+                  50
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "borrow_position.owner",
+                "account": "borrowPosition"
+              },
+              {
+                "kind": "account",
+                "path": "borrow_position.position_id",
+                "account": "borrowPosition"
+              }
+            ]
+          }
+        },
+        {
+          "name": "baseMint"
+        },
+        {
+          "name": "quoteMint"
+        },
+        {
+          "name": "baseCollateralVault",
+          "writable": true
+        },
+        {
+          "name": "quoteCollateralVault",
+          "writable": true
+        },
+        {
+          "name": "ownerBaseAccount",
+          "writable": true
+        },
+        {
+          "name": "ownerQuoteAccount",
+          "writable": true
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token2022Program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "eventAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "withdrawAllCollateralArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "withdrawCollateral",
       "discriminator": [
         115,
@@ -7243,6 +11015,11 @@ export type Dusk = {
               },
               {
                 "kind": "account",
+                "path": "borrow_position.owner",
+                "account": "borrowPosition"
+              },
+              {
+                "kind": "account",
                 "path": "borrow_position.position_id",
                 "account": "borrowPosition"
               }
@@ -7302,23 +11079,21 @@ export type Dusk = {
       ]
     },
     {
-      "name": "withdrawParameterSupport",
+      "name": "withdrawRepaidLeverage",
+      "docs": [
+        "Returns all remaining collateral to its owner after full leverage repayment."
+      ],
       "discriminator": [
-        249,
-        15,
-        97,
-        20,
-        2,
-        64,
-        146,
-        172
+        7,
+        253,
+        16,
+        195,
+        214,
+        10,
+        116,
+        51
       ],
       "accounts": [
-        {
-          "name": "supporter",
-          "writable": true,
-          "signer": true
-        },
         {
           "name": "market",
           "writable": true,
@@ -7357,61 +11132,112 @@ export type Dusk = {
           }
         },
         {
-          "name": "proposal",
-          "writable": true
+          "name": "owner",
+          "writable": true,
+          "signer": true
         },
         {
-          "name": "proposalSupport",
+          "name": "leveragePosition",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "const",
                 "value": [
-                  112,
-                  114,
-                  111,
-                  112,
-                  111,
-                  115,
-                  97,
                   108,
+                  101,
+                  118,
+                  101,
+                  114,
+                  97,
+                  103,
+                  101,
                   95,
-                  115,
-                  117,
-                  112,
                   112,
                   111,
-                  114,
-                  116
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110,
+                  95,
+                  118,
+                  50
                 ]
               },
               {
                 "kind": "account",
-                "path": "proposal"
+                "path": "market"
               },
               {
                 "kind": "account",
-                "path": "supporter"
+                "path": "leverage_position.owner",
+                "account": "leveragePosition"
+              },
+              {
+                "kind": "account",
+                "path": "leverage_position.namespace_authority",
+                "account": "leveragePosition"
+              },
+              {
+                "kind": "account",
+                "path": "leverage_position.position_id",
+                "account": "leveragePosition"
               }
             ]
           }
         },
         {
-          "name": "ylpMint",
+          "name": "collateralMint"
+        },
+        {
+          "name": "collateralVault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  108,
+                  101,
+                  118,
+                  101,
+                  114,
+                  97,
+                  103,
+                  101,
+                  95,
+                  99,
+                  111,
+                  108,
+                  108,
+                  97,
+                  116,
+                  101,
+                  114,
+                  97,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "collateralMint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "ownerCollateralAccount",
           "writable": true
         },
         {
-          "name": "supporterYlpAccount",
-          "writable": true
-        },
-        {
-          "name": "baseYieldAccount",
-          "writable": true
-        },
-        {
-          "name": "quoteYieldAccount",
-          "writable": true
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
         {
           "name": "token2022Program",
@@ -7450,7 +11276,16 @@ export type Dusk = {
           "name": "program"
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "withdrawRepaidLeverageArgs"
+            }
+          }
+        }
+      ]
     },
     {
       "name": "withdrawSingleSided",
@@ -7484,7 +11319,7 @@ export type Dusk = {
           "name": "quoteMint"
         },
         {
-          "name": "ylpMint",
+          "name": "srlpMint",
           "writable": true
         },
         {
@@ -7512,7 +11347,7 @@ export type Dusk = {
           "writable": true
         },
         {
-          "name": "hlpYlpAccount",
+          "name": "hlpSrlpAccount",
           "writable": true,
           "pda": {
             "seeds": [
@@ -7544,7 +11379,7 @@ export type Dusk = {
               },
               {
                 "kind": "account",
-                "path": "ylpMint"
+                "path": "srlpMint"
               }
             ]
           }
@@ -7638,6 +11473,71 @@ export type Dusk = {
       ]
     },
     {
+      "name": "hlpCohort",
+      "discriminator": [
+        224,
+        89,
+        199,
+        90,
+        126,
+        101,
+        43,
+        215
+      ]
+    },
+    {
+      "name": "hlpFlashSession",
+      "discriminator": [
+        212,
+        216,
+        161,
+        138,
+        241,
+        116,
+        166,
+        126
+      ]
+    },
+    {
+      "name": "incomeEpoch",
+      "discriminator": [
+        180,
+        248,
+        84,
+        87,
+        99,
+        16,
+        62,
+        246
+      ]
+    },
+    {
+      "name": "juniorCohort",
+      "discriminator": [
+        66,
+        255,
+        14,
+        91,
+        158,
+        179,
+        23,
+        9
+      ]
+    },
+    {
+      "name": "juniorExitAccount",
+      "discriminator": [
+        186,
+        158,
+        208,
+        250,
+        7,
+        219,
+        13,
+        26
+      ]
+    },
+    {
       "name": "leverageDelegation",
       "discriminator": [
         49,
@@ -7664,6 +11564,19 @@ export type Dusk = {
       ]
     },
     {
+      "name": "liquidationSession",
+      "discriminator": [
+        198,
+        19,
+        76,
+        58,
+        102,
+        166,
+        134,
+        164
+      ]
+    },
+    {
       "name": "market",
       "discriminator": [
         219,
@@ -7677,29 +11590,29 @@ export type Dusk = {
       ]
     },
     {
-      "name": "parameterProposal",
+      "name": "operatorProposal",
       "discriminator": [
-        179,
-        8,
-        154,
-        49,
-        34,
-        65,
-        232,
-        234
+        55,
+        174,
+        78,
+        112,
+        33,
+        32,
+        159,
+        169
       ]
     },
     {
-      "name": "proposalSupport",
+      "name": "operatorRevenueAccount",
       "discriminator": [
-        207,
-        134,
-        77,
-        36,
-        67,
-        63,
-        132,
-        148
+        137,
+        103,
+        226,
+        155,
+        153,
+        98,
+        227,
+        65
       ]
     },
     {
@@ -7744,6 +11657,32 @@ export type Dusk = {
   ],
   "events": [
     {
+      "name": "borrowInterestAccrued",
+      "discriminator": [
+        72,
+        60,
+        125,
+        249,
+        229,
+        92,
+        113,
+        250
+      ]
+    },
+    {
+      "name": "borrowInterestPaid",
+      "discriminator": [
+        173,
+        181,
+        219,
+        170,
+        32,
+        88,
+        224,
+        224
+      ]
+    },
+    {
       "name": "borrowPositionLiquidated",
       "discriminator": [
         107,
@@ -7754,6 +11693,71 @@ export type Dusk = {
         197,
         106,
         188
+      ]
+    },
+    {
+      "name": "debtFreePositionClosed",
+      "discriminator": [
+        220,
+        198,
+        224,
+        150,
+        204,
+        65,
+        184,
+        31
+      ]
+    },
+    {
+      "name": "emergencyLiquidationSettled",
+      "discriminator": [
+        243,
+        230,
+        130,
+        84,
+        184,
+        113,
+        18,
+        172
+      ]
+    },
+    {
+      "name": "flashLiquidationBegun",
+      "discriminator": [
+        198,
+        250,
+        117,
+        184,
+        74,
+        48,
+        48,
+        151
+      ]
+    },
+    {
+      "name": "flashLiquidationSettled",
+      "discriminator": [
+        207,
+        203,
+        137,
+        99,
+        235,
+        237,
+        207,
+        38
+      ]
+    },
+    {
+      "name": "harvestAuthorityUpdated",
+      "discriminator": [
+        232,
+        18,
+        21,
+        9,
+        229,
+        230,
+        173,
+        86
       ]
     },
     {
@@ -7770,6 +11774,58 @@ export type Dusk = {
       ]
     },
     {
+      "name": "hlpCohortRotated",
+      "discriminator": [
+        46,
+        134,
+        13,
+        57,
+        117,
+        44,
+        226,
+        81
+      ]
+    },
+    {
+      "name": "hlpFlashSettled",
+      "discriminator": [
+        255,
+        193,
+        57,
+        138,
+        48,
+        64,
+        138,
+        37
+      ]
+    },
+    {
+      "name": "hlpFlashStarted",
+      "discriminator": [
+        203,
+        97,
+        249,
+        187,
+        226,
+        119,
+        141,
+        71
+      ]
+    },
+    {
+      "name": "hlpInterestAllocated",
+      "discriminator": [
+        12,
+        174,
+        16,
+        115,
+        243,
+        133,
+        131,
+        49
+      ]
+    },
+    {
       "name": "hlpOpened",
       "discriminator": [
         188,
@@ -7780,6 +11836,84 @@ export type Dusk = {
         151,
         236,
         84
+      ]
+    },
+    {
+      "name": "hlpRebalanced",
+      "discriminator": [
+        48,
+        237,
+        118,
+        177,
+        48,
+        168,
+        104,
+        6
+      ]
+    },
+    {
+      "name": "hlpRetiredReceiptBurned",
+      "discriminator": [
+        31,
+        252,
+        3,
+        205,
+        166,
+        215,
+        14,
+        49
+      ]
+    },
+    {
+      "name": "hlpTerminalLiquidated",
+      "discriminator": [
+        80,
+        186,
+        237,
+        212,
+        75,
+        183,
+        43,
+        173
+      ]
+    },
+    {
+      "name": "juniorCohortInitialized",
+      "discriminator": [
+        18,
+        109,
+        85,
+        200,
+        65,
+        58,
+        228,
+        243
+      ]
+    },
+    {
+      "name": "juniorSeedCompounded",
+      "discriminator": [
+        253,
+        233,
+        124,
+        178,
+        67,
+        98,
+        224,
+        87
+      ]
+    },
+    {
+      "name": "juniorSeedFunded",
+      "discriminator": [
+        123,
+        105,
+        18,
+        32,
+        9,
+        92,
+        120,
+        184
       ]
     },
     {
@@ -7848,6 +11982,32 @@ export type Dusk = {
       ]
     },
     {
+      "name": "liquidationAuctionCancelled",
+      "discriminator": [
+        122,
+        103,
+        174,
+        225,
+        120,
+        149,
+        186,
+        155
+      ]
+    },
+    {
+      "name": "liquidationAuctionStarted",
+      "discriminator": [
+        137,
+        151,
+        231,
+        92,
+        108,
+        13,
+        215,
+        59
+      ]
+    },
+    {
       "name": "liquidityAdded",
       "discriminator": [
         154,
@@ -7871,6 +12031,32 @@ export type Dusk = {
         116,
         169,
         189
+      ]
+    },
+    {
+      "name": "lpTransferred",
+      "discriminator": [
+        244,
+        4,
+        93,
+        185,
+        125,
+        159,
+        75,
+        55
+      ]
+    },
+    {
+      "name": "managerChanged",
+      "discriminator": [
+        142,
+        97,
+        175,
+        220,
+        73,
+        27,
+        252,
+        56
       ]
     },
     {
@@ -7952,68 +12138,55 @@ export type Dusk = {
       ]
     },
     {
-      "name": "parameterProposalCreated",
+      "name": "operatorChangeAnnounced",
       "discriminator": [
-        243,
-        111,
-        217,
-        113,
-        215,
+        137,
+        231,
+        71,
+        79,
+        127,
+        58,
+        221,
+        224
+      ]
+    },
+    {
+      "name": "operatorChangeResolved",
+      "discriminator": [
+        147,
+        200,
+        253,
+        3,
+        228,
+        196,
+        117,
+        201
+      ]
+    },
+    {
+      "name": "operatorChanged",
+      "discriminator": [
+        231,
+        79,
+        62,
+        226,
+        190,
+        139,
         176,
-        38,
-        118
+        51
       ]
     },
     {
-      "name": "parameterProposalExecuted",
+      "name": "operatorRevenueClaimed",
       "discriminator": [
-        77,
-        126,
+        187,
+        177,
         199,
-        255,
-        166,
-        161,
-        110,
-        34
-      ]
-    },
-    {
-      "name": "parameterProposalQueued",
-      "discriminator": [
-        166,
-        188,
-        191,
-        35,
-        42,
-        165,
-        21,
-        49
-      ]
-    },
-    {
-      "name": "parameterProposalSupportWithdrawn",
-      "discriminator": [
-        204,
-        113,
-        93,
-        73,
-        179,
-        229,
-        233,
-        123
-      ]
-    },
-    {
-      "name": "parameterProposalSupported",
-      "discriminator": [
-        120,
-        73,
-        210,
-        182,
-        131,
-        10,
-        140,
-        181
+        199,
+        220,
+        87,
+        89,
+        74
       ]
     },
     {
@@ -8030,6 +12203,19 @@ export type Dusk = {
       ]
     },
     {
+      "name": "protocolAuctionConfigured",
+      "discriminator": [
+        114,
+        47,
+        219,
+        227,
+        0,
+        0,
+        171,
+        52
+      ]
+    },
+    {
       "name": "protocolAuctionRecipientsUpdated",
       "discriminator": [
         174,
@@ -8040,19 +12226,6 @@ export type Dusk = {
         241,
         5,
         120
-      ]
-    },
-    {
-      "name": "protocolAuctionRouteUpdated",
-      "discriminator": [
-        146,
-        136,
-        94,
-        87,
-        36,
-        147,
-        221,
-        192
       ]
     },
     {
@@ -8079,6 +12252,32 @@ export type Dusk = {
         110,
         234,
         249
+      ]
+    },
+    {
+      "name": "protocolInterestMarkupCheckpointed",
+      "discriminator": [
+        164,
+        132,
+        177,
+        23,
+        186,
+        43,
+        200,
+        39
+      ]
+    },
+    {
+      "name": "publicInterestFunded",
+      "discriminator": [
+        34,
+        55,
+        82,
+        224,
+        42,
+        7,
+        154,
+        156
       ]
     },
     {
@@ -8160,6 +12359,19 @@ export type Dusk = {
       ]
     },
     {
+      "name": "retiredJuniorBurned",
+      "discriminator": [
+        29,
+        56,
+        158,
+        137,
+        97,
+        193,
+        230,
+        93
+      ]
+    },
+    {
       "name": "swapExecuted",
       "discriminator": [
         150,
@@ -8170,6 +12382,19 @@ export type Dusk = {
         89,
         38,
         79
+      ]
+    },
+    {
+      "name": "trancheConverted",
+      "discriminator": [
+        249,
+        121,
+        88,
+        27,
+        39,
+        181,
+        244,
+        199
       ]
     },
     {
@@ -8202,528 +12427,528 @@ export type Dusk = {
   "errors": [
     {
       "code": 6000,
+      "name": "invalidOperator",
+      "msg": "Only the current market operator may authorize this action"
+    },
+    {
+      "code": 6001,
+      "name": "operatorEpochMismatch",
+      "msg": "Operator authority epoch changed"
+    },
+    {
+      "code": 6002,
+      "name": "operatorNonceMismatch",
+      "msg": "Operator nonce is not current"
+    },
+    {
+      "code": 6003,
+      "name": "operatorFieldForbidden",
+      "msg": "This field cannot be changed by an operator"
+    },
+    {
+      "code": 6004,
+      "name": "operatorPolicyExceeded",
+      "msg": "Operator change exceeds the fixed protocol policy"
+    },
+    {
+      "code": 6005,
+      "name": "operatorProposalStale",
+      "msg": "Operator bundle no longer matches the market"
+    },
+    {
+      "code": 6006,
+      "name": "operatorNoticeNotReady",
+      "msg": "Operator change is still in its exit notice"
+    },
+    {
+      "code": 6007,
+      "name": "operatorProposalExpired",
+      "msg": "Operator execution window expired"
+    },
+    {
+      "code": 6008,
+      "name": "operatorChangePending",
+      "msg": "Operator change is still pending"
+    },
+    {
+      "code": 6009,
+      "name": "operatorRevenueArchiveRequired",
+      "msg": "Prepare the previous recipient revenue archive before transferring future fees"
+    },
+    {
+      "code": 6010,
       "name": "invalidDeployer",
       "msg": "Invalid deployer"
     },
     {
-      "code": 6001,
+      "code": 6011,
       "name": "argumentMissing",
       "msg": "Argument missing"
     },
     {
-      "code": 6002,
+      "code": 6012,
       "name": "invalidSwapFeeBps",
       "msg": "Invalid swap fee bps"
     },
     {
-      "code": 6003,
+      "code": 6013,
       "name": "invalidInterestFeeBps",
       "msg": "Invalid interest fee bps"
     },
     {
-      "code": 6004,
+      "code": 6014,
       "name": "invalidHalfLife",
       "msg": "Invalid half life"
     },
     {
-      "code": 6005,
+      "code": 6015,
       "name": "invalidFutarchyAuthority",
       "msg": "Invalid futarchy authority"
     },
     {
-      "code": 6006,
+      "code": 6016,
       "name": "invalidReduceOnlyAuthority",
       "msg": "Invalid reduce-only authority"
     },
     {
-      "code": 6007,
+      "code": 6017,
       "name": "invalidProposalMetadata",
       "msg": "Invalid parameter proposal metadata"
     },
     {
-      "code": 6008,
+      "code": 6018,
       "name": "invalidProposalUri",
       "msg": "Invalid parameter proposal description URI"
     },
     {
-      "code": 6009,
-      "name": "invalidProposalDigest",
-      "msg": "Parameter proposal digest does not match its immutable contents"
-    },
-    {
-      "code": 6010,
-      "name": "invalidParameterProposal",
-      "msg": "Invalid parameter proposal account"
-    },
-    {
-      "code": 6011,
-      "name": "invalidProposalSupport",
-      "msg": "Invalid parameter proposal support account"
-    },
-    {
-      "code": 6012,
-      "name": "proposalNotCollecting",
-      "msg": "Parameter proposal is not collecting support"
-    },
-    {
-      "code": 6013,
-      "name": "proposalNotQueued",
-      "msg": "Parameter proposal is not queued"
-    },
-    {
-      "code": 6014,
-      "name": "proposalSupportFrozen",
-      "msg": "Queued proposal support is frozen"
-    },
-    {
-      "code": 6015,
-      "name": "proposalSponsorshipTooLow",
-      "msg": "Proposal support is below the sponsorship floor"
-    },
-    {
-      "code": 6016,
-      "name": "proposalSupportInsufficient",
-      "msg": "Proposal does not have a strict majority of eligible yLP"
-    },
-    {
-      "code": 6017,
-      "name": "proposalTimelockNotReady",
-      "msg": "Parameter proposal timelock is not ready"
-    },
-    {
-      "code": 6018,
-      "name": "proposalExecutionWindowExpired",
-      "msg": "Parameter proposal execution window has expired"
-    },
-    {
       "code": 6019,
-      "name": "proposalStale",
-      "msg": "Parameter proposal was invalidated by a same-family update"
-    },
-    {
-      "code": 6020,
       "name": "parameterUpdateNotMeaningful",
       "msg": "Parameter update would not change the active market parameters"
     },
     {
-      "code": 6021,
+      "code": 6020,
       "name": "invalidParameterUpdate",
       "msg": "Invalid parameter update"
     },
     {
-      "code": 6022,
+      "code": 6021,
       "name": "utilizationGuardExceeded",
       "msg": "Parameter execution is blocked while either lending side is at or above 80% utilization"
     },
     {
-      "code": 6023,
+      "code": 6022,
       "name": "invalidArgument",
       "msg": "Invalid argument"
     },
     {
-      "code": 6024,
+      "code": 6023,
       "name": "amountZero",
       "msg": "Amount cannot be zero"
     },
     {
-      "code": 6025,
+      "code": 6024,
       "name": "insufficientAmount0In",
       "msg": "Insufficient amount0 in"
     },
     {
-      "code": 6026,
+      "code": 6025,
       "name": "insufficientAmount1In",
       "msg": "Insufficient amount1 in"
     },
     {
-      "code": 6027,
+      "code": 6026,
       "name": "borrowingPowerExceeded",
       "msg": "Borrowing power exceeded"
     },
     {
-      "code": 6028,
+      "code": 6027,
       "name": "invalidTokenAccount",
       "msg": "Invalid token account"
     },
     {
-      "code": 6029,
+      "code": 6028,
       "name": "invalidTokenProgram",
       "msg": "Invalid token program"
     },
     {
-      "code": 6030,
+      "code": 6029,
       "name": "borrowExceedsReserve",
       "msg": "Borrow exceeds reserve"
     },
     {
-      "code": 6031,
+      "code": 6030,
       "name": "insufficientAmount0",
       "msg": "Insufficient amount0"
     },
     {
-      "code": 6032,
+      "code": 6031,
       "name": "insufficientAmount1",
       "msg": "Insufficient amount1"
     },
     {
-      "code": 6033,
+      "code": 6032,
       "name": "insufficientOutputAmount",
       "msg": "Insufficient output amount"
     },
     {
-      "code": 6034,
+      "code": 6033,
       "name": "slippageExceeded",
       "msg": "Output amount below minimum requested (slippage exceeded)"
     },
     {
-      "code": 6035,
+      "code": 6034,
       "name": "insufficientLiquidity",
       "msg": "Insufficient liquidity"
     },
     {
-      "code": 6036,
+      "code": 6035,
       "name": "insufficientCashReserve0",
       "msg": "Insufficient cash reserve0"
     },
     {
-      "code": 6037,
+      "code": 6036,
       "name": "insufficientCashReserve1",
       "msg": "Insufficient cash reserve1"
     },
     {
-      "code": 6038,
+      "code": 6037,
       "name": "overflow",
       "msg": "Arithmetic overflow"
     },
     {
-      "code": 6039,
+      "code": 6038,
       "name": "undercollateralized",
       "msg": "undercollateralized"
     },
     {
-      "code": 6040,
+      "code": 6039,
       "name": "insufficientBalanceForCollateral",
       "msg": "Insufficient balance for collateral"
     },
     {
-      "code": 6041,
+      "code": 6040,
       "name": "insufficientAmount",
       "msg": "Insufficient amount"
     },
     {
-      "code": 6042,
+      "code": 6041,
       "name": "insufficientBalance",
       "msg": "User balance insufficient to cover requested amount"
     },
     {
-      "code": 6043,
+      "code": 6042,
       "name": "insufficientDebt",
       "msg": "Insufficient debt"
     },
     {
-      "code": 6044,
+      "code": 6043,
       "name": "userPositionNotInitialized",
       "msg": "User position not initialized"
     },
     {
-      "code": 6045,
+      "code": 6044,
       "name": "zeroDebtAmount",
       "msg": "Zero debt amount"
     },
     {
-      "code": 6046,
+      "code": 6045,
       "name": "notUndercollateralized",
       "msg": "Not undercollateralized"
     },
     {
-      "code": 6047,
+      "code": 6046,
       "name": "brokenInvariant",
       "msg": "Broken invariant"
     },
     {
-      "code": 6048,
+      "code": 6047,
       "name": "invariantOverflow",
       "msg": "Math overflow during invariant calculation"
     },
     {
-      "code": 6049,
+      "code": 6048,
       "name": "feeMathOverflow",
       "msg": "Math overflow during fee calculation."
     },
     {
-      "code": 6050,
+      "code": 6049,
       "name": "outputAmountOverflow",
       "msg": "Math overflow during output amount calculation."
     },
     {
-      "code": 6051,
+      "code": 6050,
       "name": "reserveOverflow",
       "msg": "Math overflow during reserve calculation."
     },
     {
-      "code": 6052,
+      "code": 6051,
       "name": "reserveUnderflow",
       "msg": "Math underflow during reserve calculation."
     },
     {
-      "code": 6053,
+      "code": 6052,
       "name": "cashReserveUnderflow",
       "msg": "Math underflow during cash reserve calculation."
     },
     {
-      "code": 6054,
+      "code": 6053,
       "name": "denominatorOverflow",
       "msg": "Math overflow during denominator calculation."
     },
     {
-      "code": 6055,
+      "code": 6054,
       "name": "liquidityMathOverflow",
       "msg": "Math overflow during liquidity calculation"
     },
     {
-      "code": 6056,
+      "code": 6055,
       "name": "liquiditySqrtOverflow",
       "msg": "Math overflow during liquidity square root calculation"
     },
     {
-      "code": 6057,
+      "code": 6056,
       "name": "liquidityUnderflow",
       "msg": "Math underflow during liquidity calculation"
     },
     {
-      "code": 6058,
+      "code": 6057,
       "name": "liquidityConversionOverflow",
       "msg": "Math overflow during liquidity conversion"
     },
     {
-      "code": 6059,
+      "code": 6058,
       "name": "supplyOverflow",
       "msg": "Math overflow during supply calculation"
     },
     {
-      "code": 6060,
+      "code": 6059,
       "name": "supplyUnderflow",
       "msg": "Math underflow during supply calculation"
     },
     {
-      "code": 6061,
+      "code": 6060,
       "name": "debtMathOverflow",
       "msg": "Math overflow during debt calculation"
     },
     {
-      "code": 6062,
+      "code": 6061,
       "name": "debtShareMathOverflow",
       "msg": "Math overflow during debt share calculation"
     },
     {
-      "code": 6063,
+      "code": 6062,
       "name": "debtShareDivisionOverflow",
       "msg": "Math overflow during debt share division"
     },
     {
-      "code": 6064,
+      "code": 6063,
       "name": "debtUtilizationOverflow",
       "msg": "Math overflow during debt utilization calculation"
     },
     {
-      "code": 6065,
+      "code": 6064,
       "name": "invalidMint",
       "msg": "Invalid mint"
     },
     {
-      "code": 6066,
+      "code": 6065,
       "name": "invalidMintLen",
       "msg": "Invalid mint length"
     },
     {
-      "code": 6067,
+      "code": 6066,
       "name": "invalidDistribution",
       "msg": "Invalid distribution - percentages must sum to 100%"
     },
     {
-      "code": 6068,
+      "code": 6067,
       "name": "invalidAuctionConfig",
       "msg": "Invalid protocol auction config"
     },
     {
-      "code": 6069,
-      "name": "staleAuctionReference",
-      "msg": "Protocol auction reference price is stale"
+      "code": 6068,
+      "name": "invalidAuctionClock",
+      "msg": "Protocol auction slot precedes its last update"
     },
     {
-      "code": 6070,
+      "code": 6069,
       "name": "insufficientAuctionPayment",
       "msg": "Protocol auction payment is insufficient"
     },
     {
-      "code": 6071,
+      "code": 6070,
       "name": "invalidLpMintKey",
       "msg": "Invalid LP mint key"
     },
     {
-      "code": 6072,
+      "code": 6071,
       "name": "invalidLpName",
       "msg": "Invalid LP name"
     },
     {
-      "code": 6073,
+      "code": 6072,
       "name": "invalidLpSymbol",
       "msg": "Invalid LP symbol"
     },
     {
-      "code": 6074,
+      "code": 6073,
       "name": "invalidLpUri",
       "msg": "Invalid LP URI"
     },
     {
-      "code": 6075,
+      "code": 6074,
       "name": "accountNotEmpty",
       "msg": "Account not empty"
     },
     {
-      "code": 6076,
+      "code": 6075,
       "name": "invalidMintAuthority",
       "msg": "Invalid mint authority"
     },
     {
-      "code": 6077,
+      "code": 6076,
       "name": "frozenLpMint",
       "msg": "Frozen LP mint"
     },
     {
-      "code": 6078,
+      "code": 6077,
       "name": "nonZeroSupply",
       "msg": "Non-zero supply"
     },
     {
-      "code": 6079,
+      "code": 6078,
       "name": "wrongLpDecimals",
       "msg": "Wrong LP decimals"
     },
     {
-      "code": 6080,
+      "code": 6079,
       "name": "unsupportedAssetDecimals",
       "msg": "Asset mint decimals exceed Dusk's 9-decimal AMM precision"
     },
     {
-      "code": 6081,
+      "code": 6080,
       "name": "invalidVaultSameAccount",
       "msg": "Invalid vault - token_in_vault and token_out_vault must be different"
     },
     {
-      "code": 6082,
+      "code": 6081,
       "name": "invalidVault",
       "msg": "Invalid vault"
     },
     {
-      "code": 6083,
+      "code": 6082,
       "name": "invalidParamsHash",
       "msg": "Invalid params hash - hash does not match computed parameters"
     },
     {
-      "code": 6084,
+      "code": 6083,
       "name": "invalidVersion",
       "msg": "Invalid version"
     },
     {
-      "code": 6085,
+      "code": 6084,
       "name": "invalidTokenOrder",
       "msg": "Invalid token order"
     },
     {
-      "code": 6086,
+      "code": 6085,
       "name": "invalidRateModel",
       "msg": "Invalid rate model - rate_model does not match market configuration"
     },
     {
-      "code": 6087,
+      "code": 6086,
       "name": "invalidPositionMarket",
       "msg": "Invalid position market - position does not match market"
     },
     {
-      "code": 6088,
+      "code": 6087,
       "name": "invalidUtilBounds",
       "msg": "Invalid utilization bounds - must satisfy: MIN <= start < end <= MAX"
     },
     {
-      "code": 6089,
+      "code": 6088,
       "name": "invalidRateParams",
       "msg": "Invalid rate parameters - check half_life_ms, min_rate_bps, max_rate_bps, initial_rate_bps bounds"
     },
     {
-      "code": 6090,
+      "code": 6089,
       "name": "reduceOnlyMode",
       "msg": "Operation blocked: reduce-only mode is active"
     },
     {
-      "code": 6091,
+      "code": 6090,
       "name": "reduceOnlyHasDebt",
       "msg": "Cannot remove collateral in reduce-only mode while debt exists"
     },
     {
-      "code": 6092,
+      "code": 6091,
       "name": "invalidInstructionsSysvar",
       "msg": "Invalid instructions sysvar"
     },
     {
-      "code": 6093,
+      "code": 6092,
       "name": "insufficientPostWithdrawDebtCoverage",
       "msg": "Insufficient post-withdraw debt coverage"
     },
     {
-      "code": 6094,
+      "code": 6093,
       "name": "invalidRecipient",
       "msg": "Invalid recipient - address does not match configured revenue recipient"
     },
     {
-      "code": 6095,
+      "code": 6094,
       "name": "invalidMarket",
       "msg": "Invalid market"
     },
     {
-      "code": 6096,
+      "code": 6095,
       "name": "invalidMarketConfig",
       "msg": "Invalid market config"
     },
     {
-      "code": 6097,
+      "code": 6096,
       "name": "invalidSettlementPrice",
       "msg": "Invalid settlement price"
     },
     {
-      "code": 6098,
+      "code": 6097,
       "name": "insufficientMarketShareBacking",
       "msg": "Market reserve share backing is insufficient"
     },
     {
-      "code": 6099,
+      "code": 6098,
       "name": "invalidMarketSide",
       "msg": "Invalid market side"
     },
     {
-      "code": 6100,
+      "code": 6099,
       "name": "invalidYieldAccount",
       "msg": "Invalid yield account"
     },
     {
-      "code": 6101,
+      "code": 6100,
       "name": "invalidHlpVault",
       "msg": "Invalid hLP vault"
     },
     {
-      "code": 6102,
+      "code": 6101,
       "name": "invalidHlpMintSupply",
       "msg": "Live hLP mint supply is inconsistent with stored vault supply"
     },
     {
-      "code": 6103,
+      "code": 6102,
       "name": "notEnoughAccounts",
       "msg": "Not enough remaining accounts"
     },
     {
-      "code": 6104,
+      "code": 6103,
       "name": "hlpSettlementUnavailable",
       "msg": "hLP settlement is unavailable"
+    },
+    {
+      "code": 6104,
+      "name": "hlpNotLiquidatable",
+      "msg": "hLP funding position is not eligible for permissionless liquidation"
     },
     {
       "code": 6105,
@@ -8747,118 +12972,203 @@ export type Dusk = {
     },
     {
       "code": 6109,
-      "name": "insufficientInsurance",
-      "msg": "Insurance coverage is insufficient"
-    },
-    {
-      "code": 6110,
       "name": "liquidationSocializationExceeded",
       "msg": "Socialized liquidation loss exceeds caller cap"
     },
     {
-      "code": 6111,
+      "code": 6110,
       "name": "invalidClaimMint",
       "msg": "Claim mint must not charge transfer fees"
     },
     {
-      "code": 6112,
+      "code": 6111,
       "name": "unbackedFeeLiability",
       "msg": "Fee liability is not backed by its custody balance"
     },
     {
-      "code": 6113,
+      "code": 6112,
       "name": "invalidMarketFeeAuthority",
       "msg": "Invalid market fee authority"
     },
     {
+      "code": 6113,
+      "name": "invalidInitialLiquidityAuthority",
+      "msg": "Invalid initial liquidity authority"
+    },
+    {
       "code": 6114,
+      "name": "launchRateLimitSplitTransaction",
+      "msg": "Launch rate limiter permits only one top-level market action per transaction"
+    },
+    {
+      "code": 6115,
       "name": "marketReduceOnly",
       "msg": "Market is reduce-only"
     },
     {
-      "code": 6115,
+      "code": 6116,
       "name": "marketNotStarted",
       "msg": "Market has not started"
     },
     {
-      "code": 6116,
+      "code": 6117,
       "name": "marketMathOverflow",
       "msg": "Market math overflow"
     },
     {
-      "code": 6117,
+      "code": 6118,
       "name": "dailyLimitExceeded",
       "msg": "Daily liquidity limit exceeded"
     },
     {
-      "code": 6118,
+      "code": 6119,
       "name": "instructionNotLive",
       "msg": "Instruction is intentionally not live yet"
     },
     {
-      "code": 6119,
+      "code": 6120,
       "name": "liquidationRepayTooLarge",
       "msg": "Liquidation repay amount exceeds partial liquidation cap"
     },
     {
-      "code": 6120,
+      "code": 6121,
       "name": "leverageMultiplierTooHigh",
       "msg": "Leverage multiplier exceeds circuit breaker"
     },
     {
-      "code": 6121,
+      "code": 6122,
       "name": "leverageInitialMarginTooLow",
       "msg": "Leverage position does not have enough initial margin"
     },
     {
-      "code": 6122,
+      "code": 6123,
       "name": "leverageUnwindImpactTooHigh",
       "msg": "Leverage unwind impact exceeds limit"
     },
     {
-      "code": 6123,
+      "code": 6124,
       "name": "leveragePositionNotLiquidatable",
       "msg": "Leverage position is not liquidatable"
     },
     {
-      "code": 6124,
+      "code": 6125,
       "name": "invalidSigner",
       "msg": "Invalid signer"
     },
     {
-      "code": 6125,
+      "code": 6126,
       "name": "invalidLeveragePosition",
       "msg": "Invalid leverage position"
     },
     {
-      "code": 6126,
+      "code": 6127,
       "name": "invalidLeverageDelegation",
       "msg": "Invalid leverage delegation"
     },
     {
-      "code": 6127,
+      "code": 6128,
       "name": "invalidReferralInterestShareBps",
       "msg": "Referral interest share exceeds the protocol hard cap"
     },
     {
-      "code": 6128,
+      "code": 6129,
       "name": "invalidReferralPartner",
       "msg": "Invalid referral partner"
     },
     {
-      "code": 6129,
+      "code": 6130,
       "name": "referralPartnerNotActive",
       "msg": "Referral partner is not active"
     },
     {
-      "code": 6130,
+      "code": 6131,
       "name": "invalidReferralAccrual",
       "msg": "Invalid referral accrual account"
     },
     {
-      "code": 6131,
+      "code": 6132,
       "name": "invalidLeverageCollateralMint",
-      "msg": "Leverage collateral mint must not have transfer fee configuration"
+      "msg": "Leverage collateral transfer fee must be immutable with no pending change"
+    },
+    {
+      "code": 6133,
+      "name": "freezableAssetMint",
+      "msg": "Asset mint has an active freeze authority"
+    },
+    {
+      "code": 6134,
+      "name": "parameterUpdatesNotCanonical",
+      "msg": "Parameter updates must name one to seven families, each once, in ascending family order"
+    },
+    {
+      "code": 6135,
+      "name": "reservedLiquidationClock",
+      "msg": "Reserved retired liquidation clock error"
+    },
+    {
+      "code": 6136,
+      "name": "liquidationSessionActive",
+      "msg": "Position has an active liquidation session"
+    },
+    {
+      "code": 6137,
+      "name": "invalidLiquidationSession",
+      "msg": "Invalid atomic liquidation session or instruction pairing"
+    },
+    {
+      "code": 6138,
+      "name": "liquidationDoesNotImproveHealth",
+      "msg": "Partial liquidation does not improve health after costs"
+    },
+    {
+      "code": 6139,
+      "name": "incomeEpochNeedsRollover",
+      "msg": "Archive and roll the income epoch before issuing new receivables"
+    },
+    {
+      "code": 6140,
+      "name": "incomeHistoryRequired",
+      "msg": "Prepare this holder's income history before changing its balance"
+    },
+    {
+      "code": 6141,
+      "name": "oracleAccountMissing",
+      "msg": "The market's configured oracle account was not supplied"
+    },
+    {
+      "code": 6142,
+      "name": "oracleAuthenticationFailed",
+      "msg": "Oracle account owner, identity or verification failed"
+    },
+    {
+      "code": 6143,
+      "name": "oracleInvalidObservation",
+      "msg": "Oracle report is invalid, future-dated, halted or too uncertain"
+    },
+    {
+      "code": 6144,
+      "name": "oracleStale",
+      "msg": "Oracle source observation is stale"
+    },
+    {
+      "code": 6145,
+      "name": "oracleReplay",
+      "msg": "Oracle sequence or source observation regressed"
+    },
+    {
+      "code": 6146,
+      "name": "launchSettingsImmutable",
+      "msg": "Launch-only settings are immutable after the market starts"
+    },
+    {
+      "code": 6147,
+      "name": "curveTailShareBelowMinimum",
+      "msg": "Concentrated curve tails must hold at least 0.01% of liquidity; lower the peak amplification or narrow the core or fade"
+    },
+    {
+      "code": 6148,
+      "name": "concentratedSwapFeeBelowMinimum",
+      "msg": "Concentrated curves require a base swap fee of at least 1 bps"
     }
   ],
   "types": [
@@ -8892,7 +13202,7 @@ export type Dusk = {
             "type": "u64"
           },
           {
-            "name": "minYlpAmount",
+            "name": "minSrlpAmount",
             "type": "u64"
           }
         ]
@@ -8952,11 +13262,11 @@ export type Dusk = {
             "type": "u64"
           },
           {
-            "name": "ylpAmount",
+            "name": "srlpAmount",
             "type": "u64"
           },
           {
-            "name": "ylpSupply",
+            "name": "srlpSupply",
             "type": "u64"
           }
         ]
@@ -8965,18 +13275,23 @@ export type Dusk = {
     {
       "name": "ammConfig",
       "docs": [
-        "AMM controls. `peak_depth_nad == 0 && fade_scale_nad == 0` selects CPMM."
+        "AMM controls. One-times peak amplification with zero widths selects the",
+        "full-range CPMM branch of the same concentrated implementation."
       ],
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "peakDepthNad",
+            "name": "peakAmplificationNad",
             "type": "u64"
           },
           {
-            "name": "fadeScaleNad",
-            "type": "u64"
+            "name": "coreHalfWidthBps",
+            "type": "u16"
+          },
+          {
+            "name": "fadeWidthBps",
+            "type": "u16"
           },
           {
             "name": "centerEmaHalfLifeMs",
@@ -8987,15 +13302,7 @@ export type Dusk = {
             "type": "u64"
           },
           {
-            "name": "adjustmentThresholdNad",
-            "type": "u64"
-          },
-          {
             "name": "adjustmentStepNad",
-            "type": "u64"
-          },
-          {
-            "name": "minAdjustmentIntervalSlots",
             "type": "u64"
           },
           {
@@ -9015,7 +13322,80 @@ export type Dusk = {
             "type": "u64"
           },
           {
-            "name": "concentrationRampDurationSlots",
+            "name": "swapFeeCollectMode",
+            "docs": [
+              "Asset in which swap, toxicity, volatility, and retained-recenter fees",
+              "are denominated. Lending and hLP funding interest remain in the",
+              "borrowed asset and are not affected by this setting."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "compoundingFeeBps",
+            "docs": [
+              "Share of the LP-owned swap fee which becomes ordinary reserve",
+              "principal instead of a claimable fee liability. Zero disables native",
+              "compounding; `BPS_DENOMINATOR` compounds the complete LP share."
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "launchFeeStartBps",
+            "docs": [
+              "Optional launch-only base fee. The premium above `swap_fee_bps`",
+              "decays from `start_time` and is zero after the configured duration."
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "launchFeeDurationSeconds",
+            "type": "u64"
+          },
+          {
+            "name": "launchFeeDecayMode",
+            "type": "u8"
+          },
+          {
+            "name": "launchMarketPriceStepBps",
+            "docs": [
+              "When all three values are zero, the launch fee follows the time",
+              "schedule above. A fully nonzero tuple selects a price-milestone",
+              "scheduler whose reference price is bound by the first liquidity seed."
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "launchMarketNumberOfPeriods",
+            "type": "u16"
+          },
+          {
+            "name": "launchMarketReductionFactorBps",
+            "type": "u16"
+          },
+          {
+            "name": "launchRateLimitAsset",
+            "docs": [
+              "Optional launch buy-size limiter. The configured asset is the asset",
+              "being bought, not the input asset. Each full/partial reference amount",
+              "after the first adds `launch_rate_limit_increment_bps`, capped by",
+              "`launch_rate_limit_max_fee_bps`."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "launchRateLimitReferenceNad",
+            "type": "u64"
+          },
+          {
+            "name": "launchRateLimitIncrementBps",
+            "type": "u16"
+          },
+          {
+            "name": "launchRateLimitMaxFeeBps",
+            "type": "u16"
+          },
+          {
+            "name": "launchRateLimitDurationSeconds",
             "type": "u64"
           },
           {
@@ -9023,7 +13403,7 @@ export type Dusk = {
             "type": {
               "array": [
                 "u8",
-                33
+                0
               ]
             }
           }
@@ -9033,8 +13413,8 @@ export type Dusk = {
     {
       "name": "ammState",
       "docs": [
-        "Embedded mutable state for concentration, internal signals, protected",
-        "liquidity, and an active parameter ramp."
+        "Embedded mutable state for the concentrated curve, internal signals, and",
+        "protected recenter liquidity."
       ],
       "type": {
         "kind": "struct",
@@ -9044,27 +13424,22 @@ export type Dusk = {
             "type": "bool"
           },
           {
-            "name": "appliedCurveParameters",
-            "docs": [
-              "Parameters already admitted by the protected-profit gate. Time alone",
-              "never changes this field."
-            ],
+            "name": "concentrationRamp",
             "type": {
               "defined": {
-                "name": "concentrationParameters"
+                "name": "concentrationRamp"
               }
             }
           },
           {
-            "name": "concentratedGeometryCache",
+            "name": "concentratedCurveCache",
             "docs": [
-              "Authoritative geometry for `applied_curve_parameters`. CPMM stores the",
-              "all-zero cache. Only initialization or an admitted parameter change may",
-              "replace it; center and reserve changes reuse it unchanged."
+              "Concentrated CPMM-tail/band geometry. CPMM is represented by zero",
+              "concentrated liquidity in this same cache."
             ],
             "type": {
               "defined": {
-                "name": "concentratedGeometryCache"
+                "name": "concentratedCurveCache"
               }
             }
           },
@@ -9089,36 +13464,33 @@ export type Dusk = {
             "type": "u64"
           },
           {
-            "name": "lastConcentrationRampUpdateSlot",
+            "name": "launchReferencePriceNad",
             "docs": [
-              "Prevents repeated instructions in one slot from advancing a ramp more",
-              "than once."
+              "Immutable launch price reference bound by the first fully-backed",
+              "liquidity seed. Zero is allowed only before that seed."
             ],
             "type": "u64"
+          },
+          {
+            "name": "launchFeeProgressOffset",
+            "docs": [
+              "Fee-schedule progress already completed by a bootstrap adapter before",
+              "the market graduates into GAMM."
+            ],
+            "type": "u16"
           },
           {
             "name": "volatilityAccumulatorNad",
             "type": "u64"
           },
           {
-            "name": "invariantDNad",
-            "type": "u128"
-          },
-          {
-            "name": "curveMathRevision",
-            "docs": [
-              "Curve formula revision represented by `invariant_d_nad`."
-            ],
-            "type": "u8"
-          },
-          {
-            "name": "qPerShareNad",
+            "name": "curveDepthPerShareNad",
             "type": "u128"
           },
           {
             "name": "protectedFloorPerShareNad",
             "docs": [
-              "yLP principal floor protected from funded recenter/ramp impairment."
+              "srLP principal floor protected from funded recenter/ramp impairment."
             ],
             "type": "u128"
           },
@@ -9148,8 +13520,9 @@ export type Dusk = {
           {
             "name": "retainDynamicSurcharge",
             "docs": [
-              "When true, dynamic surcharge is reserve principal; when false, the",
-              "identical trader charge is routed to claimable yLP fee accounting."
+              "When true, dynamic surcharge is locked in the non-quoteable protected",
+              "recenter bucket; when false, the identical trader charge is routed to",
+              "claimable srLP fee accounting."
             ],
             "type": "bool"
           },
@@ -9161,19 +13534,11 @@ export type Dusk = {
             "type": "bool"
           },
           {
-            "name": "concentrationRamp",
-            "type": {
-              "defined": {
-                "name": "concentrationRamp"
-              }
-            }
-          },
-          {
             "name": "retentionTargetStale",
             "docs": [
-              "Retained surcharge changed executable inventory after the last exact",
-              "forward-target solve. While stale, retention stays on until a decision",
-              "point refreshes the target or executes a funded recenter."
+              "The protected bucket changed after the last exact forward-target solve.",
+              "While stale, retention stays on until a decision point refreshes the",
+              "target or executes a funded recenter."
             ],
             "type": "bool"
           },
@@ -9189,6 +13554,35 @@ export type Dusk = {
             }
           },
           {
+            "name": "frozenHlpMask",
+            "docs": [
+              "A distressed hLP cannot be reconstructed as positive one-sided equity.",
+              "Each bit freezes only that vault's share/debt hedge during swaps."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "frozenBaseVaultBaseOffsetNad",
+            "docs": [
+              "Fixed virtual-coordinate adjustment captured when the vault freezes.",
+              "It preserves the pre-freeze executable price without treating the",
+              "vault's negative equity as spendable token inventory."
+            ],
+            "type": "i128"
+          },
+          {
+            "name": "frozenBaseVaultQuoteOffsetNad",
+            "type": "i128"
+          },
+          {
+            "name": "frozenQuoteVaultBaseOffsetNad",
+            "type": "i128"
+          },
+          {
+            "name": "frozenQuoteVaultQuoteOffsetNad",
+            "type": "i128"
+          },
+          {
             "name": "reserved",
             "type": {
               "array": [
@@ -9201,17 +13595,139 @@ export type Dusk = {
       }
     },
     {
-      "name": "bidLiquidationAuctionArgs",
+      "name": "announceOperatorChangeArgs",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "repayAmount",
+            "name": "nonce",
             "type": "u64"
           },
           {
-            "name": "minCollateralOut",
+            "name": "expectedEpoch",
             "type": "u64"
+          },
+          {
+            "name": "updates",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "marketParameterUpdate"
+                }
+              }
+            }
+          },
+          {
+            "name": "nextOperator",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "nextManager",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "revenueRecipient",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "interestShareBps",
+            "type": {
+              "option": "u16"
+            }
+          },
+          {
+            "name": "metadata",
+            "type": {
+              "defined": {
+                "name": "proposalMetadataV1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "beginFlashLiquidationArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "position",
+            "type": "pubkey"
+          },
+          {
+            "name": "debtAsset",
+            "type": "u8"
+          },
+          {
+            "name": "maxRepayment",
+            "type": "u64"
+          },
+          {
+            "name": "maxPayment",
+            "type": "u64"
+          },
+          {
+            "name": "minCollateralCredit",
+            "type": "u64"
+          },
+          {
+            "name": "minBuyerCredit",
+            "docs": [
+              "Minimum final debt-token credit for the paired Dusk-AMM settlement.",
+              "External routes must use zero and enforce their own route slippage."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "full",
+            "type": "bool"
+          },
+          {
+            "name": "settleIndex",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "beginHlpFlashArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "targetAsset",
+            "type": "u8"
+          },
+          {
+            "name": "maxPayment",
+            "type": "u64"
+          },
+          {
+            "name": "allowFull",
+            "type": "bool"
+          },
+          {
+            "name": "maxSocializedLoss",
+            "type": "u64"
+          },
+          {
+            "name": "maxCollateralDebit",
+            "type": "u64"
+          },
+          {
+            "name": "minCollateralCredit",
+            "type": "u64"
+          },
+          {
+            "name": "settleIndex",
+            "type": "u16"
           }
         ]
       }
@@ -9339,6 +13855,136 @@ export type Dusk = {
       }
     },
     {
+      "name": "borrowInterestAccrued",
+      "docs": [
+        "Interest recognized by one committed borrow-index checkpoint. Amounts are",
+        "raw atoms of `asset_mint`, separately floored in each debt-share bucket.",
+        "This is accrued interest, not a payment or a protocol-revenue allocation."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "assetMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "assetSide",
+            "type": "u8"
+          },
+          {
+            "name": "fromSlot",
+            "type": "u64"
+          },
+          {
+            "name": "toSlot",
+            "type": "u64"
+          },
+          {
+            "name": "borrowIndexBeforeNad",
+            "type": "u128"
+          },
+          {
+            "name": "borrowIndexAfterNad",
+            "type": "u128"
+          },
+          {
+            "name": "creditInterest",
+            "type": "u128"
+          },
+          {
+            "name": "marginInterest",
+            "type": "u128"
+          },
+          {
+            "name": "hlpInterest",
+            "type": "u128"
+          }
+        ]
+      }
+    },
+    {
+      "name": "borrowInterestPaid",
+      "docs": [
+        "Canonical interest-payment record. Lifecycle and referral events may",
+        "repeat these amounts for context and must not be summed a second time."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "assetMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "assetSide",
+            "type": "u8"
+          },
+          {
+            "name": "source",
+            "type": {
+              "defined": {
+                "name": "debtSource"
+              }
+            }
+          },
+          {
+            "name": "position",
+            "docs": [
+              "None for aggregate hLP funding debt; `asset_side` identifies its vault."
+            ],
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "interestPaid",
+            "docs": [
+              "Gross interest collected, including any terminal hLP caller bounty."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "interestVaultCredit",
+            "docs": [
+              "Net tokens credited to the interest vault after transfer fees/bounty."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "protocolInterestRevenue",
+            "docs": [
+              "Protocol allocation from vault credit, before the referral allocation."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "referralAmount",
+            "type": "u64"
+          },
+          {
+            "name": "callerBounty",
+            "docs": [
+              "Gross terminal hLP caller bounty; zero for ordinary payments."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "slot",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "borrowPosition",
       "type": {
         "kind": "struct",
@@ -9404,6 +14050,24 @@ export type Dusk = {
             "type": "u128"
           },
           {
+            "name": "fixedBasePrincipal",
+            "docs": [
+              "Original base borrowed by this position that has not been repaid or written off."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "fixedQuotePrincipal",
+            "docs": [
+              "Original quote borrowed by this position that has not been repaid or written off."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "activeLiquidationSession",
+            "type": "pubkey"
+          },
+          {
             "name": "auctionDebtAsset",
             "type": "u8"
           },
@@ -9422,6 +14086,108 @@ export type Dusk = {
           {
             "name": "bump",
             "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "borrowPositionCapacityKind",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "borrow"
+          },
+          {
+            "name": "withdraw"
+          }
+        ]
+      }
+    },
+    {
+      "name": "borrowPositionCapacityPreview",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "positionId",
+            "type": "pubkey"
+          },
+          {
+            "name": "collateralAsset",
+            "type": {
+              "defined": {
+                "name": "marketAsset"
+              }
+            }
+          },
+          {
+            "name": "debtAsset",
+            "type": {
+              "defined": {
+                "name": "marketAsset"
+              }
+            }
+          },
+          {
+            "name": "currentCollateralAmount",
+            "type": "u64"
+          },
+          {
+            "name": "collateralAmount",
+            "type": "u64"
+          },
+          {
+            "name": "existingDebtAmount",
+            "type": "u128"
+          },
+          {
+            "name": "maxBorrowAmount",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "maxWithdrawAmount",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "projectedBorrowAmount",
+            "type": "u64"
+          },
+          {
+            "name": "projectedDebtAmount",
+            "type": "u128"
+          },
+          {
+            "name": "collateralValueNad",
+            "type": "u128"
+          },
+          {
+            "name": "maxCfBps",
+            "type": "u16"
+          },
+          {
+            "name": "liquidationCfBps",
+            "type": "u16"
+          },
+          {
+            "name": "liquidationDebtPerCollateralPriceNad",
+            "type": "u64"
+          },
+          {
+            "name": "borrowAllowed",
+            "type": "bool"
           }
         ]
       }
@@ -9478,16 +14244,61 @@ export type Dusk = {
             "type": "u64"
           },
           {
-            "name": "insuranceDrawn",
-            "type": "u64"
-          },
-          {
             "name": "socializedLoss",
             "type": "u64"
           },
           {
             "name": "remainingDebt",
             "type": "u128"
+          },
+          {
+            "name": "baseCollateral",
+            "docs": [
+              "The position's state after the liquidation."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "quoteCollateral",
+            "type": "u64"
+          },
+          {
+            "name": "fixedBaseShares",
+            "type": "u128"
+          },
+          {
+            "name": "fixedQuoteShares",
+            "type": "u128"
+          },
+          {
+            "name": "globalHealthBaseContributionForQuoteDebt",
+            "type": "u64"
+          },
+          {
+            "name": "globalHealthQuoteContributionForBaseDebt",
+            "type": "u64"
+          },
+          {
+            "name": "baseLiquidationCfBps",
+            "type": "u16"
+          },
+          {
+            "name": "quoteLiquidationCfBps",
+            "type": "u16"
+          },
+          {
+            "name": "auctionDebtAsset",
+            "docs": [
+              "`255` once the auction is cleared."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "closed",
+            "docs": [
+              "The liquidation emptied the position and closed its account."
+            ],
+            "type": "bool"
           }
         ]
       }
@@ -9561,17 +14372,113 @@ export type Dusk = {
       }
     },
     {
-      "name": "claimYieldArgs",
+      "name": "burnRetiredHlpReceiptArgs",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "tokenKind",
-            "type": {
-              "defined": {
-                "name": "yieldTokenKind"
-              }
-            }
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "burnRetiredJuniorArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "checkpointIncomeArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "source",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "claimOperatorRevenueArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "revenueEpoch",
+            "type": "u64"
+          },
+          {
+            "name": "maxDebit",
+            "type": "u64"
+          },
+          {
+            "name": "minimumCredit",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "closeApprovalQuote",
+      "docs": [
+        "Dusk-owned, transaction-local approval context. Written immediately before",
+        "the read-only delegate callback and cleared before settlement. A standalone",
+        "delegate invocation cannot authenticate an off-chain or old quote with it."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "slot",
+            "type": "u64"
+          },
+          {
+            "name": "closeBps",
+            "type": "u16"
+          },
+          {
+            "name": "collateralCredit",
+            "type": "u64"
+          },
+          {
+            "name": "selectedOutput",
+            "type": "u64"
+          },
+          {
+            "name": "reserved",
+            "docs": [
+              "Reserved to preserve the position account layout."
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "closeInsolventHlpArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "targetAsset",
+            "type": "u8"
+          },
+          {
+            "name": "maxSocializedLoss",
+            "type": "u64"
+          },
+          {
+            "name": "minCallerBountyOut",
+            "type": "u64"
           }
         ]
       }
@@ -9588,6 +14495,13 @@ export type Dusk = {
           {
             "name": "minAmountOut",
             "type": "u64"
+          },
+          {
+            "name": "closeBps",
+            "docs": [
+              "Percentage of current collateral and debt to close, in basis points."
+            ],
+            "type": "u16"
           }
         ]
       }
@@ -9605,13 +14519,7 @@ export type Dusk = {
       }
     },
     {
-      "name": "concentratedGeometryCache",
-      "docs": [
-        "Parameter-bound authoritative geometry persisted by market state.",
-        "",
-        "Q80 derivation is intentionally paid only when the applied shape changes.",
-        "Ordinary quotes reconstruct every Q64/Q48 projection with shifts."
-      ],
+      "name": "concentratedCurveCache",
       "type": {
         "kind": "struct",
         "fields": [
@@ -9620,56 +14528,69 @@ export type Dusk = {
             "type": "u8"
           },
           {
-            "name": "peakDepthNad",
+            "name": "peakAmplificationNad",
             "type": "u64"
           },
           {
-            "name": "fadeScaleNad",
-            "type": "u64"
+            "name": "coreHalfWidthBps",
+            "type": "u16"
           },
           {
-            "name": "peakQ80",
+            "name": "fadeWidthBps",
+            "type": "u16"
+          },
+          {
+            "name": "tailLiquidity",
             "type": "u128"
           },
           {
-            "name": "scaleQ80",
+            "name": "concentratedLiquidity",
             "type": "u128"
           },
           {
-            "name": "vStartQ80",
+            "name": "coreLowerSqrtPriceNad",
             "type": "u128"
           },
           {
-            "name": "vTailQ80",
+            "name": "coreUpperSqrtPriceNad",
             "type": "u128"
           },
           {
-            "name": "reserveRatioStartQ80",
+            "name": "outerLowerSqrtPriceNad",
             "type": "u128"
           },
           {
-            "name": "reserveRatioTailQ80",
-            "type": "u128"
-          },
-          {
-            "name": "negativeQPrimeStartQ80",
+            "name": "outerUpperSqrtPriceNad",
             "type": "u128"
           }
         ]
       }
     },
     {
-      "name": "concentrationParameters",
+      "name": "concentratedCurveParameters",
+      "docs": [
+        "Operator configuration surface for the concentrated curve.",
+        "",
+        "`peak_amplification_nad` is center liquidity depth relative to a CPMM with",
+        "the same center reserves. `core_half_width_bps` keeps that complete depth",
+        "active around the sticky center. `fade_width_bps` adds one deterministic",
+        "half-depth shoulder before the nonzero full-range CPMM tail. One-times",
+        "amplification with zero widths is exact CPMM."
+      ],
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "peakDepthNad",
+            "name": "peakAmplificationNad",
             "type": "u64"
           },
           {
-            "name": "fadeScaleNad",
-            "type": "u64"
+            "name": "coreHalfWidthBps",
+            "type": "u16"
+          },
+          {
+            "name": "fadeWidthBps",
+            "type": "u16"
           }
         ]
       }
@@ -9677,8 +14598,7 @@ export type Dusk = {
     {
       "name": "concentrationRamp",
       "docs": [
-        "A linear ramp whose governance delay is enforced by a queued parameter",
-        "proposal. The ramp begins in the slot where that proposal executes."
+        "Scheduled targets do not mutate live geometry until a guarded step succeeds."
       ],
       "type": {
         "kind": "struct",
@@ -9691,7 +14611,7 @@ export type Dusk = {
             "name": "start",
             "type": {
               "defined": {
-                "name": "concentrationParameters"
+                "name": "concentratedCurveParameters"
               }
             }
           },
@@ -9699,7 +14619,7 @@ export type Dusk = {
             "name": "target",
             "type": {
               "defined": {
-                "name": "concentrationParameters"
+                "name": "concentratedCurveParameters"
               }
             }
           },
@@ -9710,6 +14630,63 @@ export type Dusk = {
           {
             "name": "endSlot",
             "type": "u64"
+          },
+          {
+            "name": "lastAttemptSlot",
+            "docs": [
+              "Successful or rejected steps are attempted at most once per slot."
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "configureProtocolAuctionArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "lane",
+            "type": {
+              "defined": {
+                "name": "protocolAuctionLane"
+              }
+            }
+          },
+          {
+            "name": "source",
+            "type": {
+              "defined": {
+                "name": "protocolRevenueSource"
+              }
+            }
+          },
+          {
+            "name": "soldMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "acceptedMint",
+            "docs": [
+              "None uses the lane's current default; an explicit mint configures this",
+              "curve independently. Stored reserves always retain their payment mint."
+            ],
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "params",
+            "docs": [
+              "Sets both virtual reserves and the streaming rate, restarting this",
+              "curve at the current slot. Actual fee inventory is unaffected."
+            ],
+            "type": {
+              "defined": {
+                "name": "protocolAuctionParams"
+              }
+            }
           }
         ]
       }
@@ -9750,38 +14727,6 @@ export type Dusk = {
           {
             "name": "approvedActions",
             "type": "u32"
-          }
-        ]
-      }
-    },
-    {
-      "name": "createParameterProposalArgs",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "nonce",
-            "type": "u64"
-          },
-          {
-            "name": "update",
-            "type": {
-              "defined": {
-                "name": "marketParameterUpdate"
-              }
-            }
-          },
-          {
-            "name": "metadata",
-            "type": {
-              "defined": {
-                "name": "proposalMetadataV1"
-              }
-            }
-          },
-          {
-            "name": "initialSupport",
-            "type": "u64"
           }
         ]
       }
@@ -9840,12 +14785,35 @@ export type Dusk = {
             "type": "u128"
           },
           {
-            "name": "baseRateAtTargetNad",
+            "name": "baseBorrowIndexRemainder",
+            "docs": [
+              "Fractional index growth carried across checkpoints. Denominator is",
+              "`NAD * MS_PER_YEAR`, so frequent checkpoints cannot discard interest."
+            ],
             "type": "u128"
           },
           {
-            "name": "quoteRateAtTargetNad",
+            "name": "quoteBorrowIndexRemainder",
             "type": "u128"
+          },
+          {
+            "name": "baseBorrowAprNad",
+            "type": "u128"
+          },
+          {
+            "name": "quoteBorrowAprNad",
+            "type": "u128"
+          },
+          {
+            "name": "baseBorrowAprFractionE18",
+            "docs": [
+              "Fractional NAD APR carried by the exponential controller (scale 1e9)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "quoteBorrowAprFractionE18",
+            "type": "u64"
           },
           {
             "name": "globalHealthBaseContributionForQuoteDebt",
@@ -9900,6 +14868,75 @@ export type Dusk = {
           {
             "name": "isolatedQuotePrincipal",
             "type": "u64"
+          },
+          {
+            "name": "leverageBaseCollateral",
+            "docs": [
+              "Gross collateral atoms in debt-bearing leverage positions. Counts all",
+              "owners and namespaces; custody donations cannot create exposure credit."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "leverageQuoteCollateral",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "debtFreePositionClosed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "position",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "leverage",
+            "type": "bool"
+          },
+          {
+            "name": "baseReceived",
+            "type": "u64"
+          },
+          {
+            "name": "quoteReceived",
+            "type": "u64"
+          },
+          {
+            "name": "metadata",
+            "type": {
+              "defined": {
+                "name": "marketEventMetadata"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "debtSource",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "credit"
+          },
+          {
+            "name": "margin"
+          },
+          {
+            "name": "hlp"
           }
         ]
       }
@@ -9920,6 +14957,14 @@ export type Dusk = {
           {
             "name": "minRepayOut",
             "type": "u64"
+          },
+          {
+            "name": "maxSurplusOut",
+            "docs": [
+              "Maximum gross debt-token remainder returned after repayment. Zero",
+              "prevents wallet payouts; a bounded value permits final 1x rounding."
+            ],
+            "type": "u64"
           }
         ]
       }
@@ -9932,21 +14977,13 @@ export type Dusk = {
           {
             "name": "kind",
             "docs": [
-              "0 = none, 1 = parameter ramp, 2 = center move."
+              "0 = none, 2 = center move."
             ],
             "type": "u8"
           },
           {
             "name": "centerPriceNad",
             "type": "u64"
-          },
-          {
-            "name": "parameters",
-            "type": {
-              "defined": {
-                "name": "concentrationParameters"
-              }
-            }
           },
           {
             "name": "requiredNad",
@@ -9983,6 +15020,14 @@ export type Dusk = {
           {
             "name": "minAmountOut",
             "type": "u64"
+          },
+          {
+            "name": "closeBps",
+            "docs": [
+              "Proportion of the current position to close. `10_000` preserves the",
+              "existing full-close behavior."
+            ],
+            "type": "u16"
           },
           {
             "name": "delegated",
@@ -10048,11 +15093,220 @@ export type Dusk = {
       }
     },
     {
+      "name": "donateCollateralArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "depositAmount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "emergencyLiquidationArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "debtAsset",
+            "type": "u8"
+          },
+          {
+            "name": "collateralDebit",
+            "type": "u64"
+          },
+          {
+            "name": "full",
+            "type": "bool"
+          },
+          {
+            "name": "minRewardCredit",
+            "type": "u64"
+          },
+          {
+            "name": "minSwapOutput",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "emergencyLiquidationQuote",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "referencePriceNad",
+            "docs": [
+              "Symmetric collateral-price EMA (debt per collateral, NAD), not live spot."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "referenceDepthNad",
+            "docs": [
+              "Smoothed total active curve depth used only for settlement sizing."
+            ],
+            "type": "u128"
+          },
+          {
+            "name": "full",
+            "type": "bool"
+          },
+          {
+            "name": "collateralDebit",
+            "type": "u64"
+          },
+          {
+            "name": "collateralCredit",
+            "type": "u64"
+          },
+          {
+            "name": "swapOutput",
+            "type": "u64"
+          },
+          {
+            "name": "repayment",
+            "type": "u64"
+          },
+          {
+            "name": "sharesToBurn",
+            "type": "u128"
+          },
+          {
+            "name": "rewardCredit",
+            "type": "u64"
+          },
+          {
+            "name": "rewardDebit",
+            "type": "u64"
+          },
+          {
+            "name": "fee",
+            "type": {
+              "defined": {
+                "name": "liquidationFeeAllocation"
+              }
+            }
+          },
+          {
+            "name": "juniorFeeDebit",
+            "type": "u64"
+          },
+          {
+            "name": "revenueFeeDebit",
+            "type": "u64"
+          },
+          {
+            "name": "ownerDebit",
+            "type": "u64"
+          },
+          {
+            "name": "ownerCredit",
+            "type": "u64"
+          },
+          {
+            "name": "loss",
+            "type": {
+              "defined": {
+                "name": "liquidationLossAllocation"
+              }
+            }
+          },
+          {
+            "name": "healthBefore",
+            "type": {
+              "defined": {
+                "name": "liquidationHealth"
+              }
+            }
+          },
+          {
+            "name": "healthAfter",
+            "type": {
+              "defined": {
+                "name": "liquidationHealth"
+              }
+            }
+          },
+          {
+            "name": "rates",
+            "type": {
+              "defined": {
+                "name": "liquidationRates"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "emergencyLiquidationSettled",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "position",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "caller",
+            "type": "pubkey"
+          },
+          {
+            "name": "leverage",
+            "type": "bool"
+          },
+          {
+            "name": "debtAsset",
+            "type": "u8"
+          },
+          {
+            "name": "quote",
+            "type": {
+              "defined": {
+                "name": "emergencyLiquidationQuote"
+              }
+            }
+          },
+          {
+            "name": "remainingCollateral",
+            "type": "u64"
+          },
+          {
+            "name": "remainingDebt",
+            "type": "u64"
+          },
+          {
+            "name": "positionState",
+            "docs": [
+              "Complete post-settlement position state for event-only indexers."
+            ],
+            "type": {
+              "defined": {
+                "name": "liquidationPositionState"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "feeProfile",
       "docs": [
         "Complete mutable fee surface. The fields remain embedded in their existing",
         "`MarketConfig`/`AmmConfig` locations so this view can be used by typed",
-        "governance without duplicating fee state."
+        "operator updates without duplicating fee state."
       ],
       "type": {
         "kind": "struct",
@@ -10088,6 +15342,58 @@ export type Dusk = {
           {
             "name": "volatilityAccumulatorCapNad",
             "type": "u64"
+          },
+          {
+            "name": "swapFeeCollectMode",
+            "type": "u8"
+          },
+          {
+            "name": "compoundingFeeBps",
+            "type": "u16"
+          },
+          {
+            "name": "launchFeeStartBps",
+            "type": "u16"
+          },
+          {
+            "name": "launchFeeDurationSeconds",
+            "type": "u64"
+          },
+          {
+            "name": "launchFeeDecayMode",
+            "type": "u8"
+          },
+          {
+            "name": "launchMarketPriceStepBps",
+            "type": "u16"
+          },
+          {
+            "name": "launchMarketNumberOfPeriods",
+            "type": "u16"
+          },
+          {
+            "name": "launchMarketReductionFactorBps",
+            "type": "u16"
+          },
+          {
+            "name": "launchRateLimitAsset",
+            "type": "u8"
+          },
+          {
+            "name": "launchRateLimitReferenceNad",
+            "type": "u64"
+          },
+          {
+            "name": "launchRateLimitIncrementBps",
+            "type": "u16"
+          },
+          {
+            "name": "launchRateLimitMaxFeeBps",
+            "type": "u16"
+          },
+          {
+            "name": "launchRateLimitDurationSeconds",
+            "type": "u64"
           }
         ]
       }
@@ -10097,6 +15403,22 @@ export type Dusk = {
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "junior",
+            "type": {
+              "defined": {
+                "name": "trancheIncome"
+              }
+            }
+          },
+          {
+            "name": "publicInterestAdvance",
+            "type": {
+              "defined": {
+                "name": "publicInterestAdvance"
+              }
+            }
+          },
           {
             "name": "swapFeeGrowthIndexQ64",
             "type": "u128"
@@ -10126,7 +15448,7 @@ export type Dusk = {
             "name": "hlpFundingInterestGrowthRemainderScaled",
             "docs": [
               "Source-scoped Q64 carry for interest paid by hLP funding debt. Funding",
-              "uses a non-hLP denominator, while public interest uses total yLP",
+              "uses a non-hLP denominator, while public interest uses total srLP",
               "supply; sharing one carry across those denominators would eventually",
               "leak rounding entitlement between the two populations."
             ],
@@ -10181,52 +15503,353 @@ export type Dusk = {
             "type": "u64"
           },
           {
-            "name": "feeAuctionReferenceMarket",
+            "name": "revenueInterestLiability",
             "docs": [
-              "Governance-approved reference market for fee-lane auctions. A default",
-              "key permits only the sold market itself when it directly pairs the sold",
-              "and accepted mints."
+              "Shared custody for operator claims and protocol fractional carry."
             ],
+            "type": "u64"
+          },
+          {
+            "name": "feeSwapAuction",
+            "type": {
+              "defined": {
+                "name": "protocolAuctionState"
+              }
+            }
+          },
+          {
+            "name": "feeInterestAuction",
+            "type": {
+              "defined": {
+                "name": "protocolAuctionState"
+              }
+            }
+          },
+          {
+            "name": "buybackSwapAuction",
+            "type": {
+              "defined": {
+                "name": "protocolAuctionState"
+              }
+            }
+          },
+          {
+            "name": "buybackInterestAuction",
+            "type": {
+              "defined": {
+                "name": "protocolAuctionState"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "flashAmmLiquidationQuote",
+      "docs": [
+        "Complete quote for the optional Dusk-AMM settlement route. The buyer first",
+        "receives `liquidation.collateral_credit`, returns that amount to Dusk for",
+        "the paired swap, and finally receives `buyer_credit` debt tokens after the",
+        "liquidation obligation and debt-token transfer fee."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "liquidation",
+            "type": {
+              "defined": {
+                "name": "flashLiquidationQuote"
+              }
+            }
+          },
+          {
+            "name": "swapOutput",
+            "type": "u64"
+          },
+          {
+            "name": "obligation",
+            "type": "u64"
+          },
+          {
+            "name": "buyerDebit",
+            "type": "u64"
+          },
+          {
+            "name": "buyerCredit",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "flashLiquidationBegun",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
             "type": "pubkey"
           },
           {
-            "name": "buybackAuctionReferenceMarket",
-            "docs": [
-              "Governance-approved reference market for buyback-lane auctions. A",
-              "default key has the same direct-market-only meaning as above."
-            ],
+            "name": "position",
             "type": "pubkey"
           },
           {
-            "name": "feeSwapAuctionEpoch",
+            "name": "session",
+            "type": "pubkey"
+          },
+          {
+            "name": "buyer",
+            "type": "pubkey"
+          },
+          {
+            "name": "debtAsset",
+            "type": "u8"
+          },
+          {
+            "name": "quote",
             "type": {
               "defined": {
-                "name": "protocolAuctionEpoch"
+                "name": "flashLiquidationQuote"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "flashLiquidationQuote",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "full",
+            "type": "bool"
+          },
+          {
+            "name": "collateralDebit",
+            "type": "u64"
+          },
+          {
+            "name": "collateralCredit",
+            "type": "u64"
+          },
+          {
+            "name": "payment",
+            "docs": [
+              "Bound net spendable payment before distribution, including repayment,",
+              "liquidation fee and any full-purchase proceeds belonging to the owner."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "repayment",
+            "type": "u64"
+          },
+          {
+            "name": "ownerSurplus",
+            "type": "u64"
+          },
+          {
+            "name": "fee",
+            "type": {
+              "defined": {
+                "name": "liquidationFeeAllocation"
               }
             }
           },
           {
-            "name": "feeInterestAuctionEpoch",
+            "name": "debtSharesToBurn",
+            "type": "u128"
+          },
+          {
+            "name": "healthBefore",
             "type": {
               "defined": {
-                "name": "protocolAuctionEpoch"
+                "name": "liquidationHealth"
               }
             }
           },
           {
-            "name": "buybackSwapAuctionEpoch",
+            "name": "healthAfter",
             "type": {
               "defined": {
-                "name": "protocolAuctionEpoch"
+                "name": "liquidationHealth"
               }
             }
           },
           {
-            "name": "buybackInterestAuctionEpoch",
+            "name": "rates",
             "type": {
               "defined": {
-                "name": "protocolAuctionEpoch"
+                "name": "liquidationRates"
               }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "flashLiquidationSettled",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "position",
+            "type": "pubkey"
+          },
+          {
+            "name": "buyer",
+            "type": "pubkey"
+          },
+          {
+            "name": "leverage",
+            "type": "bool"
+          },
+          {
+            "name": "debtAsset",
+            "type": "u8"
+          },
+          {
+            "name": "collateralDebit",
+            "type": "u64"
+          },
+          {
+            "name": "debtRepaid",
+            "type": "u64"
+          },
+          {
+            "name": "ownerSurplus",
+            "type": "u64"
+          },
+          {
+            "name": "fee",
+            "type": {
+              "defined": {
+                "name": "liquidationFeeAllocation"
+              }
+            }
+          },
+          {
+            "name": "loss",
+            "type": {
+              "defined": {
+                "name": "liquidationLossAllocation"
+              }
+            }
+          },
+          {
+            "name": "remainingCollateral",
+            "type": "u64"
+          },
+          {
+            "name": "remainingDebt",
+            "type": "u64"
+          },
+          {
+            "name": "positionState",
+            "docs": [
+              "Complete post-settlement position state for event-only indexers."
+            ],
+            "type": {
+              "defined": {
+                "name": "liquidationPositionState"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "fundInterestArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "maxBaseGross",
+            "docs": [
+              "Gross public interest to fund, including the frozen protocol allocation."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "maxQuoteGross",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "fundInterestReceipt",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "grossFunded",
+            "type": {
+              "array": [
+                "u64",
+                2
+              ]
+            }
+          },
+          {
+            "name": "lpCustodyCredit",
+            "type": {
+              "array": [
+                "u64",
+                2
+              ]
+            }
+          },
+          {
+            "name": "hlpYieldPublished",
+            "docs": [
+              "[hLP target side][income side], after covering the funding gap."
+            ],
+            "type": {
+              "array": [
+                {
+                  "array": [
+                    "u64",
+                    2
+                  ]
+                },
+                2
+              ]
+            }
+          },
+          {
+            "name": "hlpCapitalGross",
+            "type": {
+              "array": [
+                {
+                  "array": [
+                    "u64",
+                    2
+                  ]
+                },
+                2
+              ]
+            }
+          },
+          {
+            "name": "hlpCapitalCredit",
+            "type": {
+              "array": [
+                {
+                  "array": [
+                    "u64",
+                    2
+                  ]
+                },
+                2
+              ]
             }
           }
         ]
@@ -10309,6 +15932,64 @@ export type Dusk = {
       }
     },
     {
+      "name": "harvestArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "tokenKind",
+            "type": {
+              "defined": {
+                "name": "yieldTokenKind"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "harvestAuthorityUpdated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "lpMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "assetMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "tokenKind",
+            "type": "u8"
+          },
+          {
+            "name": "harvestAuthority",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "metadata",
+            "type": {
+              "defined": {
+                "name": "marketEventMetadata"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "hlpClosed",
       "type": {
         "kind": "struct",
@@ -10333,7 +16014,7 @@ export type Dusk = {
             "type": "u64"
           },
           {
-            "name": "ylpAmount",
+            "name": "srlpAmount",
             "type": "u64"
           },
           {
@@ -10352,7 +16033,7 @@ export type Dusk = {
             "type": "u64"
           },
           {
-            "name": "ylpSupply",
+            "name": "srlpSupply",
             "type": "u64"
           },
           {
@@ -10361,11 +16042,431 @@ export type Dusk = {
           },
           {
             "name": "baseLiveReserve",
-            "type": "u64"
+            "type": "u128"
           },
           {
             "name": "quoteLiveReserve",
+            "type": "u128"
+          }
+        ]
+      }
+    },
+    {
+      "name": "hlpCohort",
+      "docs": [
+        "The mint-specific lifetime of one hLP receipt cohort. While current, the",
+        "market vault owns the live accounting. After terminal recovery, this account",
+        "holds the final yield indexes and supply so old receipts can be transferred,",
+        "harvested and burned without acquiring backing from a new deposit cohort."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "targetAsset",
+            "type": "u8"
+          },
+          {
+            "name": "retired",
+            "type": "bool"
+          },
+          {
+            "name": "finalVault",
+            "type": {
+              "defined": {
+                "name": "hlpVault"
+              }
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "hlpCohortRotated",
+      "docs": [
+        "A terminal hLP cohort retains its funded yield rights while a new mint",
+        "becomes the receipt for future single-sided deposits on the same market."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "targetAsset",
+            "type": "u8"
+          },
+          {
+            "name": "retiredMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "newMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "retiredSupply",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "hlpDepositCapacityPreview",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "targetAsset",
+            "type": {
+              "defined": {
+                "name": "marketAsset"
+              }
+            }
+          },
+          {
+            "name": "hlpMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "slot",
+            "type": "u64"
+          },
+          {
+            "name": "epoch",
+            "type": "u64"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "hlpDepositStatus"
+              }
+            }
+          },
+          {
+            "name": "fundingLimitGross",
+            "docs": [
+              "Exact funding ceiling, NOT a promise that all smaller amounts execute.",
+              "Actual deposits still enforce rounding, settlement, custody and slippage.",
+              "Gross wallet debit, including the current epoch's transfer fee."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "fundingLimitNet",
+            "docs": [
+              "Greatest net target reserve credit supported by opposite-asset funding."
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "hlpDepositStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "ready"
+          },
+          {
+            "name": "notStarted"
+          },
+          {
+            "name": "reduceOnly"
+          },
+          {
+            "name": "noLiquidity"
+          },
+          {
+            "name": "rebalanceRequired"
+          },
+          {
+            "name": "cashConstrained"
+          },
+          {
+            "name": "unhedgeable"
+          },
+          {
+            "name": "noFundingCapacity"
+          },
+          {
+            "name": "noNetDeposit"
+          },
+          {
+            "name": "frozen"
+          }
+        ]
+      }
+    },
+    {
+      "name": "hlpFlashQuote",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "targetAsset",
+            "type": "u8"
+          },
+          {
+            "name": "collateralDebit",
+            "type": "u64"
+          },
+          {
+            "name": "collateralCredit",
+            "type": "u64"
+          },
+          {
+            "name": "borrowedClaim",
+            "docs": [
+              "Borrowed-token srLP claim frozen when the quote is created. A full",
+              "terminal session uses this value even if an interleaved Dusk swap moves",
+              "the live pro-rata srLP reserve ratio before settlement."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "payment",
+            "docs": [
+              "Spendable atoms required in the session's payment vault; includes the",
+              "transfer fee from that vault to the market reserve."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "reserveCredit",
+            "type": "u64"
+          },
+          {
+            "name": "discountBps",
+            "type": "u16"
+          },
+          {
+            "name": "full",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "hlpFlashSession",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "buyer",
+            "type": "pubkey"
+          },
+          {
+            "name": "quote",
+            "type": {
+              "defined": {
+                "name": "hlpFlashQuote"
+              }
+            }
+          },
+          {
+            "name": "maxSocializedLoss",
+            "type": "u64"
+          },
+          {
+            "name": "paymentBalanceBefore",
+            "type": "u64"
+          },
+          {
+            "name": "hlpSupply",
+            "type": "u64"
+          },
+          {
+            "name": "beginIndex",
+            "type": "u16"
+          },
+          {
+            "name": "settleIndex",
+            "type": "u16"
+          },
+          {
+            "name": "slot",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "hlpFlashSettled",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "buyer",
+            "type": "pubkey"
+          },
+          {
+            "name": "quote",
+            "type": {
+              "defined": {
+                "name": "hlpFlashQuote"
+              }
+            }
+          },
+          {
+            "name": "baseHlpSrlpMinted",
+            "docs": [
+              "Internal srLP changes made by this flash recovery. They are not user",
+              "liquidity deposits or exits and are included here to avoid a second",
+              "event CPI on the compute-constrained atomic settlement path."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "baseHlpSrlpBurned",
+            "type": "u64"
+          },
+          {
+            "name": "quoteHlpSrlpMinted",
+            "type": "u64"
+          },
+          {
+            "name": "quoteHlpSrlpBurned",
+            "type": "u64"
+          },
+          {
+            "name": "fundingInterestPaid",
+            "type": {
+              "array": [
+                "u64",
+                2
+              ]
+            }
+          },
+          {
+            "name": "loss",
+            "type": {
+              "defined": {
+                "name": "liquidationLossAllocation"
+              }
+            }
+          },
+          {
+            "name": "surplusCredit",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "hlpFlashStarted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "buyer",
+            "type": "pubkey"
+          },
+          {
+            "name": "quote",
+            "type": {
+              "defined": {
+                "name": "hlpFlashQuote"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "hlpInterestAllocated",
+      "docs": [
+        "Fresh public repayment follows the same funding-before-yield policy as a",
+        "cash advance. The standard hLP prefix is followed by both mints/reserves."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "published",
+            "docs": [
+              "[hLP target side][income asset]. Historical holder growth is unchanged."
+            ],
+            "type": {
+              "array": [
+                {
+                  "array": [
+                    "u64",
+                    2
+                  ]
+                },
+                2
+              ]
+            }
+          },
+          {
+            "name": "capitalDebit",
+            "type": {
+              "array": [
+                {
+                  "array": [
+                    "u64",
+                    2
+                  ]
+                },
+                2
+              ]
+            }
+          },
+          {
+            "name": "capitalCredit",
+            "type": {
+              "array": [
+                {
+                  "array": [
+                    "u64",
+                    2
+                  ]
+                },
+                2
+              ]
+            }
           }
         ]
       }
@@ -10402,7 +16503,7 @@ export type Dusk = {
             "type": "u64"
           },
           {
-            "name": "ylpAmount",
+            "name": "srlpAmount",
             "type": "u64"
           },
           {
@@ -10410,7 +16511,7 @@ export type Dusk = {
             "type": "u64"
           },
           {
-            "name": "ylpSupply",
+            "name": "srlpSupply",
             "type": "u64"
           },
           {
@@ -10419,10 +16520,212 @@ export type Dusk = {
           },
           {
             "name": "baseLiveReserve",
-            "type": "u64"
+            "type": "u128"
           },
           {
             "name": "quoteLiveReserve",
+            "type": "u128"
+          }
+        ]
+      }
+    },
+    {
+      "name": "hlpOrderTriggerPreview",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "principalNavPerTokenNad",
+            "type": "u64"
+          },
+          {
+            "name": "fundingAprEmaNad",
+            "type": "u128"
+          }
+        ]
+      }
+    },
+    {
+      "name": "hlpRebalanced",
+      "docs": [
+        "Internal vault-owned srLP changes from one completed hLP hedge transition.",
+        "Ordinary srLP deposits and exits continue to use `LiquidityAdded` and",
+        "`LiquidityRemoved`. This event includes both vaults because one operation",
+        "can burn shares in one vault and mint them in the other. Debt changes are",
+        "indexed-debt changes; funding interest is also reported by the canonical",
+        "`BorrowInterestPaid` event and must not be counted twice as revenue."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "slot",
+            "type": "u64"
+          },
+          {
+            "name": "baseHlpSrlpMinted",
+            "type": "u64"
+          },
+          {
+            "name": "baseHlpSrlpBurned",
+            "type": "u64"
+          },
+          {
+            "name": "quoteHlpSrlpMinted",
+            "type": "u64"
+          },
+          {
+            "name": "quoteHlpSrlpBurned",
+            "type": "u64"
+          },
+          {
+            "name": "baseHlpSrlpSharesAfter",
+            "type": "u64"
+          },
+          {
+            "name": "quoteHlpSrlpSharesAfter",
+            "type": "u64"
+          },
+          {
+            "name": "srlpSupplyAfter",
+            "type": "u64"
+          },
+          {
+            "name": "baseHlpDebtIncrease",
+            "docs": [
+              "Quote-token debt of the base-target hLP."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "baseHlpDebtDecrease",
+            "type": "u64"
+          },
+          {
+            "name": "baseHlpDebtAfter",
+            "type": "u64"
+          },
+          {
+            "name": "quoteHlpDebtIncrease",
+            "docs": [
+              "Base-token debt of the quote-target hLP."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "quoteHlpDebtDecrease",
+            "type": "u64"
+          },
+          {
+            "name": "quoteHlpDebtAfter",
+            "type": "u64"
+          },
+          {
+            "name": "baseHlpFundingInterestPaid",
+            "docs": [
+              "Gross quote tokens paid from reserve cash to the interest vault."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "quoteHlpFundingInterestPaid",
+            "docs": [
+              "Gross base tokens paid from reserve cash to the interest vault."
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "hlpRetiredReceiptBurned",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "remainingSupply",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "hlpTerminalLiquidated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "caller",
+            "type": "pubkey"
+          },
+          {
+            "name": "targetAsset",
+            "type": "u8"
+          },
+          {
+            "name": "debtClosed",
+            "type": "u64"
+          },
+          {
+            "name": "srlpBurned",
+            "type": "u64"
+          },
+          {
+            "name": "interestPaid",
+            "docs": [
+              "Borrowed-asset funding interest credited to srLP after caller bounty and",
+              "transfer fees."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "callerBounty",
+            "docs": [
+              "Borrowed-asset amount credited to the caller after transfer fees."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "socializedLoss",
+            "docs": [
+              "Residual funded principal loss. Unpaid interest is reported separately."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "interestCanceled",
+            "type": "u64"
+          },
+          {
+            "name": "remainingHlpSupply",
+            "docs": [
+              "Existing holder tokens remain burnable for zero principal while their",
+              "already-checkpointed fee claims remain independently claimable."
+            ],
             "type": "u64"
           }
         ]
@@ -10434,11 +16737,19 @@ export type Dusk = {
         "kind": "struct",
         "fields": [
           {
-            "name": "ylpVault",
+            "name": "flashCollateralDebit",
+            "docs": [
+              "Collateral committed to one atomic flash recovery. Receipt supply is",
+              "fixed until settlement; retail operations on other positions may run."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "srlpVault",
             "type": "pubkey"
           },
           {
-            "name": "ylpShares",
+            "name": "srlpShares",
             "type": "u64"
           },
           {
@@ -10512,9 +16823,9 @@ export type Dusk = {
           {
             "name": "baseSwapFeeRemainderQ64",
             "docs": [
-              "Aggregate sub-atom yLP entitlement carried across hLP checkpoints.",
+              "Aggregate sub-atom srLP entitlement carried across hLP checkpoints.",
               "These are distinct from each holder YieldAccount remainder: this layer",
-              "converts vault-owned yLP growth into hLP growth without double-flooring."
+              "converts vault-owned srLP growth into hLP growth without double-flooring."
             ],
             "type": "u64"
           },
@@ -10533,7 +16844,7 @@ export type Dusk = {
           {
             "name": "baseSwapFeeGrowthRemainderScaled",
             "docs": [
-              "Sub-index distribution carry for the second, yLP-to-hLP allocation",
+              "Sub-index distribution carry for the second, srLP-to-hLP allocation",
               "layer. Whole-token backing represented here has already left the",
               "corresponding `unallocated_*` bucket."
             ],
@@ -10573,7 +16884,163 @@ export type Dusk = {
           },
           {
             "name": "cachedSettlementPriceNad",
+            "docs": [
+              "Base quoted in quote NAD units for either target asset; zero means unset."
+            ],
             "type": "u128"
+          },
+          {
+            "name": "fundingAprEmaNad",
+            "docs": [
+              "Smoothed APR of the opposite asset borrowed by this target-asset hLP.",
+              "The fixed twelve-hour half-life gives Stop Rate orders stable semantics."
+            ],
+            "type": "u128"
+          },
+          {
+            "name": "fundingAprEmaLastSlot",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "incomeEpoch",
+      "docs": [
+        "Immutable closing state of one unpaid-income denomination. Holders use it",
+        "to carry their existing units and unpaid cash fractions into the next epoch."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "bookIndex",
+            "type": "u8"
+          },
+          {
+            "name": "book",
+            "type": {
+              "defined": {
+                "name": "incomeReceivableBook"
+              }
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "incomeExposureEnd",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "ended",
+            "type": "bool"
+          },
+          {
+            "name": "epoch",
+            "type": "u64"
+          },
+          {
+            "name": "growth",
+            "type": {
+              "defined": {
+                "name": "receivableGrowth"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "incomeReceivableBook",
+      "docs": [
+        "A bounded-denomination epoch of an unpaid-income pool. Public and hLP",
+        "funding income use separate books. Repayments/defaults are pooled within",
+        "each book; already funded advances do not remain unpaid claims."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "epoch",
+            "type": "u64"
+          },
+          {
+            "name": "unpaid",
+            "type": "u64"
+          },
+          {
+            "name": "units",
+            "type": "u64"
+          },
+          {
+            "name": "paidPerUnitQ64",
+            "type": "u128"
+          },
+          {
+            "name": "paidRemainder",
+            "type": "u64"
+          },
+          {
+            "name": "growth",
+            "docs": [
+              "Ordinary senior, junior, base hLP, quote hLP."
+            ],
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "receivableGrowth"
+                  }
+                },
+                4
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "incomeReceivableClaim",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "epoch",
+            "type": "u64"
+          },
+          {
+            "name": "unitsQ64",
+            "type": "u128"
+          },
+          {
+            "name": "paidCheckpointQ64",
+            "type": "u128"
+          },
+          {
+            "name": "growthCheckpoint",
+            "type": {
+              "defined": {
+                "name": "receivableGrowth"
+              }
+            }
+          },
+          {
+            "name": "paidFractionQ128",
+            "type": "u128"
+          },
+          {
+            "name": "claimable",
+            "type": "u64"
           }
         ]
       }
@@ -10589,6 +17056,13 @@ export type Dusk = {
           },
           {
             "name": "debtAmount",
+            "type": "u64"
+          },
+          {
+            "name": "marginAmount",
+            "docs": [
+              "Gross debt-token funding from the owner. Zero increases size using borrowing only."
+            ],
             "type": "u64"
           },
           {
@@ -10609,11 +17083,21 @@ export type Dusk = {
           },
           {
             "name": "swapBps",
-            "type": "u16"
+            "docs": [
+              "None uses DEFAULT_PROTOCOL_REVENUE_SHARE_BPS; Some(0) explicitly disables the share."
+            ],
+            "type": {
+              "option": "u16"
+            }
           },
           {
             "name": "interestBps",
-            "type": "u16"
+            "docs": [
+              "Global additive interest markup. None uses the protocol default; Some(0) disables markup."
+            ],
+            "type": {
+              "option": "u16"
+            }
           },
           {
             "name": "maxReferralInterestShareBps",
@@ -10659,6 +17143,26 @@ export type Dusk = {
       }
     },
     {
+      "name": "initializeJuniorArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "generation",
+            "type": "u64"
+          },
+          {
+            "name": "metadata",
+            "type": {
+              "defined": {
+                "name": "initializeLpMetadataArgs"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "initializeLpMetadataArgs",
       "type": {
         "kind": "struct",
@@ -10684,6 +17188,18 @@ export type Dusk = {
         "kind": "struct",
         "fields": [
           {
+            "name": "paramsHash",
+            "docs": [
+              "First in the wire payload so account validation reads only the PDA seed."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
             "name": "config",
             "type": {
               "defined": {
@@ -10692,12 +17208,67 @@ export type Dusk = {
             }
           },
           {
-            "name": "paramsHash",
+            "name": "operatorInterestShareBps",
+            "docs": [
+              "Operator share of base interest; protocol markup is global and additive."
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "oracle",
+            "docs": [
+              "Initial oracle policy, installed atomically with the market. None uses",
+              "native pricing. First liquidity authenticates a current report when",
+              "the selected weight is positive. Oracle sources/policy are creation-only."
+            ],
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "option": {
+                "defined": {
+                  "name": "oraclePolicy"
+                }
+              }
+            }
+          },
+          {
+            "name": "bootstrapPriceNad",
+            "docs": [
+              "Optional final bootstrap price imported by a permissionless launch",
+              "adapter. Zero binds the reference to the first fully-backed seed."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "launchFeeProgressOffset",
+            "docs": [
+              "Number of price-fee periods already completed before graduation."
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "srlpMetadata",
+            "docs": [
+              "Metadata for the three LP mints, created atomically with the market."
+            ],
+            "type": {
+              "defined": {
+                "name": "initializeLpMetadataArgs"
+              }
+            }
+          },
+          {
+            "name": "baseHlpMetadata",
+            "type": {
+              "defined": {
+                "name": "initializeLpMetadataArgs"
+              }
+            }
+          },
+          {
+            "name": "quoteHlpMetadata",
+            "type": {
+              "defined": {
+                "name": "initializeLpMetadataArgs"
+              }
             }
           }
         ]
@@ -10724,44 +17295,258 @@ export type Dusk = {
       }
     },
     {
-      "name": "insurance",
+      "name": "interestRevenueBook",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "baseVault",
-            "type": "pubkey"
-          },
-          {
-            "name": "quoteVault",
-            "type": "pubkey"
-          },
-          {
-            "name": "baseAvailable",
+            "name": "grossUnpaid",
             "type": "u64"
           },
           {
-            "name": "quoteAvailable",
+            "name": "protocolUnpaid",
+            "type": "u64"
+          },
+          {
+            "name": "operatorUnpaid",
+            "type": "u64"
+          },
+          {
+            "name": "pendingGross",
+            "type": "u64"
+          },
+          {
+            "name": "pendingProtocolGross",
+            "type": "u64"
+          },
+          {
+            "name": "operatorClaimable",
+            "type": "u64"
+          },
+          {
+            "name": "protocolFractionQ64",
+            "type": "u64"
+          },
+          {
+            "name": "operatorFractionQ64",
+            "type": "u64"
+          },
+          {
+            "name": "protocolCashFractionQ64",
             "type": "u64"
           }
         ]
       }
     },
     {
-      "name": "irmConfig",
+      "name": "juniorCohort",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "targetUtilizationBps",
-            "type": "u16"
+            "name": "incomeEnd",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "incomeExposureEnd"
+                  }
+                },
+                4
+              ]
+            }
           },
           {
-            "name": "curveSteepnessNad",
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "generation",
             "type": "u64"
           },
           {
-            "name": "adjustmentSpeedPerYear",
+            "name": "retired",
+            "type": "bool"
+          },
+          {
+            "name": "finalIncome",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "trancheIncome"
+                  }
+                },
+                2
+              ]
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "juniorCohortInitialized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "generation",
+            "type": "u64"
+          },
+          {
+            "name": "previousMint",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "juniorExitAccount",
+      "docs": [
+        "Burned receipt units in this account remain junior claims. They earn income",
+        "through the owner's yield accounts and cannot be transferred or spent twice."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "ticket",
+            "type": {
+              "defined": {
+                "name": "juniorExitTicket"
+              }
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "juniorExitConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "minimumNoticeSlots",
+            "type": "u64"
+          },
+          {
+            "name": "maximumNoticeSlots",
+            "type": "u64"
+          },
+          {
+            "name": "exerciseWindowSlots",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "juniorExitTicket",
+      "docs": [
+        "Notice uses scheduled slots. The exercise window counts only slots without",
+        "a verified conversion restriction; notice itself is not paused. Handlers",
+        "authenticate owner/escrow and derive blocked time from protocol records."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "generation",
+            "type": "u64"
+          },
+          {
+            "name": "receipts",
+            "type": "u64"
+          },
+          {
+            "name": "readyAt",
+            "type": "u64"
+          },
+          {
+            "name": "expiresAt",
+            "docs": [
+              "Exclusive end before adding verified blocked time after ready_at."
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "juniorSeedCompounded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "baseAmount",
+            "type": "u64"
+          },
+          {
+            "name": "quoteAmount",
+            "type": "u64"
+          },
+          {
+            "name": "reserveShares",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "juniorSeedFunded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "interestDebit",
+            "type": "u64"
+          },
+          {
+            "name": "reserveCredit",
             "type": "u64"
           }
         ]
@@ -10795,6 +17580,10 @@ export type Dusk = {
           {
             "name": "approvedActions",
             "type": "u32"
+          },
+          {
+            "name": "openCurveRevision",
+            "type": "u64"
           },
           {
             "name": "bump",
@@ -10844,6 +17633,52 @@ export type Dusk = {
       }
     },
     {
+      "name": "leverageMarginTerms",
+      "docs": [
+        "Entry terms are snapshotted in collateral units. Price, LP activity and",
+        "another trader's position cannot passively rebase an existing position."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "referenceCollateral",
+            "type": "u64"
+          },
+          {
+            "name": "maintenanceBoundariesBps",
+            "type": {
+              "array": [
+                "u16",
+                2
+              ]
+            }
+          },
+          {
+            "name": "maintenanceRatesBps",
+            "type": {
+              "array": [
+                "u16",
+                3
+              ]
+            }
+          },
+          {
+            "name": "entryBufferBps",
+            "type": "u16"
+          },
+          {
+            "name": "admissionEquityCollateralNad",
+            "docs": [
+              "Collateral atoms times NAD, not a fixed debt-token or dollar amount.",
+              "Retained on equity extraction; released proportionally on size reduction."
+            ],
+            "type": "u128"
+          }
+        ]
+      }
+    },
+    {
       "name": "leveragePosition",
       "type": {
         "kind": "struct",
@@ -10854,6 +17689,14 @@ export type Dusk = {
           },
           {
             "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "namespaceAuthority",
+            "docs": [
+              "Funding signer that established this position. Ordinary opens use the",
+              "owner; sponsored entry orders use their owner-created order PDA."
+            ],
             "type": "pubkey"
           },
           {
@@ -10877,7 +17720,18 @@ export type Dusk = {
             "type": "u64"
           },
           {
+            "name": "marginTerms",
+            "type": {
+              "defined": {
+                "name": "leverageMarginTerms"
+              }
+            }
+          },
+          {
             "name": "marginAmount",
+            "docs": [
+              "Entry equity valued in debt-token atoms."
+            ],
             "type": "u64"
           },
           {
@@ -10903,6 +17757,26 @@ export type Dusk = {
           {
             "name": "openedSlot",
             "type": "u64"
+          },
+          {
+            "name": "openCurveRevision",
+            "docs": [
+              "Market curve revision committed by this opening. A recreated PDA gets",
+              "a new revision even if it reopens in the same slot."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "activeLiquidationSession",
+            "type": "pubkey"
+          },
+          {
+            "name": "closeApproval",
+            "type": {
+              "defined": {
+                "name": "closeApprovalQuote"
+              }
+            }
           },
           {
             "name": "bump",
@@ -11009,6 +17883,10 @@ export type Dusk = {
             "type": "u64"
           },
           {
+            "name": "socializedLoss",
+            "type": "u64"
+          },
+          {
             "name": "interestPaid",
             "type": "u64"
           },
@@ -11097,6 +17975,14 @@ export type Dusk = {
             "type": "u64"
           },
           {
+            "name": "marginTerms",
+            "type": {
+              "defined": {
+                "name": "leverageMarginTerms"
+              }
+            }
+          },
+          {
             "name": "closeoutValue",
             "type": "u64"
           },
@@ -11153,16 +18039,23 @@ export type Dusk = {
             "type": "pubkey"
           },
           {
+            "name": "ownerDebit",
+            "docs": [
+              "Gross debt-token payment from the wallet, including any transfer fee."
+            ],
+            "type": "u64"
+          },
+          {
             "name": "borrowedAmount",
             "type": "u64"
           },
           {
             "name": "debtDelta",
-            "type": "i64"
+            "type": "i128"
           },
           {
             "name": "collateralDelta",
-            "type": "i64"
+            "type": "i128"
           },
           {
             "name": "debtAmount",
@@ -11177,13 +18070,32 @@ export type Dusk = {
             "type": "u64"
           },
           {
+            "name": "marginTerms",
+            "type": {
+              "defined": {
+                "name": "leverageMarginTerms"
+              }
+            }
+          },
+          {
             "name": "closeoutValue",
+            "docs": [
+              "Executable closeout quote, or zero when unquoted by repayment or an",
+              "operation leaving debt-free collateral. Zero is not a collateral valuation."
+            ],
             "type": "u64"
           },
           {
             "name": "ownerCredit",
             "docs": [
               "Net tokens paid to the owner by this update, if any."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "interestPaid",
+            "docs": [
+              "Interest actually repaid by this action, in debt-token atoms."
             ],
             "type": "u64"
           },
@@ -11211,7 +18123,8 @@ export type Dusk = {
     {
       "name": "leverageSwapReceipt",
       "docs": [
-        "Actual AMM receipt embedded in a leverage action.",
+        "Supporting AMM receipt embedded in a leverage action. `SwapExecuted` is",
+        "the authoritative swap/fee record; do not count this receipt again.",
         "`None` on `LeveragePositionUpdated` means the action was margin-only."
       ],
       "type": {
@@ -11222,11 +18135,19 @@ export type Dusk = {
             "type": "u8"
           },
           {
+            "name": "feeAssetSide",
+            "type": "u8"
+          },
+          {
             "name": "amountIn",
             "type": "u64"
           },
           {
             "name": "amountOut",
+            "type": "u64"
+          },
+          {
+            "name": "grossAmountOut",
             "type": "u64"
           },
           {
@@ -11250,6 +18171,10 @@ export type Dusk = {
             "type": "u64"
           },
           {
+            "name": "compoundedFee",
+            "type": "u64"
+          },
+          {
             "name": "claimableFeeCredit",
             "docs": [
               "Actual reserve-vault credit after any Token-2022 transfer fee."
@@ -11261,22 +18186,351 @@ export type Dusk = {
             "docs": [
               "Final executable reserves after retention and inline hLP correction."
             ],
-            "type": "u64"
+            "type": "u128"
           },
           {
             "name": "quoteLiveReserve",
+            "type": "u128"
+          }
+        ]
+      }
+    },
+    {
+      "name": "liquidationAuctionCancelled",
+      "docs": [
+        "A fill or backstop found the position healthy again and cleared its",
+        "auction without liquidating anything."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "position",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "debtAssetSide",
+            "docs": [
+              "Debt side of the cancelled auction: `0` for base and `1` for quote."
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "liquidationAuctionStarted",
+      "docs": [
+        "A liquidation auction opened on a borrow position."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "position",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "auctionDebtAsset",
+            "docs": [
+              "`0` for base debt and `1` for quote debt."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "auctionStartTime",
+            "type": "i64"
+          },
+          {
+            "name": "auctionStartPriceNad",
+            "type": "u64"
+          },
+          {
+            "name": "auctionFloorPriceNad",
             "type": "u64"
           }
         ]
       }
     },
     {
-      "name": "liquidateLeverageArgs",
+      "name": "liquidationFeeAllocation",
+      "docs": [
+        "Whole spendable atoms. Transfer-fee gross-ups are separate from the net fee",
+        "obligation. The collected fee is never counted again as debt repayment."
+      ],
       "type": {
         "kind": "struct",
         "fields": [
           {
+            "name": "total",
+            "type": "u64"
+          },
+          {
+            "name": "protocol",
+            "type": "u64"
+          },
+          {
+            "name": "junior",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "liquidationHealth",
+      "docs": [
+        "Linear symmetric-EMA collateral value and actual indexed debt, both in debt",
+        "token atoms. Execution prices never determine reference eligibility."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "collateralValue",
+            "type": "u64"
+          },
+          {
+            "name": "debt",
+            "type": "u64"
+          },
+          {
+            "name": "maintenanceBps",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "liquidationLossAllocation",
+      "docs": [
+        "A completed debt leg. `sale_recovery` is net of the caller reward and actual",
+        "transfer costs. Unpaid borrower/leverage interest is canceled."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "principalRepaid",
+            "type": "u64"
+          },
+          {
+            "name": "interestPaid",
+            "type": "u64"
+          },
+          {
+            "name": "principalWrittenOff",
+            "type": "u64"
+          },
+          {
+            "name": "interestCanceled",
+            "type": "u64"
+          },
+          {
+            "name": "surplus",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "liquidationPositionState",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "baseCollateral",
+            "type": "u64"
+          },
+          {
+            "name": "quoteCollateral",
+            "type": "u64"
+          },
+          {
+            "name": "fixedBaseShares",
+            "type": "u128"
+          },
+          {
+            "name": "fixedQuoteShares",
+            "type": "u128"
+          },
+          {
+            "name": "globalHealthBaseContributionForQuoteDebt",
+            "type": "u64"
+          },
+          {
+            "name": "globalHealthQuoteContributionForBaseDebt",
+            "type": "u64"
+          },
+          {
+            "name": "baseLiquidationCfBps",
+            "type": "u16"
+          },
+          {
+            "name": "quoteLiquidationCfBps",
+            "type": "u16"
+          },
+          {
+            "name": "leverageCollateralAmount",
+            "type": "u64"
+          },
+          {
+            "name": "leverageDebtShares",
+            "type": "u128"
+          },
+          {
+            "name": "closed",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "liquidationRates",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "buyerDiscountBps",
+            "type": "u16"
+          },
+          {
+            "name": "emergencyRewardBps",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "liquidationSession",
+      "docs": [
+        "Exists only from begin through the exact paired settle in one transaction.",
+        "Original debt and collateral allocations remain on the locked position."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "position",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "buyer",
+            "type": "pubkey"
+          },
+          {
+            "name": "collateralMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "debtMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "collateralVault",
+            "type": "pubkey"
+          },
+          {
+            "name": "buyerCollateralAccount",
+            "type": "pubkey"
+          },
+          {
+            "name": "repaymentVault",
+            "type": "pubkey"
+          },
+          {
+            "name": "buyerRefundAccount",
+            "type": "pubkey"
+          },
+          {
+            "name": "ownerDebtAccount",
+            "type": "pubkey"
+          },
+          {
+            "name": "originalCollateral",
+            "type": "u64"
+          },
+          {
+            "name": "originalDebtShares",
+            "type": "u128"
+          },
+          {
+            "name": "originalPrincipal",
+            "type": "u128"
+          },
+          {
+            "name": "borrowIndex",
+            "type": "u128"
+          },
+          {
+            "name": "paymentBalanceBefore",
+            "type": "u64"
+          },
+          {
+            "name": "minBuyerCredit",
+            "docs": [
+              "Minimum final debt-token credit when the paired Dusk AMM funds settle.",
+              "External settlement routes bind their own output and leave this zero."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "quote",
+            "type": {
+              "defined": {
+                "name": "flashLiquidationQuote"
+              }
+            }
+          },
+          {
             "name": "debtAsset",
+            "type": "u8"
+          },
+          {
+            "name": "leverage",
+            "type": "bool"
+          },
+          {
+            "name": "beginIndex",
+            "type": "u16"
+          },
+          {
+            "name": "settleIndex",
+            "type": "u16"
+          },
+          {
+            "name": "slot",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
             "type": "u8"
           }
         ]
@@ -11304,20 +18558,20 @@ export type Dusk = {
             "type": "u64"
           },
           {
-            "name": "ylpAmount",
+            "name": "srlpAmount",
             "type": "u64"
           },
           {
-            "name": "ylpSupply",
+            "name": "srlpSupply",
             "type": "u64"
           },
           {
             "name": "baseLiveReserve",
-            "type": "u64"
+            "type": "u128"
           },
           {
             "name": "quoteLiveReserve",
-            "type": "u64"
+            "type": "u128"
           },
           {
             "name": "metadata",
@@ -11344,7 +18598,7 @@ export type Dusk = {
             "type": "pubkey"
           },
           {
-            "name": "ylpAmount",
+            "name": "srlpAmount",
             "type": "u64"
           },
           {
@@ -11370,16 +18624,16 @@ export type Dusk = {
             "type": "u64"
           },
           {
-            "name": "ylpSupply",
+            "name": "srlpSupply",
             "type": "u64"
           },
           {
             "name": "baseLiveReserve",
-            "type": "u64"
+            "type": "u128"
           },
           {
             "name": "quoteLiveReserve",
-            "type": "u64"
+            "type": "u128"
           },
           {
             "name": "metadata",
@@ -11393,16 +18647,89 @@ export type Dusk = {
       }
     },
     {
-      "name": "market",
+      "name": "lpTransferred",
+      "docs": [
+        "One LP transfer checkpointed by the Dusk Token-2022 transfer hook. Every LP",
+        "mint's extra-account list includes the event authority and Dusk program,",
+        "so every LP transfer publishes it."
+      ],
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "lpMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "tokenKind",
+            "docs": [
+              "`0` for srLP and `1` for hLP."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "sourceOwner",
+            "type": "pubkey"
+          },
+          {
+            "name": "destinationOwner",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "managerChanged",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "manager",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "market",
+      "docs": [
+        "Token amounts stored in reserves, positions, and shares are raw atoms.",
+        "Internal curve quantities, risk depths, hLP NAV/exposure, and normalized",
+        "debt/collateral values use `max(MIN_AMOUNT_DECIMALS, base_side.asset_decimals,",
+        "quote_side.asset_decimals)` decimal places, twelve or more, including",
+        "quantity fields with the historical `_nad` suffix. Prices, rates, and",
+        "per-share ratios always retain nine-decimal NAD scaling. The quantity scale",
+        "is immutable per market."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "oracle",
+            "type": {
+              "defined": {
+                "name": "oracleState"
+              }
+            }
+          },
           {
             "name": "version",
             "type": "u8"
           },
           {
-            "name": "ylpMint",
+            "name": "srlpMint",
             "type": "pubkey"
           },
           {
@@ -11446,6 +18773,45 @@ export type Dusk = {
             }
           },
           {
+            "name": "tranches",
+            "docs": [
+              "One shared junior capital budget across both reserve/debt books."
+            ],
+            "type": {
+              "defined": {
+                "name": "trancheCapital"
+              }
+            }
+          },
+          {
+            "name": "income",
+            "type": {
+              "defined": {
+                "name": "marketIncomeBooks"
+              }
+            }
+          },
+          {
+            "name": "juniorExitConfig",
+            "type": {
+              "defined": {
+                "name": "juniorExitConfig"
+              }
+            }
+          },
+          {
+            "name": "tranchePolicy",
+            "type": {
+              "defined": {
+                "name": "tranchePolicy"
+              }
+            }
+          },
+          {
+            "name": "juniorMint",
+            "type": "pubkey"
+          },
+          {
             "name": "baseHlpVault",
             "type": {
               "defined": {
@@ -11470,14 +18836,6 @@ export type Dusk = {
             }
           },
           {
-            "name": "insurance",
-            "type": {
-              "defined": {
-                "name": "insurance"
-              }
-            }
-          },
-          {
             "name": "paramsHash",
             "type": {
               "array": [
@@ -11487,24 +18845,41 @@ export type Dusk = {
             }
           },
           {
-            "name": "governanceLockedYlp",
+            "name": "initialLiquidityAuthority",
             "docs": [
-              "External yLP burned into active governance support. This is added back",
-              "when computing direct-yLP eligibility; internal reserve-share supply is",
-              "intentionally unchanged by governance locking."
+              "One-shot signer allowed to provide the first fully-backed Base/Quote",
+              "seed. It is cleared permanently once srLP supply becomes nonzero."
             ],
-            "type": "u64"
+            "type": "pubkey"
+          },
+          {
+            "name": "operator",
+            "docs": [
+              "Sole per-market authority; token ownership carries no configuration rights."
+            ],
+            "type": {
+              "defined": {
+                "name": "operatorState"
+              }
+            }
+          },
+          {
+            "name": "protocolInterestMarkupBps",
+            "docs": [
+              "Internal mirror of the global FutarchyAuthority markup, never an operator parameter."
+            ],
+            "type": "u16"
           },
           {
             "name": "parameterRevisions",
             "docs": [
-              "Independent monotone revisions for fee, concentration, IRM, EMA, and",
-              "daily-borrow-limit parameter families, in that order."
+              "Independent monotone revisions for fee, concentration, IRM, EMA,",
+              "daily-borrow-limit, center-controller, and tranche parameter families."
             ],
             "type": {
               "array": [
                 "u64",
-                5
+                7
               ]
             }
           },
@@ -11610,6 +18985,25 @@ export type Dusk = {
                 "name": "marketEventMetadata"
               }
             }
+          },
+          {
+            "name": "position",
+            "docs": [
+              "Borrow position written by this deposit; the first deposit creates it."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "positionId",
+            "type": "pubkey"
+          },
+          {
+            "name": "auctionDebtAsset",
+            "docs": [
+              "Post-deposit auction side, `255` when none is active. A deposit that",
+              "restores health cancels an active auction."
+            ],
+            "type": "u8"
           }
         ]
       }
@@ -11670,6 +19064,17 @@ export type Dusk = {
                 "name": "marketEventMetadata"
               }
             }
+          },
+          {
+            "name": "position",
+            "type": "pubkey"
+          },
+          {
+            "name": "closed",
+            "docs": [
+              "The withdrawal emptied the position and closed its account."
+            ],
+            "type": "bool"
           }
         ]
       }
@@ -11708,7 +19113,7 @@ export type Dusk = {
             "type": "u64"
           },
           {
-            "name": "qEmaHalfLifeMs",
+            "name": "curveDepthEmaHalfLifeMs",
             "type": "u64"
           },
           {
@@ -11735,7 +19140,7 @@ export type Dusk = {
             "name": "irm",
             "type": {
               "defined": {
-                "name": "irmConfig"
+                "name": "riskRateConfig"
               }
             }
           },
@@ -11764,7 +19169,7 @@ export type Dusk = {
             "type": "pubkey"
           },
           {
-            "name": "ylpMint",
+            "name": "srlpMint",
             "type": "pubkey"
           },
           {
@@ -11773,14 +19178,6 @@ export type Dusk = {
           },
           {
             "name": "quoteCollateralVault",
-            "type": "pubkey"
-          },
-          {
-            "name": "baseInsuranceVault",
-            "type": "pubkey"
-          },
-          {
-            "name": "quoteInsuranceVault",
             "type": "pubkey"
           },
           {
@@ -11808,6 +19205,33 @@ export type Dusk = {
             }
           },
           {
+            "name": "operator",
+            "type": "pubkey"
+          },
+          {
+            "name": "operatorRevenueRecipient",
+            "type": "pubkey"
+          },
+          {
+            "name": "operatorInterestShareBps",
+            "type": "u16"
+          },
+          {
+            "name": "protocolInterestMarkupBps",
+            "type": "u16"
+          },
+          {
+            "name": "oracle",
+            "docs": [
+              "Initial policy; an empty policy identifies an oracleless launch."
+            ],
+            "type": {
+              "defined": {
+                "name": "oraclePolicy"
+              }
+            }
+          },
+          {
             "name": "paramsHash",
             "type": {
               "array": [
@@ -11815,6 +19239,18 @@ export type Dusk = {
                 32
               ]
             }
+          },
+          {
+            "name": "initialLiquidityAuthority",
+            "type": "pubkey"
+          },
+          {
+            "name": "launchReferencePriceNad",
+            "type": "u64"
+          },
+          {
+            "name": "launchFeeProgressOffset",
+            "type": "u16"
           },
           {
             "name": "version",
@@ -11827,6 +19263,17 @@ export type Dusk = {
                 "name": "marketEventMetadata"
               }
             }
+          },
+          {
+            "name": "baseDecimals",
+            "docs": [
+              "Asset mint decimals, which scale every price and amount of the market."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "quoteDecimals",
+            "type": "u8"
           }
         ]
       }
@@ -11854,7 +19301,7 @@ export type Dusk = {
           },
           {
             "name": "debtDelta",
-            "type": "i64"
+            "type": "i128"
           },
           {
             "name": "cashDebit",
@@ -11873,6 +19320,9 @@ export type Dusk = {
           },
           {
             "name": "fixedBaseDebt",
+            "docs": [
+              "Market-wide fixed debt after the update, not this position's debt."
+            ],
             "type": "u128"
           },
           {
@@ -11910,6 +19360,25 @@ export type Dusk = {
                 "name": "marketEventMetadata"
               }
             }
+          },
+          {
+            "name": "fixedBaseShares",
+            "docs": [
+              "The position's fixed debt shares after the update."
+            ],
+            "type": "u128"
+          },
+          {
+            "name": "fixedQuoteShares",
+            "type": "u128"
+          },
+          {
+            "name": "auctionDebtAsset",
+            "docs": [
+              "Post-update auction side, `255` when none is active. A repayment that",
+              "restores health cancels an active auction."
+            ],
+            "type": "u8"
           }
         ]
       }
@@ -12011,6 +19480,115 @@ export type Dusk = {
       }
     },
     {
+      "name": "marketIncomeBooks",
+      "docs": [
+        "Public-loan and hLP-funding receivables are independent. The vault-owned",
+        "public-income claims preserve hLP's automatic funding-gap repayment."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "books",
+            "docs": [
+              "base public, quote public, base hLP funding, quote hLP funding."
+            ],
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "incomeReceivableBook"
+                  }
+                },
+                4
+              ]
+            }
+          },
+          {
+            "name": "revenue",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "interestRevenueBook"
+                  }
+                },
+                4
+              ]
+            }
+          },
+          {
+            "name": "pending",
+            "docs": [
+              "Gross settlement budget awaiting measured net custody credit."
+            ],
+            "type": {
+              "array": [
+                "u64",
+                4
+              ]
+            }
+          },
+          {
+            "name": "seed",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "incomeReceivableClaim"
+                  }
+                },
+                4
+              ]
+            }
+          },
+          {
+            "name": "hlp",
+            "docs": [
+              "[hLP target][income asset], owned by the vault rather than its holders."
+            ],
+            "type": {
+              "array": [
+                {
+                  "array": [
+                    {
+                      "defined": {
+                        "name": "incomeReceivableClaim"
+                      }
+                    },
+                    2
+                  ]
+                },
+                2
+              ]
+            }
+          },
+          {
+            "name": "juniorEnd",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "incomeExposureEnd"
+                  }
+                },
+                4
+              ]
+            }
+          },
+          {
+            "name": "splitCarryBps",
+            "type": {
+              "array": [
+                "u16",
+                4
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "marketParameterUpdate",
       "type": {
         "kind": "enum",
@@ -12029,15 +19607,19 @@ export type Dusk = {
             "name": "concentration",
             "fields": [
               {
-                "name": "peakDepthNad",
+                "name": "peakAmplificationNad",
                 "type": "u64"
               },
               {
-                "name": "fadeScaleNad",
-                "type": "u64"
+                "name": "coreHalfWidthBps",
+                "type": "u16"
               },
               {
-                "name": "concentrationRampDurationSlots",
+                "name": "fadeWidthBps",
+                "type": "u16"
+              },
+              {
+                "name": "rampDurationSlots",
                 "type": "u64"
               }
             ]
@@ -12047,7 +19629,7 @@ export type Dusk = {
             "fields": [
               {
                 "defined": {
-                  "name": "irmConfig"
+                  "name": "riskRateUpdate"
                 }
               }
             ]
@@ -12064,7 +19646,7 @@ export type Dusk = {
                 "type": "u64"
               },
               {
-                "name": "qMs",
+                "name": "curveDepthMs",
                 "type": "u64"
               },
               {
@@ -12078,6 +19660,24 @@ export type Dusk = {
             "fields": [
               {
                 "name": "maxDailyBorrowBps",
+                "type": "u16"
+              }
+            ]
+          },
+          {
+            "name": "centerController",
+            "fields": [
+              {
+                "name": "adjustmentStepNad",
+                "type": "u64"
+              }
+            ]
+          },
+          {
+            "name": "tranche",
+            "fields": [
+              {
+                "name": "juniorIncomeShareBps",
                 "type": "u16"
               }
             ]
@@ -12222,6 +19822,47 @@ export type Dusk = {
       }
     },
     {
+      "name": "marketSideSnapshot",
+      "docs": [
+        "One side of the market after a swap. Prices quote this side's asset in",
+        "the opposite asset and equal `preview_market` for the same state and slot."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "spotPriceNad",
+            "docs": [
+              "Marginal price at this post-swap state. A later controller step or",
+              "market update can change it before another trade is quoted."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "priceEmaNad",
+            "docs": [
+              "Symmetric risk EMA of the spot price."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "swapFeeGrowthIndexQ64",
+            "docs": [
+              "Per-srLP-share swap-fee growth, scaled by 2^64."
+            ],
+            "type": "u128"
+          },
+          {
+            "name": "interestGrowthIndexQ64",
+            "docs": [
+              "Per-srLP-share interest growth, scaled by 2^64."
+            ],
+            "type": "u128"
+          }
+        ]
+      }
+    },
+    {
       "name": "openLeverageArgs",
       "type": {
         "kind": "struct",
@@ -12251,35 +19892,31 @@ export type Dusk = {
             "type": {
               "option": "pubkey"
             }
+          },
+          {
+            "name": "positionOwner",
+            "docs": [
+              "Optional beneficiary for sponsored/delegated opens. The funding signer",
+              "still supplies the margin, while the resulting position belongs to this",
+              "key. `None` preserves the ordinary self-funded path."
+            ],
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "limitPriceNad",
+            "docs": [
+              "All-in average execution limit in Quote-per-Base NAD. Zero disables the",
+              "limit. Long Base requires price <= limit; long Quote requires >= limit."
+            ],
+            "type": "u64"
           }
         ]
       }
     },
     {
-      "name": "parameterFamily",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "fee"
-          },
-          {
-            "name": "concentration"
-          },
-          {
-            "name": "irm"
-          },
-          {
-            "name": "emaHalfLives"
-          },
-          {
-            "name": "dailyBorrowLimit"
-          }
-        ]
-      }
-    },
-    {
-      "name": "parameterProposal",
+      "name": "operatorChangeAnnounced",
       "type": {
         "kind": "struct",
         "fields": [
@@ -12288,7 +19925,11 @@ export type Dusk = {
             "type": "pubkey"
           },
           {
-            "name": "proposer",
+            "name": "proposal",
+            "type": "pubkey"
+          },
+          {
+            "name": "operator",
             "type": "pubkey"
           },
           {
@@ -12296,23 +19937,62 @@ export type Dusk = {
             "type": "u64"
           },
           {
-            "name": "family",
+            "name": "digest",
             "type": {
-              "defined": {
-                "name": "parameterFamily"
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "executeAfterSlot",
+            "type": "u64"
+          },
+          {
+            "name": "deadlineSlot",
+            "type": "u64"
+          },
+          {
+            "name": "epoch",
+            "type": "u64"
+          },
+          {
+            "name": "policyVersion",
+            "type": "u64"
+          },
+          {
+            "name": "updates",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "marketParameterUpdate"
+                }
               }
             }
           },
           {
-            "name": "familyRevision",
-            "type": "u64"
+            "name": "nextOperator",
+            "type": {
+              "option": "pubkey"
+            }
           },
           {
-            "name": "update",
+            "name": "nextManager",
             "type": {
-              "defined": {
-                "name": "marketParameterUpdate"
-              }
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "revenueRecipient",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "interestShareBps",
+            "type": {
+              "option": "u16"
             }
           },
           {
@@ -12324,6 +20004,153 @@ export type Dusk = {
             }
           },
           {
+            "name": "familyRevisions",
+            "type": {
+              "array": [
+                "u64",
+                7
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "operatorChangeResolved",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "proposal",
+            "type": "pubkey"
+          },
+          {
+            "name": "executed",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "operatorChanged",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "operator",
+            "type": "pubkey"
+          },
+          {
+            "name": "epoch",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "operatorProposal",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "operator",
+            "type": "pubkey"
+          },
+          {
+            "name": "epoch",
+            "type": "u64"
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "policyVersion",
+            "type": "u64"
+          },
+          {
+            "name": "updates",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "marketParameterUpdate"
+                }
+              }
+            }
+          },
+          {
+            "name": "nextOperator",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "nextManager",
+            "docs": [
+              "Some(zero) clears the manager; None leaves it unchanged."
+            ],
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "revenueRecipient",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "interestShareBps",
+            "type": {
+              "option": "u16"
+            }
+          },
+          {
+            "name": "metadata",
+            "type": {
+              "defined": {
+                "name": "proposalMetadataV1"
+              }
+            }
+          },
+          {
+            "name": "familyRevisions",
+            "type": {
+              "array": [
+                "u64",
+                7
+              ]
+            }
+          },
+          {
+            "name": "announcedAtSlot",
+            "type": "u64"
+          },
+          {
+            "name": "executeAfterSlot",
+            "type": "u64"
+          },
+          {
+            "name": "deadlineSlot",
+            "type": "u64"
+          },
+          {
+            "name": "rentRefund",
+            "type": "pubkey"
+          },
+          {
             "name": "digest",
             "type": {
               "array": [
@@ -12333,51 +20160,8 @@ export type Dusk = {
             }
           },
           {
-            "name": "status",
-            "type": {
-              "defined": {
-                "name": "parameterProposalStatus"
-              }
-            }
-          },
-          {
-            "name": "sponsorshipFloor",
-            "docs": [
-              "Frozen minimum support needed to keep this proposal alive after its",
-              "initial 1% sponsorship burn-lock."
-            ],
-            "type": "u64"
-          },
-          {
-            "name": "totalLocked",
-            "type": "u64"
-          },
-          {
-            "name": "queuedSupport",
-            "docs": [
-              "Immutable queue-time numerator and direct-yLP denominator."
-            ],
-            "type": "u64"
-          },
-          {
-            "name": "queuedEligibleYlp",
-            "type": "u64"
-          },
-          {
-            "name": "createdAt",
-            "type": "i64"
-          },
-          {
-            "name": "queuedAt",
-            "type": "i64"
-          },
-          {
-            "name": "executeAfter",
-            "type": "i64"
-          },
-          {
-            "name": "executionDeadline",
-            "type": "i64"
+            "name": "executed",
+            "type": "bool"
           },
           {
             "name": "bump",
@@ -12387,36 +20171,162 @@ export type Dusk = {
       }
     },
     {
-      "name": "parameterProposalCreated",
+      "name": "operatorRevenueAccount",
+      "docs": [
+        "A sealed recipient's collected cash. Unpaid interest fees follow the current",
+        "recipient and become earned only when borrower cash reaches custody."
+      ],
       "type": {
         "kind": "struct",
         "fields": [
-          {
-            "name": "proposal",
-            "type": "pubkey"
-          },
           {
             "name": "market",
             "type": "pubkey"
           },
           {
-            "name": "proposer",
+            "name": "recipient",
             "type": "pubkey"
           },
           {
-            "name": "nonce",
+            "name": "revenueEpoch",
             "type": "u64"
           },
           {
-            "name": "family",
+            "name": "claimable",
+            "type": {
+              "array": [
+                "u64",
+                4
+              ]
+            }
+          },
+          {
+            "name": "sealed",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
             "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "operatorRevenueClaimed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
           },
           {
-            "name": "familyRevision",
+            "name": "recipient",
+            "type": "pubkey"
+          },
+          {
+            "name": "revenueEpoch",
             "type": "u64"
           },
           {
-            "name": "digest",
+            "name": "assetMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "grossDebit",
+            "type": "u64"
+          },
+          {
+            "name": "netCredit",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "operatorState",
+      "docs": [
+        "Operator authority is independent from LP ownership. A governance program",
+        "can hold it using a signer PDA; voting and token issuance belong outside Dusk."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "manager",
+            "docs": [
+              "Optional parameter delegate; operator ownership and revenue stay with authority."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "epoch",
+            "type": "u64"
+          },
+          {
+            "name": "revenueEpoch",
+            "type": "u64"
+          },
+          {
+            "name": "nextNonce",
+            "docs": [
+              "Monotone across authority transfers; a closed proposal PDA cannot be reused."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "pending",
+            "type": "pubkey"
+          },
+          {
+            "name": "pendingAuthor",
+            "docs": [
+              "Prevents a manager from replacing an operator-authored bundle."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "revenueRecipient",
+            "type": "pubkey"
+          },
+          {
+            "name": "interestShareBps",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "oracleObservation",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "priceNad",
+            "type": "u64"
+          },
+          {
+            "name": "confidenceNad",
+            "type": "u64"
+          },
+          {
+            "name": "publishTime",
+            "type": "i64"
+          },
+          {
+            "name": "postedSlot",
+            "type": "u64"
+          },
+          {
+            "name": "sequence",
+            "type": "u64"
+          },
+          {
+            "name": "hash",
             "type": {
               "array": [
                 "u8",
@@ -12425,162 +20335,174 @@ export type Dusk = {
             }
           },
           {
-            "name": "sponsorshipFloor",
-            "type": "u64"
+            "name": "sourceTimes",
+            "type": {
+              "array": [
+                "i64",
+                2
+              ]
+            }
           },
           {
-            "name": "initialSupport",
-            "type": "u64"
+            "name": "sourceSlots",
+            "type": {
+              "array": [
+                "u64",
+                2
+              ]
+            }
           },
           {
-            "name": "status",
-            "type": "u8"
+            "name": "sourceSequences",
+            "docs": [
+              "Independent counters retain replay protection when only one leg updates."
+            ],
+            "type": {
+              "array": [
+                "u64",
+                2
+              ]
+            }
+          },
+          {
+            "name": "sourceHashes",
+            "docs": [
+              "Each normalized report is immutable at an already observed counter."
+            ],
+            "type": {
+              "array": [
+                {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                2
+              ]
+            }
           }
         ]
       }
     },
     {
-      "name": "parameterProposalExecuted",
+      "name": "oraclePolicy",
+      "docs": [
+        "Creation selects an optional policy atomically; omission uses native pricing.",
+        "The policy, provider and feed identity are immutable after creation."
+      ],
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "proposal",
-            "type": "pubkey"
-          },
-          {
-            "name": "market",
-            "type": "pubkey"
-          },
-          {
-            "name": "family",
+            "name": "format",
             "type": "u8"
           },
           {
-            "name": "newFamilyRevision",
+            "name": "provider",
+            "type": "pubkey"
+          },
+          {
+            "name": "baseAccount",
+            "type": "pubkey"
+          },
+          {
+            "name": "quoteAccount",
+            "type": "pubkey"
+          },
+          {
+            "name": "baseFeedId",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "quoteFeedId",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "lambdaBps",
+            "type": "u16"
+          },
+          {
+            "name": "adjustmentCapNad",
             "type": "u64"
           },
           {
-            "name": "executedAt",
-            "type": "i64"
+            "name": "maxAgeSeconds",
+            "type": "u32"
+          },
+          {
+            "name": "maxAgeSlots",
+            "type": "u64"
+          },
+          {
+            "name": "maxConfidenceBps",
+            "type": "u16"
+          },
+          {
+            "name": "maxPublishSkewSeconds",
+            "type": "u32"
           }
         ]
       }
     },
     {
-      "name": "parameterProposalQueued",
+      "name": "oracleState",
+      "docs": [
+        "Persisted policy and replay protection. `runtime` occupies zero wire bytes",
+        "and is reset on every account deserialization, including a second CPI."
+      ],
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "proposal",
-            "type": "pubkey"
+            "name": "policy",
+            "type": {
+              "defined": {
+                "name": "oraclePolicy"
+              }
+            }
           },
           {
-            "name": "totalLocked",
+            "name": "lastObservation",
+            "type": {
+              "defined": {
+                "name": "oracleObservation"
+              }
+            }
+          },
+          {
+            "name": "revision",
             "type": "u64"
           },
           {
-            "name": "eligibleSupply",
+            "name": "recognizedTailLiquidity",
+            "docs": [
+              "Recognized native-tail depth cannot grow merely because an OP trade",
+              "moves to a different native invariant. Real ordinary LP capital scales",
+              "the ceiling through its share supply; losses reduce it immediately."
+            ],
+            "type": "u128"
+          },
+          {
+            "name": "recognizedOrdinarySupply",
             "type": "u64"
           },
           {
-            "name": "queuedAt",
-            "type": "i64"
-          },
-          {
-            "name": "executeAfter",
-            "type": "i64"
-          },
-          {
-            "name": "executionDeadline",
-            "type": "i64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "parameterProposalStatus",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "collecting"
-          },
-          {
-            "name": "queued"
-          },
-          {
-            "name": "executed"
-          },
-          {
-            "name": "cancelled"
-          },
-          {
-            "name": "expired"
-          },
-          {
-            "name": "stale"
-          }
-        ]
-      }
-    },
-    {
-      "name": "parameterProposalSupportWithdrawn",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "proposal",
-            "type": "pubkey"
-          },
-          {
-            "name": "supporter",
-            "type": "pubkey"
-          },
-          {
-            "name": "amount",
-            "type": "u64"
-          },
-          {
-            "name": "totalLocked",
-            "type": "u64"
-          },
-          {
-            "name": "status",
-            "type": "u8"
-          }
-        ]
-      }
-    },
-    {
-      "name": "parameterProposalSupported",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "proposal",
-            "type": "pubkey"
-          },
-          {
-            "name": "supporter",
-            "type": "pubkey"
-          },
-          {
-            "name": "amount",
-            "type": "u64"
-          },
-          {
-            "name": "supporterLocked",
-            "type": "u64"
-          },
-          {
-            "name": "totalLocked",
-            "type": "u64"
-          },
-          {
-            "name": "status",
-            "type": "u8"
+            "name": "runtime",
+            "type": {
+              "defined": {
+                "name": "runtimePricing"
+              }
+            }
           }
         ]
       }
@@ -12647,20 +20569,29 @@ export type Dusk = {
             "type": "bool"
           },
           {
-            "name": "liquidationIncentiveBps",
-            "type": "u16"
-          },
-          {
-            "name": "insuranceFundingBps",
-            "type": "u16"
-          },
-          {
-            "name": "totalPenaltyBps",
-            "type": "u16"
-          },
-          {
             "name": "maxRepayAmount",
+            "docs": [
+              "Maximum debt-token credit that the current liquidation policy permits."
+            ],
             "type": "u64"
+          },
+          {
+            "name": "liquidationHealth",
+            "type": {
+              "defined": {
+                "name": "liquidationHealth"
+              }
+            }
+          },
+          {
+            "name": "liquidationRates",
+            "type": {
+              "option": {
+                "defined": {
+                  "name": "liquidationRates"
+                }
+              }
+            }
           }
         ]
       }
@@ -12727,15 +20658,11 @@ export type Dusk = {
             "type": "u64"
           },
           {
-            "name": "invariantDNad",
+            "name": "curveDepthNad",
             "type": "u128"
           },
           {
-            "name": "balancedEquivalentQNad",
-            "type": "u128"
-          },
-          {
-            "name": "qPerShareNad",
+            "name": "curveDepthPerShareNad",
             "type": "u128"
           },
           {
@@ -12771,48 +20698,44 @@ export type Dusk = {
             "type": "bool"
           },
           {
-            "name": "appliedCurveParameters",
-            "type": {
-              "defined": {
-                "name": "concentrationParameters"
-              }
-            }
-          },
-          {
-            "name": "desiredCurveParameters",
-            "type": {
-              "defined": {
-                "name": "concentrationParameters"
-              }
-            }
-          },
-          {
-            "name": "targetCurveParameters",
-            "type": {
-              "defined": {
-                "name": "concentrationParameters"
-              }
-            }
-          },
-          {
-            "name": "concentrationRampActive",
-            "type": "bool"
-          },
-          {
-            "name": "concentrationRampStartParameters",
-            "type": {
-              "defined": {
-                "name": "concentrationParameters"
-              }
-            }
-          },
-          {
-            "name": "concentrationRampStartSlot",
+            "name": "protectedRecenterBaseReserve",
             "type": "u64"
           },
           {
-            "name": "concentrationRampEndSlot",
+            "name": "protectedRecenterQuoteReserve",
             "type": "u64"
+          },
+          {
+            "name": "peakAmplificationNad",
+            "type": "u64"
+          },
+          {
+            "name": "coreHalfWidthBps",
+            "type": "u16"
+          },
+          {
+            "name": "fadeWidthBps",
+            "type": "u16"
+          },
+          {
+            "name": "lowerRangePriceNad",
+            "type": "u64"
+          },
+          {
+            "name": "upperRangePriceNad",
+            "type": "u64"
+          },
+          {
+            "name": "concentratedCurveBranch",
+            "type": "u8"
+          },
+          {
+            "name": "ordinaryBaseReserveNad",
+            "type": "u128"
+          },
+          {
+            "name": "ordinaryQuoteReserveNad",
+            "type": "u128"
           }
         ]
       }
@@ -12824,6 +20747,10 @@ export type Dusk = {
         "fields": [
           {
             "name": "collateralAmount",
+            "docs": [
+              "Net deposit credit in the collateral vault. Capacity also accounts",
+              "for the current fee when that collateral later exits the vault."
+            ],
             "type": "u64"
           },
           {
@@ -12836,13 +20763,121 @@ export type Dusk = {
       }
     },
     {
+      "name": "previewBorrowPositionCapacityArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "capacityKind",
+            "type": {
+              "defined": {
+                "name": "borrowPositionCapacityKind"
+              }
+            }
+          },
+          {
+            "name": "collateralChange",
+            "docs": [
+              "Net collateral credit (positive) or vault debit (negative), in raw mint units."
+            ],
+            "type": "i128"
+          },
+          {
+            "name": "projectedBorrowAmount",
+            "docs": [
+              "Additional debt to draw. None quotes the maximum additional draw."
+            ],
+            "type": {
+              "option": "u64"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "previewEmergencyLiquidationArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "debtAsset",
+            "type": "u8"
+          },
+          {
+            "name": "collateralDebit",
+            "type": "u64"
+          },
+          {
+            "name": "full",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "previewFlashAmmLiquidationArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "debtAsset",
+            "type": "u8"
+          },
+          {
+            "name": "maxRepayment",
+            "type": "u64"
+          },
+          {
+            "name": "full",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "previewFlashLiquidationArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "debtAsset",
+            "type": "u8"
+          },
+          {
+            "name": "maxRepayment",
+            "type": "u64"
+          },
+          {
+            "name": "full",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "previewHlpOrderTriggerArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "targetAsset",
+            "type": "u8"
+          },
+          {
+            "name": "hlpAmount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "previewSide",
       "type": {
         "kind": "struct",
         "fields": [
           {
             "name": "liveReserve",
-            "type": "u64"
+            "type": "u128"
           },
           {
             "name": "cashReserve",
@@ -12857,11 +20892,11 @@ export type Dusk = {
             "type": "u64"
           },
           {
-            "name": "ylpSupply",
+            "name": "srlpSupply",
             "type": "u64"
           },
           {
-            "name": "ylpExchangeRateNad",
+            "name": "srlpExchangeRateNad",
             "type": "u128"
           },
           {
@@ -12882,10 +20917,6 @@ export type Dusk = {
           },
           {
             "name": "borrowIndexNad",
-            "type": "u128"
-          },
-          {
-            "name": "rateAtTargetNad",
             "type": "u128"
           },
           {
@@ -12969,52 +21000,16 @@ export type Dusk = {
       }
     },
     {
-      "name": "proposalSupport",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "proposal",
-            "type": "pubkey"
-          },
-          {
-            "name": "supporter",
-            "type": "pubkey"
-          },
-          {
-            "name": "lockedAmount",
-            "type": "u64"
-          },
-          {
-            "name": "baseYield",
-            "type": {
-              "defined": {
-                "name": "virtualYieldLedger"
-              }
-            }
-          },
-          {
-            "name": "quoteYield",
-            "type": {
-              "defined": {
-                "name": "virtualYieldLedger"
-              }
-            }
-          },
-          {
-            "name": "bump",
-            "type": "u8"
-          }
-        ]
-      }
-    },
-    {
       "name": "protocolAuctionConfig",
       "type": {
         "kind": "struct",
         "fields": [
           {
             "name": "acceptedMint",
+            "docs": [
+              "Default payment mint for newly configured curves. Each curve stores its",
+              "own mint; changing this default never reinterprets existing reserves."
+            ],
             "type": "pubkey"
           },
           {
@@ -13022,14 +21017,6 @@ export type Dusk = {
             "type": {
               "defined": {
                 "name": "protocolAuctionRecipients"
-              }
-            }
-          },
-          {
-            "name": "params",
-            "type": {
-              "defined": {
-                "name": "protocolAuctionParams"
               }
             }
           }
@@ -13054,22 +21041,6 @@ export type Dusk = {
             "type": "pubkey"
           },
           {
-            "name": "startMultiplierBps",
-            "type": "u16"
-          },
-          {
-            "name": "floorMultiplierBps",
-            "type": "u16"
-          },
-          {
-            "name": "durationSlots",
-            "type": "u64"
-          },
-          {
-            "name": "maxReferenceAgeSlots",
-            "type": "u64"
-          },
-          {
             "name": "signer",
             "type": "pubkey"
           }
@@ -13077,22 +21048,57 @@ export type Dusk = {
       }
     },
     {
-      "name": "protocolAuctionEpoch",
+      "name": "protocolAuctionConfigured",
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "lane",
+            "type": "u8"
+          },
+          {
+            "name": "source",
+            "type": "u8"
+          },
+          {
+            "name": "side",
+            "type": "u8"
+          },
+          {
+            "name": "soldMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "acceptedMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "virtualSoldReserve",
+            "type": "u64"
+          },
+          {
+            "name": "virtualPaymentReserve",
+            "type": "u64"
+          },
+          {
+            "name": "soldRatePerDay",
+            "type": "u64"
+          },
           {
             "name": "startSlot",
             "type": "u64"
           },
           {
-            "name": "trackedInventory",
-            "docs": [
-              "Liability remaining immediately after the preceding fill. A larger",
-              "current liability proves that new inventory arrived and starts a new",
-              "epoch instead of inheriting an old floor price."
-            ],
-            "type": "u64"
+            "name": "signer",
+            "type": "pubkey"
           }
         ]
       }
@@ -13117,19 +21123,25 @@ export type Dusk = {
         "kind": "struct",
         "fields": [
           {
-            "name": "startMultiplierBps",
-            "type": "u16"
-          },
-          {
-            "name": "floorMultiplierBps",
-            "type": "u16"
-          },
-          {
-            "name": "durationSlots",
+            "name": "virtualSoldReserve",
+            "docs": [
+              "Initial virtual inventory in raw sold-token atoms, independent of custody."
+            ],
             "type": "u64"
           },
           {
-            "name": "maxReferenceAgeSlots",
+            "name": "virtualPaymentReserve",
+            "docs": [
+              "Initial virtual payment reserve in raw accepted-token atoms."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "soldRatePerDay",
+            "docs": [
+              "Virtual sold-token atoms streamed per nominal protocol day. Zero stops",
+              "streaming while preserving constant-product sales at the configured depth."
+            ],
             "type": "u64"
           }
         ]
@@ -13196,59 +21208,12 @@ export type Dusk = {
       }
     },
     {
-      "name": "protocolAuctionRouteUpdated",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "authority",
-            "type": "pubkey"
-          },
-          {
-            "name": "market",
-            "type": "pubkey"
-          },
-          {
-            "name": "lane",
-            "type": "u8"
-          },
-          {
-            "name": "side",
-            "type": "u8"
-          },
-          {
-            "name": "soldMint",
-            "type": "pubkey"
-          },
-          {
-            "name": "acceptedMint",
-            "type": "pubkey"
-          },
-          {
-            "name": "referenceMarket",
-            "docs": [
-              "`Pubkey::default()` restores the direct-market-only policy."
-            ],
-            "type": "pubkey"
-          },
-          {
-            "name": "signer",
-            "type": "pubkey"
-          }
-        ]
-      }
-    },
-    {
       "name": "protocolAuctionSettled",
       "type": {
         "kind": "struct",
         "fields": [
           {
             "name": "market",
-            "type": "pubkey"
-          },
-          {
-            "name": "referenceMarket",
             "type": "pubkey"
           },
           {
@@ -13280,6 +21245,10 @@ export type Dusk = {
             "type": "u64"
           },
           {
+            "name": "soldNetAmount",
+            "type": "u64"
+          },
+          {
             "name": "paymentAmount",
             "type": "u64"
           },
@@ -13292,12 +21261,12 @@ export type Dusk = {
             "type": "u64"
           },
           {
-            "name": "referencePriceNad",
-            "type": "u64"
+            "name": "virtualSoldReserve",
+            "type": "u128"
           },
           {
-            "name": "auctionPriceNad",
-            "type": "u64"
+            "name": "virtualPaymentReserve",
+            "type": "u128"
           },
           {
             "name": "remainingFeeLiability",
@@ -13359,6 +21328,76 @@ export type Dusk = {
       }
     },
     {
+      "name": "protocolAuctionState",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "acceptedMint",
+            "docs": [
+              "A configured curve binds raw payment reserves to this specific mint."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "virtualSoldReserve",
+            "type": "u128"
+          },
+          {
+            "name": "virtualPaymentReserve",
+            "type": "u128"
+          },
+          {
+            "name": "soldRatePerDay",
+            "type": "u64"
+          },
+          {
+            "name": "lastUpdateSlot",
+            "docs": [
+              "Initialized by governance, then advanced only by successful settlements.",
+              "Fee arrivals and exhaustion of actual inventory never restart this clock."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "streamRemainder",
+            "docs": [
+              "Fractional streamed atoms, with a denominator of nominal slots per day."
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "protocolInterestMarkupCheckpointed",
+      "docs": [
+        "A global markup change becomes prospective after the market closes its",
+        "elapsed interest under the prior setting."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "previousBps",
+            "type": "u16"
+          },
+          {
+            "name": "markupBps",
+            "type": "u16"
+          },
+          {
+            "name": "slot",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "protocolRevenueSource",
       "type": {
         "kind": "enum",
@@ -13368,6 +21407,93 @@ export type Dusk = {
           },
           {
             "name": "interest"
+          }
+        ]
+      }
+    },
+    {
+      "name": "publicInterestAdvance",
+      "docs": [
+        "Reserve-cash funding of public borrower interest. The revenue-fee portion is",
+        "held in the reserve vault until repayment, so cancellation can return it",
+        "to executable cash without a transfer or a second transfer fee."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "outstandingGross",
+            "type": "u64"
+          },
+          {
+            "name": "revenueEscrow",
+            "type": "u64"
+          },
+          {
+            "name": "repaymentCreditPending",
+            "docs": [
+              "Native repayment has already restored this cash; its token handler",
+              "must exclude it from the new interest-vault transfer."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "revenueReleasePending",
+            "docs": [
+              "Frozen operator/protocol allocation released by repayment, still held in the",
+              "reserve vault until the same instruction completes token settlement."
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "publicInterestFunded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "caller",
+            "type": "pubkey"
+          },
+          {
+            "name": "receipt",
+            "type": {
+              "defined": {
+                "name": "fundInterestReceipt"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "receivableGrowth",
+      "docs": [
+        "One exposure lane's newly issued receivable units per LP receipt. The",
+        "weighted paid index is kept at full Q128 precision: flooring it earlier can",
+        "give late entrants a fractional claim on money paid before their entry."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "unitsQ64",
+            "type": "u128"
+          },
+          {
+            "name": "weightedPaidQ128",
+            "type": {
+              "array": [
+                "u64",
+                4
+              ]
+            }
           }
         ]
       }
@@ -13667,32 +21793,12 @@ export type Dusk = {
       }
     },
     {
-      "name": "removeLeverageMarginArgs",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "debtAsset",
-            "type": "u8"
-          },
-          {
-            "name": "amount",
-            "type": "u64"
-          },
-          {
-            "name": "minAmountOut",
-            "type": "u64"
-          }
-        ]
-      }
-    },
-    {
       "name": "removeLiquidityArgs",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "ylpAmount",
+            "name": "srlpAmount",
             "type": "u64"
           },
           {
@@ -13724,7 +21830,7 @@ export type Dusk = {
         "kind": "struct",
         "fields": [
           {
-            "name": "ylpSupply",
+            "name": "srlpSupply",
             "type": "u64"
           }
         ]
@@ -13736,8 +21842,20 @@ export type Dusk = {
         "kind": "struct",
         "fields": [
           {
-            "name": "liveReserve",
+            "name": "flashReceivable",
+            "docs": [
+              "Same-transaction collateral receivable. Included in backing, excluded",
+              "from cash available to swaps, loans and withdrawals."
+            ],
             "type": "u64"
+          },
+          {
+            "name": "liveReserve",
+            "docs": [
+              "Wider than SPL custody: includes cash, indexed public debt and synthetic",
+              "hLP backing. Unpaid interest never becomes executable curve inventory."
+            ],
+            "type": "u128"
           },
           {
             "name": "cashReserve",
@@ -13759,6 +21877,43 @@ export type Dusk = {
               "Quote-hLP counterpart of `base_hlp_backing_inventory`; never a second",
               "hLP NAV or withdrawal claim."
             ],
+            "type": "u64"
+          },
+          {
+            "name": "protectedRecenterReserve",
+            "docs": [
+              "Physical reserve-vault atoms retained from toxicity surcharge for a",
+              "future protected recenter. They are custody-backed but excluded from",
+              "executable cash/live reserves, srLP NAV, and every withdrawal claim."
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "retiredJuniorBurned",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "walletAmount",
+            "type": "u64"
+          },
+          {
+            "name": "escrowAmount",
             "type": "u64"
           }
         ]
@@ -13819,6 +21974,10 @@ export type Dusk = {
           },
           {
             "name": "interestBps",
+            "docs": [
+              "Global markup added to base borrowing interest. Each market closes",
+              "elapsed interest at its previous value before binding a changed markup."
+            ],
             "type": "u16"
           }
         ]
@@ -13854,17 +22013,16 @@ export type Dusk = {
             "type": "u64"
           },
           {
-            "name": "cachedQNad",
+            "name": "observedCurveDepthNad",
             "docs": [
-              "Last observed balanced-equivalent CONCENTRATED depth."
+              "Last observed total active curve depth in market amount units (see Market)."
             ],
             "type": "u128"
           },
           {
-            "name": "qEmaNad",
+            "name": "curveDepthEmaNad",
             "docs": [
-              "EMA of balanced-equivalent CONCENTRATED depth. This replaces the CPMM `K` EMA",
-              "while retaining the same serialized width."
+              "EMA of total active curve depth in market amount units (see Market)."
             ],
             "type": "u128"
           },
@@ -13876,6 +22034,116 @@ export type Dusk = {
       }
     },
     {
+      "name": "riskRateConfig",
+      "docs": [
+        "Coverage-and-utilization controller configuration. Initial APR is creation-only."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "lowerSignalNad",
+            "type": "u64"
+          },
+          {
+            "name": "upperSignalNad",
+            "type": "u64"
+          },
+          {
+            "name": "lowerUtilizationBps",
+            "type": "u16"
+          },
+          {
+            "name": "upperUtilizationBps",
+            "type": "u16"
+          },
+          {
+            "name": "halfLifeMs",
+            "type": "u64"
+          },
+          {
+            "name": "initialAprNad",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "riskRateUpdate",
+      "docs": [
+        "Prospective controller settings. Initial APR and the protocol-wide floor",
+        "cannot be changed after pool creation."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "lowerSignalNad",
+            "type": "u64"
+          },
+          {
+            "name": "upperSignalNad",
+            "type": "u64"
+          },
+          {
+            "name": "lowerUtilizationBps",
+            "type": "u16"
+          },
+          {
+            "name": "upperUtilizationBps",
+            "type": "u16"
+          },
+          {
+            "name": "halfLifeMs",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "rollIncomeEpochArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bookIndex",
+            "type": "u8"
+          },
+          {
+            "name": "epoch",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "rotateHlpCohortArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "targetAsset",
+            "type": "u8"
+          },
+          {
+            "name": "metadata",
+            "type": {
+              "defined": {
+                "name": "initializeLpMetadataArgs"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "runtimePricing",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
       "name": "setGlobalReduceOnlyArgs",
       "type": {
         "kind": "struct",
@@ -13883,6 +22151,31 @@ export type Dusk = {
           {
             "name": "reduceOnly",
             "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "setHarvestAuthorityArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "tokenKind",
+            "type": {
+              "defined": {
+                "name": "yieldTokenKind"
+              }
+            }
+          },
+          {
+            "name": "harvestAuthority",
+            "docs": [
+              "`None` revokes the independent caller; the recipient is unchanged."
+            ],
+            "type": {
+              "option": "pubkey"
+            }
           }
         ]
       }
@@ -13932,30 +22225,6 @@ export type Dusk = {
       }
     },
     {
-      "name": "settleLiquidationAuctionFloorArgs",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "repayAmount",
-            "type": "u64"
-          },
-          {
-            "name": "minCollateralOut",
-            "type": "u64"
-          },
-          {
-            "name": "maxInsuranceDraw",
-            "type": "u64"
-          },
-          {
-            "name": "maxSocializedLoss",
-            "type": "u64"
-          }
-        ]
-      }
-    },
-    {
       "name": "settleProtocolAuctionArgs",
       "type": {
         "kind": "struct",
@@ -13988,18 +22257,6 @@ export type Dusk = {
       }
     },
     {
-      "name": "supportParameterProposalArgs",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "amount",
-            "type": "u64"
-          }
-        ]
-      }
-    },
-    {
       "name": "swapArgs",
       "type": {
         "kind": "struct",
@@ -14026,7 +22283,32 @@ export type Dusk = {
           },
           {
             "name": "trader",
+            "docs": [
+              "Beneficial owner of the trade, including delegated leverage actions."
+            ],
             "type": "pubkey"
+          },
+          {
+            "name": "actor",
+            "type": "pubkey"
+          },
+          {
+            "name": "position",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "origin",
+            "type": {
+              "defined": {
+                "name": "swapOrigin"
+              }
+            }
+          },
+          {
+            "name": "slot",
+            "type": "u64"
           },
           {
             "name": "assetInSide",
@@ -14038,16 +22320,31 @@ export type Dusk = {
           {
             "name": "amountIn",
             "docs": [
-              "Exact amount debited from the trader's input account."
+              "AMM input before trading fees, after any input transfer fee. Includes",
+              "internally borrowed principal; this is not the owner's wallet debit."
             ],
             "type": "u64"
           },
           {
             "name": "amountOut",
             "docs": [
-              "Amount credited to the trader after any output transfer fee."
+              "AMM output after trading fees, before any output transfer fee."
             ],
             "type": "u64"
+          },
+          {
+            "name": "grossAmountOut",
+            "docs": [
+              "Curve output before an output-denominated fee and transfer fee."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "feeAssetSide",
+            "docs": [
+              "`0` for Base and `1` for Quote."
+            ],
+            "type": "u8"
           },
           {
             "name": "amountInAfterFee",
@@ -14071,20 +22368,121 @@ export type Dusk = {
           {
             "name": "retainedFee",
             "docs": [
-              "Dynamic surcharge retained as executable principal."
+              "Dynamic surcharge retained outside executable/srLP inventory until an",
+              "admitted center move deploys it."
             ],
             "type": "u64"
+          },
+          {
+            "name": "compoundedFee",
+            "docs": [
+              "LP-owned fee compounded into reserve principal."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "hlpRecoveryTargetAsset",
+            "docs": [
+              "Extra output funded by deleveraging the stressed hLP."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "hlpRecoveryFundingGap",
+            "type": "u64"
+          },
+          {
+            "name": "hlpRecoveryMatchedInput",
+            "type": "u64"
+          },
+          {
+            "name": "hlpRecoveryBonusOutput",
+            "type": "u64"
+          },
+          {
+            "name": "hlpRecoveryDiscountBps",
+            "type": "u16"
+          },
+          {
+            "name": "hlpRecoveryCritical",
+            "type": "bool"
           },
           {
             "name": "baseLiveReserve",
             "docs": [
               "Final executable reserves after retention and inline hLP correction."
             ],
-            "type": "u64"
+            "type": "u128"
           },
           {
             "name": "quoteLiveReserve",
+            "type": "u128"
+          },
+          {
+            "name": "srlpSupply",
+            "docs": [
+              "Internal srLP share supply after the swap."
+            ],
             "type": "u64"
+          },
+          {
+            "name": "startPriceNad",
+            "docs": [
+              "Base price used to quote this execution, after any deferred controller step."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "base",
+            "docs": [
+              "Each side's price, price EMA, and srLP growth indexes after the swap."
+            ],
+            "type": {
+              "defined": {
+                "name": "marketSideSnapshot"
+              }
+            }
+          },
+          {
+            "name": "quote",
+            "type": {
+              "defined": {
+                "name": "marketSideSnapshot"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "swapOrigin",
+      "docs": [
+        "Instruction that caused an actual AMM execution. Fee attribution follows",
+        "this origin; borrowing interest is reported separately by debt source."
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "spot"
+          },
+          {
+            "name": "leverageOpen"
+          },
+          {
+            "name": "leverageIncrease"
+          },
+          {
+            "name": "leverageDecrease"
+          },
+          {
+            "name": "leverageClose"
+          },
+          {
+            "name": "leverageLiquidation"
+          },
+          {
+            "name": "creditLiquidation"
           }
         ]
       }
@@ -14126,16 +22524,34 @@ export type Dusk = {
             "type": "u64"
           },
           {
+            "name": "feeAsset",
+            "type": {
+              "defined": {
+                "name": "marketAsset"
+              }
+            }
+          },
+          {
             "name": "amountOut",
+            "docs": [
+              "Output reserve vault debit after Dusk trading fees, before the output mint transfer fee."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "grossAmountOut",
+            "docs": [
+              "Curve output before Dusk trading fees."
+            ],
             "type": "u64"
           },
           {
             "name": "reserveInLiveReserve",
-            "type": "u64"
+            "type": "u128"
           },
           {
             "name": "reserveOutLiveReserve",
-            "type": "u64"
+            "type": "u128"
           },
           {
             "name": "baseFeeDebit",
@@ -14168,6 +22584,17 @@ export type Dusk = {
           {
             "name": "claimableFeeDebit",
             "type": "u64"
+          },
+          {
+            "name": "compoundedFeeDebit",
+            "docs": [
+              "LP-owned fee converted into reserve principal at the configured rate."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "compoundingFeeBps",
+            "type": "u16"
           },
           {
             "name": "amountInForQuote",
@@ -14212,14 +22639,15 @@ export type Dusk = {
           {
             "name": "tradeEndPriceNad",
             "docs": [
-              "Invariant-preserving trade endpoint before retained surcharge enters reserves."
+              "Invariant-preserving executable trade endpoint."
             ],
             "type": "u64"
           },
           {
             "name": "reserveEndPriceNad",
             "docs": [
-              "Final pool marginal price after retained surcharge enters reserves."
+              "Final executable marginal price. A protected retained surcharge is",
+              "non-quoteable, so it does not change this value."
             ],
             "type": "u64"
           },
@@ -14248,6 +22676,14 @@ export type Dusk = {
             "type": "bool"
           },
           {
+            "name": "protectedRecenterBaseReserve",
+            "type": "u64"
+          },
+          {
+            "name": "protectedRecenterQuoteReserve",
+            "type": "u64"
+          },
+          {
             "name": "protectedProfitPerShareNad",
             "type": "u128"
           },
@@ -14266,6 +22702,320 @@ export type Dusk = {
           {
             "name": "retentionHardCapNad",
             "type": "u128"
+          },
+          {
+            "name": "lowerRangePriceNad",
+            "docs": [
+              "Concentrated range metadata. Zeroes mean the curve has no concentrated",
+              "ranges: a CPMM curve, or an AMM that is not yet initialized."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "upperRangePriceNad",
+            "type": "u64"
+          },
+          {
+            "name": "concentratedCurveBranch",
+            "docs": [
+              "0=lower tail, 1=lower shoulder, 2=inner band,",
+              "3=upper shoulder, 4=upper tail."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "ordinaryBaseReserveNad",
+            "type": "u128"
+          },
+          {
+            "name": "ordinaryQuoteReserveNad",
+            "type": "u128"
+          },
+          {
+            "name": "finalSpotPriceNad",
+            "type": "u64"
+          },
+          {
+            "name": "baseHlpQuoteDebtDelta",
+            "type": "i128"
+          },
+          {
+            "name": "quoteHlpBaseDebtDelta",
+            "type": "i128"
+          },
+          {
+            "name": "hlpRecoveryTargetAsset",
+            "docs": [
+              "Funding recovery funded exclusively by the stressed hLP."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "hlpRecoveryFundingGap",
+            "type": "u64"
+          },
+          {
+            "name": "hlpRecoveryMatchedInput",
+            "type": "u64"
+          },
+          {
+            "name": "hlpRecoveryBonusOutput",
+            "type": "u64"
+          },
+          {
+            "name": "hlpRecoveryDiscountBps",
+            "type": "u16"
+          },
+          {
+            "name": "hlpRecoveryCritical",
+            "type": "bool"
+          },
+          {
+            "name": "outputTransferFee",
+            "docs": [
+              "Token-2022 fee withheld when the output vault transfers `amount_out`."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "netAmountOut",
+            "docs": [
+              "Spendable output credited to the recipient; the value checked by `min_asset_out`."
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "trancheAction",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "enter",
+            "fields": [
+              {
+                "name": "seniorAmount",
+                "type": "u64"
+              },
+              {
+                "name": "minimumJunior",
+                "type": "u64"
+              }
+            ]
+          },
+          {
+            "name": "requestExit",
+            "fields": [
+              {
+                "name": "juniorAmount",
+                "type": "u64"
+              }
+            ]
+          },
+          {
+            "name": "convertExit",
+            "fields": [
+              {
+                "name": "minimumSenior",
+                "type": "u64"
+              }
+            ]
+          },
+          {
+            "name": "cancelExit"
+          }
+        ]
+      }
+    },
+    {
+      "name": "trancheCapital",
+      "docs": [
+        "Junior's portion of the AMM's existing reserve shares. Senior receipts stay",
+        "one-for-one with the remaining reserve shares, including hLP-held receipts.",
+        "Junior receipts have their own exchange rate after income, losses and fees."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "juniorReserveShares",
+            "type": "u64"
+          },
+          {
+            "name": "juniorReceiptSupply",
+            "type": "u64"
+          },
+          {
+            "name": "permanentReceipts",
+            "docs": [
+              "Funded, nonredeemable protocol receipts; included in junior supply."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "queuedReceipts",
+            "docs": [
+              "Escrow remains junior until a successful conversion or cancellation."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "generation",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "trancheConverted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "action",
+            "type": "u8"
+          },
+          {
+            "name": "seniorAmount",
+            "type": "u64"
+          },
+          {
+            "name": "juniorAmount",
+            "type": "u64"
+          },
+          {
+            "name": "juniorFee",
+            "type": "u64"
+          },
+          {
+            "name": "readyAt",
+            "type": "u64"
+          },
+          {
+            "name": "expiresAt",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "trancheIncome",
+      "docs": [
+        "Custody-backed junior income. Cached ownership is synchronized by every",
+        "capital transition; the market invariant checks it against the shared book."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "initialized",
+            "type": "bool"
+          },
+          {
+            "name": "incomeShareBps",
+            "type": "u16"
+          },
+          {
+            "name": "reserveShares",
+            "type": "u64"
+          },
+          {
+            "name": "receiptSupply",
+            "type": "u64"
+          },
+          {
+            "name": "swapGrowthQ64",
+            "type": "u128"
+          },
+          {
+            "name": "interestGrowthQ64",
+            "type": "u128"
+          },
+          {
+            "name": "swapRemainder",
+            "type": "u64"
+          },
+          {
+            "name": "interestRemainder",
+            "type": "u64"
+          },
+          {
+            "name": "seedSwapAmount",
+            "type": "u64"
+          },
+          {
+            "name": "seedInterestAmount",
+            "type": "u64"
+          },
+          {
+            "name": "seedSwapCheckpoint",
+            "type": "u128"
+          },
+          {
+            "name": "seedInterestCheckpoint",
+            "type": "u128"
+          },
+          {
+            "name": "seedSwapRemainder",
+            "type": "u64"
+          },
+          {
+            "name": "seedInterestRemainder",
+            "type": "u64"
+          },
+          {
+            "name": "carry",
+            "type": {
+              "defined": {
+                "name": "trancheRevenueCarry"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "tranchePolicy",
+      "docs": [
+        "Operator-configured junior income allocation. Exit timing and the request and",
+        "liquidation fees remain fixed by the protocol."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "juniorIncomeShareBps",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "trancheRevenueCarry",
+      "docs": [
+        "Carry sub-basis-point atoms across credits so splitting a payment into many",
+        "small transfers cannot change either tranche's governed allocation."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "interestRemainderBps",
+            "type": "u16"
+          },
+          {
+            "name": "swapRemainderBps",
+            "type": "u16"
           }
         ]
       }
@@ -14317,18 +23067,11 @@ export type Dusk = {
           },
           {
             "name": "acceptedMint",
+            "docs": [
+              "Default for newly configured auctions; existing curves retain their mint."
+            ],
             "type": {
               "option": "pubkey"
-            }
-          },
-          {
-            "name": "params",
-            "type": {
-              "option": {
-                "defined": {
-                  "name": "protocolAuctionParams"
-                }
-              }
             }
           }
         ]
@@ -14370,34 +23113,6 @@ export type Dusk = {
             "type": {
               "option": "u16"
             }
-          }
-        ]
-      }
-    },
-    {
-      "name": "updateProtocolAuctionRouteArgs",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "lane",
-            "type": {
-              "defined": {
-                "name": "protocolAuctionLane"
-              }
-            }
-          },
-          {
-            "name": "soldMint",
-            "type": "pubkey"
-          },
-          {
-            "name": "referenceMarket",
-            "docs": [
-              "A governance-approved market key. The default key removes the approval",
-              "and permits settlement only from the sold market's own direct pair."
-            ],
-            "type": "pubkey"
           }
         ]
       }
@@ -14475,37 +23190,16 @@ export type Dusk = {
       }
     },
     {
-      "name": "virtualYieldLedger",
-      "docs": [
-        "A yield ledger for yLP burned into one support position. Its checkpoints",
-        "isolate each proposal lock while the user's ordinary YieldAccounts continue",
-        "to follow only the live balance in their Token-2022 ATA."
-      ],
+      "name": "withdrawAllCollateralArgs",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "swapFeeCheckpointQ64",
-            "type": "u128"
-          },
-          {
-            "name": "interestCheckpointQ64",
-            "type": "u128"
-          },
-          {
-            "name": "accruedSwapFeeAmount",
+            "name": "minBaseOut",
             "type": "u64"
           },
           {
-            "name": "accruedInterestAmount",
-            "type": "u64"
-          },
-          {
-            "name": "swapFeeRemainderQ64",
-            "type": "u64"
-          },
-          {
-            "name": "interestRemainderQ64",
+            "name": "minQuoteOut",
             "type": "u64"
           }
         ]
@@ -14527,6 +23221,18 @@ export type Dusk = {
           {
             "name": "minLiquidationCfBps",
             "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "withdrawRepaidLeverageArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "minCollateralOut",
+            "type": "u64"
           }
         ]
       }
@@ -14564,7 +23270,7 @@ export type Dusk = {
             "name": "lpMint",
             "docs": [
               "LP mint whose balance earns this account's revenue stream. This keeps",
-              "base-hLP, quote-hLP, and yLP entitlements in disjoint PDA namespaces."
+              "base-hLP, quote-hLP, and srLP entitlements in disjoint PDA namespaces."
             ],
             "type": "pubkey"
           },
@@ -14612,6 +23318,41 @@ export type Dusk = {
           {
             "name": "bump",
             "type": "u8"
+          },
+          {
+            "name": "harvestAuthority",
+            "docs": [
+              "Optional caller allowed to harvest to the recipient without controlling",
+              "the LP or changing either yield permission. Only the owner may set it."
+            ],
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "incomeInitialized",
+            "type": "bool"
+          },
+          {
+            "name": "income",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "incomeReceivableClaim"
+                  }
+                },
+                2
+              ]
+            }
+          },
+          {
+            "name": "escrowBalance",
+            "docs": [
+              "Owner's junior exit escrow receipts. Historical unpaid-income ownership",
+              "is checkpointed here alongside the liquid balance."
+            ],
+            "type": "u64"
           }
         ]
       }
@@ -14717,10 +23458,13 @@ export type Dusk = {
         "kind": "enum",
         "variants": [
           {
-            "name": "ylp"
+            "name": "srlp"
           },
           {
             "name": "hlp"
+          },
+          {
+            "name": "junior"
           }
         ]
       }
@@ -14738,19 +23482,50 @@ export type Dusk = {
       "value": "10000"
     },
     {
+      "name": "defaultJuniorIncomeShareBps",
+      "type": "u16",
+      "value": "5000"
+    },
+    {
+      "name": "defaultProtocolRevenueShareBps",
+      "docs": [
+        "Initial DAO share of base swap fees and paid interest, and the protocol",
+        "share of liquidation fees. Governance can override swap and interest shares."
+      ],
+      "type": "u16",
+      "value": "2000"
+    },
+    {
       "name": "futarchyAuthoritySeedPrefix",
       "type": "bytes",
       "value": "[102, 117, 116, 97, 114, 99, 104, 121, 95, 97, 117, 116, 104, 111, 114, 105, 116, 121]"
     },
     {
-      "name": "hlpYlpVaultSeedPrefix",
+      "name": "hlpSrlpVaultSeedPrefix",
       "type": "bytes",
       "value": "[104, 108, 112, 95, 121, 108, 112, 95, 118, 97, 117, 108, 116]"
     },
     {
-      "name": "insuranceSeedPrefix",
-      "type": "bytes",
-      "value": "[105, 110, 115, 117, 114, 97, 110, 99, 101]"
+      "name": "hlpTerminalCallerBps",
+      "docs": [
+        "Caller reward for closing a terminal hLP vault, paid from recovered funding",
+        "interest so it cannot increase the bad-debt waterfall."
+      ],
+      "type": "u16",
+      "value": "50"
+    },
+    {
+      "name": "juniorExitFeeBps",
+      "type": "u16",
+      "value": "50"
+    },
+    {
+      "name": "juniorMaxNoticeSlots",
+      "docs": [
+        "Maximum junior notice; operator changes wait this plus one protocol day."
+      ],
+      "type": "u64",
+      "value": "4320000"
     },
     {
       "name": "leverageCollateralVaultSeedPrefix",
@@ -14763,24 +23538,9 @@ export type Dusk = {
       "value": "[108, 101, 118, 101, 114, 97, 103, 101, 95, 100, 101, 108, 101, 103, 97, 116, 105, 111, 110, 95, 118, 50]"
     },
     {
-      "name": "leverageInitialMarginBps",
-      "type": "u16",
-      "value": "1000"
-    },
-    {
-      "name": "leverageMaintenanceBufferBps",
-      "type": "u16",
-      "value": "700"
-    },
-    {
       "name": "leverageMaxMultiplierBps",
       "type": "u64",
       "value": "200000"
-    },
-    {
-      "name": "leverageMaxUnwindImpactBps",
-      "type": "u16",
-      "value": "200"
     },
     {
       "name": "leveragePositionSeedPrefix",
@@ -14788,9 +23548,33 @@ export type Dusk = {
       "value": "[108, 101, 118, 101, 114, 97, 103, 101, 95, 112, 111, 115, 105, 116, 105, 111, 110, 95, 118, 50]"
     },
     {
+      "name": "liquidationAuctionDurationSeconds",
+      "docs": [
+        "External bids have this fixed window before the permissionless internal",
+        "unwind becomes executable."
+      ],
+      "type": "i64",
+      "value": "300"
+    },
+    {
+      "name": "liquidationBackstopCallerBps",
+      "docs": [
+        "V1-style keeper reward paid from collateral consumed by the permissionless",
+        "lending-auction floor. This is deliberately independent from the dynamic",
+        "incentive used by externally funded auction bids."
+      ],
+      "type": "u16",
+      "value": "50"
+    },
+    {
       "name": "liquidationCloseFactorBps",
       "type": "u16",
       "value": "5000"
+    },
+    {
+      "name": "liquidationFeeBps",
+      "type": "u16",
+      "value": "300"
     },
     {
       "name": "liquidationIncentiveBps",
@@ -14798,19 +23582,9 @@ export type Dusk = {
       "value": "100"
     },
     {
-      "name": "liquidationInsuranceFundingBps",
-      "type": "u16",
-      "value": "200"
-    },
-    {
       "name": "liquidationMaxIncentiveBps",
       "type": "u16",
       "value": "500"
-    },
-    {
-      "name": "liquidationPenaltyBps",
-      "type": "u16",
-      "value": "300"
     },
     {
       "name": "ltvBufferBps",
@@ -14835,14 +23609,16 @@ export type Dusk = {
     {
       "name": "marketLayoutVersion",
       "docs": [
-        "Serialized `Market` account layout discriminator.",
+        "Serialized `Market` account layout discriminator, and the only layout the",
+        "program reads. An account at any other layout is rejected before any of",
+        "its quantities are read, never reinterpreted.",
         "",
-        "Dusk is still pre-launch, so CONCENTRATED ships in the first deployable layout.",
-        "Increment this only for an incompatible account-layout change after",
-        "deployment, never for ordinary feature work or product naming."
+        "This layout counts token amounts in at least `MIN_AMOUNT_DECIMALS`",
+        "decimals and sets independent lower/upper utilization rate targets.",
+        "Aggregate virtual reserves use u128; physical token amounts remain u64."
       ],
       "type": "u8",
-      "value": "1"
+      "value": "16"
     },
     {
       "name": "marketReserveVaultSeedPrefix",
@@ -14855,9 +23631,24 @@ export type Dusk = {
       "value": "[109, 97, 114, 107, 101, 116, 95, 118, 50]"
     },
     {
+      "name": "maxBorrowHalfLifeMs",
+      "type": "u64",
+      "value": "2592000000"
+    },
+    {
       "name": "maxCollateralFactorBps",
       "type": "u16",
       "value": "8500"
+    },
+    {
+      "name": "maxJuniorIncomeShareBps",
+      "type": "u16",
+      "value": "9000"
+    },
+    {
+      "name": "maxOperatorInterestShareBps",
+      "type": "u16",
+      "value": "5000"
     },
     {
       "name": "maxParameterFeeBps",
@@ -14879,6 +23670,52 @@ export type Dusk = {
       "value": "[109, 101, 116, 97, 100, 97, 116, 97]"
     },
     {
+      "name": "minimumBorrowAprNad",
+      "docs": [
+        "Minimum economic borrowing APR for every Dusk market. There is no",
+        "configurable economic ceiling; checked arithmetic bounds representation."
+      ],
+      "type": "u64",
+      "value": "10000000"
+    },
+    {
+      "name": "minAmountDecimals",
+      "docs": [
+        "Fewest decimals a market counts token amounts in. A market's amount scale",
+        "is the largest of this, its base decimals and its quote decimals. Three",
+        "decimals beyond NAD give each atom of a nine-decimal token 1,000 internal",
+        "units, so payouts, which floor to whole atoms, absorb the few units of",
+        "rounding that rebuilding a concentrated curve from reserves can leave.",
+        "Prices, rates and ratios remain NAD."
+      ],
+      "type": "u8",
+      "value": "12"
+    },
+    {
+      "name": "minBorrowHalfLifeMs",
+      "type": "u64",
+      "value": "43200000"
+    },
+    {
+      "name": "minConcentratedSwapFeeBps",
+      "docs": [
+        "Minimum base swap fee of a concentrated curve. It exceeds the round-trip",
+        "excess that curve reconstruction can leave at the minimum tail share."
+      ],
+      "type": "u16",
+      "value": "1"
+    },
+    {
+      "name": "minConcentrationRampSlots",
+      "type": "u64",
+      "value": "432000"
+    },
+    {
+      "name": "minJuniorIncomeShareBps",
+      "type": "u16",
+      "value": "1000"
+    },
+    {
       "name": "nad",
       "docs": [
         "NAD: Nine-decimal fixed point unit (1e9 scaling), similar to WAD (1e18) by Maker."
@@ -14892,42 +23729,24 @@ export type Dusk = {
       "value": "9"
     },
     {
+      "name": "operatorExecutionWindowSlots",
+      "type": "u64",
+      "value": "3024000"
+    },
+    {
+      "name": "operatorNoticeSlots",
+      "type": "u64",
+      "value": "4752000"
+    },
+    {
+      "name": "operatorPolicyVersion",
+      "type": "u64",
+      "value": "2"
+    },
+    {
       "name": "parameterExecutionMaxUtilizationBps",
       "type": "u64",
       "value": "8000"
-    },
-    {
-      "name": "parameterProposalExecutionWindowSeconds",
-      "type": "i64",
-      "value": "604800"
-    },
-    {
-      "name": "parameterProposalSeedPrefix",
-      "type": "bytes",
-      "value": "[112, 97, 114, 97, 109, 101, 116, 101, 114, 95, 112, 114, 111, 112, 111, 115, 97, 108]"
-    },
-    {
-      "name": "parameterProposalSponsorBps",
-      "docs": [
-        "Direct-yLP parameter governance thresholds and wall-clock lifecycle."
-      ],
-      "type": "u16",
-      "value": "100"
-    },
-    {
-      "name": "parameterProposalSupportBps",
-      "type": "u16",
-      "value": "5000"
-    },
-    {
-      "name": "parameterProposalTimelockSeconds",
-      "type": "i64",
-      "value": "604800"
-    },
-    {
-      "name": "proposalSupportSeedPrefix",
-      "type": "bytes",
-      "value": "[112, 114, 111, 112, 111, 115, 97, 108, 95, 115, 117, 112, 112, 111, 114, 116]"
     },
     {
       "name": "referralAccrualSeedPrefix",
@@ -14941,8 +23760,14 @@ export type Dusk = {
     },
     {
       "name": "targetMsPerSlot",
+      "docs": [
+        "Economic timers use a deterministic nominal slot cadence instead of the",
+        "leader-influenced `Clock.unix_timestamp`. Solana's 200 ms slot rollout is",
+        "separate from Alpenglow's finality change. Revisit this protocol constant",
+        "if the cluster's scheduled slot duration changes again."
+      ],
       "type": "u64",
-      "value": "400"
+      "value": "200"
     },
     {
       "name": "yieldAccountSeedPrefix",
