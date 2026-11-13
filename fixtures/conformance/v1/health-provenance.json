@@ -11,10 +11,10 @@
     "buildSha": null
   },
   "protocol": {
-    "revision": "devnet-2026-11-13-3b4260e6",
+    "revision": "next-2026-11-14-hlp-funding-layout17",
     "lockStatus": "captured",
-    "lockSha256": "301e5cc044a969dfa959149e03ea14c1fb7a7042e5c2bf061915b5d963f2bece",
-    "sourceWorktreeFingerprintSha256": "acfe1fdb9c16a01fa0c8ba1cc63ca0df77fb10aa1351275270589dbe02b2dc13"
+    "lockSha256": "e646338da209755801541554dcecd3bebf5f4ab8107985089facc7e6d42d75c1",
+    "sourceWorktreeFingerprintSha256": "72439263897f4ba7f44e9be09b64c7f9794882578f8769ffeaa8fddcae80871c"
   },
   "dependencies": {
     "rpc": "unknown",

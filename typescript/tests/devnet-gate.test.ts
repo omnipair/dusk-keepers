@@ -10,8 +10,33 @@ import { createHash } from "node:crypto";
 import { PublicKey } from "@solana/web3.js";
 const execute = promisify(execFile);
 
+// Local RPC evidence belongs only to temporary test roots. A source capture
+// intentionally has no deployment attestation and cannot opt into live mode.
+function mockDeploymentRoot() {
+  const root = mkdtempSync(join(tmpdir(), "dusk-devnet-gate-"));
+  const lock = JSON.parse(readFileSync("protocol.lock.json", "utf8"));
+  const deployment = {
+    cluster: "devnet", genesisHash: "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG",
+    protocolRevision: lock.revision, sourceCommit: lock.source.gitCommit,
+    programs: lock.programs.map((p: any, i: number) => ({
+      name: p.name, programId: p.programId,
+      programData: new PublicKey(Buffer.alloc(32, 100 + i)).toBase58(),
+      lastUpgradeSlot: 500_000_000,
+      binarySha256: p.binary.sha256,
+      idlAccount: new PublicKey(Buffer.alloc(32, 110 + i)).toBase58(),
+      idlAccountSha256: createHash("sha256").update(`mock deployed IDL ${p.name}`).digest("hex"),
+    })),
+  };
+  mkdirSync(join(root, "protocol"));
+  symlinkSync(resolve("artifacts"), join(root, "artifacts"), "dir");
+  copyFileSync("protocol.lock.json", join(root, "protocol.lock.json"));
+  writeFileSync(join(root, "protocol/devnet-deployment.v1.json"), JSON.stringify(deployment));
+  return { root, lock, deployment };
+}
+
 for (const condition of ["normal live", "wrong network", "wrong deployment", "excess sends"] as const) {
   test(`native devnet gate rejects ${condition} before signing or submission`, async () => {
+    const { root } = mockDeploymentRoot();
     const requests: string[] = [];
     const server = createServer(async (req, res) => {
       const chunks: Buffer[] = [];
@@ -25,6 +50,7 @@ for (const condition of ["normal live", "wrong network", "wrong deployment", "ex
     await new Promise<void>(resolve => server.listen(0, "127.0.0.1", resolve));
     try {
       const env: NodeJS.ProcessEnv = {
+        DUSK_PROTOCOL_LOCK: join(root, "protocol.lock.json"),
         PATH: process.env.PATH, KEEPER_MODE: "live", KEEPER_PROFILE: "lending",
         KEEPER_MAX_SENDS_PER_PASS: condition === "excess sends" ? "2" : "1",
         SOLANA_RPC_HTTP_URL: `http://127.0.0.1:${(server.address() as any).port}`,
@@ -36,14 +62,13 @@ for (const condition of ["normal live", "wrong network", "wrong deployment", "ex
       if (["normal live", "excess sends"].includes(condition)) assert.equal(requests.length, 0);
     } finally {
       await new Promise<void>(resolve => server.close(() => resolve()));
+      rmSync(root, { recursive: true, force: true });
     }
   });
 }
 
 test("verified devnet live startup accepts all markets without a market selector", async () => {
-  const root = mkdtempSync(join(tmpdir(), "dusk-all-markets-"));
-  const deployment = JSON.parse(readFileSync("protocol/devnet-deployment.v1.json", "utf8"));
-  const lock = JSON.parse(readFileSync("protocol.lock.json", "utf8"));
+  const { root, deployment, lock } = mockDeploymentRoot();
   const accounts = new Map<string, object>();
   const loader = "BPFLoaderUpgradeab1e11111111111111111111111";
   const account = (data: Buffer, owner: string, executable = false) => ({
@@ -76,10 +101,6 @@ test("verified devnet live startup accepts all markets without a market selector
     res.end(JSON.stringify({ jsonrpc: "2.0", id: body.id, result }));
   });
   try {
-    mkdirSync(join(root, "protocol"));
-    symlinkSync(resolve("artifacts"), join(root, "artifacts"), "dir");
-    copyFileSync("protocol.lock.json", join(root, "protocol.lock.json"));
-    writeFileSync(join(root, "protocol/devnet-deployment.v1.json"), JSON.stringify(deployment));
     await new Promise<void>(resolve => server.listen(0, "127.0.0.1", resolve));
     const { stdout } = await execute("target/debug/dusk-keeper", ["--check"], {
       env: {

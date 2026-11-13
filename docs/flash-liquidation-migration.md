@@ -1,8 +1,11 @@
 # Flash/emergency keeper migration to Dusk #45
 
-## Current devnet capture — 2026-11-06
+Current source capture: [layout 17](layout17-capture.md). The deployment below
+is historical and does not attest to the current local binaries.
 
-The active revision is `devnet-2026-11-06-operators`. The fresh deployment uses
+## Historical devnet capture — 2026-11-06
+
+The revision was `devnet-2026-11-06-operators`. The fresh deployment uses
 SDK `2.18.0-next.20261106`, published through Dusk's npm release workflow. Both
 executables and IDLs were captured from devnet; source
 `d8c7f89534b734792ec32af6914e53c3efeb04a9` supplies fresh lending/hLP fixtures.
@@ -16,7 +19,7 @@ principal losses pass through junior backing and then senior backing.
 | Leverage delegate | `B315E6hHTgDjHgCCPungLop2mkgv9SHkcBc9ZzALNxNY` | `519164379` |
 
 See [the capture runbook](devnet-capture.md) and
-[the evidence manifest](../protocol/devnet-deployment.v1.json) for provenance,
+the deployment observation captured for that historical release for provenance,
 payload sizes and hashes. The lock stays **captured** and services keep their
 existing shadow mode. Signed activation requires the separate frozen release.
 

@@ -1,9 +1,9 @@
 {
   "$schema": "./schemas/account-layout.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "devnet-2026-11-13-3b4260e6",
+  "protocolRevision": "next-2026-11-14-hlp-funding-layout17",
   "programId": "G6VzihcGWCxt1nujxtKPB4oUYz36GPR2t5mLdXEH8yYN",
-  "idlSha256": "c4a1e2cdfa0fc63a5136f7fff6d81fe1698ffcb51a3ffda01fe38b581b3d6863",
+  "idlSha256": "1691f5c98c762dd7bc7d43d94cca8465f169a77bff9a6fced033c7f75dfa80fe",
   "accounts": [
     {
       "name": "BorrowPosition",
@@ -63,8 +63,8 @@
     },
     {
       "name": "Market",
-      "expectedVersion": 15,
-      "sizeWithDiscriminator": 6442,
+      "expectedVersion": 17,
+      "sizeWithDiscriminator": 6922,
       "fields": [
         {
           "path": "version",
@@ -103,7 +103,7 @@
         },
         {
           "path": "quote_side.hlp_mint",
-          "offset": 1175,
+          "offset": 1399,
           "size": 32
         },
         {
@@ -133,27 +133,27 @@
         },
         {
           "path": "quote_side.asset_mint",
-          "offset": 1142,
+          "offset": 1366,
           "size": 32
         },
         {
           "path": "quote_side.asset_decimals",
-          "offset": 1174,
+          "offset": 1398,
           "size": 1
         },
         {
           "path": "quote_side.reserve_vault",
-          "offset": 1207,
+          "offset": 1431,
           "size": 32
         },
         {
           "path": "quote_side.collateral_vault",
-          "offset": 1239,
+          "offset": 1463,
           "size": 32
         },
         {
           "path": "quote_side.interest_vault",
-          "offset": 1271,
+          "offset": 1495,
           "size": 32
         },
         {
@@ -163,107 +163,107 @@
         },
         {
           "path": "quote_side.reserves.live_reserve",
-          "offset": 1311,
+          "offset": 1535,
           "size": 16
         },
         {
           "path": "base_hlp_vault.srlp_vault",
-          "offset": 5236,
+          "offset": 5716,
           "size": 32
         },
         {
           "path": "quote_hlp_vault.srlp_vault",
-          "offset": 5628,
+          "offset": 6108,
           "size": 32
         },
         {
           "path": "base_hlp_vault.hlp_supply",
-          "offset": 5316,
+          "offset": 5796,
           "size": 8
         },
         {
           "path": "base_hlp_vault.srlp_shares",
-          "offset": 5268,
+          "offset": 5748,
           "size": 8
         },
         {
           "path": "quote_hlp_vault.srlp_shares",
-          "offset": 5660,
+          "offset": 6140,
           "size": 8
         },
         {
           "path": "base_hlp_vault.debt_principal",
-          "offset": 5308,
+          "offset": 5788,
           "size": 8
         },
         {
           "path": "quote_hlp_vault.debt_principal",
-          "offset": 5700,
+          "offset": 6180,
           "size": 8
         },
         {
           "path": "base_hlp_vault.debt_shares",
-          "offset": 5292,
+          "offset": 5772,
           "size": 16
         },
         {
           "path": "quote_hlp_vault.debt_shares",
-          "offset": 5684,
+          "offset": 6164,
           "size": 16
         },
         {
           "path": "quote_hlp_vault.hlp_supply",
-          "offset": 5708,
+          "offset": 6188,
           "size": 8
         },
         {
           "path": "base_hlp_vault.residual_exposure",
-          "offset": 5324,
+          "offset": 5804,
           "size": 16
         },
         {
           "path": "quote_hlp_vault.residual_exposure",
-          "offset": 5716,
+          "offset": 6196,
           "size": 16
         },
         {
           "path": "params_hash",
-          "offset": 6100,
+          "offset": 6580,
           "size": 32
         },
         {
           "path": "last_update_slot",
-          "offset": 6432,
+          "offset": 6912,
           "size": 8
         },
         {
           "path": "operator.authority",
-          "offset": 6164,
+          "offset": 6644,
           "size": 32
         },
         {
           "path": "operator.manager",
-          "offset": 6196,
+          "offset": 6676,
           "size": 32
         },
         {
           "path": "operator.epoch",
-          "offset": 6228,
+          "offset": 6708,
           "size": 8
         },
         {
           "path": "operator.pending",
-          "offset": 6252,
+          "offset": 6732,
           "size": 32
         },
         {
           "path": "operator.revenue_epoch",
-          "offset": 6236,
+          "offset": 6716,
           "size": 8
         },
         {
           "path": "operator.revenue_recipient",
-          "offset": 6316,
+          "offset": 6796,
           "size": 32
         }
       ]
@@ -321,7 +321,7 @@
     },
     {
       "name": "FutarchyAuthority",
-      "sizeWithDiscriminator": 395,
+      "sizeWithDiscriminator": 355,
       "fields": [
         {
           "path": "recipients.futarchy_treasury",
@@ -345,17 +345,17 @@
         },
         {
           "path": "buyback_auction.accepted_mint",
-          "offset": 273,
+          "offset": 253,
           "size": 32
         },
         {
           "path": "buyback_auction.recipients.treasury",
-          "offset": 305,
+          "offset": 285,
           "size": 32
         },
         {
           "path": "buyback_auction.recipients.staking_vault",
-          "offset": 337,
+          "offset": 317,
           "size": 32
         }
       ]

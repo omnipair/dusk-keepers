@@ -256,6 +256,21 @@ mod tests {
     }
 
     #[test]
+    fn layout17_funding_translation_does_not_shift_the_ownership_or_operator_fields() {
+        let manifest = manifest();
+        let market = manifest.reader("Market").unwrap();
+        let data = include_bytes!("../../../../fixtures/conformance/v1/market-layout17.bin");
+        assert_eq!(data.len(), market.size());
+        assert_eq!(market.u8("version", data).unwrap(), 17);
+        assert_eq!(market.u64("operator.epoch", data).unwrap(), 987_654_321);
+        assert_eq!(
+            market.u64("last_update_slot", data).unwrap(),
+            123_456_789_012_345
+        );
+        assert!(market.u8("version", &data[..data.len() - 32]).is_err());
+    }
+
+    #[test]
     fn an_account_of_the_wrong_size_is_refused() {
         let manifest = manifest();
         let position = manifest.reader("BorrowPosition").unwrap();
