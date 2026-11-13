@@ -1,14 +1,14 @@
 {
   "$schema": "./protocol/schemas/protocol-lock.schema.json",
   "schemaVersion": 1,
-  "revision": "devnet-2026-11-13-20ec7d04",
+  "revision": "devnet-2026-11-13-3b4260e6",
   "status": "captured",
-  "generatedAt": "2026-11-13T04:50:44.108Z",
+  "generatedAt": "2026-11-13T11:10:43.744Z",
   "source": {
     "repository": "https://github.com/omnipair/dusk",
     "branch": "feat/devnet-short-notice",
-    "gitCommit": "20ec7d04e2ee3d497e1c84a6d91a7736b62a3065",
-    "worktreeFingerprintSha256": "83c0d76ef1588e681ebe842792a8e109a38f8694db7def01ed4fbb3df7766124"
+    "gitCommit": "038bb8915018b2a9ffd2a19e7e7f61531b000074",
+    "worktreeFingerprintSha256": "acfe1fdb9c16a01fa0c8ba1cc63ca0df77fb10aa1351275270589dbe02b2dc13"
   },
   "toolchain": {
     "anchor": "anchor-cli 0.31.1",
@@ -23,7 +23,7 @@
       "programId": "G6VzihcGWCxt1nujxtKPB4oUYz36GPR2t5mLdXEH8yYN",
       "binary": {
         "path": "artifacts/dusk.so",
-        "sha256": "6cefd492df0519c4b71a2e3ee205e2724701e84540445eec306a1933f56cd157"
+        "sha256": "30cdbf1346038c2326ef18dd96f5443920af88c69a99356a5e7d49796f6e2ad8"
       },
       "idl": {
         "path": "artifacts/dusk.json",
