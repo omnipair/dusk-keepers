@@ -70,6 +70,7 @@ for (const program of lock.programs) {
     await copyFile(`${source}/${input}`, output);
     program[kind] = { path: output, sha256: sha(await readFile(output)) };
   }
+  await copyFile(`${source}/target/types/${program.name}.ts`, `artifacts/${program.name}.ts`);
   program.programId = JSON.parse(
     await readFile(program.idl.path, "utf8"),
   ).address;

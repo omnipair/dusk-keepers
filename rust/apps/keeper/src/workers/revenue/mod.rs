@@ -82,11 +82,42 @@ impl FutarchyConfig {
         })
     }
 
-    fn lane(&self, lane: ProtocolAuctionLane) -> LaneConfig {
-        match lane {
+    fn lane(
+        &self,
+        layout: &AccountLayoutManifest,
+        market_data: &[u8],
+        lane: ProtocolAuctionLane,
+        source: ProtocolRevenueSource,
+        sold_is_base: bool,
+    ) -> Result<LaneConfig, ExecutionError> {
+        let mut config = match lane {
             ProtocolAuctionLane::Buyback => self.buyback,
             ProtocolAuctionLane::Fee => self.fee,
+        };
+        let side = if sold_is_base { "base" } else { "quote" };
+        let lane = match lane {
+            ProtocolAuctionLane::Buyback => "buyback",
+            ProtocolAuctionLane::Fee => "fee",
+        };
+        let source = match source {
+            ProtocolRevenueSource::Swap => "swap",
+            ProtocolRevenueSource::Interest => "interest",
+        };
+        let mint = layout
+            .reader("Market")
+            .and_then(|reader| {
+                reader.pubkey(
+                    &format!("{side}_side.fees.{lane}_{source}_auction.accepted_mint"),
+                    market_data,
+                )
+            })
+            .map_err(|error| ExecutionError::Assembly(error.to_string()))?;
+        // Existing curves retain their mint when governance changes the lane default.
+        // Unconfigured curves still go through the program's empty-auction refusal.
+        if mint != [0; 32] {
+            config.accepted_mint = mint;
         }
+        Ok(config)
     }
 }
 
@@ -144,7 +175,8 @@ impl ArbitrageurJob<'_> {
         sold_is_base: bool,
         max_payment_amount: u64,
     ) -> Result<(Instruction, [u8; 32]), ExecutionError> {
-        let config = futarchy.lane(lane);
+        let market_data = self.client.account_data(&address(market.address))?;
+        let config = futarchy.lane(self.layout, &market_data, lane, source, sold_is_base)?;
         let signer = self.signer.public_key();
         let sold_mint = if sold_is_base {
             market.base_mint
@@ -193,9 +225,6 @@ impl ArbitrageurJob<'_> {
             "staking_vault_payment_account",
             account_for(config.staking_vault, config.accepted_mint)?,
         );
-        // Only one reference market is permitted per lane, and for a sale
-        // between this market's own pair it is this market.
-        supplied.insert("reference_market", market.address);
 
         let mut pda_inputs = BTreeMap::new();
         pda_inputs.insert(
@@ -556,4 +585,99 @@ pub fn run(context: &super::WorkerContext<'_>) -> Result<Vec<AttemptReport>, Exe
         signer: context.signer,
     }
     .run_pass()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn settlements_use_each_curves_mint_and_current_lane_recipients() {
+        let layout: AccountLayoutManifest = serde_json::from_str(include_str!(
+            "../../../../../../protocol/keeper-account-layout.v1.json"
+        ))
+        .unwrap();
+        let market_layout = layout.accounts.iter().find(|a| a.name == "Market").unwrap();
+        let mut data = vec![0; market_layout.size_with_discriminator.unwrap()];
+        data[..8].copy_from_slice(&account_discriminator("Market"));
+        let version = market_layout
+            .fields
+            .iter()
+            .find(|f| f.path == "version")
+            .unwrap();
+        data[version.offset] = market_layout.expected_version.unwrap();
+        let config = FutarchyConfig {
+            address: [1; 32],
+            fee: LaneConfig {
+                accepted_mint: [2; 32],
+                treasury: [3; 32],
+                staking_vault: [4; 32],
+            },
+            buyback: LaneConfig {
+                accepted_mint: [5; 32],
+                treasury: [6; 32],
+                staking_vault: [7; 32],
+            },
+        };
+        for (i, field) in market_layout
+            .fields
+            .iter()
+            .filter(|f| f.path.ends_with("auction.accepted_mint"))
+            .enumerate()
+        {
+            data[field.offset..field.offset + 32].fill(10 + i as u8);
+        }
+        for sold_is_base in [true, false] {
+            for lane in [ProtocolAuctionLane::Fee, ProtocolAuctionLane::Buyback] {
+                for source in [ProtocolRevenueSource::Swap, ProtocolRevenueSource::Interest] {
+                    let selected = config
+                        .lane(&layout, &data, lane, source, sold_is_base)
+                        .unwrap();
+                    let index = usize::from(!sold_is_base) * 4
+                        + usize::from(matches!(lane, ProtocolAuctionLane::Buyback)) * 2
+                        + usize::from(matches!(source, ProtocolRevenueSource::Interest));
+                    assert_eq!(selected.accepted_mint, [10 + index as u8; 32]);
+                    let expected = if matches!(lane, ProtocolAuctionLane::Fee) {
+                        config.fee
+                    } else {
+                        config.buyback
+                    };
+                    assert_eq!(selected.treasury, expected.treasury);
+                    assert_eq!(selected.staking_vault, expected.staking_vault);
+                }
+            }
+        }
+        let mut empty = data.clone();
+        for field in market_layout
+            .fields
+            .iter()
+            .filter(|f| f.path.ends_with("auction.accepted_mint"))
+        {
+            empty[field.offset..field.offset + 32].fill(0);
+        }
+        assert_eq!(
+            config
+                .lane(
+                    &layout,
+                    &empty,
+                    ProtocolAuctionLane::Fee,
+                    ProtocolRevenueSource::Swap,
+                    true
+                )
+                .unwrap()
+                .accepted_mint,
+            config.fee.accepted_mint
+        );
+        assert!(
+            config
+                .lane(
+                    &layout,
+                    &data[..8],
+                    ProtocolAuctionLane::Fee,
+                    ProtocolRevenueSource::Swap,
+                    true
+                )
+                .is_err()
+        );
+    }
 }

@@ -387,6 +387,13 @@ pub fn build_order_plan(
                 &named,
             )?
         } else if kind == "LeverageOrder" {
+            if reader
+                .u64("min_owner_payout", raw)
+                .map_err(|e| e.to_string())?
+                == 0
+            {
+                return Err("exit order needs owner reauthorization".into());
+            }
             let position_raw = snapshot.owned(position, program)?;
             if position_reader
                 .pubkey("owner", position_raw)

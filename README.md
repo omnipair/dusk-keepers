@@ -3,9 +3,12 @@
 Keeper runtimes for Dusk, pinned to the observed Solana devnet deployment and
 verified with shared conformance fixtures in Rust and TypeScript.
 
-The current capture is `devnet-2026-11-08-hlp-deposit`. The compatible Dusk upgrade at finalized slot 519909294 was recaptured from chain; the delegate and both IDLs are unchanged. The lock pins source
-`84c2a6997c795fb062c9bafb77680f8271a6f86d`. Liquidation and hLP bank fixtures were regenerated from that source and tested against the current captured binary.
-The SDK artifact is the registry-published `@omnipair/dusk-sdk@2.18.2-next.20261108`;
+The current capture is `devnet-2026-11-14-main-grid`, using the fresh layout-16
+Dusk and delegate programs deployed at finalized slots 521965404 and 521967168.
+The lock pins source `474ddcf4fcaecd1ed055238f1105a0a1323d7313` and both downloaded
+executables and IDLs. Liquidation and hLP bank fixtures were regenerated from that
+source and tested against the captured binaries.
+The SDK artifact is the registry-published `@omnipair/dusk-sdk@2.24.1-next.20261114`;
 it records provenance and is not a bundled runtime dependency. The active ABI uses
 srLP and operator/optional-manager authority, with no core LP voting or separate
 insurance fund.
