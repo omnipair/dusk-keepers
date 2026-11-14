@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "protocolRevision": "mainnet-2026-11-14",
+  "validator": "surfpool",
+  "kind": "native-plan-rpc-simulation",
+  "cases": [
+    {
+      "fixture": "fixtures/litesvm/01-flash-BorrowPosition.json",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "action": "flash",
+      "slot": 10002,
+      "computeUnits": 411045,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/litesvm/02-emergency-BorrowPosition.json",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "action": "emergency",
+      "slot": 20003,
+      "computeUnits": 201626,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/litesvm/03-emergency-LeveragePosition.json",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "action": "emergency",
+      "slot": 21004,
+      "computeUnits": 280420,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/litesvm/04-flash-BorrowPosition.json",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "action": "flash",
+      "slot": 33005,
+      "computeUnits": 393415,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/litesvm/05-flash-LeveragePosition.json",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "action": "flash",
+      "slot": 33105,
+      "computeUnits": 416510,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/litesvm/06-flash-LeveragePosition.json",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "action": "flash",
+      "slot": 33205,
+      "computeUnits": 432265,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/litesvm/07-flash-LeveragePosition.json",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "action": "flash",
+      "slot": 35008,
+      "computeUnits": 392630,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/litesvm/08-flash-LeveragePosition.json",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "action": "flash",
+      "slot": 35108,
+      "computeUnits": 601030,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/litesvm/09-emergency-LeveragePosition.json",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "action": "emergency",
+      "slot": 35208,
+      "computeUnits": 490518,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/litesvm/10-flash-LeveragePosition.json",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "action": "flash",
+      "slot": 37010,
+      "computeUnits": 385358,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/litesvm/11-flash-LeveragePosition.json",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "action": "flash",
+      "slot": 37110,
+      "computeUnits": 348764,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/litesvm/12-flash-LeveragePosition.json",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "action": "flash",
+      "slot": 37210,
+      "computeUnits": 333812,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/litesvm/13-flash-LeveragePosition.json",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "action": "flash",
+      "slot": 37310,
+      "computeUnits": 333812,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/hlp-litesvm/01-hlp_flash.json",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "action": "hlp_flash",
+      "slot": 37410,
+      "computeUnits": 461824,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/hlp-litesvm/02-hlp_flash.json",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "action": "hlp_flash",
+      "slot": 37510,
+      "computeUnits": 453643,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/hlp-litesvm/03-hlp_close.json",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "action": "hlp_close",
+      "slot": 37610,
+      "computeUnits": 173900,
+      "status": "passed"
+    }
+  ],
+  "programs": [
+    {
+      "name": "dusk",
+      "programId": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj",
+      "binarySha256": "047a30c6396791c962c62a958c1b099b12e5994bc07dfffc69d5bd2a91031b0a",
+      "idlSha256": "b78cbeef3301d2ba650e66065424356d410cbee94f43f2aea6912991ab79736a"
+    },
+    {
+      "name": "leverage_delegate",
+      "programId": "DeLegABhDLREbDpwwcsbkHvDS5MwqKPAw1CJKoooUXFQ",
+      "binarySha256": "0b62f3ea48dbddadf5935ec57f0de907bcf26b99793d6ce7c2155225097c5e6e",
+      "idlSha256": "a5047b952378f89c34ee94823d033ad43727b99e27615b0645a347a463ec8524"
+    }
+  ],
+  "sdkSha256": "9e34054a83f7bb8ced8cd61b36ab12d34053365ee4d2a25846ffef2f250fb3e5",
+  "blockProductionMode": "transaction",
+  "scope": "Offline RPC simulation with captured fixture banks; not the full signed E2E matrix or a live-release promotion"
+}

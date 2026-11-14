@@ -345,7 +345,27 @@ impl Journal {
             )?;
             return Err("quote expired before signing; fresh evaluation required".into());
         }
-        let signature = signer.sign(message);
+        if super::mainnet::enabled()
+            && let Err(error) = super::mainnet::verify(rpc, false)
+        {
+            self.finish(
+                &work,
+                "abandoned_before_submission",
+                &serde_json::json!({"reason":"deployment changed before signing"}),
+            )?;
+            return Err(error);
+        }
+        let signature = match signer.sign(message) {
+            Ok(signature) => signature,
+            Err(_) => {
+                self.finish(
+                    &work,
+                    "abandoned_before_submission",
+                    &serde_json::json!({"reason":"signer denied or unavailable"}),
+                )?;
+                return Err("signer denied or unavailable; fresh evaluation required".into());
+            }
+        };
         let sig = bs58::encode(signature).into_string();
         let bytes = serialize_transaction(&[signature], message);
         let mut tx = self.client.transaction().map_err(|e| e.to_string())?;
@@ -482,13 +502,24 @@ mod tests {
         time::Duration,
     };
     struct CountingSigner(Arc<AtomicUsize>);
+    struct DeniedSigner;
+    impl TransactionSigner for DeniedSigner {
+        fn public_key(&self) -> [u8; 32] {
+            [7; 32]
+        }
+        fn sign(&self, _: &[u8]) -> Result<[u8; 64], crate::runtime::signer::SignerError> {
+            Err(crate::runtime::signer::SignerError::Remote(
+                "synthetic private provider detail",
+            ))
+        }
+    }
     impl TransactionSigner for CountingSigner {
         fn public_key(&self) -> [u8; 32] {
             [7; 32]
         }
-        fn sign(&self, _: &[u8]) -> [u8; 64] {
+        fn sign(&self, _: &[u8]) -> Result<[u8; 64], crate::runtime::signer::SignerError> {
             self.0.fetch_add(1, Ordering::SeqCst);
-            [9; 64]
+            Ok([9; 64])
         }
     }
     #[test]
@@ -724,6 +755,31 @@ mod tests {
         assert_eq!(row.get::<_, String>(0), "abandoned_before_submission");
         assert!(row.get::<_, Option<String>>(1).is_none());
         assert!(row.get::<_, Option<Vec<u8>>>(2).is_none());
+        let denied = journal
+            .submit(
+                &rpc,
+                &DeniedSigner,
+                "test",
+                "denied-position",
+                1,
+                "market",
+                "flash",
+                10,
+                "state",
+                b"denied-message",
+                "hash",
+                100,
+            )
+            .unwrap_err();
+        assert_eq!(
+            denied,
+            "signer denied or unavailable; fresh evaluation required"
+        );
+        let row = journal.client.query_one("SELECT outcome,signature,transaction_bytes FROM keeper_flash_work WHERE position='denied-position'", &[]).unwrap();
+        assert_eq!(row.get::<_, String>(0), "abandoned_before_submission");
+        assert!(row.get::<_, Option<String>>(1).is_none());
+        assert!(row.get::<_, Option<Vec<u8>>>(2).is_none());
+        assert!(journal.pending_sides("test").unwrap().is_empty());
         let _ = rpc.call::<serde_json::Value>("stop", serde_json::json!([]));
         handle.join().unwrap();
         journal

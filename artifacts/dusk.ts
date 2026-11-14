@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/dusk.json`.
  */
 export type Dusk = {
-  "address": "9gEvWS1Vqxmd9qr9w5KpEN2PGcn9DN1rE5NptD1ZcqXH",
+  "address": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj",
   "metadata": {
     "name": "dusk",
     "version": "2.0.0",
@@ -5027,38 +5027,38 @@ export type Dusk = {
               {
                 "kind": "const",
                 "value": [
-                  128,
-                  234,
-                  227,
-                  164,
-                  200,
-                  104,
-                  117,
-                  6,
-                  140,
-                  85,
-                  145,
-                  118,
-                  172,
-                  245,
-                  179,
-                  164,
-                  219,
-                  182,
-                  59,
-                  3,
-                  226,
-                  63,
-                  106,
-                  237,
-                  237,
-                  52,
-                  27,
-                  32,
-                  17,
-                  146,
+                  191,
+                  215,
+                  212,
+                  33,
+                  74,
+                  68,
+                  126,
+                  168,
+                  251,
+                  64,
+                  60,
+                  251,
                   142,
-                  148
+                  177,
+                  167,
+                  146,
+                  144,
+                  83,
+                  163,
+                  155,
+                  161,
+                  57,
+                  93,
+                  175,
+                  240,
+                  188,
+                  80,
+                  198,
+                  110,
+                  6,
+                  64,
+                  2
                 ]
               }
             ],
@@ -12190,6 +12190,19 @@ export type Dusk = {
       ]
     },
     {
+      "name": "orphanedHlpClosed",
+      "discriminator": [
+        127,
+        88,
+        17,
+        121,
+        183,
+        111,
+        237,
+        157
+      ]
+    },
+    {
       "name": "protocolAuctionConfigUpdated",
       "discriminator": [
         178,
@@ -13442,6 +13455,19 @@ export type Dusk = {
                 "name": "concentratedCurveCache"
               }
             }
+          },
+          {
+            "name": "hlpFundingBasePricingOffsetNad",
+            "docs": [
+              "Pricing-only translations between the ordinary ownership books and",
+              "trading coordinates. Funding payments settle cash and liabilities;",
+              "these non-redeemable offsets keep them outside trading principal."
+            ],
+            "type": "i128"
+          },
+          {
+            "name": "hlpFundingQuotePricingOffsetNad",
+            "type": "i128"
           },
           {
             "name": "centerPriceNad",
@@ -14739,10 +14765,11 @@ export type Dusk = {
           {
             "name": "borrowedBucket",
             "docs": [
-              "Gross principal lent out through the public borrow path. Internal hLP",
-              "funding and isolated leverage do not consume this capacity. This is a",
-              "24-hour leaky/token bucket, not an exact trailing-window sum: it permits",
-              "a full burst after idle and then refills at the configured daily rate."
+              "Principal lent out through the public borrow path, net of principal",
+              "repaid through the public repay path. Internal hLP funding and isolated",
+              "leverage do not consume this capacity. This is a 24-hour leaky/token",
+              "bucket, not an exact trailing-window sum: it permits a full burst after",
+              "idle and then refills at the configured daily rate."
             ],
             "type": "u64"
           },
@@ -15115,6 +15142,11 @@ export type Dusk = {
           },
           {
             "name": "collateralDebit",
+            "docs": [
+              "Collateral the caller priced. A partial sale debits exactly this",
+              "amount; a full sale debits all live collateral, which must be at least",
+              "this amount."
+            ],
             "type": "u64"
           },
           {
@@ -17730,12 +17762,16 @@ export type Dusk = {
           {
             "name": "marginAmount",
             "docs": [
-              "Entry equity valued in debt-token atoms."
+              "Entry equity valued in debt-token atoms, for the collateral still held.",
+              "A partial close releases the sold share in proportion to collateral."
             ],
             "type": "u64"
           },
           {
             "name": "openNotional",
+            "docs": [
+              "Entry notional for the collateral still held, released like `margin_amount`."
+            ],
             "type": "u64"
           },
           {
@@ -18399,6 +18435,11 @@ export type Dusk = {
           },
           {
             "name": "closed",
+            "docs": [
+              "Economic closure: no collateral and no debt shares remain. The",
+              "position account stays open until its owner withdraws through",
+              "`withdraw_all_collateral` or `withdraw_repaid_leverage`."
+            ],
             "type": "bool"
           }
         ]
@@ -20503,6 +20544,55 @@ export type Dusk = {
                 "name": "runtimePricing"
               }
             }
+          }
+        ]
+      }
+    },
+    {
+      "name": "orphanedHlpClosed",
+      "docs": [
+        "A complete direct burn left an hLP side with value but no receipts; anyone",
+        "unwound it through `withdraw_single_sided` for the whole stored supply. The",
+        "vault's debt was repaid from its srLP backing and the released target-asset",
+        "value was booked as protocol revenue."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "caller",
+            "type": "pubkey"
+          },
+          {
+            "name": "assetSide",
+            "docs": [
+              "`0` for base hLP and `1` for quote hLP."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "hlpAmount",
+            "type": "u64"
+          },
+          {
+            "name": "srlpAmount",
+            "type": "u64"
+          },
+          {
+            "name": "protocolRevenue",
+            "type": "u64"
+          },
+          {
+            "name": "debtRepaid",
+            "type": "u64"
+          },
+          {
+            "name": "interestPaid",
+            "type": "u64"
           }
         ]
       }
@@ -23615,10 +23705,19 @@ export type Dusk = {
         "",
         "This layout counts token amounts in at least `MIN_AMOUNT_DECIMALS`",
         "decimals and sets independent lower/upper utilization rate targets.",
-        "Aggregate virtual reserves use u128; physical token amounts remain u64."
+        "Aggregate virtual reserves use u128; physical token amounts remain u64.",
+        "Separate hLP funding offsets preserve pricing principal through payment."
       ],
       "type": "u8",
-      "value": "16"
+      "value": "17"
+    },
+    {
+      "name": "marketParamsHashDomain",
+      "docs": [
+        "Domain tag of the market parameters hash, the third market-address seed."
+      ],
+      "type": "bytes",
+      "value": "[100, 117, 115, 107, 58, 109, 97, 114, 107, 101, 116, 45, 112, 97, 114, 97, 109, 115, 58, 118, 49]"
     },
     {
       "name": "marketReserveVaultSeedPrefix",
@@ -23647,8 +23746,12 @@ export type Dusk = {
     },
     {
       "name": "maxOperatorInterestShareBps",
+      "docs": [
+        "The operator may retain up to all interest left after the protocol markup;",
+        "LPs keep swap fees. An increase waits the full operator notice."
+      ],
       "type": "u16",
-      "value": "5000"
+      "value": "10000"
     },
     {
       "name": "maxParameterFeeBps",

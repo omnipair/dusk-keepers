@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/leverage_delegate.json`.
  */
 export type LeverageDelegate = {
-  "address": "5yeZJw1bNer5jq4GVNa7ifsgnM7ivxXQLCK6ro8EJ3Ue",
+  "address": "DeLegABhDLREbDpwwcsbkHvDS5MwqKPAw1CJKoooUXFQ",
   "metadata": {
     "name": "leverageDelegate",
     "version": "2.0.0",
@@ -636,6 +636,128 @@ export type LeverageDelegate = {
       "args": []
     },
     {
+      "name": "closeProtectionOrder",
+      "docs": [
+        "Close a cancelled order whose LP custody is empty and whose yield",
+        "accounts have nothing left to claim. Rent returns to the sponsor."
+      ],
+      "discriminator": [
+        37,
+        228,
+        136,
+        164,
+        116,
+        239,
+        241,
+        17
+      ],
+      "accounts": [
+        {
+          "name": "order",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  116,
+                  101,
+                  99,
+                  116,
+                  105,
+                  111,
+                  110,
+                  95,
+                  111,
+                  114,
+                  100,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              },
+              {
+                "kind": "account",
+                "path": "order.order_id",
+                "account": "protectionOrder"
+              }
+            ]
+          }
+        },
+        {
+          "name": "custodyLpAccount",
+          "docs": [
+            "Must be empty. Cancellation refunds the whole balance, so repeating it",
+            "returns a later LP transfer into custody."
+          ],
+          "writable": true
+        },
+        {
+          "name": "baseYieldAccount"
+        },
+        {
+          "name": "quoteYieldAccount"
+        },
+        {
+          "name": "baseMint",
+          "docs": [
+            "Writable so Token-2022 can harvest withheld transfer fees before close."
+          ],
+          "writable": true
+        },
+        {
+          "name": "quoteMint",
+          "writable": true
+        },
+        {
+          "name": "custodyBaseAccount",
+          "docs": [
+            "Order-owned asset custody that execution used, usually the order's ATA."
+          ],
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "custodyQuoteAccount",
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "ownerBaseAccount",
+          "docs": [
+            "Required only when the matching custody account holds a balance."
+          ],
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "ownerQuoteAccount",
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "tokenProgram",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token2022Program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "createHlpOrder",
       "discriminator": [
         65,
@@ -749,45 +871,45 @@ export type LeverageDelegate = {
             "program": {
               "kind": "const",
               "value": [
-                128,
-                234,
-                227,
-                164,
-                200,
-                104,
-                117,
-                6,
-                140,
-                85,
-                145,
-                118,
-                172,
-                245,
-                179,
-                164,
-                219,
-                182,
-                59,
-                3,
-                226,
-                63,
-                106,
-                237,
-                237,
-                52,
-                27,
-                32,
-                17,
-                146,
+                191,
+                215,
+                212,
+                33,
+                74,
+                68,
+                126,
+                168,
+                251,
+                64,
+                60,
+                251,
                 142,
-                148
+                177,
+                167,
+                146,
+                144,
+                83,
+                163,
+                155,
+                161,
+                57,
+                93,
+                175,
+                240,
+                188,
+                80,
+                198,
+                110,
+                6,
+                64,
+                2
               ]
             }
           }
         },
         {
           "name": "duskProgram",
-          "address": "9gEvWS1Vqxmd9qr9w5KpEN2PGcn9DN1rE5NptD1ZcqXH"
+          "address": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj"
         },
         {
           "name": "token2022Program",
@@ -1113,45 +1235,45 @@ export type LeverageDelegate = {
             "program": {
               "kind": "const",
               "value": [
-                128,
-                234,
-                227,
-                164,
-                200,
-                104,
-                117,
-                6,
-                140,
-                85,
-                145,
-                118,
-                172,
-                245,
-                179,
-                164,
-                219,
-                182,
-                59,
-                3,
-                226,
-                63,
-                106,
-                237,
-                237,
-                52,
-                27,
-                32,
-                17,
-                146,
+                191,
+                215,
+                212,
+                33,
+                74,
+                68,
+                126,
+                168,
+                251,
+                64,
+                60,
+                251,
                 142,
-                148
+                177,
+                167,
+                146,
+                144,
+                83,
+                163,
+                155,
+                161,
+                57,
+                93,
+                175,
+                240,
+                188,
+                80,
+                198,
+                110,
+                6,
+                64,
+                2
               ]
             }
           }
         },
         {
           "name": "duskProgram",
-          "address": "9gEvWS1Vqxmd9qr9w5KpEN2PGcn9DN1rE5NptD1ZcqXH"
+          "address": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj"
         },
         {
           "name": "token2022Program",
@@ -1327,45 +1449,45 @@ export type LeverageDelegate = {
             "program": {
               "kind": "const",
               "value": [
-                128,
-                234,
-                227,
-                164,
-                200,
-                104,
-                117,
-                6,
-                140,
-                85,
-                145,
-                118,
-                172,
-                245,
-                179,
-                164,
-                219,
-                182,
-                59,
-                3,
-                226,
-                63,
-                106,
-                237,
-                237,
-                52,
-                27,
-                32,
-                17,
-                146,
+                191,
+                215,
+                212,
+                33,
+                74,
+                68,
+                126,
+                168,
+                251,
+                64,
+                60,
+                251,
                 142,
-                148
+                177,
+                167,
+                146,
+                144,
+                83,
+                163,
+                155,
+                161,
+                57,
+                93,
+                175,
+                240,
+                188,
+                80,
+                198,
+                110,
+                6,
+                64,
+                2
               ]
             }
           }
         },
         {
           "name": "duskProgram",
-          "address": "9gEvWS1Vqxmd9qr9w5KpEN2PGcn9DN1rE5NptD1ZcqXH"
+          "address": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj"
         },
         {
           "name": "protocolFee",
@@ -1548,45 +1670,45 @@ export type LeverageDelegate = {
             "program": {
               "kind": "const",
               "value": [
-                128,
-                234,
-                227,
-                164,
-                200,
-                104,
-                117,
-                6,
-                140,
-                85,
-                145,
-                118,
-                172,
-                245,
-                179,
-                164,
-                219,
-                182,
-                59,
-                3,
-                226,
-                63,
-                106,
-                237,
-                237,
-                52,
-                27,
-                32,
-                17,
-                146,
+                191,
+                215,
+                212,
+                33,
+                74,
+                68,
+                126,
+                168,
+                251,
+                64,
+                60,
+                251,
                 142,
-                148
+                177,
+                167,
+                146,
+                144,
+                83,
+                163,
+                155,
+                161,
+                57,
+                93,
+                175,
+                240,
+                188,
+                80,
+                198,
+                110,
+                6,
+                64,
+                2
               ]
             }
           }
         },
         {
           "name": "duskProgram",
-          "address": "9gEvWS1Vqxmd9qr9w5KpEN2PGcn9DN1rE5NptD1ZcqXH"
+          "address": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj"
         },
         {
           "name": "protocolFee",
@@ -1812,45 +1934,45 @@ export type LeverageDelegate = {
             "program": {
               "kind": "const",
               "value": [
-                128,
-                234,
-                227,
-                164,
-                200,
-                104,
-                117,
-                6,
-                140,
-                85,
-                145,
-                118,
-                172,
-                245,
-                179,
-                164,
-                219,
-                182,
-                59,
-                3,
-                226,
-                63,
-                106,
-                237,
-                237,
-                52,
-                27,
-                32,
-                17,
-                146,
+                191,
+                215,
+                212,
+                33,
+                74,
+                68,
+                126,
+                168,
+                251,
+                64,
+                60,
+                251,
                 142,
-                148
+                177,
+                167,
+                146,
+                144,
+                83,
+                163,
+                155,
+                161,
+                57,
+                93,
+                175,
+                240,
+                188,
+                80,
+                198,
+                110,
+                6,
+                64,
+                2
               ]
             }
           }
         },
         {
           "name": "duskProgram",
-          "address": "9gEvWS1Vqxmd9qr9w5KpEN2PGcn9DN1rE5NptD1ZcqXH"
+          "address": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj"
         },
         {
           "name": "protocolFee",
@@ -2089,38 +2211,38 @@ export type LeverageDelegate = {
             "program": {
               "kind": "const",
               "value": [
-                128,
-                234,
-                227,
-                164,
-                200,
-                104,
-                117,
-                6,
-                140,
-                85,
-                145,
-                118,
-                172,
-                245,
-                179,
-                164,
-                219,
-                182,
-                59,
-                3,
-                226,
-                63,
-                106,
-                237,
-                237,
-                52,
-                27,
-                32,
-                17,
-                146,
+                191,
+                215,
+                212,
+                33,
+                74,
+                68,
+                126,
+                168,
+                251,
+                64,
+                60,
+                251,
                 142,
-                148
+                177,
+                167,
+                146,
+                144,
+                83,
+                163,
+                155,
+                161,
+                57,
+                93,
+                175,
+                240,
+                188,
+                80,
+                198,
+                110,
+                6,
+                64,
+                2
               ]
             }
           }
@@ -2208,45 +2330,45 @@ export type LeverageDelegate = {
             "program": {
               "kind": "const",
               "value": [
-                128,
-                234,
-                227,
-                164,
-                200,
-                104,
-                117,
-                6,
-                140,
-                85,
-                145,
-                118,
-                172,
-                245,
-                179,
-                164,
-                219,
-                182,
-                59,
-                3,
-                226,
-                63,
-                106,
-                237,
-                237,
-                52,
-                27,
-                32,
-                17,
-                146,
+                191,
+                215,
+                212,
+                33,
+                74,
+                68,
+                126,
+                168,
+                251,
+                64,
+                60,
+                251,
                 142,
-                148
+                177,
+                167,
+                146,
+                144,
+                83,
+                163,
+                155,
+                161,
+                57,
+                93,
+                175,
+                240,
+                188,
+                80,
+                198,
+                110,
+                6,
+                64,
+                2
               ]
             }
           }
         },
         {
           "name": "duskProgram",
-          "address": "9gEvWS1Vqxmd9qr9w5KpEN2PGcn9DN1rE5NptD1ZcqXH"
+          "address": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj"
         },
         {
           "name": "tokenProgram",
@@ -2565,6 +2687,21 @@ export type LeverageDelegate = {
       "code": 6006,
       "name": "minimumPayoutNotMet",
       "msg": "Net close payout is below the owner's minimum"
+    },
+    {
+      "code": 6007,
+      "name": "hlpCohortRetired",
+      "msg": "The order's hLP cohort was retired; only cancellation remains"
+    },
+    {
+      "code": 6008,
+      "name": "minimumMarginNotMet",
+      "msg": "Opened margin is below the owner's minimum"
+    },
+    {
+      "code": 6009,
+      "name": "unclaimedYield",
+      "msg": "Harvest the order's earned yield before closing it"
     }
   ],
   "types": [
@@ -2738,6 +2875,19 @@ export type LeverageDelegate = {
                 "name": "concentratedCurveCache"
               }
             }
+          },
+          {
+            "name": "hlpFundingBasePricingOffsetNad",
+            "docs": [
+              "Pricing-only translations between the ordinary ownership books and",
+              "trading coordinates. Funding payments settle cash and liabilities;",
+              "these non-redeemable offsets keep them outside trading principal."
+            ],
+            "type": "i128"
+          },
+          {
+            "name": "hlpFundingQuotePricingOffsetNad",
+            "type": "i128"
           },
           {
             "name": "centerPriceNad",
@@ -3371,10 +3521,11 @@ export type LeverageDelegate = {
           {
             "name": "borrowedBucket",
             "docs": [
-              "Gross principal lent out through the public borrow path. Internal hLP",
-              "funding and isolated leverage do not consume this capacity. This is a",
-              "24-hour leaky/token bucket, not an exact trailing-window sum: it permits",
-              "a full burst after idle and then refills at the configured daily rate."
+              "Principal lent out through the public borrow path, net of principal",
+              "repaid through the public repay path. Internal hLP funding and isolated",
+              "leverage do not consume this capacity. This is a 24-hour leaky/token",
+              "bucket, not an exact trailing-window sum: it permits a full burst after",
+              "idle and then refills at the configured daily rate."
             ],
             "type": "u64"
           },
@@ -4308,9 +4459,27 @@ export type LeverageDelegate = {
             "type": "u8"
           },
           {
+            "name": "depositCredit",
+            "docs": [
+              "Measured vault credit of `deposit_amount`, which funds the margin and",
+              "the executor's gross bounty. The protocol fee deposit is not included."
+            ],
+            "type": "u64"
+          },
+          {
             "name": "marginAmount",
             "docs": [
-              "Gross vault debit forwarded to Dusk as margin."
+              "Gross vault debit forwarded to Dusk as margin at the creation epoch's",
+              "transfer fee. Execution forwards less when a later fee increase raises",
+              "the bounty's gross debit."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "minMarginAmount",
+            "docs": [
+              "Minimum margin Dusk must record for the opened position, after every",
+              "transfer fee."
             ],
             "type": "u64"
           },
@@ -4590,12 +4759,16 @@ export type LeverageDelegate = {
           {
             "name": "marginAmount",
             "docs": [
-              "Entry equity valued in debt-token atoms."
+              "Entry equity valued in debt-token atoms, for the collateral still held.",
+              "A partial close releases the sold share in proportion to collateral."
             ],
             "type": "u64"
           },
           {
             "name": "openNotional",
+            "docs": [
+              "Entry notional for the collateral still held, released like `margin_amount`."
+            ],
             "type": "u64"
           },
           {
@@ -5373,6 +5546,12 @@ export type LeverageDelegate = {
     },
     {
       "name": "orderProtocolFeePaid",
+      "docs": [
+        "Protocol fee charged on one order execution. `value` is the execution",
+        "value the fee is assessed on. `debit` is the gross amount spent, capped by",
+        "the order's fee budget; `credited` is what the treasury received after any",
+        "transfer fee, and `fee` equals `credited`."
+      ],
       "type": {
         "kind": "struct",
         "fields": [

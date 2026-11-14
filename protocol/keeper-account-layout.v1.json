@@ -1,9 +1,9 @@
 {
   "$schema": "./schemas/account-layout.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "devnet-2026-11-14-main-grid",
-  "programId": "9gEvWS1Vqxmd9qr9w5KpEN2PGcn9DN1rE5NptD1ZcqXH",
-  "idlSha256": "bd020b7be3803e761d8c4934b69c060b919fe21b8144f3526f5942aecc9731f4",
+  "protocolRevision": "mainnet-2026-11-14",
+  "programId": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj",
+  "idlSha256": "b78cbeef3301d2ba650e66065424356d410cbee94f43f2aea6912991ab79736a",
   "accounts": [
     {
       "name": "BorrowPosition",
@@ -63,8 +63,8 @@
     },
     {
       "name": "Market",
-      "expectedVersion": 16,
-      "sizeWithDiscriminator": 6890,
+      "expectedVersion": 17,
+      "sizeWithDiscriminator": 6922,
       "fields": [
         {
           "path": "version",
@@ -208,102 +208,102 @@
         },
         {
           "path": "base_hlp_vault.srlp_vault",
-          "offset": 5684,
+          "offset": 5716,
           "size": 32
         },
         {
           "path": "quote_hlp_vault.srlp_vault",
-          "offset": 6076,
+          "offset": 6108,
           "size": 32
         },
         {
           "path": "base_hlp_vault.hlp_supply",
-          "offset": 5764,
+          "offset": 5796,
           "size": 8
         },
         {
           "path": "base_hlp_vault.srlp_shares",
-          "offset": 5716,
+          "offset": 5748,
           "size": 8
         },
         {
           "path": "quote_hlp_vault.srlp_shares",
-          "offset": 6108,
+          "offset": 6140,
           "size": 8
         },
         {
           "path": "base_hlp_vault.debt_principal",
-          "offset": 5756,
+          "offset": 5788,
           "size": 8
         },
         {
           "path": "quote_hlp_vault.debt_principal",
-          "offset": 6148,
+          "offset": 6180,
           "size": 8
         },
         {
           "path": "base_hlp_vault.debt_shares",
-          "offset": 5740,
-          "size": 16
-        },
-        {
-          "path": "quote_hlp_vault.debt_shares",
-          "offset": 6132,
-          "size": 16
-        },
-        {
-          "path": "quote_hlp_vault.hlp_supply",
-          "offset": 6156,
-          "size": 8
-        },
-        {
-          "path": "base_hlp_vault.residual_exposure",
           "offset": 5772,
           "size": 16
         },
         {
-          "path": "quote_hlp_vault.residual_exposure",
+          "path": "quote_hlp_vault.debt_shares",
           "offset": 6164,
           "size": 16
         },
         {
+          "path": "quote_hlp_vault.hlp_supply",
+          "offset": 6188,
+          "size": 8
+        },
+        {
+          "path": "base_hlp_vault.residual_exposure",
+          "offset": 5804,
+          "size": 16
+        },
+        {
+          "path": "quote_hlp_vault.residual_exposure",
+          "offset": 6196,
+          "size": 16
+        },
+        {
           "path": "params_hash",
-          "offset": 6548,
+          "offset": 6580,
           "size": 32
         },
         {
           "path": "last_update_slot",
-          "offset": 6880,
+          "offset": 6912,
           "size": 8
         },
         {
           "path": "operator.authority",
-          "offset": 6612,
-          "size": 32
-        },
-        {
-          "path": "operator.manager",
           "offset": 6644,
           "size": 32
         },
         {
-          "path": "operator.epoch",
+          "path": "operator.manager",
           "offset": 6676,
+          "size": 32
+        },
+        {
+          "path": "operator.epoch",
+          "offset": 6708,
           "size": 8
         },
         {
           "path": "operator.pending",
-          "offset": 6700,
+          "offset": 6732,
           "size": 32
         },
         {
           "path": "operator.revenue_epoch",
-          "offset": 6684,
+          "offset": 6716,
           "size": 8
         },
         {
           "path": "operator.revenue_recipient",
-          "offset": 6764,
+          "offset": 6796,
           "size": 32
         }
       ]

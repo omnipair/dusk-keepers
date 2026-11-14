@@ -1,6 +1,10 @@
 # Devnet capture — 8 November 2026
 
-The current revision is `devnet-2026-11-08-hlp-deposit`, captured from the fresh
+This is a historical capture. The active mainnet preparation is documented in
+[`mainnet-release.md`](mainnet-release.md). Its original chain receipt is
+archived at `protocol/archive/devnet-2026-11-08-hlp-deposit/deployment.v1.json`.
+
+The historical revision is `devnet-2026-11-08-hlp-deposit`, captured from the fresh
 Dusk and leverage-delegate deployment, updated for the compatible Dusk upgrade at finalized slot 519909294. Source
 `84c2a6997c795fb062c9bafb77680f8271a6f86d` preserves the observed IDLs. Liquidation and hLP fixtures were regenerated from that exact source and execute the current captured binary. The SDK artifact is downloaded from npm as
 `@omnipair/dusk-sdk@2.18.2-next.20261108`; its SHA-256 is recorded

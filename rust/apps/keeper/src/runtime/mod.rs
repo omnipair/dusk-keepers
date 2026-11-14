@@ -3,6 +3,7 @@ pub mod accounts;
 pub mod devnet;
 pub mod execution;
 pub mod flash_journal;
+pub mod mainnet;
 pub mod rpc;
 pub mod signer;
 pub mod transaction;

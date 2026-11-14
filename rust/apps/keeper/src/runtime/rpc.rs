@@ -116,6 +116,9 @@ impl RpcClient {
         if method == "sendTransaction" && super::devnet::enabled() {
             super::devnet::verify(self, false).map_err(DiscoveryError::Malformed)?;
         }
+        if method == "sendTransaction" && super::mainnet::enabled() {
+            super::mainnet::verify(self, false).map_err(DiscoveryError::Malformed)?;
+        }
         let body = serde_json::json!({
             "jsonrpc": "2.0",
             "id": 1,

@@ -15,10 +15,14 @@ use std::{error::Error, fmt, fs, path::Path};
 
 use ed25519_dalek::{Signer as _, SigningKey};
 
+mod aws_kms;
+pub use aws_kms::AwsKmsSigner;
+
 #[derive(Debug)]
 pub enum SignerError {
     Unreadable(String),
     Malformed(String),
+    Remote(&'static str),
 }
 
 impl fmt::Display for SignerError {
@@ -26,6 +30,7 @@ impl fmt::Display for SignerError {
         match self {
             Self::Unreadable(detail) => write!(formatter, "signer key unreadable: {detail}"),
             Self::Malformed(detail) => write!(formatter, "signer key malformed: {detail}"),
+            Self::Remote(detail) => write!(formatter, "remote signer: {detail}"),
         }
     }
 }
@@ -36,7 +41,7 @@ pub trait TransactionSigner: Send + Sync {
     /// The signing public key, base58 encoded, as it appears in an account list.
     fn public_key(&self) -> [u8; 32];
 
-    fn sign(&self, message: &[u8]) -> [u8; 64];
+    fn sign(&self, message: &[u8]) -> Result<[u8; 64], SignerError>;
 
     fn public_key_base58(&self) -> String {
         bs58::encode(self.public_key()).into_string()
@@ -49,8 +54,8 @@ impl TransactionSigner for ShadowIdentity {
     fn public_key(&self) -> [u8; 32] {
         self.0
     }
-    fn sign(&self, _: &[u8]) -> [u8; 64] {
-        [0; 64]
+    fn sign(&self, _: &[u8]) -> Result<[u8; 64], SignerError> {
+        Ok([0; 64])
     }
 }
 
@@ -108,8 +113,8 @@ impl TransactionSigner for LocalKeypair {
         self.key.verifying_key().to_bytes()
     }
 
-    fn sign(&self, message: &[u8]) -> [u8; 64] {
-        self.key.sign(message).to_bytes()
+    fn sign(&self, message: &[u8]) -> Result<[u8; 64], SignerError> {
+        Ok(self.key.sign(message).to_bytes())
     }
 }
 
@@ -128,7 +133,7 @@ mod tests {
     fn loads_a_solana_keypair_file() {
         let keypair = LocalKeypair::from_json(&sample()).unwrap();
         assert_eq!(keypair.public_key().len(), 32);
-        assert_eq!(keypair.sign(b"payload").len(), 64);
+        assert_eq!(keypair.sign(b"payload").unwrap().len(), 64);
     }
 
     #[test]

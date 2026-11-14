@@ -21,6 +21,10 @@ COPY --chown=keeper:keeper protocol/keeper-instructions.v1.json /app/protocol/ke
 COPY --chown=keeper:keeper protocol/keeper-account-resolution.v1.json /app/protocol/keeper-account-resolution.v1.json
 COPY --chown=keeper:keeper protocol/keeper-account-layout.v1.json /app/protocol/keeper-account-layout.v1.json
 COPY --chown=keeper:keeper protocol/keeper-order-layout.v1.json /app/protocol/keeper-order-layout.v1.json
+# Full startup verification hashes these exact local artifacts and the deployed
+# mainnet account bank. Source-history bundles are not runtime dependencies.
+COPY --chown=keeper:keeper protocol/mainnet-deployment.v1.json /app/protocol/mainnet-deployment.v1.json
+COPY --chown=keeper:keeper artifacts/dusk.so artifacts/leverage_delegate.so artifacts/dusk.json artifacts/leverage_delegate.json artifacts/dusk-sdk.tgz /app/artifacts/
 USER keeper
 WORKDIR /app
 ENV DUSK_PROTOCOL_LOCK=/app/protocol.lock.json
