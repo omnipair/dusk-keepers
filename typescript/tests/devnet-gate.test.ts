@@ -10,8 +10,24 @@ import { createHash } from "node:crypto";
 import { PublicKey } from "@solana/web3.js";
 const execute = promisify(execFile);
 
+// Synthetic devnet bank for testing the explicit exception. This is not a
+// deployment capture: the active release artifacts remain pinned to mainnet.
+function devnetTestContext() {
+  const root = mkdtempSync(join(tmpdir(), "dusk-devnet-gate-"));
+  const deployment = JSON.parse(readFileSync("protocol/mainnet-deployment.v1.json", "utf8"));
+  deployment.cluster = "devnet";
+  deployment.genesisHash = "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG";
+  deployment.artifactOrigin = "synthetic-local-rpc-gate-test";
+  mkdirSync(join(root, "protocol"));
+  symlinkSync(resolve("artifacts"), join(root, "artifacts"), "dir");
+  copyFileSync("protocol.lock.json", join(root, "protocol.lock.json"));
+  writeFileSync(join(root, "protocol/devnet-deployment.v1.json"), JSON.stringify(deployment));
+  return { root, deployment };
+}
+
 for (const condition of ["normal live", "wrong network", "wrong deployment", "excess sends"] as const) {
   test(`native devnet gate rejects ${condition} before signing or submission`, async () => {
+    const { root } = devnetTestContext();
     const requests: string[] = [];
     const server = createServer(async (req, res) => {
       const chunks: Buffer[] = [];
@@ -26,6 +42,7 @@ for (const condition of ["normal live", "wrong network", "wrong deployment", "ex
     try {
       const env: NodeJS.ProcessEnv = {
         PATH: process.env.PATH, KEEPER_MODE: "live", KEEPER_PROFILE: "lending",
+        DUSK_PROTOCOL_LOCK: join(root, "protocol.lock.json"),
         KEEPER_MAX_SENDS_PER_PASS: condition === "excess sends" ? "2" : "1",
         SOLANA_RPC_HTTP_URL: `http://127.0.0.1:${(server.address() as any).port}`,
       };
@@ -36,13 +53,13 @@ for (const condition of ["normal live", "wrong network", "wrong deployment", "ex
       if (["normal live", "excess sends"].includes(condition)) assert.equal(requests.length, 0);
     } finally {
       await new Promise<void>(resolve => server.close(() => resolve()));
+      rmSync(root, { recursive: true, force: true });
     }
   });
 }
 
 test("verified devnet live startup accepts all markets without a market selector", async () => {
-  const root = mkdtempSync(join(tmpdir(), "dusk-all-markets-"));
-  const deployment = JSON.parse(readFileSync("protocol/devnet-deployment.v1.json", "utf8"));
+  const { root, deployment } = devnetTestContext();
   const lock = JSON.parse(readFileSync("protocol.lock.json", "utf8"));
   const accounts = new Map<string, object>();
   const loader = "BPFLoaderUpgradeab1e11111111111111111111111";
@@ -76,9 +93,6 @@ test("verified devnet live startup accepts all markets without a market selector
     res.end(JSON.stringify({ jsonrpc: "2.0", id: body.id, result }));
   });
   try {
-    mkdirSync(join(root, "protocol"));
-    symlinkSync(resolve("artifacts"), join(root, "artifacts"), "dir");
-    copyFileSync("protocol.lock.json", join(root, "protocol.lock.json"));
     writeFileSync(join(root, "protocol/devnet-deployment.v1.json"), JSON.stringify(deployment));
     await new Promise<void>(resolve => server.listen(0, "127.0.0.1", resolve));
     const { stdout } = await execute("target/debug/dusk-keeper", ["--check"], {

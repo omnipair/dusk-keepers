@@ -19,3 +19,6 @@ borsh.workspace = true
 postgres.workspace = true
 postgres-native-tls.workspace = true
 native-tls.workspace = true
+aws-config.workspace = true
+aws-sdk-kms.workspace = true
+tokio.workspace = true

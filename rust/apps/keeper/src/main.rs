@@ -9,7 +9,7 @@ mod workers;
 use crate::{
     liquidation::policy::LiquidationMode,
     runtime::rpc::RpcClient,
-    runtime::signer::{LocalKeypair, TransactionSigner},
+    runtime::signer::{AwsKmsSigner, LocalKeypair, TransactionSigner},
     workers::{
         leverage::orders,
         sentinel::{fee_notice, observe},
@@ -53,6 +53,8 @@ fn main() -> Result<(), Box<dyn Error>> {
             );
         } else {
             lock.assert_live_ready()?;
+            let endpoint = env::var("SOLANA_RPC_HTTP_URL")?;
+            runtime::mainnet::verify(&RpcClient::new(endpoint, Duration::from_secs(20)), true)?;
         }
     }
 
@@ -90,7 +92,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             Box::new(crate::runtime::signer::ShadowIdentity(key)) as Box<dyn TransactionSigner>
         })
     } else {
-        Some(Box::new(load_signer()?))
+        Some(load_signer()?)
     };
 
     let contract = match std::fs::read_to_string(&config.instruction_contract) {
@@ -303,15 +305,32 @@ fn main() -> Result<(), Box<dyn Error>> {
     )
 }
 
-/// The signer, from the environment or from a file.
-///
-/// The variable is how a deployed keeper receives a key, since there is no
-/// filesystem to mount one onto; the path is how a local run uses an existing
-/// Solana keypair without pasting it into a shell.
-fn load_signer() -> Result<LocalKeypair, crate::runtime::signer::SignerError> {
-    match env::var("KEEPER_SIGNER_KEY_PATH") {
-        Ok(path) => LocalKeypair::from_file(path),
-        Err(_) => LocalKeypair::from_environment("KEEPER_SIGNER_KEY"),
+/// Mainnet uses a non-exportable KMS key. Local keys are accepted only within
+/// the existing explicit devnet test exception.
+fn load_signer() -> Result<Box<dyn TransactionSigner>, crate::runtime::signer::SignerError> {
+    use crate::runtime::signer::SignerError;
+    let provider = env::var("SIGNER_PROVIDER").ok();
+    match provider.as_deref() {
+        Some("aws-kms") => {
+            if env::var_os("KEEPER_SIGNER_KEY_PATH").is_some()
+                || env::var_os("KEEPER_SIGNER_KEY").is_some()
+            {
+                return Err(SignerError::Remote(
+                    "remove local signing keys from the KMS service",
+                ));
+            }
+            Ok(Box::new(AwsKmsSigner::from_environment()?))
+        }
+        Some("local") | None if runtime::devnet::enabled() => {
+            let signer = match env::var("KEEPER_SIGNER_KEY_PATH") {
+                Ok(path) => LocalKeypair::from_file(path),
+                Err(_) => LocalKeypair::from_environment("KEEPER_SIGNER_KEY"),
+            }?;
+            Ok(Box::new(signer))
+        }
+        _ => Err(SignerError::Remote(
+            "live mainnet requires SIGNER_PROVIDER=aws-kms",
+        )),
     }
 }
 
@@ -349,6 +368,14 @@ fn run_execution_pass(
     if !dry_run {
         if runtime::devnet::enabled()
             && let Err(error) = runtime::devnet::verify(client, false)
+        {
+            if let Ok(mut current) = shared.lock() {
+                current.last_execution_error = Some(error);
+            }
+            return;
+        }
+        if !runtime::devnet::enabled()
+            && let Err(error) = runtime::mainnet::verify(client, false)
         {
             if let Ok(mut current) = shared.lock() {
                 current.last_execution_error = Some(error);

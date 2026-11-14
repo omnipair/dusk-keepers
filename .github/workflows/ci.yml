@@ -62,6 +62,18 @@ jobs:
       - uses: actions/checkout@v4
       - run: docker build --file deploy/railway/rust.Dockerfile --tag dusk-keeper-rs:test .
       - run: docker build --file deploy/railway/typescript.Dockerfile --tag dusk-keeper-ts:test .
+      - name: Verify the packaged mainnet artifacts offline
+        run: |
+          docker run --rm --network none --env KEEPER_MODE=shadow dusk-keeper-rs:test --check
+          docker run --rm --network none --entrypoint sh dusk-keeper-rs:test -c 'test -f /app/protocol/mainnet-deployment.v1.json && sha256sum /app/artifacts/dusk.so /app/artifacts/leverage_delegate.so /app/artifacts/dusk.json /app/artifacts/leverage_delegate.json /app/artifacts/dusk-sdk.tgz' > image.sha256
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          const lock=JSON.parse(fs.readFileSync('protocol.lock.json'));
+          const hashes=new Map(fs.readFileSync('image.sha256','utf8').trim().split('\n').map(line=>line.trim().split(/\s+/).reverse()));
+          for(const artifact of [...lock.programs.flatMap(p=>[p.binary,p.idl]),lock.sdk])
+            assert.equal(hashes.get('/app/'+artifact.path),artifact.sha256,'runtime image artifact mismatch');
+          JS
 
   live-release-gate:
     if: github.event_name == 'workflow_dispatch' && inputs.live_release

@@ -74,18 +74,24 @@ if (lock.status !== "draft") {
 
 // Offline consistency of the read-only chain capture. Live release still has
 // its separate frozen-lock gate; this record is not a build attestation.
-const deployment = await readJson("protocol/devnet-deployment.v1.json").catch(error => {
-  if (error.code === "ENOENT") return null;
-  throw error;
-});
-if (deployment) {
+let hasMainnetCapture = false;
+for (const [path, cluster, genesis, origin] of [
+  ["protocol/devnet-deployment.v1.json", "devnet", "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG", "upgradeable-loader-programdata"],
+  ["protocol/mainnet-deployment.v1.json", "mainnet-beta", "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d", "verified-production-release-and-upgradeable-loader-programdata"],
+]) {
+  const deployment = await readJson(path).catch(error => {
+    if (error.code === "ENOENT") return null;
+    throw error;
+  });
+  if (!deployment) continue;
+  if (cluster === "mainnet-beta") hasMainnetCapture = true;
   assert.equal(deployment.schemaVersion, 1);
-  assert.equal(deployment.cluster, "devnet");
-  assert.equal(deployment.genesisHash, "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG");
+  assert.equal(deployment.cluster, cluster);
+  assert.equal(deployment.genesisHash, genesis);
   assert.equal(deployment.protocolRevision, lock.revision);
   assert.equal(deployment.sourceCommit, lock.source.gitCommit);
   assert.equal(deployment.capturedAt, lock.generatedAt);
-  assert.equal(deployment.artifactOrigin, "upgradeable-loader-programdata");
+  assert.equal(deployment.artifactOrigin, origin);
   assert.equal(deployment.programs.length, lock.programs.length);
   assert.equal(new Set(deployment.programs.map(p => p.name)).size, lock.programs.length);
   for (const observed of deployment.programs) {
@@ -101,8 +107,18 @@ if (deployment) {
     for (const key of [observed.programData, observed.idlAccount])
       assert.match(key, /^[1-9A-HJ-NP-Za-km-z]{32,44}$/);
     assert.match(observed.idlAccountSha256, /^[0-9a-f]{64}$/);
+    if (cluster === "mainnet-beta") {
+      assert.match(observed.idlCanonicalSha256, /^[0-9a-f]{64}$/);
+      assert.match(observed.upgradeAuthority, /^[1-9A-HJ-NP-Za-km-z]{32,44}$/);
+    }
+  }
+  if (cluster === "mainnet-beta") {
+    assert.equal(deployment.replayFirstSlot, Math.max(...deployment.programs.map(p => p.lastUpgradeSlot)) + 1);
+    assert.match(deployment.builderImage, /^solanafoundation\/solana-verifiable-build@sha256:[0-9a-f]{64}$/);
   }
 }
+if (lock.revision.startsWith("mainnet-") && lock.status !== "draft")
+  assert.ok(hasMainnetCapture, "mainnet artifacts require their mainnet deployment capture");
 
 const bundle = await readJson("fixtures/conformance/v1/scheduler-cases.json");
 assert.equal(bundle.schemaVersion, 1);

@@ -473,7 +473,9 @@ for (const { file, profile, expected, settlement, maxRepay, minProfit, name, mod
         assert.ok(fullEmergencyBounds.length >= 2);
         for (const bounds of fullEmergencyBounds) {
           assert.ok(bounds.reward >= BigInt(minProfit), "minimum profit must be enforced by the transaction");
-          assert.equal(bounds.output, emergencySlippage === "0" ? 9513n : emergencySlippage === "10000" ? 0n : 9504n);
+          // Exact deployed-program fixture, including the injected one-atom
+          // optimistic preview and the keeper's integer slippage bound.
+          assert.equal(bounds.output, emergencySlippage === "0" ? 9514n : emergencySlippage === "10000" ? 0n : 9505n);
           if (emergencySlippage === "10000") assert.equal(bounds.reward, BigInt(minProfit));
         }
       }
