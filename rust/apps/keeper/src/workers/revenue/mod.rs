@@ -315,13 +315,14 @@ impl ArbitrageurJob<'_> {
         let (measuring, payment_account) =
             self.settle_instruction(market, futarchy, lane, source, sold_is_base, u64::MAX)?;
         let payment_key = bs58::encode(payment_account).into_string();
-        let before = self
-            .client
-            .account_data(&payment_key)
-            .ok()
-            .as_deref()
-            .and_then(token_amount)
-            .unwrap_or(0);
+        let payment_data = self.client.account_data(&payment_key)?;
+        let before = token_amount(&payment_data).ok_or_else(|| {
+            ExecutionError::Assembly("auction payment token account unavailable".into())
+        })?;
+        let payment_mint: [u8; 32] = payment_data
+            .get(..32)
+            .and_then(|bytes| bytes.try_into().ok())
+            .ok_or_else(|| ExecutionError::Assembly("auction payment mint unavailable".into()))?;
 
         let encoded = self.encode(measuring)?;
         let (failure, accounts) = self
@@ -365,6 +366,25 @@ impl ArbitrageurJob<'_> {
             });
         }
 
+        let ceiling =
+            payment_ceiling(paid, self.policy.slippage_bps).map_err(ExecutionError::Assembly)?;
+        let maximum = crate::runtime::risk::payment_cap(
+            payment_mint,
+            crate::liquidation::required_u64("KEEPER_AUCTION_MAX_PAYMENT")
+                .map_err(ExecutionError::Assembly)?,
+        )
+        .map_err(ExecutionError::Assembly)?;
+        if ceiling > maximum {
+            return Ok(AttemptReport {
+                debt_mint: label,
+                detail: Some("auction exceeds payment cap".into()),
+                position: market_key,
+                race: None,
+                reason: ReasonCode::BoundsNotMet,
+                signature: None,
+                status: OutcomeStatus::Skipped,
+            });
+        }
         if self.dry_run {
             return Ok(AttemptReport {
                 debt_mint: label,
@@ -379,31 +399,8 @@ impl ArbitrageurJob<'_> {
             });
         }
 
-        let ceiling =
-            (paid as u128).saturating_mul((10_000 + self.policy.slippage_bps) as u128) / 10_000;
-        if crate::runtime::devnet::enabled() {
-            let maximum = crate::liquidation::required_u64("KEEPER_AUCTION_MAX_PAYMENT")
-                .map_err(ExecutionError::Assembly)?;
-            if ceiling > u128::from(maximum) {
-                return Ok(AttemptReport {
-                    debt_mint: label,
-                    detail: Some("auction exceeds devnet payment cap".into()),
-                    position: market_key,
-                    race: None,
-                    reason: ReasonCode::BoundsNotMet,
-                    signature: None,
-                    status: OutcomeStatus::Skipped,
-                });
-            }
-        }
-        let (sending, _) = self.settle_instruction(
-            market,
-            futarchy,
-            lane,
-            source,
-            sold_is_base,
-            u64::try_from(ceiling).unwrap_or(u64::MAX),
-        )?;
+        let (sending, _) =
+            self.settle_instruction(market, futarchy, lane, source, sold_is_base, ceiling)?;
         let submitted = (|| -> Result<Option<String>, String> {
             let mut keys = sending
                 .accounts
@@ -470,6 +467,10 @@ impl ArbitrageurJob<'_> {
             let mut journal = Journal::connect(
                 &env::var("DATABASE_URL").map_err(|_| "DATABASE_URL is required before signing")?,
             )?;
+            journal.set_token_debits(vec![crate::runtime::risk::TokenDebit {
+                mint: address(payment_mint),
+                maximum: ceiling,
+            }]);
             journal.submit(
                 self.client,
                 self.signer,
@@ -554,6 +555,14 @@ impl ArbitrageurJob<'_> {
     }
 }
 
+fn payment_ceiling(paid: u64, slippage_bps: u32) -> Result<u64, String> {
+    if slippage_bps > 10_000 {
+        return Err("auction slippage must be between 0 and 10000 bps".into());
+    }
+    u64::try_from((u128::from(paid) * u128::from(10_000 + slippage_bps)).div_ceil(10_000))
+        .map_err(|_| "auction payment ceiling overflow".into())
+}
+
 /// How much revenue the arbitrageur will buy, and at what tolerance.
 ///
 /// Required rather than defaulted, like the other spending profiles: the
@@ -590,6 +599,16 @@ pub fn run(context: &super::WorkerContext<'_>) -> Result<Vec<AttemptReport>, Exe
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn payment_bounds_round_up_and_reject_overflow() {
+        assert_eq!(payment_ceiling(1, 50).unwrap(), 2);
+        assert_eq!(payment_ceiling(10_000, 50).unwrap(), 10_050);
+        assert_eq!(payment_ceiling(u64::MAX, 0).unwrap(), u64::MAX);
+        assert!(payment_ceiling(u64::MAX, 1).is_err());
+        assert!(payment_ceiling(1, 10_001).is_err());
+        assert!(payment_ceiling(1, u32::MAX).is_err());
+    }
 
     #[test]
     fn settlements_use_each_curves_mint_and_current_lane_recipients() {

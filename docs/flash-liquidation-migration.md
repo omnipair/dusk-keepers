@@ -53,14 +53,16 @@ searched route are explicitly reported as unfilled.
 
 ## Settlement modes and bounds
 
-- **`dusk` (default):** an atomic begin/settle pair with Dusk's internal settlement
+- **`dusk` (explicit internal settlement):** an atomic begin/settle pair with Dusk's internal settlement
   accounts. Simulated net debt-token profit must meet the operator's minimum;
   existing wallet collateral cannot be spent to hide a loss.
 - **`inventory` (opt-in):** the buyer supplies debt tokens and keeps seized
   collateral. The payment is grossed up using the *effective* transfer fee.
-  A single market, maximum gross wallet debit and minimum net collateral credit
-  must be configured. This is an explicit inventory purchase, not an automatically
-  profitable arbitrage or a Jupiter routing service.
+  Configure maximum gross wallet debit and minimum net collateral credit.
+  All supported markets are eligible; payment must fit available wallet funds.
+  This purchases at the program's quoted terms without a swap or profitability
+  requirement. See the [lending runbook](runbooks/lending.md) for inventory settings
+  and detailed quote, rejection, simulation and finalized-receipt logs.
 - **Emergency:** uses #45's internal EMA price/smoothed-depth settlement, normal
   fees, authoritative reward and loss-waterfall quote. Same-position locks and
   the emergency gate remain program-enforced.
@@ -71,8 +73,8 @@ searched route are explicitly reported as unfilled.
   close has separate funded-loss and bounty limits.
 
 The native and TypeScript builders also accept externally supplied route
-instructions between begin and settle. The service currently implements the two
-modes above; automatic Jupiter route discovery is not part of this migration.
+instructions between begin and settle. The current default ordinary route is
+Jupiter; see the [Jupiter runbook](runbooks/jupiter-routing.md) for that later addition.
 Routes must finish in the same transaction, use the computed settle index and
 satisfy the net payment. Owner payouts are owner-owned ATAs. Existing repayment
 vault donations are preserved; the session closes but its token vault can remain.
@@ -85,7 +87,7 @@ force a fresh quote. Submitted bytes are never rewritten to follow a new quote.
 ## Configuration
 
 All token amounts below are integer raw atoms, not decimals or dollar values.
-Use market-scoped workers when assets have different units/economics.
+Bounds apply in each market's token units; choose them deliberately when asset decimals differ.
 
 | Variable | Meaning |
 | --- | --- |
@@ -95,7 +97,7 @@ Use market-scoped workers when assets have different units/economics.
 | `KEEPER_FLASH_MAX_REPAY` | Positive maximum net debt repayment for ordinary fill probes. |
 | `KEEPER_LIQUIDATION_MIN_PROFIT` | Minimum simulated debt-token gain for internal/emergency execution. Account for SOL fees operationally; there is no built-in SOL exchange-rate feed. |
 | `KEEPER_EMERGENCY_SLIPPAGE_BPS` | Emergency reward/output quote tolerance, `0..10000` basis points (up to 100%); default `0`. The configured profit floor remains enforced on chain. |
-| `KEEPER_FLASH_MARKET` | Required single-market public key for inventory purchases. |
+| `KEEPER_FLASH_MARKET` | Obsolete and ignored; inventory purchases cover all supported markets. |
 | `KEEPER_FLASH_MAX_PAYMENT_DEBIT` | Required maximum gross wallet debit in inventory mode. |
 | `KEEPER_FLASH_MIN_COLLATERAL_CREDIT` | Required minimum net seized collateral in inventory mode. |
 | `KEEPER_LIQUIDATION_LOOKUP_TABLE` | Optional active, warmed-up LUT for transaction account compression. Needed when the plan exceeds the 1,232-byte packet limit. |

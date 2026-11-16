@@ -92,6 +92,25 @@ pub(crate) fn state_hash(s: &Snapshot, epoch: u64) -> Result<String> {
 
 // Financial bounds are expected during size probing. ABI, account, invariant,
 // and arithmetic failures must remain visible instead of looking unprofitable.
+pub(super) fn rejection_detail(value: &serde_json::Value) -> String {
+    let errors = value["value"]["logs"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|line| line.as_str())
+        .filter(|line| {
+            line.contains("Error Code:")
+                || line.contains("Error:")
+                || line.contains("Program log: Left:")
+                || line.contains("Program log: Right:")
+                || line.contains("failed:")
+                || line.contains("exceeded CUs")
+        })
+        .collect::<Vec<_>>()
+        .join(" | ");
+    format!("{} | {errors}", value["value"]["err"])
+}
+
 pub(super) fn expected_bound_rejection(value: &serde_json::Value) -> bool {
     let Some(logs) = value["value"]["logs"].as_array() else {
         return false;

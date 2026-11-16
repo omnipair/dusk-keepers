@@ -15,3 +15,17 @@ reuse or overwrite the completed attempt.
 Never delete or rewrite signing generations during ordinary operation. A
 `submitted_unknown` generation must reach `confirmed` or `finalized_not_landed`
 before inserting the next generation.
+
+The Rust runtime uses `keeper_flash_work` and `keeper_flash_events` (migration
+`0002`) for every signing profile. Apply `0004` for durable per-wallet fee/token
+reservations and `0005` for pending-position conflicts across protocol revisions.
+Stop workers during this upgrade: old releases use revision-scoped advisory locks.
+The new runtime reconciles old pending generations before replacing them and
+rejects missing budget/conflict migrations on mainnet. Do not delete pending rows
+to clear a spending cap or bypass an upgrade failure.
+
+The daily wallet budget uses the reservation's UTC date, conservatively charging
+the signed maximum payment. Pending work from earlier dates remains charged.
+Failed transactions release token reservations but retain their fee reservation;
+abandoned and definitively expired-absent work releases both. Ordinary restarts,
+policy changes, and protocol revisions cannot reset these reservations.

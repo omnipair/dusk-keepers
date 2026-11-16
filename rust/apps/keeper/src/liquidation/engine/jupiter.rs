@@ -19,6 +19,14 @@ pub(super) fn check_deadline(state: Option<&RouteState>) -> Result<()> {
     Ok(())
 }
 
+fn check_network(genesis: &str, local_shadow_fork: bool) -> Result<()> {
+    if genesis == crate::runtime::mainnet::GENESIS || local_shadow_fork {
+        Ok(())
+    } else {
+        Err("Jupiter requires mainnet or an opted-in local shadow fork; configure KEEPER_FLASH_SETTLEMENT=dusk for devnet".into())
+    }
+}
+
 pub(super) fn slippage_rejection(value: &serde_json::Value, ixs: &[Instruction]) -> bool {
     let error = &value["value"]["err"]["InstructionError"];
     error[0]
@@ -41,6 +49,8 @@ impl LiquidationJob<'_> {
         s: &Snapshot,
         health: &LiquidationHealth,
         pass_budget: &mut usize,
+        position_budget: &mut usize,
+        full_only: bool,
     ) -> Result<Option<LiquidationPlan>> {
         let config = Config::from_env()?;
         let minimum_profit = required_u64("KEEPER_LIQUIDATION_MIN_PROFIT")?;
@@ -55,22 +65,24 @@ impl LiquidationJob<'_> {
         let local_fork = self.dry_run
             && self.client.is_loopback()
             && std::env::var("KEEPER_JUPITER_LOCAL_FORK").as_deref() == Ok("1");
-        if genesis != "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp" && !local_fork {
-            return Err("Jupiter requires mainnet or an opted-in local shadow fork; configure KEEPER_FLASH_SETTLEMENT=dusk for devnet".into());
-        }
+        check_network(&genesis, local_fork)?;
         let client = Client::new(&config);
-        let mut builds = config.attempts;
         // HTTP-backed search has its own small budget, not the 256-probe local
         // adaptive search. Reserve a candidate for independently permitted full
         // liquidation; no failure of a partial preview authorizes a full close.
         let full_allowed = cap >= health.debt;
         let partial_count = config.attempts.saturating_sub(usize::from(full_allowed));
+        let mut builds = if full_only {
+            *position_budget
+        } else {
+            position_budget.saturating_sub(usize::from(full_allowed))
+        };
         let mut candidates: Vec<_> = super::super::search::slices(cap.min(health.debt))
             .into_iter()
-            .take(partial_count)
+            .take(if full_only { 0 } else { partial_count })
             .map(|a| (a, false))
             .collect();
-        if full_allowed {
+        if full_only && full_allowed {
             candidates.push((cap, true));
         }
         for (repay, full) in candidates {
@@ -96,6 +108,7 @@ impl LiquidationJob<'_> {
                     break;
                 }
                 builds -= 1;
+                *position_budget -= 1;
                 let Some(route) = client.build(&config, &request, max_accounts, pass_budget)?
                 else {
                     break;
@@ -181,6 +194,11 @@ impl LiquidationJob<'_> {
                         minimum_profit,
                         route_state: Some(state),
                     }));
+                }
+                // Refresh before full liquidation after an expected partial
+                // execution rejection; never recycle the failed route or quote.
+                if !full {
+                    return Ok(None);
                 }
                 break;
             }
@@ -296,6 +314,18 @@ mod tests {
     use super::*;
     use crate::liquidation::plan::Account;
     #[test]
+    fn routing_accepts_the_complete_mainnet_identity_and_rejects_other_networks() {
+        assert!(check_network("5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d", false).is_ok());
+        for genesis in [
+            "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+            "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG",
+            "local",
+        ] {
+            assert!(check_network(genesis, false).is_err());
+        }
+        assert!(check_network("local", true).is_ok());
+    }
+    #[test]
     fn ordinary_composition_keeps_swap_and_fee_aware_payment_inside_each_flash_pair() {
         let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../..");
         let layout = AccountLayoutManifest::from_json(
@@ -367,18 +397,27 @@ mod tests {
                     0,
                     "external settlement must not use internal profit field"
                 );
+                let settle = &ixs.last().unwrap().accounts;
+                let spec = contract
+                    .instructions
+                    .iter()
+                    .find(|s| s.key == "dusk:settle_flash_liquidation")
+                    .unwrap();
+                let optional = spec
+                    .accounts
+                    .iter()
+                    .position(|a| a.name == "collateral_reserve_vault")
+                    .unwrap();
                 assert_eq!(
-                    ixs.last()
-                        .unwrap()
-                        .accounts
-                        .iter()
-                        .filter(|a| a.pubkey
-                            == c.market
-                                .oriented(c.debt_asset == 0)
-                                .collateral_reserve_vault)
-                        .count(),
-                    0
+                    settle[optional].pubkey, c.program,
+                    "external settlement must leave the optional AMM reserve absent"
                 );
+                assert!(!settle[optional].is_writable && !settle[optional].is_signer);
+                // A reserve may still be required in the remaining-account
+                // group for public interest accounting; that does not select AMM settlement.
+                let mut remaining = c.market.hlp_income_remaining_accounts();
+                remaining.extend(c.market.oracle_remaining_accounts());
+                assert_eq!(settle[spec.accounts.len()..], remaining);
             }
         }
         assert!(coverage.iter().any(|(_, side, _)| *side == 0));

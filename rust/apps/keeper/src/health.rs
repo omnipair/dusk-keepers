@@ -6,6 +6,7 @@ use std::{
     io::{Read, Write},
     net::{SocketAddr, TcpListener, TcpStream},
     sync::{Arc, Mutex},
+    time::{Duration, Instant},
 };
 /// What the last discovery pass saw, shared with the health endpoint.
 #[derive(Clone, Debug, Default)]
@@ -17,6 +18,8 @@ pub(crate) struct Snapshot {
     pub passes: u64,
     /// Readiness waits for discovery, fee monitoring, and execution checks.
     pub first_pass_complete: bool,
+    pub last_completed_at: Option<Instant>,
+    pub max_scan_age: Duration,
     /// Execution counters. Sent is deliberately separate from evaluated: on a
     /// healthy market the first climbs and the second does not, and an
     /// operator needs to see that the keeper is working rather than idle.
@@ -51,7 +54,10 @@ pub(crate) fn serve(
             .lock()
             .map(|guard| guard.clone())
             .unwrap_or_default();
-        respond(stream?, profile, revision, &current)?;
+        // A disconnected or slow health client must not terminate the keeper.
+        if let Ok(stream) = stream {
+            let _ = respond(stream, profile, revision, &current);
+        }
     }
     Ok(())
 }
@@ -69,6 +75,8 @@ fn respond(
     revision: &str,
     snapshot: &Snapshot,
 ) -> std::io::Result<()> {
+    stream.set_read_timeout(Some(Duration::from_secs(2)))?;
+    stream.set_write_timeout(Some(Duration::from_secs(2)))?;
     let mut buffer = [0_u8; 1024];
     let read = stream.read(&mut buffer)?;
     let request = String::from_utf8_lossy(&buffer[..read]);
@@ -84,6 +92,11 @@ fn respond(
         snapshot.sent,
         optional_json(snapshot.last_signature.as_deref()),
         optional_json(snapshot.last_execution_error.as_deref()),
+    );
+    let scan_age = snapshot.last_completed_at.map(|at| at.elapsed());
+    let observed = format!(
+        "{observed},\"lastCompletedScanAgeMs\":{}",
+        scan_age.map_or_else(|| "null".into(), |age| age.as_millis().to_string())
     );
     let observed = format!(
         "{observed},\"lastSkipDetail\":{}",
@@ -117,6 +130,11 @@ fn respond(
                 .or(snapshot.fee_notice_error.as_deref())
                 .or(snapshot.last_execution_error.as_deref())
                 .or(snapshot.execution_configuration_error.as_deref())
+                .or_else(|| {
+                    scan_age
+                        .filter(|age| *age > snapshot.max_scan_age)
+                        .map(|_| "last completed scan is stale")
+                })
                 .or_else(|| {
                     (profile != "sentinel" && !snapshot.execution_configured)
                         .then_some("execution is not configured")

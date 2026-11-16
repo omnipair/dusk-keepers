@@ -298,6 +298,7 @@ pub fn run(context: &super::WorkerContext<'_>) -> Result<Vec<AttemptReport>, Exe
                 &std::env::var("DATABASE_URL")
                     .map_err(|_| "DATABASE_URL is required before signing")?,
             )?;
+            journal.set_token_debits(vec![]);
             journal.submit(
                 context.client,
                 context.signer,

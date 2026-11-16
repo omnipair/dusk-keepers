@@ -191,7 +191,12 @@ function plan(
 }
 
 function entrySetup(
-  options: { limit?: bigint; expiry?: number; multiplier?: number } = {},
+  options: {
+    limit?: bigint;
+    expiry?: number;
+    multiplier?: number;
+    bounty?: number;
+  } = {},
 ) {
   const f = JSON.parse(
     readFileSync("fixtures/litesvm/07-flash-LeveragePosition.json", "utf8"),
@@ -239,7 +244,7 @@ function entrySetup(
     deposit_credit: bn(margin + 10),
     margin_amount: bn(margin),
     min_margin_amount: bn(margin),
-    executor_bounty: bn(10),
+    executor_bounty: bn(options.bounty ?? 10),
     multiplier_bps: bn(options.multiplier ?? 20000),
     limit_price_nad: bn(options.limit ?? 0xffffffffffffffffn),
     min_collateral_out: bn(1),
@@ -283,6 +288,24 @@ test("native entry executor opens position, pays bounty and refunds escrow", () 
       c.svm.getAccount(new PublicKey(c.prepared.value.reward_account))!.data,
     ).readBigUInt64LE(64) - c.rewardBefore,
     10n,
+  );
+});
+
+test("native zero-bounty entry opens the position and refunds escrow without a reward", () => {
+  const c = entrySetup({ bounty: 0 });
+  assert.equal(result(c.svm, c.prepared.tx), null);
+  assert.equal(c.svm.getAccount(c.order)?.lamports ?? 0n, 0n);
+  const position = decode(
+    dusk,
+    "LeveragePosition",
+    c.svm.getAccount(c.position)!.data,
+  );
+  assert.equal(position.margin_amount.toString(), "1000");
+  assert.equal(
+    Buffer.from(
+      c.svm.getAccount(new PublicKey(c.prepared.value.reward_account))!.data,
+    ).readBigUInt64LE(64),
+    c.rewardBefore,
   );
 });
 
@@ -538,9 +561,54 @@ test("native hLP unmet stop preserves escrow", () => {
   assert.deepEqual(Buffer.from(c.svm.getAccount(c.order)!.data), before);
 });
 
-for (const kind of ["LeverageEntryOrder", "HlpOrder"])
-  test(`native leverage worker discovers and simulates ${kind} through RPC`, async () => {
-    const c = kind === "HlpOrder" ? hlpSetup(0) : entrySetup();
+const bountyCases: {
+  name: string;
+  kind: string;
+  bounty?: number;
+  minimum?: string;
+  rejected?: boolean;
+  rewardDebit?: boolean;
+}[] = [
+  { name: "paid entry", kind: "LeverageEntryOrder", minimum: "1" },
+  { name: "paid hLP order", kind: "HlpOrder", minimum: "1" },
+  {
+    name: "zero bounty with explicit zero minimum",
+    kind: "LeverageEntryOrder",
+    bounty: 0,
+    minimum: "0",
+  },
+  {
+    name: "zero bounty with default minimum",
+    kind: "LeverageEntryOrder",
+    bounty: 0,
+  },
+  { name: "paid entry with default minimum", kind: "LeverageEntryOrder" },
+  {
+    name: "zero bounty below a positive minimum",
+    kind: "LeverageEntryOrder",
+    bounty: 0,
+    minimum: "1",
+    rejected: true,
+  },
+  {
+    name: "reward-token debit despite zero minimum",
+    kind: "LeverageEntryOrder",
+    bounty: 0,
+    minimum: "0",
+    rewardDebit: true,
+    rejected: true,
+  },
+];
+for (const {
+  name,
+  kind,
+  bounty,
+  minimum,
+  rejected,
+  rewardDebit,
+} of bountyCases)
+  test(`native leverage worker evaluates ${name} through RPC`, async () => {
+    const c = kind === "HlpOrder" ? hlpSetup(0) : entrySetup({ bounty });
     const svm = c.svm;
     const keys = [...Object.keys(c.f.bank), c.order.toBase58()];
     let simulations = 0;
@@ -622,13 +690,31 @@ for (const kind of ["LeverageEntryOrder", "HlpOrder"])
             value: {
               err: failed ? String(outcome.err()) : null,
               logs: outcome.meta().logs(),
-              accounts: (p[1].accounts?.addresses ?? []).map((k: string) =>
-                rpcAccount(
+              accounts: (p[1].accounts?.addresses ?? []).map((k: string) => {
+                const account = rpcAccount(
                   posts.has(k)
                     ? posts.get(k)
                     : svm.getAccount(new PublicKey(k)),
-                ),
-              ),
+                );
+                if (
+                  rewardDebit &&
+                  k ===
+                    new PublicKey(c.prepared.value.reward_account).toBase58() &&
+                  account
+                ) {
+                  const before = Buffer.from(
+                    svm.getAccount(new PublicKey(k))!.data,
+                  ).readBigUInt64LE(64);
+                  assert.ok(
+                    before > 0n,
+                    "fixture has an existing reward-token balance",
+                  );
+                  const raw = Buffer.from(account.data[0], "base64");
+                  raw.writeBigUInt64LE(before - 1n, 64);
+                  account.data = [raw.toString("base64"), "base64"];
+                }
+                return account;
+              }),
             },
           };
         } else throw new Error(`unexpected RPC ${call.method}`);
@@ -661,7 +747,7 @@ for (const kind of ["LeverageEntryOrder", "HlpOrder"])
               PORT: "0",
               SOLANA_RPC_HTTP_URL: `http://127.0.0.1:${(server.address() as any).port}`,
               KEEPER_LIQUIDATION_LOOKUP_TABLE: key("order lookup").toBase58(),
-              KEEPER_ORDER_MIN_BOUNTY_CREDIT: "1",
+              KEEPER_ORDER_MIN_BOUNTY_CREDIT: minimum,
             },
           });
           let output = "";
@@ -674,9 +760,11 @@ for (const kind of ["LeverageEntryOrder", "HlpOrder"])
       assert.equal(run.code, 0, run.output);
       assert.match(
         run.output,
-        new RegExp(
-          `shadow ${kind}: native trigger, settlement and bounty checks passed`,
-        ),
+        rejected
+          ? /order bounty is below the configured net-credit bound/
+          : new RegExp(
+              `shadow ${kind}: native trigger, settlement and bounty checks passed`,
+            ),
       );
       assert.equal(simulations, 1);
       assert.ok(

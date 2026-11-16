@@ -73,6 +73,51 @@ impl Snapshot {
         keys: &[[u8; 32]],
         min_slot: u64,
     ) -> std::result::Result<Self, DiscoveryError> {
+        const MAX_ATTEMPTS: usize = 3;
+        let mut min_slot = min_slot;
+        for attempt in 1..=MAX_ATTEMPTS {
+            let snapshot = Self::fetch_once(client, keys, min_slot)?;
+            // Retry only this atomic batch, including every account, rather
+            // than repeating discovery. Never combine accounts across banks.
+            let Some(clock) = snapshot.accounts.get(CLOCK) else {
+                return Ok(snapshot);
+            };
+            let clock = clock
+                .as_ref()
+                .filter(|account| !account.executable)
+                .ok_or_else(|| DiscoveryError::Malformed("missing data account Clock".into()))?;
+            let clock_slot = clock
+                .data
+                .get(..8)
+                .map(|bytes| u64::from_le_bytes(bytes.try_into().unwrap()))
+                .ok_or_else(|| DiscoveryError::Malformed("invalid Clock account".into()))?;
+            // Validate owner and layout first: malformed accounts are not a
+            // transient slot mismatch and must fail without retrying.
+            decode_clock_epoch(&clock.owner, &clock.data, clock_slot)
+                .map_err(DiscoveryError::Malformed)?;
+            if clock_slot == snapshot.slot {
+                return Ok(snapshot);
+            }
+            if attempt == MAX_ATTEMPTS {
+                return Err(DiscoveryError::Malformed(format!(
+                    "clock and RPC bank do not match: clock_slot={clock_slot} rpc_slot={} attempts={attempt}",
+                    snapshot.slot
+                )));
+            }
+            eprintln!(
+                "keeper snapshot_retry reason=clock_bank_mismatch clock_slot={clock_slot} rpc_slot={} attempt={attempt}/{MAX_ATTEMPTS}",
+                snapshot.slot
+            );
+            min_slot = snapshot.slot;
+            std::thread::sleep(std::time::Duration::from_millis(150));
+        }
+        unreachable!("snapshot attempts always return on the final iteration")
+    }
+    fn fetch_once(
+        client: &RpcClient,
+        keys: &[[u8; 32]],
+        min_slot: u64,
+    ) -> std::result::Result<Self, DiscoveryError> {
         if keys.len() > 100 {
             return Err(DiscoveryError::Malformed(
                 "snapshot exceeds RPC batch".into(),
@@ -116,6 +161,11 @@ impl Snapshot {
         Ok(Self { slot, accounts })
     }
 }
+
+#[cfg(test)]
+#[path = "snapshot_tests.rs"]
+mod snapshot_tests;
+
 #[derive(Clone, Debug)]
 pub struct Context {
     pub program: [u8; 32],
@@ -333,8 +383,11 @@ impl Context {
                 is_writable: a.writable && !absent,
             });
         }
-        if internal {
-            accounts.extend(self.market.hlp_remaining_accounts());
+        // External/inventory settlement also distributes interest to hLP.
+        // Keep the optional collateral reserve absent so this remains a wallet
+        // payment, not an internal AMM swap.
+        if internal || matches!(args, Args::SettleFlashLiquidation) {
+            accounts.extend(self.market.hlp_income_remaining_accounts());
         }
         accounts.extend(self.market.oracle_remaining_accounts());
         Ok(Instruction {

@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "profiles": {
+    "lending": {
+      "fees": {
+        "perTransaction": "200000",
+        "perDay": "20000000"
+      },
+      "minimumSolReserve": "50000000",
+      "tokens": {
+        "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": {
+          "perTransaction": "25000000",
+          "perDay": "100000000"
+        },
+        "So11111111111111111111111111111111111111112": {
+          "perTransaction": "100000000",
+          "perDay": "400000000"
+        }
+      }
+    },
+    "leverage": {
+      "fees": {
+        "perTransaction": "200000",
+        "perDay": "20000000"
+      },
+      "minimumSolReserve": "50000000",
+      "tokens": {
+        "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": {
+          "perTransaction": "25000000",
+          "perDay": "100000000"
+        },
+        "So11111111111111111111111111111111111111112": {
+          "perTransaction": "100000000",
+          "perDay": "400000000"
+        }
+      }
+    },
+    "hlp-recovery": {
+      "fees": {
+        "perTransaction": "200000",
+        "perDay": "20000000"
+      },
+      "minimumSolReserve": "50000000",
+      "tokens": {
+        "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": {
+          "perTransaction": "25000000",
+          "perDay": "100000000"
+        },
+        "So11111111111111111111111111111111111111112": {
+          "perTransaction": "100000000",
+          "perDay": "400000000"
+        }
+      }
+    },
+    "auction-arbitrage": {
+      "fees": {
+        "perTransaction": "200000",
+        "perDay": "20000000"
+      },
+      "minimumSolReserve": "50000000",
+      "tokens": {
+        "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": {
+          "perTransaction": "25000000",
+          "perDay": "100000000"
+        },
+        "So11111111111111111111111111111111111111112": {
+          "perTransaction": "100000000",
+          "perDay": "400000000"
+        }
+      }
+    },
+    "lifecycle": {
+      "fees": {
+        "perTransaction": "200000",
+        "perDay": "20000000"
+      },
+      "minimumSolReserve": "50000000",
+      "tokens": {}
+    }
+  }
+}
