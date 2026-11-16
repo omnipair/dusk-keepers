@@ -57,7 +57,7 @@ Do not put owner credentials or Solana private keys in the deployment.
 
 Before live promotion, complete the frozen release checks, verified database
 TLS, durable schema migrations and recovery, signing policies, wallet funding
-and explicit market/asset spending limits. The owner creates the first market
+and explicit execution settings. The owner creates the first market
 through the UI; coordinate the subsequent controlled canary with that action.
 Neither this release nor the KMS provisioning script creates or funds a market.
 
@@ -65,13 +65,12 @@ Neither this release nor the KMS provisioning script creates or funds a market.
 
 Start from [`deploy/mainnet/env.example`](../deploy/mainnet/env.example) and a
 reviewed copy of [`risk-policy.example.json`](../deploy/mainnet/risk-policy.example.json).
-The examples stay in shadow and are not automatically loaded. These are initial
-canary limits **per signing wallet**, not a protocol-wide budget:
+The examples stay in shadow and are not automatically loaded. Inventory payments
+have **no per-token transaction or daily spending cap**, and no payment-mint
+allowlist. These fee limits remain **per signing wallet**:
 
 | Asset or expense | Per transaction | Per UTC day |
 | --- | ---: | ---: |
-| USDC inventory payment | 25 USDC | 100 USDC |
-| WSOL inventory payment | 0.1 SOL | 0.4 SOL |
 | SOL transaction fees, including priority | 0.0002 SOL | 0.02 SOL |
 
 Each wallet retains at least 0.05 SOL after simulated rent/account creation and
@@ -80,20 +79,21 @@ subtracts the quoted fee from the simulated payer balance even if the RPC alread
 deducted it. Fund inventory separately from this SOL reserve. Zero-bounty orders
 remain supported; their fees still consume the daily fee allowance.
 
-Amounts in the policy are decimal strings of raw atoms. Inventory purchases work
-across all supported markets, capped by the debt/payment mint. An unlisted mint
-has no inventory spending allowance; it does not prevent fee-only actions such as
-an eligible emergency liquidation. Legacy global payment limits are additionally
-clamped by the mint's policy. Mainnet startup validates profile-specific bounds,
-even when no eligible work exists yet.
+Amounts in the policy are decimal strings of raw atoms. The policy contains only
+`fees` and `minimumSolReserve`; remove the old `tokens` entries when updating an
+earlier copy. Inventory purchases work across all supported markets using available
+wallet tokens and the protocol's permitted repayment. The lending/leverage example
+sets the legacy global repayment/payment bounds to `u64::MAX`, so they add no
+practical inventory cap. Explicit hLP and auction execution bounds remain separate.
+Mainnet startup validates profile-specific settings even when no eligible work exists.
 
 Before signing, the journal quotes the exact transaction fee, simulates the final
-message, and atomically reserves fees and instruction-enforced maximum token
-debits under a wallet lock. Successful payments retain their maximum reservation
-for the reservation's UTC day. Failed transactions retain fee charges but release
-token exposure. Unsubmitted/definitively absent transactions release both;
-unresolved generations remain charged across midnight, restarts and releases.
-Changing the policy cannot erase recorded spending. A budget failure stops signing.
+message, and atomically reserves fees under a wallet lock. Instruction-enforced
+maximum token debits are still recorded for auditing, without a daily budget check.
+Successful and failed transactions consume the fee budget for the reservation's
+UTC day. Unsubmitted/definitively absent transactions release their fee reservations;
+unresolved fees remain charged across midnight, restarts and releases. Changing
+the policy cannot erase recorded spending. A fee-budget failure stops signing.
 
 Inventory liquidation deliberately has no swap or profit filter. The auction
 worker likewise purchases protocol revenue with a bounded payment; it does not

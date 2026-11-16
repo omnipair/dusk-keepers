@@ -93,38 +93,84 @@ fn policy() -> WalletPolicy {
             per_day: 20_000_000,
         },
         minimum_sol_reserve: 50_000_000,
-        tokens: BTreeMap::from([(
-            crate::liquidation::plan::address([7; 32]),
-            Limits {
-                per_transaction: 25_000_000,
-                per_day: 100_000_000,
-            },
-        )]),
     }
 }
 
 #[test]
-fn rejects_unknown_assets_excess_fees_and_combined_payments() {
+fn mainnet_example_keeps_fee_and_reserve_limits_without_token_caps() {
+    let configured: Policy = serde_json::from_str(include_str!(
+        "../../../../../../deploy/mainnet/risk-policy.example.json"
+    ))
+    .unwrap();
+    assert_eq!(configured.profiles.len(), 5);
+    for profile in configured.profiles.values() {
+        profile.validate().unwrap();
+        assert_eq!(profile.fees.per_transaction, 200_000);
+        assert_eq!(profile.fees.per_day, 20_000_000);
+        assert_eq!(profile.minimum_sol_reserve, 50_000_000);
+        let claims = profile
+            .claims(
+                5_000,
+                &[TokenDebit {
+                    mint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v".into(),
+                    maximum: 1_000_000_000,
+                }],
+            )
+            .unwrap();
+        assert!(
+            claims
+                .iter()
+                .any(|c| c.maximum == 1_000_000_000 && c.daily_limit.is_none())
+        );
+    }
+}
+
+#[test]
+fn inventory_has_no_transaction_cap_or_mint_allowlist_but_fees_stay_capped() {
     let p = policy();
     assert!(p.validate().is_ok());
-    assert!(p.claims(5_000, &[]).is_ok());
-    assert!(p.claims(200_001, &[]).is_err());
-    assert!(
-        p.claims(
-            5_000,
-            &[TokenDebit {
-                mint: crate::liquidation::plan::address([8; 32]),
-                maximum: 1
-            }]
-        )
-        .is_err()
-    );
+    let debits = [
+        TokenDebit {
+            mint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v".into(),
+            maximum: 1_000_000_000,
+        },
+        TokenDebit {
+            mint: "So11111111111111111111111111111111111111112".into(),
+            maximum: 10_000_000_000,
+        },
+        TokenDebit {
+            mint: crate::liquidation::plan::address([8; 32]),
+            maximum: u64::MAX,
+        },
+    ];
+    let claims = p.claims(5_000, &debits).unwrap();
+    assert_eq!(claims.len(), 4);
+    for claim in claims {
+        if claim.asset == FEES {
+            assert_eq!(claim.daily_limit, Some(20_000_000));
+        } else {
+            assert_eq!(claim.daily_limit, None);
+            assert_eq!(
+                claim.maximum,
+                debits
+                    .iter()
+                    .find(|d| d.mint == claim.asset)
+                    .unwrap()
+                    .maximum
+            );
+        }
+    }
+    assert!(p.claims(200_001, &debits).is_err());
     let debit = TokenDebit {
         mint: crate::liquidation::plan::address([7; 32]),
         maximum: 15_000_000,
     };
-    assert!(p.claims(5_000, std::slice::from_ref(&debit)).is_ok());
-    assert!(p.claims(5_000, &[debit.clone(), debit]).is_err());
+    let combined = p.claims(5_000, &[debit.clone(), debit]).unwrap();
+    assert!(
+        combined
+            .iter()
+            .any(|c| c.maximum == 30_000_000 && c.daily_limit.is_none())
+    );
 }
 
 #[test]
@@ -174,7 +220,7 @@ fn inventory_budget_is_bound_to_the_signed_transfer_amount() {
 
 #[test]
 #[ignore = "requires isolated KEEPER_TEST_DATABASE_URL"]
-fn durable_wallet_budgets_serialize_concurrent_workers_and_survive_restart() {
+fn fee_budgets_survive_concurrency_and_restart_while_inventory_is_uncapped() {
     use postgres::{Client, NoTls};
     let url = env::var("KEEPER_TEST_DATABASE_URL").expect("isolated test database");
     let schema = format!("risk_test_{}", std::process::id());
@@ -201,30 +247,32 @@ fn durable_wallet_budgets_serialize_concurrent_workers_and_survive_restart() {
             "../../../../../../deploy/postgres/migrations/0004_wallet_budgets.sql"
         ))
         .unwrap();
-    for (work, position) in [
-        ("one", "one"),
-        ("two", "two"),
-        ("three", "three"),
-        ("four", "four"),
-    ] {
-        admin.execute("INSERT INTO keeper_flash_work(work_key,revision,market,position,debt_asset,action,observed_slot,state_hash,message,blockhash,last_valid_height) VALUES($1,'release','market',$2,0,'inventory',1,'state','bytes','hash',100)", &[&work, &position]).unwrap();
+    for work in ["one", "two", "three", "four", "five"] {
+        admin.execute("INSERT INTO keeper_flash_work(work_key,revision,market,position,debt_asset,action,observed_slot,state_hash,message,blockhash,last_valid_height) VALUES($1,'release','market',$1,0,'inventory',1,'state','bytes','hash',100)", &[&work]).unwrap();
     }
-    let claim = || {
-        vec![Claim {
-            asset: "token".into(),
-            maximum: 60,
-            daily_limit: 100,
-        }]
+    let claims = |fee| {
+        vec![
+            Claim {
+                asset: FEES.into(),
+                maximum: fee,
+                daily_limit: Some(100),
+            },
+            Claim {
+                asset: "token".into(),
+                maximum: u64::MAX,
+                daily_limit: None,
+            },
+        ]
     };
     let mut first = connect();
     let mut tx = first.transaction().unwrap();
-    reserve(&mut tx, "one", "wallet", &claim()).unwrap();
+    reserve(&mut tx, "one", "wallet", &claims(60)).unwrap();
     let mut second = connect();
     let (started, waiting) = std::sync::mpsc::channel();
     let competing = std::thread::spawn(move || {
         let mut tx = second.transaction().unwrap();
         started.send(()).unwrap();
-        reserve(&mut tx, "two", "wallet", &claim())
+        reserve(&mut tx, "two", "wallet", &claims(60))
     });
     waiting.recv().unwrap();
     tx.commit().unwrap();
@@ -233,65 +281,43 @@ fn durable_wallet_budgets_serialize_concurrent_workers_and_survive_restart() {
             .join()
             .unwrap()
             .unwrap_err()
-            .contains("daily wallet budget exhausted")
+            .contains("SOL_FEES daily wallet budget exhausted")
     );
     drop(first);
     let mut restarted = connect();
-    // A pending transaction from yesterday still reserves today's available exposure.
-    restarted.batch_execute("UPDATE keeper_wallet_budget SET created_at=now()-interval '2 days'; UPDATE keeper_flash_work SET outcome='submitted_unknown' WHERE work_key='one'").unwrap();
+    restarted.batch_execute("UPDATE keeper_wallet_budget SET created_at=now()-interval '2 days'; UPDATE keeper_flash_work SET outcome='submitted_unknown' WHERE work_key='one'; UPDATE keeper_flash_work SET revision='new-release' WHERE work_key='two'").unwrap();
     let mut tx = restarted.transaction().unwrap();
-    assert!(reserve(&mut tx, "two", "wallet", &claim()).is_err());
+    assert!(reserve(&mut tx, "two", "wallet", &claims(60)).is_err());
     tx.rollback().unwrap();
     restarted.batch_execute("UPDATE keeper_flash_work SET outcome='abandoned_before_submission' WHERE work_key='one'").unwrap();
     let mut tx = restarted.transaction().unwrap();
-    reserve(&mut tx, "two", "wallet", &claim()).unwrap();
+    reserve(&mut tx, "two", "wallet", &claims(60)).unwrap();
     tx.commit().unwrap();
     let mut tx = restarted.transaction().unwrap();
-    reserve(&mut tx, "three", "different-wallet", &claim()).unwrap();
+    reserve(&mut tx, "three", "wallet", &claims(40)).unwrap();
     tx.commit().unwrap();
-    // Failed transactions release token exposure, but their paid fee remains
-    // charged. A new revision cannot evade either reservation.
-    restarted.execute("INSERT INTO keeper_wallet_budget(work_key,wallet,asset,maximum) VALUES('two','wallet','SOL_FEES',60)", &[]).unwrap();
-    restarted.batch_execute("UPDATE keeper_flash_work SET outcome='failed' WHERE work_key='two'; UPDATE keeper_flash_work SET revision='new-release' WHERE work_key='one'").unwrap();
+    // Even a combined token total greater than u64::MAX has no daily cap.
+    let total: String = restarted.query_one("SELECT SUM(maximum)::text FROM keeper_wallet_budget WHERE wallet='wallet' AND asset='token' AND work_key IN ('two','three')", &[]).unwrap().get(0);
+    assert_eq!(total, (u128::from(u64::MAX) * 2).to_string());
     let mut tx = restarted.transaction().unwrap();
-    reserve(
-        &mut tx,
-        "one",
-        "wallet",
-        &[Claim {
-            asset: FEES.into(),
-            maximum: 60,
-            daily_limit: 100,
-        }],
-    )
-    .unwrap_err();
+    assert!(reserve(&mut tx, "four", "wallet", &claims(1)).is_err());
     tx.rollback().unwrap();
+    // A failed transaction still incurs its fee; an absent one releases it.
+    restarted
+        .batch_execute("UPDATE keeper_flash_work SET outcome='failed' WHERE work_key='two'")
+        .unwrap();
     let mut tx = restarted.transaction().unwrap();
-    reserve(
-        &mut tx,
-        "one",
-        "wallet",
-        &[Claim {
-            asset: "other-token".into(),
-            maximum: 60,
-            daily_limit: 100,
-        }],
-    )
-    .unwrap();
+    assert!(reserve(&mut tx, "four", "wallet", &claims(1)).is_err());
     tx.rollback().unwrap();
+    restarted
+        .batch_execute("UPDATE keeper_flash_work SET outcome='expired_absent' WHERE work_key='two'")
+        .unwrap();
     let mut tx = restarted.transaction().unwrap();
-    reserve(
-        &mut tx,
-        "four",
-        "wallet",
-        &[Claim {
-            asset: "token".into(),
-            maximum: 100,
-            daily_limit: 100,
-        }],
-    )
-    .unwrap();
-    tx.rollback().unwrap();
+    reserve(&mut tx, "four", "wallet", &claims(1)).unwrap();
+    tx.commit().unwrap();
+    let mut tx = restarted.transaction().unwrap();
+    reserve(&mut tx, "five", "different-wallet", &claims(100)).unwrap();
+    tx.commit().unwrap();
     admin
         .batch_execute(&format!("DROP SCHEMA {schema} CASCADE"))
         .unwrap();

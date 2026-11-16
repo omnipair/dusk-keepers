@@ -1,4 +1,4 @@
-//! Explicit wallet spending policy. Reservations are durable before signing.
+//! SOL fee/reserve policy and durable records of inventory payments before signing.
 use super::{
     rpc::RpcClient,
     transaction::{base64, serialize_transaction},
@@ -62,7 +62,6 @@ pub struct WalletPolicy {
     pub fees: Limits,
     #[serde(deserialize_with = "amount")]
     pub minimum_sol_reserve: u64,
-    pub tokens: BTreeMap<String, Limits>,
 }
 
 #[derive(Deserialize)]
@@ -106,15 +105,10 @@ impl WalletPolicy {
         if self.minimum_sol_reserve == 0 {
             return Err("SOL reserve must be positive".into());
         }
-        for limits in std::iter::once(&self.fees).chain(self.tokens.values()) {
-            if limits.per_transaction == 0 || limits.per_day < limits.per_transaction {
-                return Err(
-                    "risk limits must be positive and daily limits must cover a transaction".into(),
-                );
-            }
-        }
-        for mint in self.tokens.keys() {
-            crate::liquidation::plan::key(mint).map_err(|_| "invalid risk policy mint")?;
+        if self.fees.per_transaction == 0 || self.fees.per_day < self.fees.per_transaction {
+            return Err(
+                "risk limits must be positive and daily limits must cover a transaction".into(),
+            );
         }
         Ok(())
     }
@@ -131,46 +125,30 @@ impl WalletPolicy {
         amounts
             .into_iter()
             .map(|(asset, maximum)| {
-                let limits = if asset == FEES {
-                    &self.fees
-                } else {
-                    self.tokens
-                        .get(&asset)
-                        .ok_or_else(|| format!("no spending policy for mint {asset}"))?
-                };
-                if maximum > limits.per_transaction {
+                if asset == FEES && maximum > self.fees.per_transaction {
                     return Err(format!(
                         "{asset} maximum debit {maximum} exceeds transaction cap {}",
-                        limits.per_transaction
+                        self.fees.per_transaction
                     ));
                 }
+                // Inventory has no wallet-wide transaction/day cap or mint
+                // allowlist. Record the instruction-bound amount for auditing.
+                let daily_limit = (asset == FEES).then_some(self.fees.per_day);
                 Ok(Claim {
                     asset,
                     maximum,
-                    daily_limit: limits.per_day,
+                    daily_limit,
                 })
             })
             .collect()
     }
 }
 
-/// Apply a configured asset cap during route selection as well as submission.
-pub fn payment_cap(mint: [u8; 32], configured: u64) -> Result<u64> {
-    if !super::mainnet::enabled() && env::var_os("KEEPER_RISK_POLICY").is_none() {
-        return Ok(configured);
-    }
-    let policy = WalletPolicy::load()?;
-    Ok(policy
-        .tokens
-        .get(&crate::liquidation::plan::address(mint))
-        .map_or(0, |limits| configured.min(limits.per_transaction)))
-}
-
 #[derive(Debug)]
 pub struct Claim {
     asset: String,
     maximum: u64,
-    daily_limit: u64,
+    daily_limit: Option<u64>,
 }
 
 pub fn assess(
@@ -242,10 +220,9 @@ fn assess_with_policy(
     Ok(claims)
 }
 
-/// Serialize budget reservations across every process using this wallet. Pending
-/// transactions remain charged across midnight; neither restart nor a revision
-/// change resets a wallet's allowance. Successful costs conservatively retain
-/// their instruction maximum for the day, rather than trusting advisory quotes.
+/// Serialize fee reservations across every process using this wallet. Pending
+/// fees remain charged across midnight; neither restart nor a revision change
+/// resets the allowance. Token amounts are recorded without spending caps.
 pub fn reserve(
     tx: &mut postgres::Transaction<'_>,
     work: &str,
@@ -258,13 +235,15 @@ pub fn reserve(
     )
     .map_err(|_| "wallet budget lock unavailable")?;
     for claim in claims {
-        let used: String = tx.query_one(
+        if let Some(daily_limit) = claim.daily_limit {
+            let used: String = tx.query_one(
             "SELECT COALESCE(SUM(b.maximum),0)::text FROM keeper_wallet_budget b JOIN keeper_flash_work w USING(work_key) WHERE b.wallet=$1 AND b.asset=$2 AND w.outcome NOT IN ('abandoned_before_submission','expired_absent') AND (b.asset='SOL_FEES' OR w.outcome <> 'failed') AND (b.created_at >= date_trunc('day',now() AT TIME ZONE 'UTC') AT TIME ZONE 'UTC' OR w.outcome IN ('reserved','submitted_unknown'))",
             &[&wallet, &claim.asset]
         ).map_err(|_| "wallet budget table unavailable; apply database migrations")?.get(0);
-        let used: u128 = used.parse().map_err(|_| "invalid stored wallet budget")?;
-        if used + u128::from(claim.maximum) > u128::from(claim.daily_limit) {
-            return Err(format!("{} daily wallet budget exhausted", claim.asset));
+            let used: u128 = used.parse().map_err(|_| "invalid stored wallet budget")?;
+            if used + u128::from(claim.maximum) > u128::from(daily_limit) {
+                return Err(format!("{} daily wallet budget exhausted", claim.asset));
+            }
         }
         tx.execute("INSERT INTO keeper_wallet_budget(work_key,wallet,asset,maximum) VALUES($1,$2,$3,$4::text::numeric)", &[&work,&wallet,&claim.asset,&claim.maximum.to_string()]).map_err(|_| "wallet budget reservation failed")?;
     }

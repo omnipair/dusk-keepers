@@ -368,12 +368,8 @@ impl ArbitrageurJob<'_> {
 
         let ceiling =
             payment_ceiling(paid, self.policy.slippage_bps).map_err(ExecutionError::Assembly)?;
-        let maximum = crate::runtime::risk::payment_cap(
-            payment_mint,
-            crate::liquidation::required_u64("KEEPER_AUCTION_MAX_PAYMENT")
-                .map_err(ExecutionError::Assembly)?,
-        )
-        .map_err(ExecutionError::Assembly)?;
+        let maximum = crate::liquidation::required_u64("KEEPER_AUCTION_MAX_PAYMENT")
+            .map_err(ExecutionError::Assembly)?;
         if ceiling > maximum {
             return Ok(AttemptReport {
                 debt_mint: label,

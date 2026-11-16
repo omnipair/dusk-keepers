@@ -48,7 +48,7 @@ test("mainnet rejects missing policies and spending settings before reaching sig
   }), /KEEPER_AUCTION_MAX_SOLD must be configured/);
   const policy = join(directory, "bad-policy.json");
   writeFileSync(policy, JSON.stringify({ schemaVersion: 1, profiles: { lifecycle: {
-    fees: { perTransaction: "200000", perDay: "1" }, minimumSolReserve: "50000000", tokens: {},
+    fees: { perTransaction: "200000", perDay: "1" }, minimumSolReserve: "50000000",
   } } }));
   await assert.rejects(execute("target/debug/dusk-keeper", ["--check-execution"], {
     env: { ...env, KEEPER_PROFILE: "lifecycle", KEEPER_RISK_POLICY: policy },

@@ -534,10 +534,7 @@ impl LiquidationJob<'_> {
                 &s.account(c.named["buyer_refund_account"])?.data,
             )
             .ok_or("inventory debt token balance unavailable")?;
-            let payment_cap = crate::runtime::risk::payment_cap(
-                c.named["debt_mint"],
-                required_u64("KEEPER_FLASH_MAX_PAYMENT_DEBIT")?,
-            )?;
+            let payment_cap = required_u64("KEEPER_FLASH_MAX_PAYMENT_DEBIT")?;
             let minimum_collateral = required_u64("KEEPER_FLASH_MIN_COLLATERAL_CREDIT")?;
             position_log::detail(
                 c.position,
@@ -763,10 +760,7 @@ impl LiquidationJob<'_> {
                 &s.account(c.named["buyer_refund_account"])?.data,
             )
             .ok_or("inventory debt token balance unavailable")?;
-            let cap = crate::runtime::risk::payment_cap(
-                c.named["debt_mint"],
-                required_u64("KEEPER_FLASH_MAX_PAYMENT_DEBIT")?,
-            )?;
+            let cap = required_u64("KEEPER_FLASH_MAX_PAYMENT_DEBIT")?;
             let min_collateral = required_u64("KEEPER_FLASH_MIN_COLLATERAL_CREDIT")?;
             position_log::inventory_quote(c, s, q, gross, available);
             let reason = if gross > available {
@@ -928,10 +922,7 @@ impl LiquidationJob<'_> {
         });
         let inventory = is_flash && self.inventory_mode()?;
         if inventory {
-            let cap = crate::runtime::risk::payment_cap(
-                c.named["debt_mint"],
-                required_u64("KEEPER_FLASH_MAX_PAYMENT_DEBIT")?,
-            )?;
+            let cap = required_u64("KEEPER_FLASH_MAX_PAYMENT_DEBIT")?;
             let min_credit = required_u64("KEEPER_FLASH_MIN_COLLATERAL_CREDIT")?;
             position_log::detail(
                 c.position,

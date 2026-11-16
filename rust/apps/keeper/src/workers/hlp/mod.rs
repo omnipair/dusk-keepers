@@ -213,10 +213,7 @@ impl HlpJob<'_> {
                 .map(Some);
         }
         let max_socialized_loss = required_u64("KEEPER_HLP_MAX_SOCIALIZED_LOSS")?;
-        let max_payment_debit = crate::runtime::risk::payment_cap(
-            context.named["borrowed_mint"],
-            required_u64("KEEPER_HLP_MAX_PAYMENT_DEBIT")?,
-        )?;
+        let max_payment_debit = required_u64("KEEPER_HLP_MAX_PAYMENT_DEBIT")?;
         let min_collateral_credit = required_u64("KEEPER_HLP_MIN_COLLATERAL_CREDIT")?;
         let recovered = try_hlp_recovery(
             || {
@@ -419,10 +416,7 @@ impl HlpJob<'_> {
                     &fresh,
                     &current,
                     &instructions,
-                    crate::runtime::risk::payment_cap(
-                        fresh.named["borrowed_mint"],
-                        required_u64("KEEPER_HLP_MAX_PAYMENT_DEBIT")?,
-                    )?,
+                    required_u64("KEEPER_HLP_MAX_PAYMENT_DEBIT")?,
                     required_u64("KEEPER_HLP_MIN_COLLATERAL_CREDIT")?,
                 )? {
                     return Err("hLP flash no longer meets bounds".into());

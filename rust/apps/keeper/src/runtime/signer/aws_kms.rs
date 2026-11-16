@@ -287,6 +287,9 @@ mod tests {
                             Err(error) => panic!("mock KMS accept: {error}"),
                         }
                     };
+                    // macOS can inherit the listener's nonblocking mode. The
+                    // request reader below needs a blocking, timed stream.
+                    stream.set_nonblocking(false).unwrap();
                     stream
                         .set_read_timeout(Some(Duration::from_secs(5)))
                         .unwrap();
