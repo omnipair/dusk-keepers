@@ -27,6 +27,8 @@ jobs:
         with:
           node-version: 24
       - run: node scripts/validate-repo.mjs
+      - name: Human-readable local terminal output
+        run: python3 -m unittest discover -s scripts -p 'test_keeper_console.py' -v
       - run: npm ci
       - run: cargo build --locked
       - run: npm run typecheck

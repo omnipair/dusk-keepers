@@ -55,8 +55,19 @@ an explicit `KEEPER_EMERGENCY_SLIPPAGE_BPS` from 0 through 10000 overrides it.
 
 Ctrl+C stops the workers, then the database if this session started it. The
 journal and wallets remain on disk. Restart with the same directory to preserve
-pending-transaction reconciliation and fee history. Logs are timestamped and
-colored in a terminal; plain logs are saved under `logs/`.
+pending-transaction reconciliation and fee history. The terminal shows colored,
+plain-language summaries: position health, debt, collateral, action progress,
+failure reasons and finalized payments/rewards/swaps. Unchanged healthy positions
+are summarized at most once a minute; state changes and health changes of roughly
+0.01 are shown immediately. Internal retries and individual search probes stay in
+the diagnostic file. Simulation amounts are explicitly hypothetical; submitted
+transactions remain pending until a finalized receipt appears.
+
+The original native output is retained in `logs/<profile>.log`, with local
+readiness snapshots in `logs/<profile>-health.log`. No JSON or raw field dumps are
+printed to the terminal. Restart the launcher after updating these Python files;
+no Rust rebuild is needed for presentation changes. The formatter makes no RPC
+requests and does not change execution or accounting decisions.
 
 To also run borrowing liquidation, lifecycle and monitoring, supply distinct
 keys in `wallets/lending.key` and `wallets/lifecycle.key`, then run:

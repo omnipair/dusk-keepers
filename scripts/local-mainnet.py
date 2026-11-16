@@ -17,6 +17,11 @@ import socket
 import subprocess
 import sys
 import threading
+import time
+import urllib.error
+import urllib.request
+
+from keeper_console import HumanLogs, LABELS, reason
 
 REPO = Path(__file__).resolve().parent.parent
 ROOT = Path(os.environ.get('KEEPER_MAINNET_HOME', str(Path.home() / '.local/share/dusk-keepers/mainnet'))).resolve()
@@ -29,7 +34,6 @@ DB = 'dusk_keepers_mainnet'
 SOCKET = ROOT / 'pgsocket'
 PGDATA = ROOT / 'postgres'
 ANSI = re.compile(r'\x1b\[[0-9;]*m')
-COLORS = dict(zip(PROFILES, ['36', '35', '34', '34', '33', '32']))
 OPTIONS = {
     'DISCOVERY_INTERVAL_MS', 'KEEPER_MAX_SCAN_AGE_MS', 'KEEPER_MAX_SENDS_PER_PASS',
     'KEEPER_MINIMUM_LAMPORTS', 'KEEPER_EMERGENCY_SLIPPAGE_BPS', 'KEEPER_ORDER_MIN_BOUNTY_CREDIT',
@@ -174,33 +178,88 @@ def identities(environments):
     for profile, env in environments.items():
         if profile == 'sentinel':
             continue
-        address = subprocess.check_output([str(BINARY), '--signer-public-key'], env=env, cwd=REPO, text=True).strip()
+        result = subprocess.run([str(BINARY), '--signer-public-key'], env=env, cwd=REPO,
+                                text=True, capture_output=True)
+        if result.returncode:
+            with (ROOT / 'logs' / (profile + '.log')).open('a') as log:
+                log.write(result.stdout + result.stderr)
+            raise RuntimeError(LABELS[profile] + ' wallet: ' + reason(result.stderr))
+        address = result.stdout.strip()
         if address in seen:
             raise RuntimeError(profile + ' and ' + seen[address] + ' must use distinct wallets')
         seen[address] = profile
-        print(profile + ' wallet: ' + address, flush=True)
+        print(LABELS[profile] + ' wallet: ' + address, flush=True)
+
+
+def show(profile, messages, colored):
+    stamp = datetime.datetime.now().strftime('%H:%M:%S')
+    for message, color in messages:
+        for line in message.splitlines():
+            text = stamp + ' [' + LABELS[profile] + '] ' + line
+            print('\x1b[' + color + 'm' + text + '\x1b[0m' if colored else text, flush=True)
+
+
+def preflight(profile, env):
+    print('Checking ' + LABELS[profile].lower() + ' settings, deployment and transaction journal…', flush=True)
+    result = subprocess.run([str(BINARY), '--check-execution'], cwd=REPO, env=env,
+                            capture_output=True, text=True)
+    formatter = HumanLogs()
+    with (ROOT / 'logs' / (profile + '.log')).open('a') as log:
+        for line in (result.stdout + result.stderr).splitlines():
+            log.write(datetime.datetime.now().strftime('%H:%M:%S') + ' [' + profile + '] ' + ANSI.sub('', line) + '\n')
+            # The normal startup line refers to the check process, not a live worker.
+            if not line.startswith('keeper profile='):
+                show(profile, formatter.feed(line), env['KEEPER_LOG_COLOR'] == 'always')
+    if result.returncode:
+        raise RuntimeError(LABELS[profile] + ' startup checks failed; see ' + str(ROOT / 'logs' / (profile + '.log')))
 
 
 def terminal(environments):
     children, readers = [], []
     stopping, output_lock = threading.Event(), threading.Lock()
+    formatters = {profile: HumanLogs() for profile in environments}
 
     def forward(profile, child):
-        with (ROOT / 'logs' / (profile + '.log')).open('a', buffering=1) as log:
+        with child.stdout, (ROOT / 'logs' / (profile + '.log')).open('a', buffering=1) as log:
             for line in child.stdout:
                 stamp = datetime.datetime.now().strftime('%H:%M:%S')
                 plain = stamp + ' [' + profile + '] ' + ANSI.sub('', line)
                 log.write(plain)
                 with output_lock:
-                    if environments[profile]['KEEPER_LOG_COLOR'] == 'always':
-                        print(stamp + ' \x1b[' + COLORS[profile] + 'm[' + profile + ']\x1b[0m ' + line, end='', flush=True)
-                    else:
-                        print(plain, end='', flush=True)
+                    try:
+                        messages = formatters[profile].feed(line)
+                    except (ValueError, TypeError, KeyError, ArithmeticError):
+                        messages = formatters[profile].once('format-error', 'A diagnostic could not be summarized. Its full text is saved in the log.', '33')
+                    show(profile, messages, environments[profile]['KEEPER_LOG_COLOR'] == 'always')
+
+    def health_updates():
+        for profile in environments:
+            if stopping.is_set():
+                break
+            try:
+                try:
+                    response = urllib.request.urlopen('http://127.0.0.1:' + str(PORTS[profile]) + '/readyz', timeout=1)
+                except urllib.error.HTTPError as error:
+                    response = error  # A degraded worker still supplies a useful reason.
+                with response:
+                    snapshot = json.load(response)
+                if not isinstance(snapshot, dict):
+                    raise ValueError('Invalid worker status response')
+                with (ROOT / 'logs' / (profile + '-health.log')).open('a') as log:
+                    log.write(datetime.datetime.now().isoformat() + ' ' + json.dumps(snapshot) + '\n')
+                with output_lock:
+                    show(profile, formatters[profile].health(snapshot), environments[profile]['KEEPER_LOG_COLOR'] == 'always')
+            except (OSError, ValueError):
+                with output_lock:
+                    show(profile, formatters[profile].once('health-unavailable', 'Waiting for the worker’s status connection.', '33'),
+                         environments[profile]['KEEPER_LOG_COLOR'] == 'always')
 
     previous = {sig: signal.signal(sig, lambda *_: stopping.set()) for sig in (signal.SIGINT, signal.SIGTERM)}
     try:
         print('LIVE MAINNET: ' + ', '.join(environments) + '. Ctrl+C stops this session.', flush=True)
         print('Inventory liquidation pays debt and keeps collateral across all supported markets. Token payments are uncapped.', flush=True)
+        print('Health at or below 1 means a position may be liquidated. Confirmed receipts show actual payments and rewards.', flush=True)
+        print('Detailed diagnostics are saved in ' + str(ROOT / 'logs') + '.', flush=True)
         for profile, env in environments.items():
             if stopping.is_set():
                 break
@@ -210,10 +269,14 @@ def terminal(environments):
             reader = threading.Thread(target=forward, args=(profile, child), daemon=True)
             readers.append(reader)
             reader.start()
+        last_health_check = 0.0
         while not stopping.wait(1):
             for profile, child in children:
                 if child.poll() is not None:
                     raise RuntimeError(profile + ' exited; stopping this session. See ' + str(ROOT / 'logs' / (profile + '.log')))
+            if time.monotonic() - last_health_check >= 5:
+                health_updates()
+                last_health_check = time.monotonic()
     finally:
         for _, child in reversed(children):
             if child.poll() is None:
@@ -261,8 +324,8 @@ def main():
         try:
             start_database()
             # This preflight cannot sign or submit; all profiles must pass before any worker starts.
-            for env in environments.values():
-                subprocess.run([str(BINARY), '--check-execution'], cwd=REPO, env=env, check=True)
+            for profile, env in environments.items():
+                preflight(profile, env)
             if args.action == 'terminal':
                 terminal(environments)
         finally:
@@ -276,5 +339,8 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         sys.exit(130)
     except (RuntimeError, OSError, ValueError, KeyError, subprocess.CalledProcessError) as error:
-        print('Error: ' + str(error), file=sys.stderr)
+        if isinstance(error, subprocess.CalledProcessError):
+            print('A local dependency failed to start. See ' + str(ROOT / 'logs/postgres-setup.log') + '.', file=sys.stderr)
+        else:
+            print('Error: ' + str(error), file=sys.stderr)
         sys.exit(1)
