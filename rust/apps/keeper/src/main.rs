@@ -32,6 +32,10 @@ use std::{
 };
 
 fn main() -> Result<(), Box<dyn Error>> {
+    if env::args().any(|a| a == "--signer-public-key") {
+        println!("{}", load_signer()?.public_key_base58());
+        return Ok(());
+    }
     if env::args().any(|a| a == "--check-mainnet-deployment") {
         let endpoint = env::var("SOLANA_RPC_HTTP_URL")?;
         runtime::mainnet::verify_capture(&RpcClient::new(endpoint, Duration::from_secs(20)))?;
@@ -334,8 +338,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     )
 }
 
-/// Mainnet uses a non-exportable KMS key. Local keys are accepted only within
-/// the existing explicit devnet test exception.
+/// Hosted services can use KMS; the owner-authorized local mainnet launcher uses
+/// an explicitly selected key file. Neither selection bypasses live validation.
 fn load_signer() -> Result<Box<dyn TransactionSigner>, crate::runtime::signer::SignerError> {
     use crate::runtime::signer::SignerError;
     let provider = env::var("SIGNER_PROVIDER").ok();
@@ -350,7 +354,26 @@ fn load_signer() -> Result<Box<dyn TransactionSigner>, crate::runtime::signer::S
             }
             Ok(Box::new(AwsKmsSigner::from_environment()?))
         }
-        Some("local") | None if runtime::devnet::enabled() => {
+        Some("local") => {
+            let signer = if runtime::devnet::enabled() {
+                match env::var("KEEPER_SIGNER_KEY_PATH") {
+                    Ok(path) => LocalKeypair::from_file(path),
+                    Err(_) => LocalKeypair::from_environment("KEEPER_SIGNER_KEY"),
+                }?
+            } else {
+                let path = env::var("KEEPER_SIGNER_KEY_PATH").map_err(|_| {
+                    SignerError::Remote("local mainnet signing requires KEEPER_SIGNER_KEY_PATH")
+                })?;
+                if env::var_os("KEEPER_SIGNER_KEY").is_some() {
+                    return Err(SignerError::Remote(
+                        "use only the key file for local mainnet signing",
+                    ));
+                }
+                LocalKeypair::from_file(path)?
+            };
+            Ok(Box::new(signer))
+        }
+        None if runtime::devnet::enabled() => {
             let signer = match env::var("KEEPER_SIGNER_KEY_PATH") {
                 Ok(path) => LocalKeypair::from_file(path),
                 Err(_) => LocalKeypair::from_environment("KEEPER_SIGNER_KEY"),
@@ -358,7 +381,7 @@ fn load_signer() -> Result<Box<dyn TransactionSigner>, crate::runtime::signer::S
             Ok(Box::new(signer))
         }
         _ => Err(SignerError::Remote(
-            "live mainnet requires SIGNER_PROVIDER=aws-kms",
+            "live mainnet requires SIGNER_PROVIDER=aws-kms or explicit SIGNER_PROVIDER=local",
         )),
     }
 }

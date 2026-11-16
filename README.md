@@ -13,9 +13,10 @@ lifecycle and sentinel workers. TypeScript provides independent protocol codecs
 and shadow reference checks. Active oracle policies add the required read-only
 reports to liquidation, hLP and order instructions and fresh execution snapshots.
 
-The lock remains **captured** and defaults to **shadow mode**. Mainnet signing
-requires a frozen release, matching deployed artifacts, KMS custody, durable
-PostgreSQL journaling and an explicit wallet spending policy. The devnet-only
+The lock is **frozen** under the owner’s [release-test waiver](docs/evidence/mainnet-release-waiver.json);
+the full release matrix was not completed. The binary defaults to **shadow mode**.
+Mainnet signing requires matching deployed artifacts, explicit KMS or local-file
+custody, durable PostgreSQL journaling and an explicit wallet fee policy. The devnet-only
 exception cannot run this mainnet capture. A separate captured devnet checkout is
 required for local devnet tests.
 
@@ -96,12 +97,14 @@ node scripts/generate-account-layout.mjs --write
 
 ## Safety state
 
-`protocol.lock.json` is `captured`: all program, IDL, SDK, and compatibility
-hashes are real and validated. Normal live startup still rejects this lock; the
-native runtime has the explicit devnet-only test exception described below. Move
-it to `frozen` only through
-[`docs/runbooks/protocol-upgrade.md`](docs/runbooks/protocol-upgrade.md) after the
-full Surfpool and cross-runtime gates pass.
+`protocol.lock.json` is `frozen` for `mainnet-2026-11-14`. The owner explicitly
+waived the remaining release tests on 2026-11-16; this is recorded as a waiver,
+not a passing test receipt. Artifact, deployment, simulation, fee/reserve and
+journal checks remain enforced. Other revisions follow the normal
+[protocol upgrade process](docs/runbooks/protocol-upgrade.md).
+
+For local mainnet execution with private key files, use the
+[local mainnet launcher](docs/runbooks/local-mainnet.md).
 
 For authorized local devnet testing, set `KEEPER_MODE=live`,
 `KEEPER_ALLOW_CAPTURED_DEVNET=1` and `KEEPER_MAX_SENDS_PER_PASS=1`.
