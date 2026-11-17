@@ -5,7 +5,7 @@ use serde::Deserialize;
 use sha2::{Digest, Sha256};
 use std::{collections::BTreeSet, env, fs, path::Path};
 
-const GENESIS: &str = "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d";
+pub(crate) const GENESIS: &str = "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d";
 const LOADER: &str = "BPFLoaderUpgradeab1e11111111111111111111111";
 type Result<T> = std::result::Result<T, String>;
 
@@ -89,13 +89,26 @@ fn check_program(program: &Program, accounts: &[serde_json::Value], full: bool) 
 }
 
 pub fn verify(client: &RpcClient, full: bool) -> Result<()> {
+    verify_inner(client, full, true)
+}
+
+/// Read-only comparison for a release candidate. This never authorizes signing.
+pub fn verify_capture(client: &RpcClient) -> Result<()> {
+    verify_inner(client, true, false)
+}
+
+fn verify_inner(client: &RpcClient, full: bool, require_frozen: bool) -> Result<()> {
     let path = env::var("DUSK_PROTOCOL_LOCK").unwrap_or_else(|_| "protocol.lock.json".into());
     let lock = ProtocolLock::read(&path).map_err(|_| "mainnet protocol lock unavailable")?;
-    if lock.status != LockStatus::Frozen {
+    if require_frozen && lock.status != LockStatus::Frozen {
         return Err("mainnet requires a frozen protocol lock".into());
     }
-    lock.assert_live_ready()
-        .map_err(|_| "mainnet protocol lock is incomplete")?;
+    if require_frozen {
+        lock.assert_live_ready()
+            .map_err(|_| "mainnet protocol lock is incomplete")?;
+    } else if !matches!(lock.status, LockStatus::Captured | LockStatus::Frozen) {
+        return Err("deployment comparison requires captured artifacts".into());
+    }
     let root = Path::new(&path).parent().unwrap_or(Path::new("."));
     let deployment: Deployment = serde_json::from_slice(
         &fs::read(root.join("protocol/mainnet-deployment.v1.json"))

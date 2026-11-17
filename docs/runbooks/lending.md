@@ -27,10 +27,37 @@ Swap API V2 and settles externally in one transaction. It requires
 settlement (`KEEPER_FLASH_SETTLEMENT=dusk`). Jupiter is mainnet-only; set `dusk`
 explicitly for devnet. See [Jupiter routing](jupiter-routing.md) for configuration,
 supported instructions, verification and rollout limits. The leverage worker
-uses the same ordinary routing setting. Inventory settlement requires
-`KEEPER_FLASH_MARKET`, `KEEPER_FLASH_MAX_PAYMENT_DEBIT`, and
-`KEEPER_FLASH_MIN_COLLATERAL_CREDIT`. The market restriction scopes inventory
-purchases only; in `both` mode, other markets can still receive emergency evaluation.
+uses the same ordinary routing setting.
+
+For an inventory purchase, set `KEEPER_FLASH_SETTLEMENT=inventory`,
+`KEEPER_FLASH_MAX_PAYMENT_DEBIT`, and `KEEPER_FLASH_MIN_COLLATERAL_CREDIT`.
+It pays the debt token from that worker's wallet and keeps the quoted collateral,
+without a swap, market-price comparison, or profit floor. It supports every
+discovered supported market; the obsolete `KEEPER_FLASH_MARKET` setting is ignored.
+The transfer is grossed up for effective token transfer fees, and candidates that
+exceed actual wallet funds or the configured debit bound are skipped so smaller
+amounts can be tested. Simulated debt reduction, wallet debit/credit, session
+closure, and all on-chain eligibility rules still must pass.
+
+To buy at the program's quoted terms up to available inventory, explicitly set
+`KEEPER_FLASH_MAX_REPAY=18446744073709551615`,
+`KEEPER_FLASH_MAX_PAYMENT_DEBIT=18446744073709551615`, and
+`KEEPER_FLASH_MIN_COLLATERAL_CREDIT=1`. These remove the operator's amount ceilings
+while requiring at least one collateral atom; they do not bypass wallet balances
+or protocol rules. `KEEPER_LIQUIDATION_MIN_PROFIT` does not filter ordinary
+inventory purchases, but is still required for emergency evaluation in `both` mode.
+
+With `KEEPER_LOG_POSITIONS=1`, logs show every preview's amount and full/partial
+flag, exact program rejection codes, quoted repayment/fees/gross wallet payment,
+available inventory, and collateral credit. Simulation amounts are labeled
+`SIMULATED`; only finalized receipts report actual payments and received assets.
+An inventory acquisition is reported as tokens paid and collateral received,
+without claiming that the collateral is realized profit.
+
+On markets with active hLP, liquidation settlement also supplies the hLP interest
+accounting prefix, both asset mints and both reserve vaults. These are required
+even for inventory purchases when repayment includes accrued interest. This
+does not activate the separate hLP recovery worker or swap the seized collateral.
 
 Emergency execution independently requires `KEEPER_LIQUIDATION_MIN_PROFIT`.
 `KEEPER_EMERGENCY_SLIPPAGE_BPS` optionally tolerates movement between the preview
@@ -43,6 +70,26 @@ An inventory purchase bound does not replace the emergency reward/profit bound.
 Full liquidation always requires an accepted full preview, regardless of whether
 partial searches found a route. Both mechanisms retain their pinned protocol
 eligibility and loss-allocation rules.
+
+## Simulation fallback
+
+An expected partial execution rejection (including final plan revalidation)
+ends partial size searching for that attempt. The keeper discards the quote,
+re-reads the position, market, wallet, oracle and fee accounts, and previews
+health again before trying a full ordinary liquidation. The full preview must
+independently permit closing the position; a partial rejection is not permission.
+
+If no full ordinary route passes and `KEEPER_LENDING_MODE=both`, the keeper
+refreshes again and checks emergency eligibility before searching emergency
+sizes. The pinned emergency threshold is equity at or below 70% of maintenance.
+The on-chain emergency preview and execution simulation must still approve the
+size, health improvement, payment and reward bounds. Logs identify each refresh
+and explain when emergency is unavailable. This sequence is bounded to one
+partial phase, one full phase and one emergency phase per position attempt.
+
+Unexpected program errors, RPC failures and invariant failures abort the attempt.
+Once a selected plan enters submission, no failure triggers another route;
+pending signatures must be reconciled before a later attempt.
 
 ## Submission and recovery
 

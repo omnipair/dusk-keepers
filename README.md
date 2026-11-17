@@ -1,28 +1,24 @@
 # Dusk Keepers
 
-Keeper runtimes for Dusk, pinned to the observed Solana devnet deployment and
+Keeper runtimes for Dusk, pinned to the observed Solana mainnet deployment and
 verified with shared conformance fixtures in Rust and TypeScript.
 
-The current capture is `devnet-2026-11-14-main-grid`, using the fresh layout-16
-Dusk and delegate programs deployed at finalized slots 521965404 and 521967168.
-The lock pins source `474ddcf4fcaecd1ed055238f1105a0a1323d7313` and both downloaded
-executables and IDLs. Liquidation and hLP bank fixtures were regenerated from that
-source and tested against the captured binaries.
-The SDK artifact is the registry-published `@omnipair/dusk-sdk@2.24.1-next.20261114`;
-it records provenance and is not a bundled runtime dependency. The active ABI uses
-srLP and operator/optional-manager authority, with no core LP voting or separate
-insurance fund.
+The current capture is `mainnet-2026-11-14`, using production source
+`0acc9057b53a0495571f1bbf8a18e5db0f2efd45`, the deployed Dusk/delegate executables
+and IDLs, and published SDK `2.27.0`. See [mainnet release preparation](docs/mainnet-release.md).
+The active ABI uses srLP and operator/optional-manager authority.
+
 Rust implements lending, leveraged liquidation and orders, hLP recovery, revenue,
 lifecycle and sentinel workers. TypeScript provides independent protocol codecs
 and shadow reference checks. Active oracle policies add the required read-only
 reports to liquidation, hLP and order instructions and fresh execution snapshots.
 
-The lock remains **captured** and defaults to **shadow mode**. Local bank tests
-execute the downloaded devnet binaries. Live signing normally requires the separate
-frozen-lock release gate. An explicitly enabled native devnet test verifies the
-network and captured deployment, discovers all active supported markets and retains
-durable journaling and transaction limits. See [the devnet capture record](docs/devnet-capture.md)
-and [the flash migration runbook](docs/flash-liquidation-migration.md).
+The lock is **frozen** under the owner’s [release-test waiver](docs/evidence/mainnet-release-waiver.json);
+the full release matrix was not completed. The binary defaults to **shadow mode**.
+Mainnet signing requires matching deployed artifacts, explicit KMS or local-file
+custody, durable PostgreSQL journaling and an explicit wallet fee policy. The devnet-only
+exception cannot run this mainnet capture. A separate captured devnet checkout is
+required for local devnet tests.
 
 ## What is here
 
@@ -31,7 +27,7 @@ and [the flash migration runbook](docs/flash-liquidation-migration.md).
 - `protocol/keeper-account-resolution.v1.json`: generated static-account and PDA seed manifest.
 - `fixtures/`: golden inputs shared by the Rust and TypeScript test suites.
 - `rust/`: native execution, fresh RPC evaluation and durable PostgreSQL submission/recovery.
-- `typescript/`: the shadow/reference runtime and future lifecycle workers.
+- `typescript/`: the shadow/reference runtime and independent protocol codecs.
 - `deploy/railway/`: separate Railway service profiles and hardened container builds.
 - `docs/`: architecture, threat model, upgrade process, and operational runbooks.
 
@@ -101,12 +97,14 @@ node scripts/generate-account-layout.mjs --write
 
 ## Safety state
 
-`protocol.lock.json` is `captured`: all program, IDL, SDK, and compatibility
-hashes are real and validated. Normal live startup still rejects this lock; the
-native runtime has the explicit devnet-only test exception described below. Move
-it to `frozen` only through
-[`docs/runbooks/protocol-upgrade.md`](docs/runbooks/protocol-upgrade.md) after the
-full Surfpool and cross-runtime gates pass.
+`protocol.lock.json` is `frozen` for `mainnet-2026-11-14`. The owner explicitly
+waived the remaining release tests on 2026-11-16; this is recorded as a waiver,
+not a passing test receipt. Artifact, deployment, simulation, fee/reserve and
+journal checks remain enforced. Other revisions follow the normal
+[protocol upgrade process](docs/runbooks/protocol-upgrade.md).
+
+For local mainnet execution with private key files, use the
+[local mainnet launcher](docs/runbooks/local-mainnet.md).
 
 For authorized local devnet testing, set `KEEPER_MODE=live`,
 `KEEPER_ALLOW_CAPTURED_DEVNET=1` and `KEEPER_MAX_SENDS_PER_PASS=1`.
@@ -141,6 +139,36 @@ Healthy positions remain visible. Supported positions evaluated after the pass's
 receive health previews marked `MONITOR ONLY`; diagnostics never select a route
 or submit a transaction. Missing/unsupported markets and failed previews report
 why health is unavailable. Logging does not change eligibility or execution limits.
+
+Live Rust workers also print a receipt after the journal records a finalized
+transaction. It shows the SOL transaction fee (including priority fees), other
+SOL movements such as rent, keeper token balances before/after, and actual net
+tokens paid or received. Dusk liquidation events add the reward, swap input/output,
+trading fees, repayment, owner surplus, and any written-off debt. Transfer, mint,
+burn and account-balance lines identify each token mint and source/destination;
+Jupiter routes include their recorded token transfers. Amounts use integer token
+atoms and receipt decimals, never floating-point rounding or assumed USD prices.
+
+Submitted transactions are labeled pending until finalized. Failed receipts show
+the charged fee without presenting rolled-back swaps or rewards as received.
+Missing receipt details are marked unavailable. Receipt formatting uses the
+already-fetched journal evidence and adds no RPC requests or signing decisions.
+
+Colors are automatic in a terminal. Set `KEEPER_LOG_COLOR=always` when forwarding
+output through a terminal launcher, or `KEEPER_LOG_COLOR=never` for plain text;
+`NO_COLOR` always disables colors. `KEEPER_LOG_POSITIONS=1` also colors position
+health and prints progress while liquidation routes are being searched.
+Detailed logs also identify every preview amount, program rejection, inventory
+funding shortfall, and simulated wallet debit/collateral credit. For purchases
+that pay directly from the keeper's inventory without a swap or profit filter,
+see the [inventory settings](docs/runbooks/lending.md#economic-bounds).
+
+For offline inspection, `dusk-keeper --receipt-log < receipt.json` accepts
+`{ "signature": "...", "action": "...", "position": "...", "market": "...",
+"receipt": <finalized getTransaction result with base64 transaction> }` from stdin.
+Run from the runtime/repository directory so the pinned `artifacts/dusk.json` is
+available. This only formats supplied evidence; it does not fetch, verify finality,
+sign, or submit transactions.
 
 ## Mutable transfer-fee notice handling
 

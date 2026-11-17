@@ -3,8 +3,8 @@
 Each signing worker uses a separate non-exportable AWS KMS
 `ECC_NIST_EDWARDS25519` key: lending, leverage, hLP recovery, auction arbitrage
 and lifecycle. The sentinel has no signer. Native mainnet execution accepts
-`SIGNER_PROVIDER=aws-kms`; local keys remain restricted to the explicit devnet
-test exception.
+`SIGNER_PROVIDER=aws-kms`. The owner-authorized [local mainnet launcher](local-mainnet.md)
+also supports explicit `SIGNER_PROVIDER=local` key files.
 
 Solana needs `ED25519_SHA_512` with `MessageType=RAW`. Ed25519ph is incompatible.
 The runtime pins the full immutable key ARN and expected Solana public key,

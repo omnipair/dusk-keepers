@@ -27,6 +27,8 @@ jobs:
         with:
           node-version: 24
       - run: node scripts/validate-repo.mjs
+      - name: Human-readable local terminal output
+        run: python3 -m unittest discover -s scripts -p 'test_keeper_console.py' -v
       - run: npm ci
       - run: cargo build --locked
       - run: npm run typecheck
@@ -54,7 +56,7 @@ jobs:
       - name: Durable submission and restart recovery
         env:
           KEEPER_TEST_DATABASE_URL: postgresql://keeper_test:disposable_ci_only@127.0.0.1:5432/keeper_test
-        run: cargo test --locked -p dusk-keeper flash_journal -- --ignored
+        run: cargo test --locked -p dusk-keeper -- --ignored
 
   containers:
     runs-on: ubuntu-latest

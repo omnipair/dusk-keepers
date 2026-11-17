@@ -551,6 +551,66 @@ fn balance(data: Option<&[u8]>) -> Result<u64> {
     }
 }
 
+fn validate_execution(
+    orders: &AccountLayoutManifest,
+    plan: &OrderPlan,
+    snapshot: &Snapshot,
+    simulated: &serde_json::Value,
+) -> Result<Option<String>> {
+    if simulated["context"]["slot"]
+        .as_u64()
+        .is_none_or(|slot| slot < snapshot.slot)
+    {
+        return Err("stale order simulation".into());
+    }
+    if !simulated["value"]["err"].is_null() {
+        return Ok(Some(format!(
+            "order trigger/settlement rejected: {}",
+            simulated["value"]
+        )));
+    }
+    let posts = [
+        crate::liquidation::post_bytes(simulated, 0)?,
+        crate::liquidation::post_bytes(simulated, 1)?,
+    ];
+    if plan.kind == "HlpOrder" {
+        if let Some(raw) = posts[0].as_deref().filter(|raw| !raw.is_empty())
+            && orders
+                .reader(&plan.kind)
+                .map_err(|e| e.to_string())?
+                .u8("status", raw)
+                .map_err(|e| e.to_string())?
+                != 2
+        {
+            return Err("hLP order did not reach executed status".into());
+        }
+    } else if posts[0].as_ref().is_some_and(|v| !v.is_empty()) {
+        return Err("executed order account did not close".into());
+    }
+    let before = balance(
+        snapshot
+            .accounts
+            .get(&address(plan.reward_account))
+            .and_then(Option::as_ref)
+            .map(|v| v.data.as_slice()),
+    )?;
+    let after = balance(posts[1].as_deref())?;
+    let minimum: u64 = match std::env::var("KEEPER_ORDER_MIN_BOUNTY_CREDIT") {
+        Ok(value) => value.parse().map_err(|_| "invalid order bounty bound")?,
+        Err(std::env::VarError::NotPresent) => 0,
+        Err(_) => return Err("invalid order bounty bound".into()),
+    };
+    if after
+        .checked_sub(before)
+        .is_none_or(|credit| credit < minimum)
+    {
+        return Ok(Some(
+            "order bounty is below the configured net-credit bound".into(),
+        ));
+    }
+    Ok(None)
+}
+
 impl OrderJob<'_> {
     pub fn run_pass(
         &self,
@@ -673,9 +733,8 @@ impl OrderJob<'_> {
         kind: &str,
     ) -> Result<(crate::runtime::execution::AttemptReport, bool)> {
         use crate::{
-            liquidation::simulation,
-            runtime::execution::AttemptReport,
-            runtime::transaction::{base64, serialize_transaction},
+            liquidation::simulation, runtime::execution::AttemptReport,
+            runtime::transaction::serialize_transaction,
         };
         use keeper_core::{OutcomeStatus, ReasonCode};
         let skipped = |reason, detail| {
@@ -729,18 +788,15 @@ impl OrderJob<'_> {
                 "order needs a configured lookup table".into(),
             ));
         }
-        let (error, posts) = self
-            .client
-            .simulate_with_accounts(
-                &base64(&wire),
-                &[address(order), address(plan.reward_account)],
-            )
-            .map_err(|e| e.to_string())?;
-        if let Some(error) = error {
-            return Ok(skipped(
-                ReasonCode::BoundsNotMet,
-                format!("order trigger/settlement rejected: {error}"),
-            ));
+        let simulated = simulation::simulate_for(
+            self.client,
+            self.signer.public_key(),
+            &snapshot,
+            &plan.instructions,
+            &[order, plan.reward_account],
+        )?;
+        if let Some(detail) = validate_execution(orders, &plan, &snapshot, &simulated)? {
+            return Ok(skipped(ReasonCode::BoundsNotMet, detail));
         }
         let after_fees =
             crate::workers::sentinel::fee_notice::read_fees(self.client, &mints, fees.slot)
@@ -749,44 +805,6 @@ impl OrderJob<'_> {
             return Ok(skipped(
                 ReasonCode::StateChanged,
                 "order mint fees or epoch changed during evaluation".into(),
-            ));
-        }
-        if posts.len() != 2 {
-            return Err("order simulation omitted post-state".into());
-        }
-        if kind == "HlpOrder" {
-            if let Some(raw) = posts[0].as_deref().filter(|raw| !raw.is_empty())
-                && orders
-                    .reader(kind)
-                    .map_err(|e| e.to_string())?
-                    .u8("status", raw)
-                    .map_err(|e| e.to_string())?
-                    != 2
-            {
-                return Err("hLP order did not reach executed status".into());
-            }
-        } else if posts[0].as_ref().is_some_and(|v| !v.is_empty()) {
-            return Err("executed order account did not close".into());
-        }
-        let before = balance(
-            snapshot
-                .accounts
-                .get(&address(plan.reward_account))
-                .and_then(Option::as_ref)
-                .map(|v| v.data.as_slice()),
-        )?;
-        let after = balance(posts[1].as_deref())?;
-        let minimum: u64 = std::env::var("KEEPER_ORDER_MIN_BOUNTY_CREDIT")
-            .map_err(|_| "KEEPER_ORDER_MIN_BOUNTY_CREDIT must be configured")?
-            .parse()
-            .map_err(|_| "invalid order bounty bound")?;
-        if after
-            .checked_sub(before)
-            .is_none_or(|credit| credit < minimum)
-        {
-            return Ok(skipped(
-                ReasonCode::BoundsNotMet,
-                "order bounty is below the configured net-credit bound".into(),
             ));
         }
         if self.dry_run {
@@ -819,7 +837,7 @@ impl OrderJob<'_> {
             .client
             .call(
                 "getLatestBlockhash",
-                serde_json::json!([{"commitment":"confirmed"}]),
+                serde_json::json!([{"commitment":"confirmed","minContextSlot":recheck.slot}]),
             )
             .map_err(|e| e.to_string())?;
         let hash = block["value"]["blockhash"]
@@ -834,6 +852,19 @@ impl OrderJob<'_> {
             &plan.instructions,
             key(hash)?,
         )?;
+        let final_simulation = simulation::simulate_for(
+            self.client,
+            self.signer.public_key(),
+            &recheck,
+            &plan.instructions,
+            &[order, plan.reward_account],
+        )?;
+        if let Some(detail) = validate_execution(orders, &plan, &recheck, &final_simulation)? {
+            return Ok(skipped(
+                ReasonCode::StateChanged,
+                format!("order changed before signing: {detail}"),
+            ));
+        }
         let signing_fees =
             crate::workers::sentinel::fee_notice::read_fees(self.client, &mints, recheck.slot)
                 .map_err(|e| e.to_string())?;
@@ -852,6 +883,7 @@ impl OrderJob<'_> {
             &std::env::var("DATABASE_URL")
                 .map_err(|_| "DATABASE_URL is required before signing")?,
         )?;
+        journal.set_token_debits(vec![]);
         let signature = journal.submit(
             self.client,
             self.signer,

@@ -32,6 +32,21 @@ use std::{
 };
 
 fn main() -> Result<(), Box<dyn Error>> {
+    if env::args().any(|a| a == "--signer-public-key") {
+        println!("{}", load_signer()?.public_key_base58());
+        return Ok(());
+    }
+    if env::args().any(|a| a == "--check-mainnet-deployment") {
+        let endpoint = env::var("SOLANA_RPC_HTTP_URL")?;
+        runtime::mainnet::verify_capture(&RpcClient::new(endpoint, Duration::from_secs(20)))?;
+        println!(
+            "mainnet deployed programs, IDLs and authorities match the capture; no signing performed"
+        );
+        return Ok(());
+    }
+    if env::args().any(|a| a == "--receipt-log") {
+        return runtime::receipt_log::run_cli();
+    }
     if env::args().any(|a| a == "--order-plan") {
         return orders::run_plan_cli();
     }
@@ -40,6 +55,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
     let config = Config::from_environment()?;
     let lock = ProtocolLock::read(&config.protocol_lock)?;
+    if config.mode == Mode::Live && config.profile == "conformance" {
+        return Err("live mode requires an explicit keeper profile".into());
+    }
 
     if config.mode == Mode::Live {
         if runtime::devnet::enabled() {
@@ -53,6 +71,10 @@ fn main() -> Result<(), Box<dyn Error>> {
             );
         } else {
             lock.assert_live_ready()?;
+            config.validate_mainnet_execution()?;
+            if config.profile != "sentinel" {
+                runtime::risk::WalletPolicy::load()?;
+            }
             let endpoint = env::var("SOLANA_RPC_HTTP_URL")?;
             runtime::mainnet::verify(&RpcClient::new(endpoint, Duration::from_secs(20)), true)?;
         }
@@ -135,6 +157,18 @@ fn main() -> Result<(), Box<dyn Error>> {
         Err(error) => return Err(Box::new(error)),
     };
 
+    if env::args().any(|a| a == "--check-execution") {
+        if config.mode != Mode::Live {
+            return Err("execution dependency check requires live mode".into());
+        }
+        if config.profile != "sentinel" {
+            let mut journal = runtime::flash_journal::Journal::connect(&env::var("DATABASE_URL")?)?;
+            journal.check_schema(runtime::mainnet::enabled())?;
+        }
+        println!("execution dependencies verified; no transaction signed or submitted");
+        return Ok(());
+    }
+
     if env::args().any(|arg| arg == "--prepare-devnet-wallet") {
         if config.mode != Mode::Live {
             return Err("wallet preparation requires live devnet mode".into());
@@ -178,6 +212,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         )
     };
     let snapshot = Arc::new(Mutex::new(Snapshot {
+        max_scan_age: Duration::from_millis(config.max_scan_age_ms),
         execution_configured,
         execution_configuration_error,
         error: endpoint
@@ -189,10 +224,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Discovery runs even in shadow mode: reading is how the sentinel earns
     // trust before any profile is given a key.
     if let Some(endpoint) = endpoint {
-        let interval = env::var("DISCOVERY_INTERVAL_MS")
-            .ok()
-            .and_then(|value| value.parse().ok())
-            .unwrap_or(15_000);
+        let interval = config.discovery_interval_ms;
         let shared = Arc::clone(&snapshot);
         let program_id_key = decode_program_id(&dusk_program_id)?;
         let dry_run = config.mode == Mode::Shadow;
@@ -273,6 +305,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
                 if let Ok(mut current) = shared.lock() {
                     current.first_pass_complete = true;
+                    current.last_completed_at = Some(std::time::Instant::now());
                 }
 
                 if env::args().any(|a| a == "--once") {
@@ -305,8 +338,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     )
 }
 
-/// Mainnet uses a non-exportable KMS key. Local keys are accepted only within
-/// the existing explicit devnet test exception.
+/// Hosted services can use KMS; the owner-authorized local mainnet launcher uses
+/// an explicitly selected key file. Neither selection bypasses live validation.
 fn load_signer() -> Result<Box<dyn TransactionSigner>, crate::runtime::signer::SignerError> {
     use crate::runtime::signer::SignerError;
     let provider = env::var("SIGNER_PROVIDER").ok();
@@ -321,7 +354,26 @@ fn load_signer() -> Result<Box<dyn TransactionSigner>, crate::runtime::signer::S
             }
             Ok(Box::new(AwsKmsSigner::from_environment()?))
         }
-        Some("local") | None if runtime::devnet::enabled() => {
+        Some("local") => {
+            let signer = if runtime::devnet::enabled() {
+                match env::var("KEEPER_SIGNER_KEY_PATH") {
+                    Ok(path) => LocalKeypair::from_file(path),
+                    Err(_) => LocalKeypair::from_environment("KEEPER_SIGNER_KEY"),
+                }?
+            } else {
+                let path = env::var("KEEPER_SIGNER_KEY_PATH").map_err(|_| {
+                    SignerError::Remote("local mainnet signing requires KEEPER_SIGNER_KEY_PATH")
+                })?;
+                if env::var_os("KEEPER_SIGNER_KEY").is_some() {
+                    return Err(SignerError::Remote(
+                        "use only the key file for local mainnet signing",
+                    ));
+                }
+                LocalKeypair::from_file(path)?
+            };
+            Ok(Box::new(signer))
+        }
+        None if runtime::devnet::enabled() => {
             let signer = match env::var("KEEPER_SIGNER_KEY_PATH") {
                 Ok(path) => LocalKeypair::from_file(path),
                 Err(_) => LocalKeypair::from_environment("KEEPER_SIGNER_KEY"),
@@ -329,7 +381,7 @@ fn load_signer() -> Result<Box<dyn TransactionSigner>, crate::runtime::signer::S
             Ok(Box::new(signer))
         }
         _ => Err(SignerError::Remote(
-            "live mainnet requires SIGNER_PROVIDER=aws-kms",
+            "live mainnet requires SIGNER_PROVIDER=aws-kms or explicit SIGNER_PROVIDER=local",
         )),
     }
 }

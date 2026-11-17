@@ -11,16 +11,50 @@ use postgres_native_tls::MakeTlsConnector;
 use sha2::{Digest, Sha256};
 pub struct Journal {
     client: Client,
+    token_debits: Option<Vec<super::risk::TokenDebit>>,
 }
 impl Journal {
+    pub fn check_schema(&mut self, budgets: bool) -> Result<(), String> {
+        self.client
+            .query(
+                "SELECT work_key, message, outcome FROM keeper_flash_work LIMIT 0",
+                &[],
+            )
+            .map_err(|_| "journal schema unavailable; apply database migrations")?;
+        self.client
+            .query(
+                "SELECT sequence, phase FROM keeper_flash_events LIMIT 0",
+                &[],
+            )
+            .map_err(|_| "journal event schema unavailable")?;
+        if budgets {
+            let index: bool = self.client.query_one("SELECT EXISTS (SELECT 1 FROM pg_index WHERE indexrelid=to_regclass('keeper_flash_pending_across_revisions') AND indisvalid AND indisunique)", &[])
+                .map_err(|_| "journal migration check unavailable")?.get(0);
+            if !index {
+                return Err("cross-revision journal migration missing".into());
+            }
+            self.client
+                .query(
+                    "SELECT wallet, asset, maximum FROM keeper_wallet_budget LIMIT 0",
+                    &[],
+                )
+                .map_err(|_| "wallet budget schema unavailable; apply database migrations")?;
+        }
+        Ok(())
+    }
+    /// Every mainnet caller declares instruction-enforced gross debit bounds.
+    /// An empty list explicitly means no wallet token principal is spent.
+    pub fn set_token_debits(&mut self, debits: Vec<super::risk::TokenDebit>) {
+        self.token_debits = Some(debits);
+    }
     /// Discovery guard: do not spend external quote requests or select an
     /// alternate route for work whose submitted outcome is still uncertain.
     /// submit_locked remains the authoritative guard against concurrent races.
     pub fn pending_sides(
         &mut self,
-        revision: &str,
+        _revision: &str,
     ) -> Result<std::collections::BTreeSet<([u8; 32], u8)>, String> {
-        self.client.query("SELECT position,debt_asset FROM keeper_flash_work WHERE revision=$1 AND outcome IN ('reserved','submitted_unknown')", &[&revision])
+        self.client.query("SELECT position,debt_asset FROM keeper_flash_work WHERE outcome IN ('reserved','submitted_unknown')", &[])
             .map_err(|e| e.to_string())?.iter().map(|row| {
                 let position: String = row.get(0);
                 let side: i16 = row.get(1);
@@ -41,14 +75,25 @@ impl Journal {
             config.connect(NoTls)
         } else {
             config.ssl_mode(postgres::config::SslMode::Require);
+            let mut tls = native_tls::TlsConnector::builder();
+            if let Ok(path) = std::env::var("DATABASE_CA_CERT") {
+                let bytes =
+                    std::fs::read(path).map_err(|_| "database CA certificate unavailable")?;
+                tls.add_root_certificate(
+                    native_tls::Certificate::from_pem(&bytes)
+                        .map_err(|_| "invalid database CA certificate")?,
+                );
+            }
             config.connect(MakeTlsConnector::new(
-                native_tls::TlsConnector::builder()
-                    .build()
-                    .map_err(|e| e.to_string())?,
+                tls.build()
+                    .map_err(|_| "database TLS initialization failed")?,
             ))
         }
         .map_err(|e| e.to_string())?;
-        Ok(Self { client })
+        Ok(Self {
+            client,
+            token_debits: None,
+        })
     }
     /// Reconcile every pending generation before evaluating new work, including
     /// positions which have since closed. Expiry requires complete finalized
@@ -56,15 +101,16 @@ impl Journal {
     pub fn recover(
         &mut self,
         rpc: &RpcClient,
-        revision: &str,
+        _revision: &str,
     ) -> Result<Vec<(String, Option<String>, String)>, String> {
-        let rows=self.client.query("SELECT work_key,position,debt_asset FROM keeper_flash_work WHERE revision=$1 AND outcome IN ('reserved','submitted_unknown') ORDER BY created_at LIMIT 100",&[&revision]).map_err(|e|e.to_string())?;
+        self.check_schema(super::mainnet::enabled())?;
+        let rows=self.client.query("SELECT work_key,position,debt_asset FROM keeper_flash_work WHERE outcome IN ('reserved','submitted_unknown') ORDER BY created_at LIMIT 100",&[]).map_err(|e|e.to_string())?;
         let mut outcomes = Vec::new();
         for row in rows {
             let work: String = row.get(0);
             let position: String = row.get(1);
             let side: i16 = row.get(2);
-            let lock_key = format!("{revision}:{position}:{side}");
+            let lock_key = format!("keeper-position:{position}:{side}");
             let locked: bool = self
                 .client
                 .query_one(
@@ -224,7 +270,7 @@ impl Journal {
         last_valid_height: u64,
         deadline: Option<std::time::Instant>,
     ) -> Result<Option<String>, String> {
-        let lock_key = format!("{revision}:{position}:{debt_asset}");
+        let lock_key = format!("keeper-position:{position}:{debt_asset}");
         let locked: bool = self
             .client
             .query_one(
@@ -278,7 +324,7 @@ impl Journal {
         deadline: Option<std::time::Instant>,
     ) -> Result<Option<String>, String> {
         let side = i16::from(debt_asset);
-        let pending=self.client.query_opt("SELECT work_key, signature, transaction_bytes, observed_slot, last_valid_height FROM keeper_flash_work WHERE revision=$1 AND position=$2 AND debt_asset=$3 AND outcome IN ('reserved','submitted_unknown')",&[&revision,&position,&side]).map_err(|e|e.to_string())?;
+        let pending=self.client.query_opt("SELECT work_key, signature, transaction_bytes, observed_slot, last_valid_height FROM keeper_flash_work WHERE position=$1 AND debt_asset=$2 AND outcome IN ('reserved','submitted_unknown')",&[&position,&side]).map_err(|e|e.to_string())?;
         if let Some(row) = pending {
             let work: String = row.get(0);
             let sig: Option<String> = row.get(1);
@@ -326,8 +372,25 @@ impl Journal {
         );
         let slot = i64::try_from(slot).map_err(|_| "slot overflow")?;
         let height = i64::try_from(last_valid_height).map_err(|_| "height overflow")?;
+        let wallet = signer.public_key_base58();
+        let claims = if super::mainnet::enabled() {
+            Some(super::risk::assess(
+                rpc,
+                &wallet,
+                message,
+                slot as u64,
+                self.token_debits
+                    .as_deref()
+                    .ok_or("mainnet submission has no declared spending bounds")?,
+            )?)
+        } else {
+            None
+        };
         let mut tx = self.client.transaction().map_err(|e| e.to_string())?;
         tx.execute("INSERT INTO keeper_flash_work(work_key,revision,market,position,debt_asset,action,observed_slot,state_hash,message,blockhash,last_valid_height) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)",&[&work,&revision,&market,&position,&side,&action,&slot,&state_hash,&message,&blockhash,&height]).map_err(|e|e.to_string())?;
+        if let Some(claims) = &claims {
+            super::risk::reserve(&mut tx, &work, &wallet, claims)?;
+        }
         tx.execute(
             "INSERT INTO keeper_flash_events(work_key,phase,evidence) VALUES($1,'reserved',$2)",
             &[
@@ -355,6 +418,16 @@ impl Journal {
             )?;
             return Err(error);
         }
+        // Deployment RPCs and remote signing may outlive the route. Check on
+        // both sides of signing; an expired signed message is never broadcast.
+        if deadline.is_some_and(|t| std::time::Instant::now() >= t) {
+            self.finish(
+                &work,
+                "abandoned_before_submission",
+                &serde_json::json!({"reason":"quote expired before signing"}),
+            )?;
+            return Err("quote expired before signing; fresh evaluation required".into());
+        }
         let signature = match signer.sign(message) {
             Ok(signature) => signature,
             Err(_) => {
@@ -366,18 +439,47 @@ impl Journal {
                 return Err("signer denied or unavailable; fresh evaluation required".into());
             }
         };
+        if deadline.is_some_and(|t| std::time::Instant::now() >= t) {
+            self.finish(&work, "abandoned_before_submission", &serde_json::json!({"reason":"quote expired during signing; signed bytes discarded without broadcast"}))?;
+            return Err("quote expired during signing; fresh evaluation required".into());
+        }
+        if super::mainnet::enabled()
+            && let Err(error) = super::mainnet::verify(rpc, false)
+        {
+            self.finish(&work, "abandoned_before_submission", &serde_json::json!({"reason":"deployment changed during signing; signed bytes discarded"}))?;
+            return Err(error);
+        }
+        if deadline.is_some_and(|t| std::time::Instant::now() >= t) {
+            self.finish(&work, "abandoned_before_submission", &serde_json::json!({"reason":"quote expired before submission; signed bytes discarded"}))?;
+            return Err("quote expired before submission; fresh evaluation required".into());
+        }
         let sig = bs58::encode(signature).into_string();
         let bytes = serialize_transaction(&[signature], message);
         let mut tx = self.client.transaction().map_err(|e| e.to_string())?;
         tx.execute("UPDATE keeper_flash_work SET signature=$2,transaction_bytes=$3,outcome='submitted_unknown',updated_at=now() WHERE work_key=$1",&[&work,&sig,&bytes]).map_err(|e|e.to_string())?;
         tx.execute("INSERT INTO keeper_flash_events(work_key,phase,evidence) VALUES($1,'submitted_unknown',$2)",&[&work,&serde_json::json!({"signature":sig})]).map_err(|e|e.to_string())?;
         tx.commit().map_err(|e| e.to_string())?;
-        let returned = rpc
-            .send_transaction(&crate::runtime::transaction::base64(&bytes))
-            .map_err(|e| e.to_string())?;
+        let returned = match rpc.send_transaction(&crate::runtime::transaction::base64(&bytes)) {
+            Ok(value) => value,
+            Err(error) => {
+                super::logging::emit(super::logging::paint(
+                    format!(
+                        "transaction_pending action={action} position={position} signature={sig} | RPC result unknown; journal reconciliation required"
+                    ),
+                    super::logging::YELLOW,
+                ));
+                return Err(error.to_string());
+            }
+        };
         if returned != sig {
             return Err("RPC returned a different signature".into());
         }
+        super::logging::emit(super::logging::paint(
+            format!(
+                "transaction_submitted action={action} position={position} signature={sig} | awaiting finalized receipt; fees and rewards not yet confirmed"
+            ),
+            super::logging::CYAN,
+        ));
         Ok(None)
     }
     fn finish_receipt(
@@ -399,14 +501,14 @@ impl Journal {
         let actual =
             crate::runtime::rpc::decode_base64(receipt["transaction"][0].as_str().unwrap_or(""))
                 .ok_or("invalid finalized transaction bytes")?;
-        let expected: Vec<u8> = self
+        let row = self
             .client
             .query_one(
-                "SELECT transaction_bytes FROM keeper_flash_work WHERE work_key=$1",
+                "SELECT transaction_bytes,action,position,market FROM keeper_flash_work WHERE work_key=$1",
                 &[&work],
             )
-            .map_err(|e| e.to_string())?
-            .get(0);
+            .map_err(|e| e.to_string())?;
+        let expected: Vec<u8> = row.get(0);
         if actual != expected {
             return Err("finalized transaction differs from persisted generation".into());
         }
@@ -420,6 +522,19 @@ impl Journal {
             outcome,
             &serde_json::json!({"slot":receipt["slot"],"meta":receipt["meta"]}),
         )?;
+        let action: String = row.get(1);
+        let position: String = row.get(2);
+        let market: String = row.get(3);
+        super::receipt_log::finalized(
+            &super::receipt_log::Context {
+                signature,
+                action: &action,
+                position: &position,
+                market: &market,
+            },
+            &receipt,
+            &actual,
+        );
         Ok(outcome.into())
     }
     fn finish(
@@ -503,6 +618,20 @@ mod tests {
     };
     struct CountingSigner(Arc<AtomicUsize>);
     struct DeniedSigner;
+    struct SlowSigner(std::time::Instant, Arc<AtomicUsize>);
+    impl TransactionSigner for SlowSigner {
+        fn public_key(&self) -> [u8; 32] {
+            [7; 32]
+        }
+        fn sign(&self, _: &[u8]) -> Result<[u8; 64], crate::runtime::signer::SignerError> {
+            self.1.fetch_add(1, Ordering::SeqCst);
+            std::thread::sleep(
+                self.0.saturating_duration_since(std::time::Instant::now())
+                    + Duration::from_millis(10),
+            );
+            Ok([9; 64])
+        }
+    }
     impl TransactionSigner for DeniedSigner {
         fn public_key(&self) -> [u8; 32] {
             [7; 32]
@@ -554,6 +683,20 @@ mod tests {
                 "../../../../../deploy/postgres/migrations/0002_flash_attempts.sql"
             ))
             .unwrap();
+        assert!(journal.check_schema(true).is_err());
+        journal
+            .client
+            .batch_execute(include_str!(
+                "../../../../../deploy/postgres/migrations/0004_wallet_budgets.sql"
+            ))
+            .unwrap();
+        journal
+            .client
+            .batch_execute(include_str!(
+                "../../../../../deploy/postgres/migrations/0005_cross_revision_conflicts.sql"
+            ))
+            .unwrap();
+        journal.check_schema(true).unwrap();
         let listener = TcpListener::bind("127.0.0.1:0").unwrap();
         let endpoint = format!("http://{}", listener.local_addr().unwrap());
         let phase = Arc::new(AtomicUsize::new(0));
@@ -657,7 +800,7 @@ mod tests {
             .client
             .execute(
                 "SELECT pg_advisory_lock(hashtextextended($1,0))",
-                &[&"test:11111111111111111111111111111111:1"],
+                &[&"keeper-position:11111111111111111111111111111111:1"],
             )
             .unwrap();
         assert!(
@@ -670,7 +813,7 @@ mod tests {
             .client
             .execute(
                 "SELECT pg_advisory_unlock(hashtextextended($1,0))",
-                &[&"test:11111111111111111111111111111111:1"],
+                &[&"keeper-position:11111111111111111111111111111111:1"],
             )
             .unwrap();
         assert_eq!(submit(&mut journal, b"first").unwrap(), None);
@@ -681,6 +824,22 @@ mod tests {
                 .contains("pending signature")
         );
         assert_eq!(count.load(Ordering::SeqCst), 1);
+        let cross_revision = competing.submit(
+            &rpc,
+            &signer,
+            "next-release",
+            "11111111111111111111111111111111",
+            1,
+            "market",
+            "flash",
+            10,
+            "changed-state",
+            b"new-release-message",
+            "new-hash",
+            200,
+        );
+        assert!(cross_revision.unwrap_err().contains("pending signature"));
+        assert_eq!(count.load(Ordering::SeqCst), 1);
         let row = journal
             .client
             .query_one("SELECT message,outcome FROM keeper_flash_work", &[])
@@ -688,7 +847,7 @@ mod tests {
         assert_eq!(row.get::<_, Vec<u8>>(0), b"first");
         assert_eq!(row.get::<_, String>(1), "submitted_unknown");
         assert_eq!(
-            journal.pending_sides("test").unwrap(),
+            journal.pending_sides("new-release").unwrap(),
             std::collections::BTreeSet::from([([0; 32], 1)])
         );
         phase.store(3, Ordering::SeqCst);
@@ -701,7 +860,7 @@ mod tests {
         assert_eq!(pending, "submitted_unknown");
         assert_eq!(count.load(Ordering::SeqCst), 1);
         phase.store(1, Ordering::SeqCst);
-        let recovered = competing.recover(&rpc, "test").unwrap();
+        let recovered = competing.recover(&rpc, "new-release").unwrap();
         assert_eq!(recovered[0].2, "executed");
         phase.store(2, Ordering::SeqCst);
         assert_eq!(submit(&mut journal, b"second").unwrap(), None);
@@ -752,6 +911,29 @@ mod tests {
         assert!(expired.unwrap_err().contains("expired before signing"));
         assert_eq!(count.load(Ordering::SeqCst), signed_before);
         let row = journal.client.query_one("SELECT outcome,signature,transaction_bytes FROM keeper_flash_work WHERE position='expired-position'", &[]).unwrap();
+        assert_eq!(row.get::<_, String>(0), "abandoned_before_submission");
+        assert!(row.get::<_, Option<String>>(1).is_none());
+        assert!(row.get::<_, Option<Vec<u8>>>(2).is_none());
+        let deadline = std::time::Instant::now() + Duration::from_secs(1);
+        let slow_count = Arc::new(AtomicUsize::new(0));
+        let delayed = journal.submit_before(
+            &rpc,
+            &SlowSigner(deadline, slow_count.clone()),
+            "test",
+            "slow-position",
+            1,
+            "market",
+            "flash_jupiter",
+            10,
+            "state",
+            b"slow-jupiter",
+            "hash",
+            100,
+            Some(deadline),
+        );
+        assert!(delayed.unwrap_err().contains("expired during signing"));
+        assert_eq!(slow_count.load(Ordering::SeqCst), 1);
+        let row = journal.client.query_one("SELECT outcome,signature,transaction_bytes FROM keeper_flash_work WHERE position='slow-position'", &[]).unwrap();
         assert_eq!(row.get::<_, String>(0), "abandoned_before_submission");
         assert!(row.get::<_, Option<String>>(1).is_none());
         assert!(row.get::<_, Option<Vec<u8>>>(2).is_none());

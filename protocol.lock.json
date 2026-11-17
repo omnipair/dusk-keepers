@@ -2,7 +2,7 @@
   "$schema": "./protocol/schemas/protocol-lock.schema.json",
   "schemaVersion": 1,
   "revision": "mainnet-2026-11-14",
-  "status": "captured",
+  "status": "frozen",
   "generatedAt": "2026-11-14T14:57:06.914Z",
   "source": {
     "repository": "https://github.com/omnipair/dusk",

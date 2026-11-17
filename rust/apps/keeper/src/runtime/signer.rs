@@ -1,10 +1,8 @@
 //! Signing.
 //!
-//! A trait rather than a concrete keypair, because the devnet arrangement — a
-//! file on disk — is the one arrangement that must not survive to mainnet. A
-//! remote signer, an HSM, or a policy-gated service implements the same two
-//! methods, so swapping one in later changes deployment configuration rather
-//! than execution code.
+//! Local key files and remote KMS implement the same narrow interface. Mainnet
+//! local keys require explicit provider selection; execution policy is enforced
+//! before either signer receives a message.
 //!
 //! The trait is deliberately narrow: it signs opaque bytes and names its
 //! public key. It cannot be asked what it is signing, which keeps the decision
@@ -61,8 +59,8 @@ impl TransactionSigner for ShadowIdentity {
 
 /// A keypair held in this process, loaded from a Solana CLI keypair file.
 ///
-/// Correct for devnet and nowhere else: the key is readable by anything that
-/// can read the container's filesystem.
+/// Used by devnet and the owner-authorized local mainnet launcher. Store these
+/// files outside the repository with access restricted to the operator.
 pub struct LocalKeypair {
     key: SigningKey,
 }
@@ -71,7 +69,20 @@ impl LocalKeypair {
     pub fn from_file(path: impl AsRef<Path>) -> Result<Self, SignerError> {
         let raw = fs::read_to_string(path.as_ref())
             .map_err(|error| SignerError::Unreadable(error.to_string()))?;
-        Self::from_json(&raw)
+        Self::from_text(&raw)
+    }
+
+    /// Wallet exports may be a base58 64-byte keypair or a Solana CLI JSON array.
+    /// Parsing errors never include private key text.
+    pub fn from_text(raw: &str) -> Result<Self, SignerError> {
+        let raw = raw.trim();
+        if raw.starts_with('[') {
+            return Self::from_json(raw);
+        }
+        let bytes = bs58::decode(raw).into_vec().map_err(|_| {
+            SignerError::Malformed("expected a base58 keypair or Solana JSON array".into())
+        })?;
+        Self::from_bytes(&bytes)
     }
 
     /// Accepts the Solana CLI's 64-byte array: 32 bytes of seed followed by
@@ -79,8 +90,12 @@ impl LocalKeypair {
     /// trusted, so a truncated or spliced file fails here instead of
     /// producing signatures no one can verify.
     pub fn from_json(raw: &str) -> Result<Self, SignerError> {
-        let bytes: Vec<u8> =
-            serde_json::from_str(raw).map_err(|error| SignerError::Malformed(error.to_string()))?;
+        let bytes: Vec<u8> = serde_json::from_str(raw)
+            .map_err(|_| SignerError::Malformed("expected a Solana keypair JSON array".into()))?;
+        Self::from_bytes(&bytes)
+    }
+
+    fn from_bytes(bytes: &[u8]) -> Result<Self, SignerError> {
         if bytes.len() != 64 {
             return Err(SignerError::Malformed(format!(
                 "expected 64 bytes, found {}",
@@ -104,7 +119,7 @@ impl LocalKeypair {
     pub fn from_environment(variable: &str) -> Result<Self, SignerError> {
         let raw = std::env::var(variable)
             .map_err(|_| SignerError::Unreadable(format!("{variable} is not set")))?;
-        Self::from_json(&raw)
+        Self::from_text(&raw)
     }
 }
 
@@ -150,5 +165,27 @@ mod tests {
     #[test]
     fn rejects_a_truncated_key() {
         assert!(LocalKeypair::from_json("[1,2,3]").is_err());
+    }
+
+    #[test]
+    fn wallet_export_and_json_resolve_to_the_same_signer() {
+        let raw = sample();
+        let bytes: Vec<u8> = serde_json::from_str(&raw).unwrap();
+        let exported = format!("  {}\n", bs58::encode(&bytes).into_string());
+        let json = LocalKeypair::from_text(&raw).unwrap();
+        let base58 = LocalKeypair::from_text(&exported).unwrap();
+        assert_eq!(json.public_key(), base58.public_key());
+        assert_eq!(
+            json.sign(b"wallet export").unwrap(),
+            base58.sign(b"wallet export").unwrap()
+        );
+    }
+
+    #[test]
+    fn malformed_key_errors_do_not_echo_the_input() {
+        for raw in ["private-key-do-not-echo!", "[\"private-key-do-not-echo\"]"] {
+            let error = LocalKeypair::from_text(raw).err().unwrap().to_string();
+            assert!(!error.contains("private-key-do-not-echo"));
+        }
     }
 }

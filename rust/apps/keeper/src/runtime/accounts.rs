@@ -129,6 +129,23 @@ impl MarketAccounts {
         .collect()
     }
 
+    /// Liquidation interest can be distributed to active hLP even when the
+    /// collateral is purchased from inventory. The pinned program expects the
+    /// five-account prefix followed by both mints and reserve vaults, before any
+    /// oracle/hook suffix. Fixed instruction accounts do not satisfy this lookup.
+    pub fn hlp_income_remaining_accounts(&self) -> Vec<AccountMeta> {
+        let mut accounts = self.hlp_remaining_accounts();
+        if self.hlp_active {
+            accounts.extend([
+                AccountMeta::readonly(self.base_mint),
+                AccountMeta::readonly(self.quote_mint),
+                AccountMeta::writable(self.base_reserve_vault),
+                AccountMeta::writable(self.quote_reserve_vault),
+            ]);
+        }
+        accounts
+    }
+
     /// Oracle reports follow any positional hLP prefix and delegate hooks.
     /// A retained zero-weight policy has no feed dependency.
     pub fn oracle_remaining_accounts(&self) -> Vec<AccountMeta> {
@@ -401,7 +418,16 @@ mod tests {
         assert_eq!(prefix[4].pubkey, market.quote_interest_vault);
         assert!(prefix.iter().all(|meta| meta.is_writable));
 
+        let income = market.hlp_income_remaining_accounts();
+        assert_eq!(income.len(), 9);
+        assert_eq!(income[..5], prefix);
+        assert_eq!(income[5], AccountMeta::readonly(market.base_mint));
+        assert_eq!(income[6], AccountMeta::readonly(market.quote_mint));
+        assert_eq!(income[7], AccountMeta::writable(market.base_reserve_vault));
+        assert_eq!(income[8], AccountMeta::writable(market.quote_reserve_vault));
+
         market.hlp_active = false;
         assert!(market.hlp_remaining_accounts().is_empty());
+        assert!(market.hlp_income_remaining_accounts().is_empty());
     }
 }

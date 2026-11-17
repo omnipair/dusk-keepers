@@ -12,8 +12,8 @@
   },
   "protocol": {
     "revision": "mainnet-2026-11-14",
-    "lockStatus": "captured",
-    "lockSha256": "099b07f565fefc1445fe4f4f5d03a87208bdfc57c9c81723bb4f018409b75f9f",
+    "lockStatus": "frozen",
+    "lockSha256": "9f4ae3005f550d3ab84aafae378e0428104ed9bae885ad6d745b73f660b6aabc",
     "sourceWorktreeFingerprintSha256": "dbddb47606b50d279149d69a468568d9763c11b3a7f9e66da50d773ddad6f5b6"
   },
   "dependencies": {

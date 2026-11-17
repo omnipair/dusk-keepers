@@ -1,6 +1,8 @@
 # Keeper repository guardrails
 
 - `captured` protocol locks allow fixtures, shadow runtimes, and Surfpool work only. A live runtime must require `frozen`, verify every artifact/fingerprint, and pass the explicit live-release gate. Never weaken this check to unblock deployment.
+- Owner override on 2026-11-16: the remaining release-test matrix for `mainnet-2026-11-14` is explicitly waived; see `docs/evidence/mainnet-release-waiver.json`. Freeze these verified artifact pins without representing the skipped tests as passed. All runtime deployment, simulation, fee/reserve, lease and journal checks remain required. This waiver does not apply to other protocol revisions.
+- The owner also selected private-key files for the local mainnet launcher. Explicit `SIGNER_PROVIDER=local` is supported for that use; KMS remains available for hosted services. Never place a real key in the repository or print its contents.
 - User-authorized local devnet testing may explicitly opt in with `KEEPER_ALLOW_CAPTURED_DEVNET=1`: verify devnet genesis and exact captured deployment, discover all active supported markets, retain signing limits and PostgreSQL journaling, and recheck deployment before submission. This exception never freezes a captured lock or authorizes another network.
 - JSON Schemas, protocol artifacts, and golden fixtures are the cross-language contract. Rust and TypeScript implementations stay native and must pass the same fixtures; do not share implementation source across languages.
 - Indexer data may discover candidates but can never authorize execution. Re-read every safety-critical account through direct RPC immediately before evaluation, simulation, and any re-sign.

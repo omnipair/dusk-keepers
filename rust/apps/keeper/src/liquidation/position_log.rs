@@ -1,19 +1,10 @@
 //! Optional position diagnostics. Never used to authorize or size execution.
 use super::plan::{Context, Snapshot, address};
-use dusk_adapter::liquidation::LiquidationHealth;
+use crate::runtime::logging::{self, CYAN, GREEN, RED, YELLOW, paint, units};
+use dusk_adapter::liquidation::{FlashLiquidationQuote, LiquidationHealth};
 
 pub fn enabled() -> bool {
     std::env::var("KEEPER_LOG_POSITIONS").as_deref() == Ok("1")
-}
-
-// String arithmetic preserves token atoms, including values above JS/f64 precision.
-fn units(value: u128, decimals: u8) -> String {
-    if decimals == 0 {
-        return value.to_string();
-    }
-    let mut digits = format!("{value:0>width$}", width = usize::from(decimals) + 1);
-    digits.insert(digits.len() - usize::from(decimals), '.');
-    digits
 }
 
 fn ratio(numerator: u128, denominator: u128, decimals: u8) -> String {
@@ -53,7 +44,7 @@ fn health_text(health: &LiquidationHealth) -> String {
     )
 }
 
-fn amount(snapshot: &Snapshot, mint: [u8; 32], value: u64) -> String {
+pub(super) fn amount(snapshot: &Snapshot, mint: [u8; 32], value: u64) -> String {
     match snapshot
         .account(mint)
         .ok()
@@ -90,6 +81,14 @@ pub fn health(
     let metrics = health.map_or_else(
         || "state=DEBT_FREE health_factor=n/a eligible=false".into(),
         health_text,
+    );
+    let metrics = paint(
+        metrics,
+        if health.is_some_and(LiquidationHealth::eligible) {
+            RED
+        } else {
+            GREEN
+        },
     );
     let scope = monitor_reason.unwrap_or("supported market");
     println!(
@@ -128,13 +127,74 @@ pub fn unavailable(
 
 pub fn decision(position: [u8; 32], side: u8, detail: &str, signature: Option<&str>) {
     if enabled() {
-        println!(
-            "position_decision position={} debt_side={} detail={detail:?} signature={}",
-            address(position),
-            if side == 0 { "BASE" } else { "QUOTE" },
-            signature.unwrap_or("none")
-        );
+        logging::emit(paint(
+            format!(
+                "position_decision position={} debt_side={} detail={detail:?} signature={}",
+                address(position),
+                if side == 0 { "BASE" } else { "QUOTE" },
+                signature.unwrap_or("none")
+            ),
+            if signature.is_some() { GREEN } else { YELLOW },
+        ));
     }
+}
+
+pub fn progress(position: [u8; 32], stage: &str) {
+    if enabled() {
+        logging::emit(paint(
+            format!(
+                "liquidation_progress position={} stage={stage}",
+                address(position)
+            ),
+            CYAN,
+        ));
+    }
+}
+
+pub fn detail(position: [u8; 32], stage: &str, detail: &str) {
+    if enabled() {
+        logging::emit(paint(
+            format!(
+                "liquidation_detail position={} stage={stage} detail={detail:?}",
+                address(position)
+            ),
+            if stage.contains("rejected") || stage.contains("unavailable") {
+                YELLOW
+            } else {
+                CYAN
+            },
+        ));
+    }
+}
+
+pub fn inventory_quote(
+    c: &Context,
+    s: &Snapshot,
+    q: &FlashLiquidationQuote,
+    gross: u64,
+    available: u64,
+) {
+    if !enabled() {
+        return;
+    }
+    let debt = |value| amount(s, c.named["debt_mint"], value);
+    detail(
+        c.position,
+        "inventory_quote",
+        &format!(
+            "full={} repay={} liquidation_fee={} net_payment={} gross_wallet_payment={} transfer_fee={} wallet_available={} collateral_received={} debt_mint={} collateral_mint={} | no swap; no price or profit filter",
+            q.full,
+            debt(q.repayment),
+            debt(q.fee.total),
+            debt(q.payment),
+            debt(gross),
+            debt(gross.saturating_sub(q.payment)),
+            debt(available),
+            amount(s, c.named["collateral_mint"], q.collateral_credit),
+            address(c.named["debt_mint"]),
+            address(c.named["collateral_mint"]),
+        ),
+    );
 }
 
 #[cfg(test)]

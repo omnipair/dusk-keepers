@@ -168,6 +168,13 @@ export function resolveLiquidationAccounts(
         "quote_side.interest_vault",
       ].map((f) => m.key(f))
     : [];
+  // Public interest settlement reads these by identity from remaining accounts,
+  // even for an inventory purchase. The canonical extension precedes oracles.
+  const hlpIncome = active ? [
+    ...hlp.map(pubkey => ({ pubkey, writable: true })),
+    ...["base_side.asset_mint", "quote_side.asset_mint"].map(f => ({ pubkey: m.key(f), writable: false })),
+    ...["base_side.reserve_vault", "quote_side.reserve_vault"].map(f => ({ pubkey: m.key(f), writable: true })),
+  ] : [];
   const oracle: string[] = [];
   const weight = m.int("oracle.policy.lambda_bps");
   if (weight > 0n) {
@@ -186,6 +193,7 @@ export function resolveLiquidationAccounts(
   return {
     named,
     hlp,
+    hlpIncome,
     oracle,
     collateralReserve: m.key(`${collateral}_side.reserve_vault`),
     program,
@@ -219,12 +227,12 @@ export function liquidationInstruction(
       is_writable: a.writable && !!found,
     };
   });
-  if (internal)
+  if (internal || name === "settle_flash_liquidation")
     accounts.push(
-      ...context.hlp.map((k) => ({
-        pubkey: Array.from(bytes(k)),
+      ...context.hlpIncome.map((a) => ({
+        pubkey: Array.from(bytes(a.pubkey)),
         is_signer: false,
-        is_writable: true,
+        is_writable: a.writable,
       })),
     );
   accounts.push(...context.oracle.map(k => ({

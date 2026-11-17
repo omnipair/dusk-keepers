@@ -509,8 +509,24 @@ mod tests {
             let (first, _) = listener.accept().unwrap();
             drop(first);
             let (mut stream, _) = listener.accept().unwrap();
-            let mut request = [0; 4096];
-            assert!(stream.read(&mut request).unwrap() > 0);
+            stream
+                .set_read_timeout(Some(Duration::from_secs(2)))
+                .unwrap();
+            // Drain the request before closing the successful connection. A
+            // single read can contain only the headers; dropping a socket with
+            // unread request bytes can reset it and discard the response.
+            let mut request = Vec::new();
+            loop {
+                let mut chunk = [0; 4096];
+                let count = stream.read(&mut chunk).unwrap();
+                assert!(count > 0);
+                request.extend_from_slice(&chunk[..count]);
+                if let Some(body) = request.windows(4).position(|window| window == b"\r\n\r\n")
+                    && serde_json::from_slice::<serde_json::Value>(&request[body + 4..]).is_ok()
+                {
+                    break;
+                }
+            }
             let body = r#"{"jsonrpc":"2.0","id":1,"result":123}"#;
             write!(
                 stream,

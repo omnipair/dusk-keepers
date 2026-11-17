@@ -452,6 +452,11 @@ impl HlpJob<'_> {
             &std::env::var("DATABASE_URL")
                 .map_err(|_| "DATABASE_URL is required before signing")?,
         )?;
+        journal.set_token_debits(if action.starts_with("hlp_flash") {
+            crate::runtime::risk::inventory_debits(&instructions, fresh.buyer)?
+        } else {
+            vec![]
+        });
         let signature = journal.submit(
             self.client,
             self.signer,

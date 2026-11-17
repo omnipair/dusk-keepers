@@ -1,0 +1,223 @@
+{
+  "schemaVersion": 1,
+  "kind": "signed-offline-native-plan-execution",
+  "genesis": "9LiwEwEMogQRWiuoYHokpPzZ6HDqGz7WL86bZqPPE5F1",
+  "protocolRevision": "mainnet-2026-11-14",
+  "completeLiveReleaseMatrix": false,
+  "cases": [
+    {
+      "fixture": "fixtures/litesvm/01-flash-BorrowPosition.json",
+      "action": "flash",
+      "kind": "BorrowPosition",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "slot": 10002,
+      "signature": "3Pb4QEUb5Z9hjaq3m2WbhkZiMZ6DRXPVbEu8V9uPA8zp9VsX1UiNkjf6LCY72RmTFiNw8jLnWSFd7krcQbnBbdq2",
+      "signer": "6o5di6oqz2YbagqhSdEPFQZ41rbN7vEwsoWYcHoRtgfN",
+      "signatureVerified": true,
+      "forgedSignatureRejected": true,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/litesvm/02-emergency-BorrowPosition.json",
+      "action": "emergency",
+      "kind": "BorrowPosition",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "slot": 20003,
+      "signature": "3R9KcJUG1uaiyK3zKof4JS3XtSc34t7Pyon5iYYyAFd1nf21RhnmVS1GQB52dJEi3tBrRJGyWHYiFt3MQnTMNjtC",
+      "signer": "JB7vsWvdhRQRno71MDzJPMLGNafru4b7p2Hc1zZ4wDYN",
+      "signatureVerified": true,
+      "forgedSignatureRejected": true,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/litesvm/03-emergency-LeveragePosition.json",
+      "action": "emergency",
+      "kind": "LeveragePosition",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "slot": 21004,
+      "signature": "EyBiRhquzsadaMX9gk4oBWsTwKzRV35qCYnmw9uXyfyh5UWuFRYZQDPMDSbA9TvAoduZaMawZoZe62vhEE89NzZ",
+      "signer": "DDctWGjMD2q7saJSzFBg6QcBaZKjDW4CphuULc7B4nvo",
+      "signatureVerified": true,
+      "forgedSignatureRejected": true,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/litesvm/04-flash-BorrowPosition.json",
+      "action": "flash",
+      "kind": "BorrowPosition",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "slot": 33005,
+      "signature": "2ccup2GGtBYaJ6PTWsrcrhtKHrqHiaNr1g2fmYx7LaihTd4RiPWSgpAuJwTV6efEjSz2KC1SWNwjt48S6B61gdWg",
+      "signer": "FXacHZXnbNyFLfkG7wuQcK1F8o3wuoQSN2R3585WKcrW",
+      "signatureVerified": true,
+      "forgedSignatureRejected": true,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/litesvm/05-flash-LeveragePosition.json",
+      "action": "flash",
+      "kind": "LeveragePosition",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "slot": 33106,
+      "signature": "BJ1D8rZBGKd183nxb8BxtaFMfqjprY2KiBNrHWjAZQWkZsUF9yCnCDSP72tBz8hRp3mP91TrfrBSA9YgV6VwjUx",
+      "signer": "J64pfCxUQv1ZiBAyNtPozuEHZtEue4s5WPaj4nJDpVrj",
+      "signatureVerified": true,
+      "forgedSignatureRejected": true,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/litesvm/06-flash-LeveragePosition.json",
+      "action": "flash",
+      "kind": "LeveragePosition",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "slot": 33207,
+      "signature": "2dWyhoEPJAbVGCavhDYwwardEsi7JbpFB5JipMo1HrcnF4VXrSMWNJySW6CKJcok3457jtkFr8srr23eqS1p6iZB",
+      "signer": "54YnFtan9ff5W2BwQdNuiviZny1YBEVaawoNKwTKt5Xp",
+      "signatureVerified": true,
+      "forgedSignatureRejected": true,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/litesvm/07-flash-LeveragePosition.json",
+      "action": "flash",
+      "kind": "LeveragePosition",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "slot": 35008,
+      "signature": "4xUSBVnW6xyeVMhj4xBjNwbUf4a4RUAt5tFZmA3fWMgVSMLQJx48pExY2P5VvvEeaKHNKxNfmpDSUvSgbk8tBDRD",
+      "signer": "4bHMr86gdUcV61wLiFLSeqHAxeqmSYfLjAMTGVznaaaE",
+      "signatureVerified": true,
+      "forgedSignatureRejected": true,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/litesvm/08-flash-LeveragePosition.json",
+      "action": "flash",
+      "kind": "LeveragePosition",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "slot": 35109,
+      "signature": "5CbMJ2BeUb2LSzXFjmBocRGoB7LXYs1p365keanRGN16VeEMZEq5xmv3mXzNhAD5kCHQL2rz3ivXhUMwaxEyWiHv",
+      "signer": "AuqAyLEoXZo4PSeRWhGfH7HJn8WHrvE35GHDdYCFUYYE",
+      "signatureVerified": true,
+      "forgedSignatureRejected": true,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/litesvm/09-emergency-LeveragePosition.json",
+      "action": "emergency",
+      "kind": "LeveragePosition",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "slot": 35210,
+      "signature": "4BvogwmPUsNfyaWfo1La5soqMVRrbJPPrbUFEUD9L4ZTWsSreU5NT9L8D7Q66jC7ssBtg2YEcrq4ZDYUUfzwr3ce",
+      "signer": "663sGzCvXGTeNKAaf4AV4HFA2A6E4wRV1nrA94b2BYxt",
+      "signatureVerified": true,
+      "forgedSignatureRejected": true,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/litesvm/10-flash-LeveragePosition.json",
+      "action": "flash",
+      "kind": "LeveragePosition",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "slot": 37010,
+      "signature": "4hEjsMjLptgnWBiNfzT9QiD8SvnaTdjsbghR3R7rDbtAXPUHRusHVaTYP8sEyRLiQaGMdC6NmsRXYGSBoFU2GVnS",
+      "signer": "6VVQxe41kxZc73nTC3Kws6Q35wiHbhbc8Y2zBaguCBcF",
+      "signatureVerified": true,
+      "forgedSignatureRejected": true,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/litesvm/11-flash-LeveragePosition.json",
+      "action": "flash",
+      "kind": "LeveragePosition",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "slot": 37111,
+      "signature": "2AXYTVKjsKPTVCcJdXG1zoHeHpcQrnay35QtgjV6riaLc97Jz9CyU2jFEWtkchkYzHWFvZhBLT4g3sjjzXvUs2QN",
+      "signer": "8baZziWL15VHrva5k3viECs9zXTzjmcZAdtANh7khbS2",
+      "signatureVerified": true,
+      "forgedSignatureRejected": true,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/litesvm/12-flash-LeveragePosition.json",
+      "action": "flash",
+      "kind": "LeveragePosition",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "slot": 37212,
+      "signature": "278RuXcUw1i7J6uqqBAg79Kk3Np4faqMy6j6CxqRV7f14mYC9G8C93Kaw4BAnVTE3aXpttgvyVspBfhxrjTmCCbL",
+      "signer": "9umt9rbtu7ztAwe4kA6oJEScfPBXAW6Uij1oVT68SkYS",
+      "signatureVerified": true,
+      "forgedSignatureRejected": true,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/litesvm/13-flash-LeveragePosition.json",
+      "action": "flash",
+      "kind": "LeveragePosition",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "slot": 37313,
+      "signature": "2ssKoTG4tr1CHr46BKBtQs5nwhvJiN191WYKL46NXTHSsyrMmmuEGHscva2D4Tt4u4NZi8cnU73nihYGxUuqxe7a",
+      "signer": "HboPdHfytu9sikX5fAFpav6geKRQ2mBiwXL5d1z2RZ5v",
+      "signatureVerified": true,
+      "forgedSignatureRejected": true,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/hlp-litesvm/01-hlp_flash.json",
+      "action": "hlp_flash",
+      "kind": "Market",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "slot": 37414,
+      "signature": "3uyw3q1Men9qWRCuULGLJfZUeGquQz1YBK6LRnSoUyYLE9W3u17Yr2ZzNPRpUrzYcmjeP1Kc2NJGamycDTd3gBnz",
+      "signer": "63eN9eJNJSRu3VhAM9gghGaMFAdQBD9kTFsUFswGao4P",
+      "signatureVerified": true,
+      "forgedSignatureRejected": true,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/hlp-litesvm/02-hlp_flash.json",
+      "action": "hlp_flash",
+      "kind": "Market",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "slot": 37515,
+      "signature": "4Fje8fhSLPNH5LwDtbbFaUX3jMeKs3NbVouB54v5PVeadyzkc21RfuMgG9qM9Dhq8vL9RNcRp8QPQzciPNcZ3wP2",
+      "signer": "HDbhCnAv1XCb1NQkDVn9EUczA8Xpm1uEtiHH9uT6G4Y3",
+      "signatureVerified": true,
+      "forgedSignatureRejected": true,
+      "status": "passed"
+    },
+    {
+      "fixture": "fixtures/hlp-litesvm/03-hlp_close.json",
+      "action": "hlp_close",
+      "kind": "Market",
+      "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+      "slot": 37616,
+      "signature": "3LbTHBehb6CSPMyDgmB53RfsKp2ZeE9SQotcbEyiXL31ZWTz8zsgkmvGUvfwyLLVJpHMMKFY4Fsnw44QDZ6sD5BE",
+      "signer": "5XwAqZbeYGA9UdAnBCT62Rn8hZkhqpFTwmf7s5vCZ4VW",
+      "signatureVerified": true,
+      "forgedSignatureRejected": true,
+      "status": "passed"
+    }
+  ],
+  "keeperBaseCommit": "8617389ef1689abd9b60c366efece7d9b99997aa",
+  "validator": "surfpool 1.2.0, offline, signature checks enabled",
+  "reproduce": "SURFPOOL_REHEARSAL_RPC=http://127.0.0.1:18919 node --experimental-strip-types scripts/rehearse-signed-surfpool.mjs",
+  "artifacts": [
+    {
+      "name": "dusk",
+      "programId": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj",
+      "binarySha256": "047a30c6396791c962c62a958c1b099b12e5994bc07dfffc69d5bd2a91031b0a",
+      "idlSha256": "b78cbeef3301d2ba650e66065424356d410cbee94f43f2aea6912991ab79736a"
+    },
+    {
+      "name": "leverage_delegate",
+      "programId": "DeLegABhDLREbDpwwcsbkHvDS5MwqKPAw1CJKoooUXFQ",
+      "binarySha256": "0b62f3ea48dbddadf5935ec57f0de907bcf26b99793d6ce7c2155225097c5e6e",
+      "idlSha256": "a5047b952378f89c34ee94823d033ad43727b99e27615b0645a347a463ec8524"
+    }
+  ],
+  "limitations": [
+    "This validates signed captured liquidation and hLP plans only.",
+    "TP/SL, entry orders, auctions, lifecycle and the complete failure matrix are not signed Surfpool evidence in this receipt.",
+    "This is not authority to freeze the lock or activate mainnet."
+  ]
+}

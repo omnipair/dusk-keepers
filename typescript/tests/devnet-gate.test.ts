@@ -3,7 +3,7 @@ import test from "node:test";
 import { createServer } from "node:http";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { createHash } from "node:crypto";
@@ -20,7 +20,9 @@ function devnetTestContext() {
   deployment.artifactOrigin = "synthetic-local-rpc-gate-test";
   mkdirSync(join(root, "protocol"));
   symlinkSync(resolve("artifacts"), join(root, "artifacts"), "dir");
-  copyFileSync("protocol.lock.json", join(root, "protocol.lock.json"));
+  const lock = JSON.parse(readFileSync("protocol.lock.json", "utf8"));
+  lock.status = "captured";
+  writeFileSync(join(root, "protocol.lock.json"), JSON.stringify(lock));
   writeFileSync(join(root, "protocol/devnet-deployment.v1.json"), JSON.stringify(deployment));
   return { root, deployment };
 }

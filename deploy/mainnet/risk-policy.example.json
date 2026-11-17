@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "profiles": {
+    "lending": {
+      "fees": {
+        "perTransaction": "200000",
+        "perDay": "20000000"
+      },
+      "minimumSolReserve": "50000000"
+    },
+    "leverage": {
+      "fees": {
+        "perTransaction": "200000",
+        "perDay": "20000000"
+      },
+      "minimumSolReserve": "50000000"
+    },
+    "hlp-recovery": {
+      "fees": {
+        "perTransaction": "200000",
+        "perDay": "20000000"
+      },
+      "minimumSolReserve": "50000000"
+    },
+    "auction-arbitrage": {
+      "fees": {
+        "perTransaction": "200000",
+        "perDay": "20000000"
+      },
+      "minimumSolReserve": "50000000"
+    },
+    "lifecycle": {
+      "fees": {
+        "perTransaction": "200000",
+        "perDay": "20000000"
+      },
+      "minimumSolReserve": "50000000"
+    }
+  }
+}

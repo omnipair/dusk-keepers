@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { createServer, type Server } from "node:http";
 import { setTimeout as delay } from "node:timers/promises";
 import test, { type TestContext } from "node:test";
@@ -144,4 +144,23 @@ test("RPC discovery failure still fails readiness while liveness remains healthy
   assert.equal(result.body.status, "degraded");
   assert.match(result.body.reason, /fixture discovery unavailable/);
   assert.equal((await health(() => true, "/healthz")).status, 200);
+});
+
+test("a stalled discovery loop loses readiness while the process stays live", async t => {
+  const health = await startKeeper(t, { KEEPER_MAX_SCAN_AGE_MS: "300" });
+  assert.equal((await health(body => body.firstPassComplete)).status, 200);
+  const stale = await health(body => body.reason === "last completed scan is stale");
+  assert.equal(stale.status, 503);
+  assert.ok(stale.body.lastCompletedScanAgeMs >= 300);
+  assert.equal((await health(() => true, "/healthz")).status, 200);
+});
+
+test("malformed runtime limits fail startup instead of silently using defaults", () => {
+  for (const setting of ["DISCOVERY_INTERVAL_MS", "KEEPER_MAX_SCAN_AGE_MS", "KEEPER_MAX_SENDS_PER_PASS", "KEEPER_MINIMUM_LAMPORTS"]) {
+    const result = spawnSync("target/debug/dusk-keeper", ["--check"], {
+      env: { PATH: process.env.PATH, KEEPER_MODE: "shadow", [setting]: "broken" }, encoding: "utf8",
+    });
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, new RegExp(`invalid ${setting}`));
+  }
 });

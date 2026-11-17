@@ -43,6 +43,8 @@ pub struct LiquidationJob<'a> {
     pub max_sends: usize,
     pub priority_markets: &'a BTreeSet<[u8; 32]>,
 }
+type PreparedPlan = (Context, Snapshot, LiquidationPlan);
+
 struct LiquidationPlan {
     action: &'static str,
     instructions: Vec<Instruction>,
@@ -246,7 +248,12 @@ impl LiquidationJob<'_> {
         )?;
         let mut all = keys.to_vec();
         all.extend(c.named.values());
-        all.extend(c.market.hlp_remaining_accounts().iter().map(|a| a.pubkey));
+        all.extend(
+            c.market
+                .hlp_income_remaining_accounts()
+                .iter()
+                .map(|a| a.pubkey),
+        );
         all.extend(
             c.market
                 .oracle_remaining_accounts()
@@ -303,10 +310,46 @@ impl LiquidationJob<'_> {
         s: &Snapshot,
         ix: Instruction,
     ) -> Result<Option<T>> {
+        let ordinary = ix.data.get(..8)
+            == Some(sha2::Sha256::digest(b"global:preview_flash_liquidation")[..8].as_ref());
+        let stage = if ordinary {
+            "ordinary_preview"
+        } else {
+            "emergency_preview"
+        };
+        let amount = ix
+            .data
+            .get(9..17)
+            .and_then(|v| v.try_into().ok())
+            .map(u64::from_le_bytes);
+        let probe = format!(
+            "{}={} raw={} full={}",
+            if ordinary { "repay" } else { "collateral" },
+            amount.map_or_else(
+                || "unknown".into(),
+                |n| position_log::amount(
+                    s,
+                    c.named[if ordinary {
+                        "debt_mint"
+                    } else {
+                        "collateral_mint"
+                    }],
+                    n
+                )
+            ),
+            amount.map_or_else(|| "unknown".into(), |n| n.to_string()),
+            ix.data.get(17) == Some(&1)
+        );
+        position_log::detail(c.position, stage, &probe);
         let mut instructions = crate::liquidation::plan::resources()?;
         instructions.push(ix);
         let value = self.simulate(c, s, &instructions, &[])?;
         if !value["value"]["err"].is_null() {
+            position_log::detail(
+                c.position,
+                &format!("{stage}_rejected"),
+                &format!("{probe}; {}", rejection_detail(&value)),
+            );
             if compute_limit_rejection(&value) {
                 eprintln!(
                     "keeper liquidation probe exceeded transaction compute limit; trying other permitted sizes"
@@ -328,19 +371,7 @@ impl LiquidationJob<'_> {
         side: u8,
         monitor_reason: Option<&str>,
     ) -> Result<(Context, Snapshot, Option<LiquidationHealth>)> {
-        // A load-balanced RPC may transiently pair a Clock from a different
-        // bank with the account context. Retry the entire snapshot, never
-        // relax the equality check or merge accounts from separate reads.
-        let mut snapshot = self.fresh(position, kind, side);
-        for _ in 0..2 {
-            if snapshot.as_ref().err().map(String::as_str)
-                != Some("clock and RPC bank do not match")
-            {
-                break;
-            }
-            snapshot = self.fresh(position, kind, side);
-        }
-        let (c, s) = snapshot?;
+        let (c, s) = self.fresh(position, kind, side)?;
         if c.shares == 0 {
             position_log::health(&c, &s, None, None, monitor_reason);
             return Ok((c, s, None));
@@ -387,10 +418,10 @@ impl LiquidationJob<'_> {
         }
         let plan = select_liquidation(
             self.liquidation_mode,
-            || self.ordinary_plan(&c, &s, &health, jupiter_budget),
-            || self.emergency_plan(&c, &s),
+            || self.ordinary_with_refresh(c, s, health, jupiter_budget),
+            || self.emergency_with_refresh(position, kind, side),
         )?;
-        if let Some(plan) = plan {
+        if let Some((c, s, plan)) = plan {
             // Once a plan enters submission, every outcome returns to the journal.
             // Submission errors and unknown signatures never select another route.
             return self
@@ -407,25 +438,88 @@ impl LiquidationJob<'_> {
         Ok(Some((None, "eligible but unfilled: no adaptively searched permitted route met the configured payment/profit bounds".into())))
     }
 
+    fn ordinary_with_refresh(
+        &self,
+        c: Context,
+        s: Snapshot,
+        health: LiquidationHealth,
+        jupiter_budget: &mut usize,
+    ) -> Result<Option<PreparedPlan>> {
+        let mut jupiter_builds = if settlement()? == Settlement::Jupiter {
+            crate::routing::jupiter::Config::from_env()?.attempts
+        } else {
+            0
+        };
+        if let Some(plan) =
+            self.ordinary_plan(&c, &s, &health, jupiter_budget, &mut jupiter_builds, false)?
+        {
+            return Ok(Some((c, s, plan)));
+        }
+        position_log::decision(
+            c.position,
+            c.debt_asset,
+            "ordinary_fallback: refreshing state and health before full liquidation",
+            None,
+        );
+        let (c, s, health) = self.inspect_health(c.position, &c.kind, c.debt_asset, None)?;
+        let Some(health) = health.filter(|health| health.eligible()) else {
+            return Ok(None);
+        };
+        if !c.setup(&s)?.is_empty() {
+            return Err(
+                "wallet accounts changed during full-liquidation refresh; retry next pass".into(),
+            );
+        }
+        let plan =
+            self.ordinary_plan(&c, &s, &health, jupiter_budget, &mut jupiter_builds, true)?;
+        Ok(plan.map(|plan| (c, s, plan)))
+    }
+
+    fn emergency_with_refresh(
+        &self,
+        position: [u8; 32],
+        kind: &str,
+        side: u8,
+    ) -> Result<Option<PreparedPlan>> {
+        position_log::decision(
+            position,
+            side,
+            "emergency_eligibility: refreshing state and health before emergency liquidation",
+            None,
+        );
+        let (c, s, health) = self.inspect_health(position, kind, side, None)?;
+        if !health.is_some_and(|health| health.emergency_allowed()) {
+            position_log::decision(
+                position,
+                side,
+                "emergency_unavailable: refreshed health is outside emergency eligibility",
+                None,
+            );
+            return Ok(None);
+        }
+        if !c.setup(&s)?.is_empty() {
+            return Err("wallet accounts changed during emergency refresh; retry next pass".into());
+        }
+        // Eligibility is only a prefilter. The on-chain preview must separately
+        // approve the size, health improvement and any full-close permission.
+        let plan = self.emergency_plan(&c, &s)?;
+        Ok(plan.map(|plan| (c, s, plan)))
+    }
+
     fn ordinary_plan(
         &self,
         c: &Context,
         s: &Snapshot,
         health: &LiquidationHealth,
         jupiter_budget: &mut usize,
+        jupiter_builds: &mut usize,
+        full_only: bool,
     ) -> Result<Option<LiquidationPlan>> {
+        position_log::progress(c.position, "searching ordinary liquidation routes");
         if settlement()? == Settlement::Jupiter {
-            return self.jupiter_plan(c, s, health, jupiter_budget);
+            return self.jupiter_plan(c, s, health, jupiter_budget, jupiter_builds, full_only);
         }
         let inventory = self.inventory_mode()?;
-        if inventory {
-            let market = std::env::var("KEEPER_FLASH_MARKET")
-                .map_err(|_| "KEEPER_FLASH_MARKET is required for inventory settlement")?;
-            key(&market)?;
-            if market != address(c.market.address) {
-                return Ok(None);
-            }
-        }
         let minimum_profit = if inventory {
             0
         } else {
@@ -435,37 +529,100 @@ impl LiquidationJob<'_> {
         if cap == 0 {
             return Err("KEEPER_FLASH_MAX_REPAY must be positive".into());
         }
-        let partial = search_profitable(cap.min(health.debt), minimum_profit, |repay| {
-            let Some(q) = self.preview::<FlashLiquidationQuote>(
-                c,
-                s,
-                c.preview_flash(self.contract, repay, false)?,
-            )?
-            else {
+        let partial_cap = if inventory {
+            let available = crate::liquidation::plan::token_amount(
+                &s.account(c.named["buyer_refund_account"])?.data,
+            )
+            .ok_or("inventory debt token balance unavailable")?;
+            let payment_cap = required_u64("KEEPER_FLASH_MAX_PAYMENT_DEBIT")?;
+            let minimum_collateral = required_u64("KEEPER_FLASH_MIN_COLLATERAL_CREDIT")?;
+            position_log::detail(
+                c.position,
+                "ordinary_inventory",
+                &format!(
+                    "wallet={} debt_mint={} collateral_mint={} balance={} balance_raw={available} max_repay_raw={cap} max_payment_raw={payment_cap} min_collateral_raw={minimum_collateral} | pay debt tokens; retain collateral; no swap; no price or profit filter",
+                    address(c.buyer),
+                    address(c.named["debt_mint"]),
+                    address(c.named["collateral_mint"]),
+                    position_log::amount(s, c.named["debt_mint"], available),
+                ),
+            );
+            if available == 0 || payment_cap == 0 {
+                position_log::detail(
+                    c.position,
+                    "ordinary_unavailable",
+                    "no spendable debt-token inventory or payment budget",
+                );
                 return Ok(None);
-            };
-            // Score without the final floor, then rebuild and recheck the winner
-            // with that floor enforced on chain.
-            let Some(ixs) = self.flash_plan(c, s, &q, repay, 0)? else {
-                return Ok(None);
-            };
-            Ok(self
-                .liquidation_profit(c, s, &ixs, q.full)?
-                .map(|profit| (profit, (repay, q))))
-        })?;
-        if let Some((repay, quote)) = partial {
-            let instructions = self
-                .flash_plan(c, s, &quote, repay, minimum_profit)?
-                .ok_or("selected flash route no longer meets configured bounds")?;
-            if !self.profitable(c, s, &instructions, minimum_profit, false)? {
-                return Err("selected flash route failed protected revalidation".into());
             }
-            return Ok(Some(LiquidationPlan {
-                action: "flash",
-                instructions,
-                minimum_profit,
-                route_state: None,
-            }));
+            cap.min(health.debt).min(available).min(payment_cap)
+        } else {
+            cap.min(health.debt)
+        };
+        if !full_only {
+            let mut rejected = false;
+            let partial = search_profitable(partial_cap, minimum_profit, |repay| {
+                if rejected {
+                    return Ok(None);
+                }
+                let Some(q) = self.preview::<FlashLiquidationQuote>(
+                    c,
+                    s,
+                    c.preview_flash(self.contract, repay, false)?,
+                )?
+                else {
+                    return Ok(None);
+                };
+                // Score without the final floor, then rebuild and recheck the winner
+                // with that floor enforced on chain.
+                let Some(ixs) = self.flash_plan(c, s, &q, repay, 0)? else {
+                    return Ok(None);
+                };
+                let profit = self.liquidation_profit(c, s, &ixs, q.full)?;
+                // Expected execution rejection ends this search. Further candidates
+                // must use a fresh snapshot; unexpected errors propagate above.
+                rejected = profit.is_none();
+                Ok(profit.map(|profit| (profit, (repay, q))))
+            })?;
+            if rejected {
+                position_log::decision(
+                    c.position,
+                    c.debt_asset,
+                    "partial_simulation_rejected: discarding quote before full-liquidation refresh",
+                    None,
+                );
+                return Ok(None);
+            }
+            if let Some((repay, quote)) = partial {
+                let instructions = self
+                    .flash_plan(c, s, &quote, repay, minimum_profit)?
+                    .ok_or("selected flash route no longer meets configured bounds")?;
+                if !self.profitable(c, s, &instructions, minimum_profit, false)? {
+                    position_log::decision(
+                        c.position,
+                        c.debt_asset,
+                        "partial_revalidation_rejected: discarding quote before full-liquidation refresh",
+                        None,
+                    );
+                    return Ok(None);
+                }
+                position_log::detail(
+                    c.position,
+                    "ordinary_selected",
+                    if inventory {
+                        "inventory partial; payment and collateral verified by simulation"
+                    } else {
+                        "swap settlement partial; profit verified by simulation"
+                    },
+                );
+                return Ok(Some(LiquidationPlan {
+                    action: "flash",
+                    instructions,
+                    minimum_profit,
+                    route_state: None,
+                }));
+            }
+            return Ok(None);
         }
         if cap >= health.debt
             && let Some(q) = self.preview::<FlashLiquidationQuote>(
@@ -476,6 +633,15 @@ impl LiquidationJob<'_> {
             && let Some(instructions) = self.flash_plan(c, s, &q, cap, minimum_profit)?
             && self.profitable(c, s, &instructions, minimum_profit, q.full)?
         {
+            position_log::detail(
+                c.position,
+                "ordinary_selected",
+                if inventory {
+                    "inventory full; payment and collateral verified by simulation"
+                } else {
+                    "swap settlement full; profit verified by simulation"
+                },
+            );
             return Ok(Some(LiquidationPlan {
                 action: "flash_full",
                 instructions,
@@ -483,10 +649,26 @@ impl LiquidationJob<'_> {
                 route_state: None,
             }));
         }
+        if cap < health.debt {
+            position_log::detail(
+                c.position,
+                "ordinary_full_unavailable",
+                &format!(
+                    "repayment cap {cap} raw is below debt {} raw; full preview not attempted",
+                    health.debt
+                ),
+            );
+        }
+        position_log::detail(
+            c.position,
+            "ordinary_unavailable",
+            "no tested ordinary amount passed the logged quote, funding and simulation checks",
+        );
         Ok(None)
     }
 
     fn emergency_plan(&self, c: &Context, s: &Snapshot) -> Result<Option<LiquidationPlan>> {
+        position_log::progress(c.position, "searching emergency liquidation sizes");
         let minimum_profit = required_u64("KEEPER_LIQUIDATION_MIN_PROFIT")?;
         let slippage_bps = std::env::var("KEEPER_EMERGENCY_SLIPPAGE_BPS")
             .unwrap_or_else(|_| "0".into())
@@ -574,9 +756,31 @@ impl LiquidationJob<'_> {
     ) -> Result<Option<Vec<Instruction>>> {
         if self.inventory_mode()? {
             let (payment, gross) = crate::liquidation::plan::inventory_payment(c, s, q.payment)?;
-            if gross > required_u64("KEEPER_FLASH_MAX_PAYMENT_DEBIT")?
-                || q.collateral_credit < required_u64("KEEPER_FLASH_MIN_COLLATERAL_CREDIT")?
-            {
+            let available = crate::liquidation::plan::token_amount(
+                &s.account(c.named["buyer_refund_account"])?.data,
+            )
+            .ok_or("inventory debt token balance unavailable")?;
+            let cap = required_u64("KEEPER_FLASH_MAX_PAYMENT_DEBIT")?;
+            let min_collateral = required_u64("KEEPER_FLASH_MIN_COLLATERAL_CREDIT")?;
+            position_log::inventory_quote(c, s, q, gross, available);
+            let reason = if gross > available {
+                Some("insufficient debt-token inventory")
+            } else if gross > cap {
+                Some("gross wallet payment exceeds configured maximum")
+            } else if q.collateral_credit < min_collateral {
+                Some("net collateral below configured minimum")
+            } else {
+                None
+            };
+            if let Some(reason) = reason {
+                position_log::detail(
+                    c.position,
+                    "inventory_quote_rejected",
+                    &format!(
+                        "{reason}; required_payment_raw={gross} available_raw={available} payment_cap_raw={cap} collateral_raw={} min_collateral_raw={min_collateral}",
+                        q.collateral_credit
+                    ),
+                );
                 return Ok(None);
             }
             c.flash(
@@ -614,9 +818,17 @@ impl LiquidationJob<'_> {
         minimum: u64,
         full: bool,
     ) -> Result<bool> {
-        Ok(self
-            .liquidation_profit(c, s, ixs, full)?
-            .is_some_and(|profit| profit >= minimum))
+        let profit = self.liquidation_profit(c, s, ixs, full)?;
+        if let Some(profit) = profit
+            && profit < minimum
+        {
+            position_log::detail(
+                c.position,
+                "simulation_rejected",
+                &format!("debt-token gain {profit} raw below minimum {minimum} raw"),
+            );
+        }
+        Ok(profit.is_some_and(|profit| profit >= minimum))
     }
     fn liquidation_profit(
         &self,
@@ -640,6 +852,11 @@ impl LiquidationJob<'_> {
         }
         let value = self.simulate(c, s, ixs, &post)?;
         if !value["value"]["err"].is_null() {
+            position_log::detail(
+                c.position,
+                "execution_simulation_rejected",
+                &rejection_detail(&value),
+            );
             if compute_limit_rejection(&value) {
                 eprintln!(
                     "keeper liquidation execution exceeded transaction compute limit; trying other permitted sizes"
@@ -707,11 +924,39 @@ impl LiquidationJob<'_> {
         if inventory {
             let cap = required_u64("KEEPER_FLASH_MAX_PAYMENT_DEBIT")?;
             let min_credit = required_u64("KEEPER_FLASH_MIN_COLLATERAL_CREDIT")?;
+            position_log::detail(
+                c.position,
+                "inventory_simulation",
+                &format!(
+                    "SIMULATED wallet_payment={} collateral_received={} debt_balance={} -> {} collateral_balance={} -> {} debt_mint={} collateral_mint={}",
+                    position_log::amount(
+                        s,
+                        c.named["debt_mint"],
+                        debt_before.saturating_sub(debt_after)
+                    ),
+                    position_log::amount(
+                        s,
+                        c.named["collateral_mint"],
+                        collateral_after.saturating_sub(collateral_before)
+                    ),
+                    position_log::amount(s, c.named["debt_mint"], debt_before),
+                    position_log::amount(s, c.named["debt_mint"], debt_after),
+                    position_log::amount(s, c.named["collateral_mint"], collateral_before),
+                    position_log::amount(s, c.named["collateral_mint"], collateral_after),
+                    address(c.named["debt_mint"]),
+                    address(c.named["collateral_mint"]),
+                ),
+            );
             if debt_before.saturating_sub(debt_after) > cap
                 || collateral_after
                     .checked_sub(collateral_before)
                     .is_none_or(|v| v < min_credit)
             {
+                position_log::detail(
+                    c.position,
+                    "inventory_simulation_rejected",
+                    "wallet debit or net collateral credit violates configured bounds",
+                );
                 return Ok(None);
             }
         }
@@ -719,14 +964,31 @@ impl LiquidationJob<'_> {
             0
         } else {
             let Some(profit) = debt_after.checked_sub(debt_before) else {
+                position_log::detail(
+                    c.position,
+                    "simulation_rejected",
+                    "swap settlement would spend existing debt-token inventory",
+                );
                 return Ok(None);
             };
             if collateral_after < collateral_before {
+                position_log::detail(
+                    c.position,
+                    "simulation_rejected",
+                    "swap settlement would spend existing collateral inventory",
+                );
                 return Ok(None);
             }
             profit
         };
         let Some(position_after) = post_bytes(&value, 0)? else {
+            if !full {
+                position_log::detail(
+                    c.position,
+                    "simulation_rejected",
+                    "partial plan unexpectedly closed the position",
+                );
+            }
             return Ok(full.then_some(profit));
         };
         let r = self.layout.reader(&c.kind).map_err(|e| e.to_string())?;
@@ -743,7 +1005,25 @@ impl LiquidationJob<'_> {
                 .try_into()
                 .map_err(|_| "shares post length")?,
         );
-        Ok((remaining < c.shares && (!full || remaining == 0)).then_some(profit))
+        let reduced = remaining < c.shares && (!full || remaining == 0);
+        position_log::detail(
+            c.position,
+            if reduced {
+                "simulation_accepted"
+            } else {
+                "simulation_rejected"
+            },
+            &format!(
+                "full={full} debt_shares={} -> {remaining} debt_token_profit_raw={} inventory_purchase={inventory}",
+                c.shares,
+                if inventory {
+                    "n/a".into()
+                } else {
+                    profit.to_string()
+                }
+            ),
+        );
+        Ok(reduced.then_some(profit))
     }
     fn submit(
         &self,
@@ -778,6 +1058,11 @@ impl LiquidationJob<'_> {
         if state_hash(s, c.epoch)? != state_hash(&now, fresh.epoch)? {
             return Err("state or fee epoch changed; requote".into());
         }
+        position_log::detail(
+            c.position,
+            "pre_submit_revalidation",
+            &format!("action={action}; freshly read accounts match; checking execution again"),
+        );
         if liquidation && !self.profitable(&fresh, &now, &ixs, minimum, action.ends_with("full"))? {
             return Err("execution no longer meets bounds".into());
         }
@@ -805,6 +1090,11 @@ impl LiquidationJob<'_> {
             &std::env::var("DATABASE_URL")
                 .map_err(|_| "DATABASE_URL is required before signing")?,
         )?;
+        journal.set_token_debits(if self.inventory_mode()? && action.starts_with("flash") {
+            crate::runtime::risk::inventory_debits(&ixs, fresh.buyer)?
+        } else {
+            vec![]
+        });
         jupiter::check_deadline(route_state)?;
         let signature = journal.submit_before(
             self.client,
