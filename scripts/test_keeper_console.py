@@ -128,6 +128,17 @@ class ConsoleTests(unittest.TestCase):
         self.assertIn('0.05 SOL', messages[0][0])
         self.assertIn('recovered', formatter.health({'status': 'ready'})[0][0])
 
+    def test_closed_position_order_is_a_readable_skip_not_a_worker_error(self):
+        formatter = HumanLogs()
+        line = f'order_skipped order={MINT} position={POSITION} reason=position_closed'
+        output = render(formatter, [line])
+        self.assertIn('its position', output)
+        self.assertIn('no longer exists', output)
+        self.assertIn('Continuing with other orders', output)
+        self.assertNotIn('=', output)
+        self.assertNotIn('Error', output)
+        self.assertEqual(render(formatter, [line]), '')
+
     def test_unknown_diagnostics_never_dump_raw_data(self):
         output = render(HumanLogs(), ['new_diagnostic payload={"very":"technical"}', 'Error: {"unknown":{"data":1}}'])
         self.assertIn('saved', output)

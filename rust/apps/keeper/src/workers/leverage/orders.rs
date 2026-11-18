@@ -539,6 +539,77 @@ pub struct OrderJob<'a> {
     pub max_sends: usize,
 }
 
+/// Only an explicit null from a fresh RPC snapshot resolves a vanished target.
+/// Missing snapshot entries, invalid owners/layouts and RPC failures remain errors.
+#[derive(Debug)]
+enum CaptureError {
+    OrderClosed,
+    PositionClosed([u8; 32]),
+    Invalid(String),
+}
+
+impl From<String> for CaptureError {
+    fn from(detail: String) -> Self {
+        Self::Invalid(detail)
+    }
+}
+
+impl From<&str> for CaptureError {
+    fn from(detail: &str) -> Self {
+        Self::Invalid(detail.to_owned())
+    }
+}
+
+type CaptureResult<T> = std::result::Result<T, CaptureError>;
+
+fn explicitly_absent(snapshot: &Snapshot, account: [u8; 32]) -> CaptureResult<bool> {
+    snapshot
+        .accounts
+        .get(&address(account))
+        .map(Option::is_none)
+        .ok_or_else(|| CaptureError::Invalid("order snapshot omitted a required account".into()))
+}
+
+fn read_order_position(
+    orders: &AccountLayoutManifest,
+    snapshot: &Snapshot,
+    order: [u8; 32],
+    kind: &str,
+) -> CaptureResult<Option<[u8; 32]>> {
+    if explicitly_absent(snapshot, order)? {
+        return Err(CaptureError::OrderClosed);
+    }
+    let raw = snapshot.owned(order, key(&orders.program_id)?)?;
+    if raw.get(..8) != Some(account_discriminator(kind).as_slice()) {
+        return Err("order discriminator".into());
+    }
+    // Entry orders create their position; a missing entry target is expected.
+    if kind != "LeverageOrder" {
+        return Ok(None);
+    }
+    Ok(Some(
+        orders
+            .reader(kind)
+            .map_err(|error| error.to_string())?
+            .pubkey("position", raw)
+            .map_err(|error| error.to_string())?,
+    ))
+}
+
+fn check_capture_targets(
+    orders: &AccountLayoutManifest,
+    snapshot: &Snapshot,
+    order: [u8; 32],
+    kind: &str,
+) -> CaptureResult<()> {
+    if let Some(position) = read_order_position(orders, snapshot, order, kind)?
+        && explicitly_absent(snapshot, position)?
+    {
+        return Err(CaptureError::PositionClosed(position));
+    }
+    Ok(())
+}
+
 fn balance(data: Option<&[u8]>) -> Result<u64> {
     match data {
         None => Ok(0),
@@ -665,11 +736,12 @@ impl OrderJob<'_> {
         order: [u8; 32],
         market: [u8; 32],
         kind: &str,
-    ) -> Result<(OrderPlan, Snapshot)> {
+    ) -> CaptureResult<(OrderPlan, Snapshot)> {
         let program = key(&self.layout.program_id)?;
         let floor = self.client.slot().map_err(|e| e.to_string())?;
         let first =
             Snapshot::fetch(self.client, &[order, market], floor).map_err(|e| e.to_string())?;
+        let position = read_order_position(orders, &first, order, kind)?;
         let m = MarketAccounts::decode(self.layout, market, first.owned(market, program)?)
             .ok_or("order market layout")?;
         let mut keys = vec![
@@ -679,16 +751,11 @@ impl OrderJob<'_> {
             m.quote_mint,
             pda(program, &[b"futarchy_authority"])?,
         ];
-        if kind == "LeverageOrder" {
-            keys.push(
-                orders
-                    .reader(kind)
-                    .map_err(|e| e.to_string())?
-                    .pubkey("position", first.owned(order, key(&orders.program_id)?)?)
-                    .map_err(|e| e.to_string())?,
-            );
+        if let Some(position) = position {
+            keys.push(position);
         }
         let second = Snapshot::fetch(self.client, &keys, first.slot).map_err(|e| e.to_string())?;
+        check_capture_targets(orders, &second, order, kind)?;
         let draft = build_order_plan(
             self.contract,
             self.layout,
@@ -713,6 +780,7 @@ impl OrderJob<'_> {
         keys.sort();
         keys.dedup();
         let full = Snapshot::fetch(self.client, &keys, second.slot).map_err(|e| e.to_string())?;
+        check_capture_targets(orders, &full, order, kind)?;
         let plan = build_order_plan(
             self.contract,
             self.layout,
@@ -753,13 +821,41 @@ impl OrderJob<'_> {
         };
         let (plan, snapshot) = match self.capture(orders, order, market, kind) {
             Ok(value) => value,
-            Err(detail)
+            Err(CaptureError::OrderClosed) => {
+                crate::runtime::logging::emit(format!(
+                    "order_skipped order={} reason=order_closed",
+                    address(order)
+                ));
+                let (mut report, eligible) = skipped(
+                    ReasonCode::AlreadyResolved,
+                    "Order no longer exists; continuing with other orders".into(),
+                );
+                report.race = Some(keeper_core::lifecycle::ExpectedRace::OrderAlreadyClosed);
+                return Ok((report, eligible));
+            }
+            Err(CaptureError::PositionClosed(position)) => {
+                crate::runtime::logging::emit(format!(
+                    "order_skipped order={} position={} reason=position_closed",
+                    address(order),
+                    address(position)
+                ));
+                let (mut report, eligible) = skipped(
+                    ReasonCode::AlreadyResolved,
+                    format!(
+                        "Order refers to a position that no longer exists ({}); continuing with other orders",
+                        address(position)
+                    ),
+                );
+                report.race = Some(keeper_core::lifecycle::ExpectedRace::PositionAlreadyClosed);
+                return Ok((report, eligible));
+            }
+            Err(CaptureError::Invalid(detail))
                 if detail == "order is no longer open"
                     || detail.starts_with("retired hLP order") =>
             {
                 return Ok(skipped(ReasonCode::AlreadyResolved, detail));
             }
-            Err(error) => return Err(error),
+            Err(CaptureError::Invalid(error)) => return Err(error),
         };
         let payout_mint = plan.named.get("debt_mint").copied().unwrap_or_else(|| {
             plan.named[if plan.side == 0 {
