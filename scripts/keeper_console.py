@@ -175,6 +175,12 @@ class HumanLogs:
                              'Position ' + short(data.get('position', '?')) + ': ' + reason(data.get('detail')), '33')
         if text.startswith('keeper executed '):
             return self.submitted(data.get('signature', '-'))
+        if text.startswith('order_skipped '):
+            order = short(data.get('order', '?'))
+            message = ('Skipping order ' + order + ': its position ' + short(data.get('position', '?')) +
+                       ' no longer exists. Continuing with other orders.' if data.get('reason') == 'position_closed'
+                       else 'Order ' + order + ' no longer exists. Continuing with other orders.')
+            return self.once(('closed-order', data.get('order')), message, '2')
         if text.startswith(('keeper unclassified ', 'keeper submit_failed ')):
             detail = text.split('detail=', 1)[-1]
             prefix = 'Submission needs attention' if 'submit_failed' in text else 'Could not execute'

@@ -568,6 +568,8 @@ const bountyCases: {
   minimum?: string;
   rejected?: boolean;
   rewardDebit?: boolean;
+  captureFault?: "position_closed" | "order_closed" | "position_closed_late" | "order_closed_late" | "wrong_position_owner" | "missing_mint" | "incomplete_snapshot";
+  assemblyError?: RegExp;
 }[] = [
   { name: "paid entry", kind: "LeverageEntryOrder", minimum: "1" },
   { name: "paid hLP order", kind: "HlpOrder", minimum: "1" },
@@ -598,6 +600,13 @@ const bountyCases: {
     rewardDebit: true,
     rejected: true,
   },
+  { name: "entry after an orphaned exit order", kind: "LeverageEntryOrder", captureFault: "position_closed" },
+  { name: "entry after an order closes during discovery", kind: "LeverageEntryOrder", captureFault: "order_closed" },
+  { name: "entry after an exit position closes during full capture", kind: "LeverageEntryOrder", captureFault: "position_closed_late" },
+  { name: "entry after an exit order closes during full capture", kind: "LeverageEntryOrder", captureFault: "order_closed_late" },
+  { name: "wrong position ownership remains an error", kind: "LeverageEntryOrder", captureFault: "wrong_position_owner", assemblyError: /account owner mismatch/ },
+  { name: "missing mint remains an error", kind: "LeverageEntryOrder", captureFault: "missing_mint", assemblyError: /missing data account/ },
+  { name: "incomplete RPC snapshot remains an error", kind: "LeverageEntryOrder", captureFault: "incomplete_snapshot", assemblyError: /stale\/incomplete snapshot/ },
 ];
 for (const {
   name,
@@ -606,11 +615,34 @@ for (const {
   minimum,
   rejected,
   rewardDebit,
+  captureFault,
+  assemblyError,
 } of bountyCases)
   test(`native leverage worker evaluates ${name} through RPC`, async () => {
     const c = kind === "HlpOrder" ? hlpSetup(0) : entrySetup({ bounty });
     const svm = c.svm;
     const keys = [...Object.keys(c.f.bank), c.order.toBase58()];
+    // An exit order is scanned before the valid entry order. Its original
+    // position is different from the entry's not-yet-created target.
+    let obsoleteOrder: string | undefined;
+    let obsoletePosition: string | undefined;
+    let missingMint: string | undefined;
+    let fullCaptureFaults = 0;
+    if (captureFault) {
+      const positionKey = new PublicKey(c.f.position);
+      const pos = decode(dusk, "LeveragePosition", svm.getAccount(positionKey)!.data);
+      const [order, bump] = pda(delegatedProgram, "leverage_order", positionKey, pos.owner, u64(102));
+      put(svm, order, delegatedProgram, data(delegate, "LeverageOrder", {
+        owner: pos.owner, market: pos.market, position: positionKey,
+        open_curve_revision: pos.open_curve_revision, order_id: bn(102),
+        kind: 1, trigger_price_nad: bn(1), min_owner_payout: bn(1), close_bps: 10000, bump,
+      }));
+      keys.push(order.toBase58());
+      obsoleteOrder = order.toBase58();
+      obsoletePosition = positionKey.toBase58();
+      const market = decode(dusk, "Market", svm.getAccount(pos.market)!.data);
+      missingMint = (pos.debt_asset === 0 ? market.base_side : market.quote_side).asset_mint.toBase58();
+    }
     let simulations = 0;
     const rpcAccount = (a: any) => {
       if (!a) return null;
@@ -634,13 +666,24 @@ for (const {
         const context = { slot: Number(svm.getClock().slot) };
         let answer: any;
         if (call.method === "getSlot") answer = context.slot;
-        else if (call.method === "getMultipleAccounts")
+        else if (call.method === "getMultipleAccounts") {
+          const targetsObsolete = obsoleteOrder !== undefined && p[0].includes(obsoleteOrder);
+          const fullCapture = targetsObsolete && p[0].length > 6;
+          if (fullCapture) fullCaptureFaults++;
           answer = {
             context,
-            value: p[0].map((k: string) =>
-              rpcAccount(svm.getAccount(new PublicKey(k))),
-            ),
+            value: p[0].map((k: string) => {
+              const account = rpcAccount(svm.getAccount(new PublicKey(k)));
+              if (!targetsObsolete) return account;
+              if (k === obsoleteOrder && (captureFault === "order_closed" || (captureFault === "order_closed_late" && fullCapture))) return null;
+              if (k === obsoletePosition && (captureFault === "position_closed" || (captureFault === "position_closed_late" && fullCapture))) return null;
+              if (k === obsoletePosition && captureFault === "wrong_position_owner" && account) return { ...account, owner: PublicKey.default.toBase58() };
+              if (k === missingMint && captureFault === "missing_mint") return null;
+              return account;
+            }),
           };
+          if (targetsObsolete && captureFault === "incomplete_snapshot") answer.value.pop();
+        }
         else if (call.method === "getProgramAccounts") {
           const allowed = [
             "Market",
@@ -748,6 +791,7 @@ for (const {
               SOLANA_RPC_HTTP_URL: `http://127.0.0.1:${(server.address() as any).port}`,
               KEEPER_LIQUIDATION_LOOKUP_TABLE: key("order lookup").toBase58(),
               KEEPER_ORDER_MIN_BOUNTY_CREDIT: minimum,
+              KEEPER_MAX_SENDS_PER_PASS: "1",
             },
           });
           let output = "";
@@ -757,15 +801,31 @@ for (const {
           proc.on("exit", (code) => resolve({ code, output }));
         },
       );
+      if (assemblyError) {
+        assert.equal(run.code, 1, run.output);
+        assert.match(run.output, assemblyError);
+        assert.doesNotMatch(run.output, /order_skipped/);
+        assert.equal(simulations, 0, "invalid dependencies must stop before simulation");
+        return;
+      }
       assert.equal(run.code, 0, run.output);
-      assert.match(
-        run.output,
-        rejected
-          ? /order bounty is below the configured net-credit bound/
-          : new RegExp(
-              `shadow ${kind}: native trigger, settlement and bounty checks passed`,
-            ),
-      );
+      if (captureFault) {
+        assert.match(run.output, /order_skipped/);
+        assert.match(run.output, /keeper_once evaluated=2/,
+          "a resolved order must not consume the single-send budget or block the next entry");
+        assert.doesNotMatch(run.output, /error=Some/);
+        if (captureFault.endsWith("_late")) assert.equal(fullCaptureFaults, 1,
+          "the closure must occur after a successful draft, during final account capture");
+      } else {
+        assert.match(
+          run.output,
+          rejected
+            ? /order bounty is below the configured net-credit bound/
+            : new RegExp(
+                `shadow ${kind}: native trigger, settlement and bounty checks passed`,
+              ),
+        );
+      }
       assert.equal(simulations, 1);
       assert.ok(
         (svm.getAccount(c.order)?.lamports ?? 0n) > 0n,
