@@ -1,9 +1,9 @@
 {
   "$schema": "./schemas/account-layout.schema.json",
   "schemaVersion": 1,
-  "protocolRevision": "mainnet-2026-11-14",
+  "protocolRevision": "mainnet-2026-11-19",
   "programId": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj",
-  "idlSha256": "b78cbeef3301d2ba650e66065424356d410cbee94f43f2aea6912991ab79736a",
+  "idlSha256": "0f39c142c1112a22bd210a2d064035e10572eab9eb6d81a92356f0387b07e8e6",
   "accounts": [
     {
       "name": "BorrowPosition",
@@ -63,8 +63,8 @@
     },
     {
       "name": "Market",
-      "expectedVersion": 17,
-      "sizeWithDiscriminator": 6922,
+      "expectedVersion": 19,
+      "sizeWithDiscriminator": 4478,
       "fields": [
         {
           "path": "version",
@@ -103,7 +103,7 @@
         },
         {
           "path": "quote_side.hlp_mint",
-          "offset": 1399,
+          "offset": 1415,
           "size": 32
         },
         {
@@ -127,183 +127,173 @@
           "size": 32
         },
         {
-          "path": "base_side.interest_vault",
-          "offset": 575,
-          "size": 32
-        },
-        {
           "path": "quote_side.asset_mint",
-          "offset": 1366,
+          "offset": 1382,
           "size": 32
         },
         {
           "path": "quote_side.asset_decimals",
-          "offset": 1398,
+          "offset": 1414,
           "size": 1
         },
         {
           "path": "quote_side.reserve_vault",
-          "offset": 1431,
+          "offset": 1447,
           "size": 32
         },
         {
           "path": "quote_side.collateral_vault",
-          "offset": 1463,
-          "size": 32
-        },
-        {
-          "path": "quote_side.interest_vault",
-          "offset": 1495,
+          "offset": 1479,
           "size": 32
         },
         {
           "path": "base_side.fees.fee_swap_auction.accepted_mint",
-          "offset": 990,
+          "offset": 1006,
           "size": 32
         },
         {
           "path": "base_side.fees.fee_interest_auction.accepted_mint",
-          "offset": 1078,
+          "offset": 1094,
           "size": 32
         },
         {
           "path": "base_side.fees.buyback_swap_auction.accepted_mint",
-          "offset": 1166,
+          "offset": 1182,
           "size": 32
         },
         {
           "path": "base_side.fees.buyback_interest_auction.accepted_mint",
-          "offset": 1254,
+          "offset": 1270,
           "size": 32
         },
         {
           "path": "quote_side.fees.fee_swap_auction.accepted_mint",
-          "offset": 1910,
+          "offset": 1942,
           "size": 32
         },
         {
           "path": "quote_side.fees.fee_interest_auction.accepted_mint",
-          "offset": 1998,
+          "offset": 2030,
           "size": 32
         },
         {
           "path": "quote_side.fees.buyback_swap_auction.accepted_mint",
-          "offset": 2086,
+          "offset": 2118,
           "size": 32
         },
         {
           "path": "quote_side.fees.buyback_interest_auction.accepted_mint",
-          "offset": 2174,
+          "offset": 2206,
           "size": 32
         },
         {
           "path": "base_side.reserves.live_reserve",
-          "offset": 615,
+          "offset": 583,
           "size": 16
         },
         {
           "path": "quote_side.reserves.live_reserve",
-          "offset": 1535,
+          "offset": 1519,
           "size": 16
         },
         {
           "path": "base_hlp_vault.srlp_vault",
-          "offset": 5716,
+          "offset": 3336,
           "size": 32
         },
         {
           "path": "quote_hlp_vault.srlp_vault",
-          "offset": 6108,
+          "offset": 3696,
           "size": 32
         },
         {
           "path": "base_hlp_vault.hlp_supply",
-          "offset": 5796,
+          "offset": 3416,
           "size": 8
         },
         {
           "path": "base_hlp_vault.srlp_shares",
-          "offset": 5748,
+          "offset": 3368,
           "size": 8
         },
         {
           "path": "quote_hlp_vault.srlp_shares",
-          "offset": 6140,
+          "offset": 3728,
           "size": 8
         },
         {
           "path": "base_hlp_vault.debt_principal",
-          "offset": 5788,
+          "offset": 3408,
           "size": 8
         },
         {
           "path": "quote_hlp_vault.debt_principal",
-          "offset": 6180,
+          "offset": 3768,
           "size": 8
         },
         {
           "path": "base_hlp_vault.debt_shares",
-          "offset": 5772,
+          "offset": 3392,
           "size": 16
         },
         {
           "path": "quote_hlp_vault.debt_shares",
-          "offset": 6164,
+          "offset": 3752,
           "size": 16
         },
         {
           "path": "quote_hlp_vault.hlp_supply",
-          "offset": 6188,
+          "offset": 3776,
           "size": 8
         },
         {
           "path": "base_hlp_vault.residual_exposure",
-          "offset": 5804,
+          "offset": 3424,
           "size": 16
         },
         {
           "path": "quote_hlp_vault.residual_exposure",
-          "offset": 6196,
+          "offset": 3784,
           "size": 16
         },
         {
           "path": "params_hash",
-          "offset": 6580,
+          "offset": 4136,
           "size": 32
         },
         {
           "path": "last_update_slot",
-          "offset": 6912,
+          "offset": 4468,
           "size": 8
         },
         {
           "path": "operator.authority",
-          "offset": 6644,
+          "offset": 4200,
           "size": 32
         },
         {
           "path": "operator.manager",
-          "offset": 6676,
+          "offset": 4232,
           "size": 32
         },
         {
           "path": "operator.epoch",
-          "offset": 6708,
+          "offset": 4264,
           "size": 8
         },
         {
           "path": "operator.pending",
-          "offset": 6732,
+          "offset": 4288,
           "size": 32
         },
         {
           "path": "operator.revenue_epoch",
-          "offset": 6716,
+          "offset": 4272,
           "size": 8
         },
         {
           "path": "operator.revenue_recipient",
-          "offset": 6796,
+          "offset": 4352,
           "size": 32
         }
       ]

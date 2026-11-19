@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "cluster": "mainnet-beta",
+  "genesisHash": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
+  "protocolRevision": "mainnet-2026-11-14",
+  "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
+  "capturedAt": "2026-11-14T14:57:06.914Z",
+  "artifactOrigin": "verified-production-release-and-upgradeable-loader-programdata",
+  "builderImage": "solanafoundation/solana-verifiable-build@sha256:6468b89ae21d87b8eb002f894ac3f3442dbd8bcf5ea93414051e96e00d03b5ab",
+  "toolchainNote": "Lock toolchain records local capture tools. The ELF build is pinned by the production release manifest and independent source-verification image, not by these local tool versions.",
+  "replayFirstSlot": 469350144,
+  "programs": [
+    {
+      "name": "dusk",
+      "programId": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj",
+      "programData": "58HpCNM5jydkig5bhy8BR77DJn2E3KcuD9hruj13mUqz",
+      "lastUpgradeSlot": 469349657,
+      "upgradeAuthority": "EdYBBhu2PU84eNt6r8zPWkaxrxbXVAzVvAz3tR3XveRq",
+      "binarySha256": "047a30c6396791c962c62a958c1b099b12e5994bc07dfffc69d5bd2a91031b0a",
+      "binaryBytes": 4058688,
+      "idlAccount": "6WeYYZVNgnrNGZyWQXS2tULBEokMvgYc56nMCThpD29z",
+      "idlSha256": "b78cbeef3301d2ba650e66065424356d410cbee94f43f2aea6912991ab79736a",
+      "idlCanonicalSha256": "dfd05743bca263f84193acbe882d281cb532806928fa357fc4ce0f07a4ec383c",
+      "idlAccountSha256": "893ee6aacfd267eaaba0cc7b3cad1a9ed2c65cfaf4e7ef72b8045c89a7dcddf9",
+      "observedSlot": 469369400
+    },
+    {
+      "name": "leverage_delegate",
+      "programId": "DeLegABhDLREbDpwwcsbkHvDS5MwqKPAw1CJKoooUXFQ",
+      "programData": "4VHNxPfE4w6hUj2RT1jPhP6FzRjno7V1ZDn52hH1vvqT",
+      "lastUpgradeSlot": 469350143,
+      "upgradeAuthority": "EdYBBhu2PU84eNt6r8zPWkaxrxbXVAzVvAz3tR3XveRq",
+      "binarySha256": "0b62f3ea48dbddadf5935ec57f0de907bcf26b99793d6ce7c2155225097c5e6e",
+      "binaryBytes": 1289240,
+      "idlAccount": "7LbAx3RUZPwbsDeNeS2RxVV7pDEVAEv2HLj1eighNPWp",
+      "idlSha256": "a5047b952378f89c34ee94823d033ad43727b99e27615b0645a347a463ec8524",
+      "idlCanonicalSha256": "58f03db70f59e04ed594848bda54dcf5a05b4fa9ef31868c4d98273443321d22",
+      "idlAccountSha256": "6c99d75280653be88e33823ade695911583204eb557e26cd1a44ae1af980538d",
+      "observedSlot": 469369402
+    }
+  ]
+}

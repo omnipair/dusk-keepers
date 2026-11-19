@@ -415,7 +415,7 @@ mod tests {
                 assert!(!settle[optional].is_writable && !settle[optional].is_signer);
                 // A reserve may still be required in the remaining-account
                 // group for public interest accounting; that does not select AMM settlement.
-                let mut remaining = c.market.hlp_income_remaining_accounts();
+                let mut remaining = c.market.hlp_remaining_accounts();
                 remaining.extend(c.market.oracle_remaining_accounts());
                 assert_eq!(settle[spec.accounts.len()..], remaining);
             }

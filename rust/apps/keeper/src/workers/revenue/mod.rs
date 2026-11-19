@@ -183,14 +183,12 @@ impl ArbitrageurJob<'_> {
         } else {
             market.quote_mint
         };
-        // Swap revenue sits in the side's reserve vault; interest revenue in
-        // its interest vault. The program checks this, so getting it wrong
-        // costs a simulation rather than a mistake.
-        let sold_vault = match (source, sold_is_base) {
-            (ProtocolRevenueSource::Swap, true) => market.base_reserve_vault,
-            (ProtocolRevenueSource::Swap, false) => market.quote_reserve_vault,
-            (ProtocolRevenueSource::Interest, true) => market.base_interest_vault,
-            (ProtocolRevenueSource::Interest, false) => market.quote_interest_vault,
+        // Layout 19 holds swap and interest liabilities in the reserve vault;
+        // the source still selects the distinct auction ledger inside Market.
+        let sold_vault = if sold_is_base {
+            market.base_reserve_vault
+        } else {
+            market.quote_reserve_vault
         };
 
         let token_program = decode_key(

@@ -3,22 +3,22 @@
 Keeper runtimes for Dusk, pinned to the observed Solana mainnet deployment and
 verified with shared conformance fixtures in Rust and TypeScript.
 
-The current capture is `mainnet-2026-11-14`, using production source
-`0acc9057b53a0495571f1bbf8a18e5db0f2efd45`, the deployed Dusk/delegate executables
-and IDLs, and published SDK `2.27.0`. See [mainnet release preparation](docs/mainnet-release.md).
-The active ABI uses srLP and operator/optional-manager authority.
+The `mainnet-2026-11-19` capture matches the finalized production deployment
+from `aa196e3423fd5f46b00630a4f161d91f95ef7b3d` and registry-published SDK
+`3.0.1`. Both source verifications passed. Exact on-chain padded executables,
+IDLs, authorities and upgrade slots are recorded in the deployment receipt.
+The lock remains captured: compatible hosted services run in shadow until the
+new live-release matrix and owner-created-market canary are complete.
 
 Rust implements lending, leveraged liquidation and orders, hLP recovery, revenue,
 lifecycle and sentinel workers. TypeScript provides independent protocol codecs
-and shadow reference checks. Active oracle policies add the required read-only
-reports to liquidation, hLP and order instructions and fresh execution snapshots.
+and reference checks. Both preserve oracle suffixes and direct account checks.
 
-The lock is **frozen** under the owner’s [release-test waiver](docs/evidence/mainnet-release-waiver.json);
-the full release matrix was not completed. The binary defaults to **shadow mode**.
-Mainnet signing requires matching deployed artifacts, explicit KMS or local-file
-custody, durable PostgreSQL journaling and an explicit wallet fee policy. The devnet-only
-exception cannot run this mainnet capture. A separate captured devnet checkout is
-required for local devnet tests.
+The lock is **captured**, not frozen. The old `mainnet-2026-11-14` waiver does
+not authorize this revision. Production signing remains gated by the full new
+release matrix, deployed-artifact verification and durable journal/fee checks.
+See [mainnet release preparation](docs/mainnet-release.md). Historical production
+artifacts and receipts are preserved under `artifacts/releases/mainnet-2026-11-14`.
 
 ## What is here
 
@@ -97,11 +97,10 @@ node scripts/generate-account-layout.mjs --write
 
 ## Safety state
 
-`protocol.lock.json` is `frozen` for `mainnet-2026-11-14`. The owner explicitly
-waived the remaining release tests on 2026-11-16; this is recorded as a waiver,
-not a passing test receipt. Artifact, deployment, simulation, fee/reserve and
-journal checks remain enforced. Other revisions follow the normal
-[protocol upgrade process](docs/runbooks/protocol-upgrade.md).
+`protocol.lock.json` is `captured` for `mainnet-2026-11-19`. It cannot enable
+live signing. Complete the actual production capture and
+[protocol upgrade process](docs/runbooks/protocol-upgrade.md), including the
+required new release evidence. The old scoped waiver is historical only.
 
 For local mainnet execution with private key files, use the
 [local mainnet launcher](docs/runbooks/local-mainnet.md).

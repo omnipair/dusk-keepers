@@ -38,28 +38,20 @@ function interestFixture() {
   return { f: { ...f, internal: false, route: [payment(f, q)] }, q };
 }
 
-for (const prefix of [0, 5, 9]) {
-  test(`inventory liquidation with interest and ${prefix} hLP settlement accounts`, () => {
+for (const prefix of [0, 2, 3]) {
+  test(`inventory liquidation pays indexed interest with ${prefix} extra hLP accounts`, () => {
     const { f, q } = interestFixture();
     const svm = bank(f);
     const { tx, plan } = planWithTable(f, svm);
     const settle = tx.message.compiledInstructions.at(-1)!;
-    assert.equal(settle.accountKeyIndexes.length, settleAccounts.length + 9);
-    // Exercise the original omission and the incomplete five-account fix.
+    assert.equal(settle.accountKeyIndexes.length, settleAccounts.length + 3);
+    // Inventory recovery does not change AMM or hLP funding. Indexed interest
+    // payment no longer requires the old nine-account income-vault group.
     settle.accountKeyIndexes = settle.accountKeyIndexes.slice(0, settleAccounts.length + prefix);
     const balance = (name: string) => Buffer.from(svm.getAccount(new PublicKey(plan.named[name]))!.data).readBigUInt64LE(64);
     const debtBefore = balance("buyer_refund_account");
     const collateralBefore = balance("buyer_collateral_account");
-    const positionBefore = Buffer.from(svm.getAccount(new PublicKey(f.position))!.data);
     const result: any = svm.sendTransaction(tx);
-    if (prefix < 9) {
-      assert.equal(typeof result.err, "function", "missing income accounts must reproduce the failure");
-      assert.ok(result.meta().logs().some((l: string) => l.includes("Error Code: NotEnoughAccounts.")));
-      assert.equal(balance("buyer_refund_account"), debtBefore);
-      assert.equal(balance("buyer_collateral_account"), collateralBefore);
-      assert.deepEqual(Buffer.from(svm.getAccount(new PublicKey(f.position))!.data), positionBefore);
-      return;
-    }
     assert.notEqual(typeof result.err, "function", result.toString());
     assert.equal(debtBefore - balance("buyer_refund_account"), 103_000n);
     assert.equal(balance("buyer_collateral_account") - collateralBefore, BigInt(q.collateralCredit));
@@ -87,7 +79,7 @@ for (const active of [false, true]) {
     const settle = ts.at(-1)!;
     const optionalReserve = settleAccounts.findIndex((a: any) => a.name === "collateral_reserve_vault");
     assert.equal(new PublicKey(settle.accounts[optionalReserve].pubkey).toBase58(), c.program, "external settlement keeps AMM reserve option absent");
-    assert.equal(c.hlpIncome.length, active ? 9 : 0);
+    assert.equal(c.hlpIncome.length, active ? 3 : 0);
     assert.equal(settle.accounts.length, settleAccounts.length + c.hlpIncome.length + 1);
     assert.deepEqual(settle.accounts.at(-1), { pubkey: Array.from(oracleFeed.toBytes()), is_signer: false, is_writable: false });
     assert.deepEqual(settle.accounts.slice(settleAccounts.length, -1), c.hlpIncome.map(a => ({ pubkey: Array.from(new PublicKey(a.pubkey).toBytes()), is_signer: false, is_writable: a.writable })));

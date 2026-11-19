@@ -285,7 +285,6 @@ impl Context {
                 },
             ),
             ("reserve_vault".into(), sides.debt_reserve_vault),
-            ("interest_vault".into(), sides.debt_interest_vault),
             (
                 "buyer_collateral_account".into(),
                 associated_token_account(buyer, collateral_token, sides.collateral_mint)
@@ -387,7 +386,7 @@ impl Context {
         // Keep the optional collateral reserve absent so this remains a wallet
         // payment, not an internal AMM swap.
         if internal || matches!(args, Args::SettleFlashLiquidation) {
-            accounts.extend(self.market.hlp_income_remaining_accounts());
+            accounts.extend(self.market.hlp_remaining_accounts());
         }
         accounts.extend(self.market.oracle_remaining_accounts());
         Ok(Instruction {

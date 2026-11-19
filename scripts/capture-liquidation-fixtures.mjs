@@ -89,7 +89,7 @@ try {
     {
       cwd: source,
       stdio: "inherit",
-      env: { ...process.env, DUSK_REQUIRE_COMPLETE_CU_BASELINE: "0" },
+      env: { ...process.env, DUSK_REQUIRE_COMPLETE_CU_BASELINE: "0", DUSK_EXPECT_PRODUCTION_MINT_SUFFIXES: "1" },
     },
   );
 } finally {

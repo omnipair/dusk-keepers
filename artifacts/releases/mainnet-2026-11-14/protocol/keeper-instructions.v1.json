@@ -1,0 +1,2187 @@
+{
+  "$schema": "./schemas/instruction-contract.schema.json",
+  "schemaVersion": 1,
+  "protocolRevision": "mainnet-2026-11-14",
+  "programs": [
+    {
+      "name": "dusk",
+      "programId": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj",
+      "idlPath": "artifacts/dusk.json",
+      "idlSha256": "b78cbeef3301d2ba650e66065424356d410cbee94f43f2aea6912991ab79736a"
+    },
+    {
+      "name": "leverage_delegate",
+      "programId": "DeLegABhDLREbDpwwcsbkHvDS5MwqKPAw1CJKoooUXFQ",
+      "idlPath": "artifacts/leverage_delegate.json",
+      "idlSha256": "a5047b952378f89c34ee94823d033ad43727b99e27615b0645a347a463ec8524"
+    }
+  ],
+  "actions": [
+    {
+      "action": "limit_entry_execute",
+      "jobKind": "limit_entry",
+      "primaryInstructionKey": "leverage_delegate:execute_leverage_entry_order",
+      "cpiInstructionKeys": [],
+      "requiredOptionalAccounts": []
+    },
+    {
+      "action": "hlp_order_execute",
+      "jobKind": "hlp_order",
+      "primaryInstructionKey": "leverage_delegate:execute_hlp_order",
+      "cpiInstructionKeys": [],
+      "requiredOptionalAccounts": []
+    },
+    {
+      "action": "flash_liquidation_settle",
+      "jobKind": "lending_liquidation_bid",
+      "primaryInstructionKey": "dusk:settle_flash_liquidation",
+      "cpiInstructionKeys": [],
+      "requiredOptionalAccounts": []
+    },
+    {
+      "action": "flash_liquidation_preview",
+      "jobKind": "lending_liquidation_bid",
+      "primaryInstructionKey": "dusk:preview_flash_liquidation",
+      "cpiInstructionKeys": [],
+      "requiredOptionalAccounts": []
+    },
+    {
+      "action": "emergency_liquidation_preview",
+      "jobKind": "lending_liquidation_settle",
+      "primaryInstructionKey": "dusk:preview_emergency_liquidation",
+      "cpiInstructionKeys": [],
+      "requiredOptionalAccounts": []
+    },
+    {
+      "action": "lending_health_preview",
+      "jobKind": "lending_liquidation_bid",
+      "primaryInstructionKey": "dusk:preview_liquidation_health",
+      "cpiInstructionKeys": [],
+      "requiredOptionalAccounts": []
+    },
+    {
+      "action": "lending_liquidation_bid",
+      "jobKind": "lending_liquidation_bid",
+      "primaryInstructionKey": "dusk:begin_flash_liquidation",
+      "cpiInstructionKeys": [],
+      "requiredOptionalAccounts": []
+    },
+    {
+      "action": "lending_liquidation_floor_settle",
+      "jobKind": "lending_liquidation_settle",
+      "primaryInstructionKey": "dusk:emergency_liquidation",
+      "cpiInstructionKeys": [],
+      "requiredOptionalAccounts": []
+    },
+    {
+      "action": "leverage_liquidation",
+      "jobKind": "leverage_liquidation",
+      "primaryInstructionKey": "dusk:preview_liquidation_health",
+      "cpiInstructionKeys": [],
+      "requiredOptionalAccounts": []
+    },
+    {
+      "action": "hlp_flash_preview",
+      "jobKind": "hlp_recovery",
+      "primaryInstructionKey": "dusk:preview_hlp_flash",
+      "cpiInstructionKeys": [],
+      "requiredOptionalAccounts": []
+    },
+    {
+      "action": "hlp_flash_begin",
+      "jobKind": "hlp_recovery",
+      "primaryInstructionKey": "dusk:begin_hlp_flash",
+      "cpiInstructionKeys": [],
+      "requiredOptionalAccounts": []
+    },
+    {
+      "action": "hlp_flash_settle",
+      "jobKind": "hlp_recovery",
+      "primaryInstructionKey": "dusk:settle_hlp_flash",
+      "cpiInstructionKeys": [],
+      "requiredOptionalAccounts": []
+    },
+    {
+      "action": "hlp_insolvent_close",
+      "jobKind": "hlp_recovery",
+      "primaryInstructionKey": "dusk:close_insolvent_hlp",
+      "cpiInstructionKeys": [],
+      "requiredOptionalAccounts": []
+    },
+    {
+      "action": "delegated_close_take_profit",
+      "jobKind": "take_profit",
+      "primaryInstructionKey": "dusk:delegated_close_leverage",
+      "cpiInstructionKeys": [
+        "leverage_delegate:before_take_profit",
+        "leverage_delegate:after_close_order"
+      ],
+      "requiredOptionalAccounts": [
+        "leverage_delegation",
+        "delegated_program"
+      ]
+    },
+    {
+      "action": "delegated_close_stop_loss",
+      "jobKind": "stop_loss",
+      "primaryInstructionKey": "dusk:delegated_close_leverage",
+      "cpiInstructionKeys": [
+        "leverage_delegate:before_stop_loss",
+        "leverage_delegate:after_close_order"
+      ],
+      "requiredOptionalAccounts": [
+        "leverage_delegation",
+        "delegated_program"
+      ]
+    },
+    {
+      "action": "protocol_revenue_auction_settle",
+      "jobKind": "auction_bid",
+      "primaryInstructionKey": "dusk:settle_protocol_auction",
+      "cpiInstructionKeys": [],
+      "requiredOptionalAccounts": []
+    },
+    {
+      "action": "operator_revenue_archive_initialize",
+      "jobKind": "lifecycle",
+      "primaryInstructionKey": "dusk:initialize_operator_revenue",
+      "cpiInstructionKeys": [],
+      "requiredOptionalAccounts": []
+    },
+    {
+      "action": "operator_bundle_execute",
+      "jobKind": "lifecycle",
+      "primaryInstructionKey": "dusk:execute_operator_change",
+      "cpiInstructionKeys": [],
+      "requiredOptionalAccounts": []
+    }
+  ],
+  "instructions": [
+    {
+      "key": "leverage_delegate:execute_leverage_entry_order",
+      "program": "leverage_delegate",
+      "programId": "DeLegABhDLREbDpwwcsbkHvDS5MwqKPAw1CJKoooUXFQ",
+      "instructionName": "execute_leverage_entry_order",
+      "discriminatorHex": "63433961cc47ac90",
+      "accounts": [
+        {
+          "name": "order",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "market",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "futarchy_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "leverage_position",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "debt_mint",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "collateral_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "debt_reserve_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "collateral_reserve_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "leverage_collateral_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "funding_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "owner_refund_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "executor_bounty_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "referral_partner",
+          "writable": false,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "referral_accrual",
+          "writable": false,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "instructions_sysvar",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "executor",
+          "writable": true,
+          "signer": true,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "dusk_event_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "dusk_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj"
+        },
+        {
+          "name": "fee_recipient",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "token_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token_2022_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "system_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "11111111111111111111111111111111"
+        }
+      ]
+    },
+    {
+      "key": "leverage_delegate:execute_hlp_order",
+      "program": "leverage_delegate",
+      "programId": "DeLegABhDLREbDpwwcsbkHvDS5MwqKPAw1CJKoooUXFQ",
+      "instructionName": "execute_hlp_order",
+      "discriminatorHex": "ba32b16ca8ca8ec9",
+      "accounts": [
+        {
+          "name": "order",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "market",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "futarchy_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "base_mint",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "quote_mint",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "srlp_mint",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "target_hlp_mint",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "base_reserve_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "quote_reserve_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "borrowed_interest_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "custody_target_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "custody_hlp_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "hlp_srlp_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "base_yield_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "quote_yield_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "owner_target_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "executor_target_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "executor",
+          "writable": false,
+          "signer": true,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "order_owner",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "dusk_event_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "dusk_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj"
+        },
+        {
+          "name": "fee_recipient",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "token_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token_2022_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        }
+      ]
+    },
+    {
+      "key": "dusk:settle_flash_liquidation",
+      "program": "dusk",
+      "programId": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj",
+      "instructionName": "settle_flash_liquidation",
+      "discriminatorHex": "a15d5938857c4f14",
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "borrow_position",
+          "writable": true,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "leverage_position",
+          "writable": true,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "buyer",
+          "writable": true,
+          "signer": true,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "collateral_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "debt_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "collateral_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "reserve_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "interest_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "buyer_collateral_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "buyer_refund_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "owner_debt_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "futarchy_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "referral_partner",
+          "writable": false,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "referral_accrual",
+          "writable": true,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "token_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token_2022_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "debt_token_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "session",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "repayment_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "collateral_reserve_vault",
+          "writable": true,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "instructions",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "event_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        }
+      ]
+    },
+    {
+      "key": "dusk:preview_flash_liquidation",
+      "program": "dusk",
+      "programId": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj",
+      "instructionName": "preview_flash_liquidation",
+      "discriminatorHex": "ee5e7af3d6aff603",
+      "accounts": [
+        {
+          "name": "market",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "borrow_position",
+          "writable": false,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "leverage_position",
+          "writable": false,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "collateral_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "debt_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        }
+      ]
+    },
+    {
+      "key": "dusk:preview_emergency_liquidation",
+      "program": "dusk",
+      "programId": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj",
+      "instructionName": "preview_emergency_liquidation",
+      "discriminatorHex": "4bc8420070e61838",
+      "accounts": [
+        {
+          "name": "market",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "borrow_position",
+          "writable": false,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "leverage_position",
+          "writable": false,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "collateral_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "debt_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "futarchy_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        }
+      ]
+    },
+    {
+      "key": "dusk:preview_liquidation_health",
+      "program": "dusk",
+      "programId": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj",
+      "instructionName": "preview_liquidation_health",
+      "discriminatorHex": "7b9e787a5f1c06ac",
+      "accounts": [
+        {
+          "name": "market",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "borrow_position",
+          "writable": false,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "leverage_position",
+          "writable": false,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "collateral_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "debt_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        }
+      ]
+    },
+    {
+      "key": "dusk:begin_flash_liquidation",
+      "program": "dusk",
+      "programId": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj",
+      "instructionName": "begin_flash_liquidation",
+      "discriminatorHex": "12f22f2acb2d62fc",
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "borrow_position",
+          "writable": true,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "leverage_position",
+          "writable": true,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "buyer",
+          "writable": true,
+          "signer": true,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "collateral_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "debt_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "collateral_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "reserve_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "interest_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "buyer_collateral_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "buyer_refund_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "owner_debt_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "futarchy_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "referral_partner",
+          "writable": false,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "referral_accrual",
+          "writable": true,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "token_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token_2022_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "debt_token_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "session",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "repayment_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "instructions",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "system_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "11111111111111111111111111111111"
+        },
+        {
+          "name": "event_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        }
+      ]
+    },
+    {
+      "key": "dusk:emergency_liquidation",
+      "program": "dusk",
+      "programId": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj",
+      "instructionName": "emergency_liquidation",
+      "discriminatorHex": "185f76884dc22cf7",
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "borrow_position",
+          "writable": true,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "leverage_position",
+          "writable": true,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "buyer",
+          "writable": true,
+          "signer": true,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "collateral_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "debt_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "collateral_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "reserve_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "interest_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "buyer_collateral_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "buyer_refund_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "owner_debt_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "futarchy_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "referral_partner",
+          "writable": false,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "referral_accrual",
+          "writable": true,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "token_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token_2022_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "debt_token_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "collateral_reserve_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "instructions",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "event_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        }
+      ]
+    },
+    {
+      "key": "dusk:preview_hlp_flash",
+      "program": "dusk",
+      "programId": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj",
+      "instructionName": "preview_hlp_flash",
+      "discriminatorHex": "1aa47654e7569db0",
+      "accounts": [
+        {
+          "name": "market",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "futarchy_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "target_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "borrowed_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        }
+      ]
+    },
+    {
+      "key": "dusk:begin_hlp_flash",
+      "program": "dusk",
+      "programId": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj",
+      "instructionName": "begin_hlp_flash",
+      "discriminatorHex": "29cff767b43a830d",
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "futarchy_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "buyer",
+          "writable": true,
+          "signer": true,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "target_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "borrowed_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "target_reserve",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "borrowed_reserve",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "buyer_collateral_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "buyer_refund_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "token_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token_2022_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "borrowed_token_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "session",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "repayment_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "instructions",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "system_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "11111111111111111111111111111111"
+        },
+        {
+          "name": "event_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        }
+      ]
+    },
+    {
+      "key": "dusk:settle_hlp_flash",
+      "program": "dusk",
+      "programId": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj",
+      "instructionName": "settle_hlp_flash",
+      "discriminatorHex": "d77c9968c35b76d1",
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "futarchy_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "buyer",
+          "writable": true,
+          "signer": true,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "target_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "borrowed_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "target_reserve",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "borrowed_reserve",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "buyer_collateral_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "buyer_refund_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "token_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token_2022_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "borrowed_token_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "session",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "repayment_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "instructions",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "event_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        }
+      ]
+    },
+    {
+      "key": "dusk:close_insolvent_hlp",
+      "program": "dusk",
+      "programId": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj",
+      "instructionName": "close_insolvent_hlp",
+      "discriminatorHex": "9eac308679a1c2a8",
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "futarchy_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "caller",
+          "writable": true,
+          "signer": true,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "borrowed_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "borrowed_reserve_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "borrowed_interest_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "caller_bounty_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "srlp_mint",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "target_hlp_srlp_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "token_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token_2022_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "event_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        }
+      ]
+    },
+    {
+      "key": "dusk:delegated_close_leverage",
+      "program": "dusk",
+      "programId": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj",
+      "instructionName": "delegated_close_leverage",
+      "discriminatorHex": "0eda6299a413308b",
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "futarchy_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "position_owner",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "leverage_position",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "debt_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "collateral_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "debt_reserve_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "collateral_reserve_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "debt_interest_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "leverage_collateral_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "owner_debt_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "delegate_fee_recipient",
+          "writable": true,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "delegate_executor_account",
+          "writable": true,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "referral_partner",
+          "writable": false,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "referral_accrual",
+          "writable": true,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "leverage_delegation",
+          "writable": false,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "delegated_program",
+          "writable": false,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "instructions_sysvar",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token_2022_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "event_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        }
+      ]
+    },
+    {
+      "key": "leverage_delegate:before_take_profit",
+      "program": "leverage_delegate",
+      "programId": "DeLegABhDLREbDpwwcsbkHvDS5MwqKPAw1CJKoooUXFQ",
+      "instructionName": "before_take_profit",
+      "discriminatorHex": "05236f00df83c11f",
+      "accounts": [
+        {
+          "name": "order",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "market",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "leverage_position",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "leverage_delegation",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "owner_token_account",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "fee_recipient",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "executor_token_account",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "futarchy_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "collateral_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "token_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "executor",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        }
+      ]
+    },
+    {
+      "key": "leverage_delegate:after_close_order",
+      "program": "leverage_delegate",
+      "programId": "DeLegABhDLREbDpwwcsbkHvDS5MwqKPAw1CJKoooUXFQ",
+      "instructionName": "after_close_order",
+      "discriminatorHex": "9ce0eefa5fe5eb3b",
+      "accounts": [
+        {
+          "name": "order",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "leverage_position",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "leverage_delegation",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "owner_token_account",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "executor_token_account",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "fee_recipient",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "token_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "executor",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "futarchy_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        }
+      ]
+    },
+    {
+      "key": "leverage_delegate:before_stop_loss",
+      "program": "leverage_delegate",
+      "programId": "DeLegABhDLREbDpwwcsbkHvDS5MwqKPAw1CJKoooUXFQ",
+      "instructionName": "before_stop_loss",
+      "discriminatorHex": "f63e52e8a8c7794e",
+      "accounts": [
+        {
+          "name": "order",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "market",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "leverage_position",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "leverage_delegation",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "owner_token_account",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "fee_recipient",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "executor_token_account",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "futarchy_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "collateral_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "token_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "executor",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        }
+      ]
+    },
+    {
+      "key": "dusk:settle_protocol_auction",
+      "program": "dusk",
+      "programId": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj",
+      "instructionName": "settle_protocol_auction",
+      "discriminatorHex": "cecc208708164850",
+      "accounts": [
+        {
+          "name": "bidder",
+          "writable": true,
+          "signer": true,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "market",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "futarchy_authority",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "sold_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "accepted_mint",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "sold_vault",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "bidder_payment_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "bidder_receive_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "treasury_payment_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "staking_vault_payment_account",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "token_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token_2022_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "event_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        }
+      ]
+    },
+    {
+      "key": "dusk:initialize_operator_revenue",
+      "program": "dusk",
+      "programId": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj",
+      "instructionName": "initialize_operator_revenue",
+      "discriminatorHex": "70d2b9085ad70f29",
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "market",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "revenue",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "system_program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": "11111111111111111111111111111111"
+        }
+      ]
+    },
+    {
+      "key": "dusk:execute_operator_change",
+      "program": "dusk",
+      "programId": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj",
+      "instructionName": "execute_operator_change",
+      "discriminatorHex": "72921b743d869723",
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "futarchy_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "proposal",
+          "writable": true,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "accepting_operator",
+          "writable": false,
+          "signer": true,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "previous_revenue",
+          "writable": true,
+          "signer": false,
+          "optional": true,
+          "fixedAddress": null
+        },
+        {
+          "name": "event_authority",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        },
+        {
+          "name": "program",
+          "writable": false,
+          "signer": false,
+          "optional": false,
+          "fixedAddress": null
+        }
+      ]
+    }
+  ]
+}
