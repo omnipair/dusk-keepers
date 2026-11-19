@@ -21,6 +21,24 @@ The former release, its receipt and scoped waiver are archived under
 `artifacts/releases/mainnet-2026-11-14`. That waiver applies only to its original
 revision. It cannot substitute for the new release matrix.
 
+## Readiness snapshot (2026-11-20)
+
+The [shadow-readiness receipt](evidence/layout19-shadow-readiness-20261120.json)
+records checks against the tested layout-19 source: 259 TypeScript tests,
+92 native tests, and the two separately executed PostgreSQL recovery/fee-budget
+regressions passed. The [signed local receipt](evidence/layout19-signed-rehearsal-20261120.json)
+records 16 committed liquidation/hLP cases and forged-signature rejection on an
+isolated Surfpool instance. Its signatures are local test receipts, not mainnet
+transactions, and `completeLiveReleaseMatrix` remains `false`.
+
+All six hosted services were healthy in shadow mode. The five enabled KMS public
+keys match their configured Solana addresses; no KMS signing canary was performed.
+The funding receipt records zero SOL and zero OMFG/USDv at slots 471432619–621.
+Live fee policies and the profile-specific hLP/auction limits were not configured.
+These observations do not authorize activation. Complete the remaining signed
+matrix, review the frozen-lock transition, configure and fund each signer, then
+run a controlled mainnet canary before treating the workers as live protection.
+
 ## Capture the actual release
 
 After the core upgrade, both IDL uploads, exact on-chain verification and stable
