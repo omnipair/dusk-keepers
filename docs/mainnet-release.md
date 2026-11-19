@@ -1,50 +1,55 @@
 # Mainnet keeper preparation
 
-The active revision is `mainnet-2026-11-14`, captured from the production
-release at Dusk commit `0acc9057b53a0495571f1bbf8a18e5db0f2efd45` and the
-published SDK `2.27.0`. Both programs are independently source verified.
+The `mainnet-2026-11-19` candidate ports both independent adapters to the exact
+production ABI from `aa196e3423fd5f46b00630a4f161d91f95ef7b3d`. LP interest is
+credited through the accrued index; removed interest-vault and IOU accounts are
+not included in liquidation, hLP, delegated-order or auction plans. Active hLP
+funding uses the three-account srLP mint/vault prefix. Oracle accounts follow it.
 
-| Program | ID | Deployed slot |
-| --- | --- | ---: |
-| Dusk | `DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj` | 469349657 |
-| Delegate | `DeLegABhDLREbDpwwcsbkHvDS5MwqKPAw1CJKoooUXFQ` | 469350143 |
+## Current evidence
 
-`protocol/mainnet-deployment.v1.json` records the observed upgradeable-loader
-accounts, upgrade authorities, executable bytes and IDL account hashes. The
-validator checks the receipt against the vendored artifacts. At live startup,
-the native runtime also verifies the mainnet genesis, both deployed binaries,
-IDLs and authorities; it rechecks deployment metadata each pass and around
-submission. A change requires recapture and release review.
+The actual finalized release is captured, not frozen. The SDK is the exact
+registry-published `3.0.1` archive (SHA-256
+`70eca34c89a1e80f64c3907e5f92c3196c3dfba01a38d8e75465a7c529b63ef6`).
+Dusk finalized at slot 471276209 and delegate at 471275760; the complete
+revision begins at 471276210. Both on-chain programs, IDLs and deployer
+upgrade/IDL authorities match the tested production bundle, and both independent
+source-verification jobs match the exact commit. Fixture and capture checks do
+not freeze this lock or authorize hosted live signing.
 
-## Deployment state
+The former release, its receipt and scoped waiver are archived under
+`artifacts/releases/mainnet-2026-11-14`. That waiver applies only to its original
+revision. It cannot substitute for the new release matrix.
 
-The lock is **frozen** under the explicit owner instruction on 2026-11-16:
-“skip the release tests, make it mainnet ready.” The scoped
-[waiver receipt](evidence/mainnet-release-waiver.json) records the incomplete
-release matrix without marking those scenarios passed. Verified artifact pins
-and runtime deployment, simulation, fee/reserve and journal checks remain in force.
-This waiver applies only to `mainnet-2026-11-14`.
+## Capture the actual release
 
-The owner also selected local private-key files for the Mac launcher. Follow the
-[local mainnet runbook](runbooks/local-mainnet.md); KMS remains supported for AWS.
+After the core upgrade, both IDL uploads, exact on-chain verification and stable
+SDK publication, download the exact npm tarball and run:
 
-The [Surfpool evidence](evidence/mainnet-surfpool-simulations.json) names the
-exact executable, IDL and SDK hashes. Reproduce it with an isolated offline
-Surfpool on port 18899, `--block-production-mode transaction`, and
-`node --experimental-strip-types scripts/rehearse-surfpool.mjs`. Transaction
-clock mode preserves each captured fixture clock. Clock mode can overwrite
-fixture sysvars with wall time and invalidate time-dependent eligibility.
+```sh
+node scripts/capture-mainnet.mjs CLEAN_CORE_CHECKOUT NORMAL_RELEASE_BUNDLE \
+  PUBLISHED_SDK_TGZ mainnet-2026-11-19
+node scripts/capture-liquidation-fixtures.mjs CLEAN_CORE_CHECKOUT
+node scripts/capture-hlp-fixtures.mjs CLEAN_CORE_CHECKOUT
+cargo build --locked -p dusk-keeper
+node scripts/validate-repo.mjs
+cargo test --locked --workspace
+npm run typecheck
+npm test
+```
 
-The [signed liquidation/hLP receipt](evidence/mainnet-signed-liquidations.json)
-records 16 successful local submissions with forged-signature rejection and
-flash-session closure checks against those production binaries. Its
-`completeLiveReleaseMatrix` remains false; it does not cover the missing signed
-order, auction, lifecycle and complete fault scenarios.
+The read-only capture verifies the SDK's registry integrity, deployed ELF and
+zero padding, both IDLs and their authorities against the reviewed production
+bundle. It retains full ProgramData payloads and actual upgrade slots; it never
+invents a receipt, signs, freezes the lock or inherits a waiver. Rebuild fixture
+receipts against those captured bytes. The common replay boundary follows both
+actual upgrades; the retired market's canonical payout history is separate.
 
-Source-history bundles and dependency locks describe the clean deployed source.
-The previous devnet chain receipt is historical data at
-`protocol/archive/devnet-2026-11-08-hlp-deposit/deployment.v1.json`; it is not
-an active mainnet capture or authority to execute on devnet.
+Run the isolated PostgreSQL recovery/fee-budget tests and the complete new
+[Surfpool release matrix](runbooks/surfpool-e2e.md). Captured liquidation/hLP
+rehearsals alone do not cover TP/SL, auctions, lifecycle and all fault scenarios.
+Keep hosted workers non-signing until the frozen release gate passes. An actual
+mainnet canary requires the owner's new market; deployment does not create one.
 
 ## AWS service parity
 
@@ -62,7 +67,7 @@ Do not put owner credentials or Solana private keys in the deployment.
 Before activation, configure verified database TLS (or the private local Unix
 socket), durable schema migrations and recovery, signing policies, wallet funding
 and explicit execution settings. Neither this release nor the KMS provisioning
-script creates or funds a market. No production canary is claimed by the waiver.
+script creates or funds a market. No production canary is claimed by an offline fixture receipt.
 
 ## Spending configuration
 
@@ -106,25 +111,25 @@ evidence have been reviewed. Do not infer profitable arbitrage from the profile 
 
 ## Operator checks
 
-1. Build the binary and run `REQUIRE_FROZEN_PROTOCOL=1 node scripts/validate-repo.mjs`.
-   The remaining release-test matrix is waived for this revision; ordinary CI
-   continues to check the code. No test result should be fabricated for the waiver.
+1. Complete the new revision's full release matrix and review its evidence before
+   freezing the lock. Run `REQUIRE_FROZEN_PROTOCOL=1 node scripts/validate-repo.mjs`
+   only after that transition; the historical revision17 waiver is inapplicable.
 2. Stop signing workers, then apply every PostgreSQL migration in filename order.
-   Migration `0005` makes pending-position conflicts independent of release revision.
-   Duplicate pending generations cause it to fail and must be reconciled first.
-   Do not run old and new lease implementations together during this upgrade.
+   Migration `0005` makes pending-position conflicts independent of revision.
+   Reconcile duplicate pending generations before proceeding; do not run old and
+   new lease implementations together during this upgrade.
 3. With the intended RPC in `SOLANA_RPC_HTTP_URL`, run
-   `dusk-keeper --check-mainnet-deployment`. This accepts a captured candidate and
+   `dusk-keeper --check-mainnet-deployment`. It accepts a captured candidate and
    checks deployed binaries, IDLs and authorities without loading a signer.
-4. Review the scoped [release waiver](evidence/mainnet-release-waiver.json). For
-   any later revision, complete the normal [release process](runbooks/protocol-upgrade.md).
-5. Supply each service's fee policy, database configuration and distinct KMS
-   identity or explicitly selected local key file. On the frozen candidate, `KEEPER_MODE=live dusk-keeper --check-execution`
-   checks deployment, public signer identity, profile settings and journal schema
-   without signing or submitting. It does not prove KMS Sign IAM permission; the
-   complete signing and submission path has not been exercised on mainnet.
-6. Start one signing worker with `KEEPER_MAX_SENDS_PER_PASS=1`; inspect finalized
-   receipts and journal reservations before enabling the other signing profiles.
+4. Supply each service's fee policy, database configuration and distinct KMS
+   identity or explicitly selected local key file. On the frozen release,
+   `KEEPER_MODE=live dusk-keeper --check-execution` validates deployment, public
+   signer identity, settings and journal schema without submitting. This does
+   not itself prove KMS Sign permission or a successful mainnet transaction.
+5. After an owner-created controlled market and reviewed execution policies are
+   available, start one authorized signing worker with
+   `KEEPER_MAX_SENDS_PER_PASS=1`. Inspect finalized receipts and durable fee
+   reservations before activating other signing profiles.
 
 Remote database connections verify TLS certificates and hostnames. A private
 database CA may be supplied as a public PEM file via `DATABASE_CA_CERT`.

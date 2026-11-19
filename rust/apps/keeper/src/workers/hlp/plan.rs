@@ -79,11 +79,6 @@ impl HlpContext {
         } else {
             market.base_reserve_vault
         };
-        let borrowed_interest_vault = if target_is_base {
-            market.quote_interest_vault
-        } else {
-            market.base_interest_vault
-        };
         let target_hlp_srlp_vault = if target_is_base {
             market.base_srlp_vault
         } else {
@@ -123,7 +118,6 @@ impl HlpContext {
             ("target_reserve".into(), target_reserve),
             ("borrowed_reserve".into(), borrowed_reserve),
             ("borrowed_reserve_vault".into(), borrowed_reserve),
-            ("borrowed_interest_vault".into(), borrowed_interest_vault),
             ("buyer_collateral_account".into(), buyer_collateral_account),
             ("buyer_refund_account".into(), buyer_refund_account),
             ("caller_bounty_account".into(), buyer_refund_account),

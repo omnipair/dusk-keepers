@@ -13,7 +13,7 @@
         "market": "market:meta-usdc",
         "target": "position:happy",
         "observedSlot": 100,
-        "protocolRevision": "mainnet-2026-11-14",
+        "protocolRevision": "mainnet-2026-11-19",
         "expectedStateHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
       },
       "events": [
@@ -59,7 +59,7 @@
         "market": "market:meta-usdc",
         "target": "position:race",
         "observedSlot": 200,
-        "protocolRevision": "mainnet-2026-11-14",
+        "protocolRevision": "mainnet-2026-11-19",
         "expectedStateHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
       },
       "events": [
@@ -91,7 +91,7 @@
         "market": "market:meta-usdc",
         "target": "position:expired-before-submit",
         "observedSlot": 300,
-        "protocolRevision": "mainnet-2026-11-14",
+        "protocolRevision": "mainnet-2026-11-19",
         "expectedStateHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
       },
       "events": [
@@ -150,7 +150,7 @@
         "market": "market:meta-usdc",
         "target": "obligation:unknown",
         "observedSlot": 400,
-        "protocolRevision": "mainnet-2026-11-14",
+        "protocolRevision": "mainnet-2026-11-19",
         "expectedStateHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
       },
       "events": [
@@ -211,7 +211,7 @@
         "market": "market:meta-usdc",
         "target": "auction:late",
         "observedSlot": 500,
-        "protocolRevision": "mainnet-2026-11-14",
+        "protocolRevision": "mainnet-2026-11-19",
         "expectedStateHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
       },
       "events": [
@@ -258,7 +258,7 @@
         "market": "market:meta-usdc",
         "target": "auction:lending:denied",
         "observedSlot": 600,
-        "protocolRevision": "mainnet-2026-11-14",
+        "protocolRevision": "mainnet-2026-11-19",
         "expectedStateHash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
       },
       "events": [
@@ -292,7 +292,7 @@
         "market": "market:meta-usdc",
         "target": "proposal:invalid-order",
         "observedSlot": 700,
-        "protocolRevision": "mainnet-2026-11-14",
+        "protocolRevision": "mainnet-2026-11-19",
         "expectedStateHash": "7777777777777777777777777777777777777777777777777777777777777777"
       },
       "events": [

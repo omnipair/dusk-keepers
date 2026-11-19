@@ -126,7 +126,6 @@ export function resolveLiquidationAccounts(
         ])
       : m.key(`${collateral}_side.collateral_vault`),
     reserve_vault: m.key(`${debt}_side.reserve_vault`),
-    interest_vault: m.key(`${debt}_side.interest_vault`),
     buyer_collateral_account: ata(buyer, collateralMint, cm.owner),
     buyer_refund_account: ata(buyer, debtMint, dm.owner),
     owner_debt_account: ata(owner, debtMint, dm.owner),
@@ -164,17 +163,10 @@ export function resolveLiquidationAccounts(
         "srlp_mint",
         "base_hlp_vault.srlp_vault",
         "quote_hlp_vault.srlp_vault",
-        "base_side.interest_vault",
-        "quote_side.interest_vault",
       ].map((f) => m.key(f))
     : [];
-  // Public interest settlement reads these by identity from remaining accounts,
-  // even for an inventory purchase. The canonical extension precedes oracles.
-  const hlpIncome = active ? [
-    ...hlp.map(pubkey => ({ pubkey, writable: true })),
-    ...["base_side.asset_mint", "quote_side.asset_mint"].map(f => ({ pubkey: m.key(f), writable: false })),
-    ...["base_side.reserve_vault", "quote_side.reserve_vault"].map(f => ({ pubkey: m.key(f), writable: true })),
-  ] : [];
+  // The exact three-account hLP prefix precedes oracle/delegate suffixes.
+  const hlpIncome = hlp.map(pubkey => ({ pubkey, writable: true }));
   const oracle: string[] = [];
   const weight = m.int("oracle.policy.lambda_bps");
   if (weight > 0n) {

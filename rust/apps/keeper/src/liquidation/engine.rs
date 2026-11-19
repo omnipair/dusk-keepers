@@ -248,12 +248,7 @@ impl LiquidationJob<'_> {
         )?;
         let mut all = keys.to_vec();
         all.extend(c.named.values());
-        all.extend(
-            c.market
-                .hlp_income_remaining_accounts()
-                .iter()
-                .map(|a| a.pubkey),
-        );
+        all.extend(c.market.hlp_remaining_accounts().iter().map(|a| a.pubkey));
         all.extend(
             c.market
                 .oracle_remaining_accounts()

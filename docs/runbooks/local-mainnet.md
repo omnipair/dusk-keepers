@@ -1,9 +1,8 @@
 # Local mainnet keeper
 
-The current mainnet artifact lock is frozen under the owner's scoped
-[release-test waiver](../evidence/mainnet-release-waiver.json). The full release
-matrix and production canary were not completed. Runtime deployment checks,
-simulations, fee/reserve checks and the durable journal remain required.
+The current layout-19 candidate is captured, not frozen, and cannot sign on
+mainnet. The previous layout-17 waiver applies only to its archived revision.
+Complete the new [mainnet release gates](../mainnet-release.md) first.
 
 ## Setup
 

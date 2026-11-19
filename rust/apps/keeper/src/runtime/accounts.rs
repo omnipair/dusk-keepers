@@ -36,8 +36,6 @@ pub struct MarketAccounts {
     pub quote_reserve_vault: [u8; 32],
     pub base_collateral_vault: [u8; 32],
     pub quote_collateral_vault: [u8; 32],
-    pub base_interest_vault: [u8; 32],
-    pub quote_interest_vault: [u8; 32],
     pub srlp_mint: [u8; 32],
     pub base_srlp_vault: [u8; 32],
     pub quote_srlp_vault: [u8; 32],
@@ -84,11 +82,9 @@ impl MarketAccounts {
             address,
             oracle_feeds,
             base_collateral_vault: reader.pubkey("base_side.collateral_vault", data).ok()?,
-            base_interest_vault: reader.pubkey("base_side.interest_vault", data).ok()?,
             base_mint: reader.pubkey("base_side.asset_mint", data).ok()?,
             base_reserve_vault: reader.pubkey("base_side.reserve_vault", data).ok()?,
             quote_collateral_vault: reader.pubkey("quote_side.collateral_vault", data).ok()?,
-            quote_interest_vault: reader.pubkey("quote_side.interest_vault", data).ok()?,
             quote_mint: reader.pubkey("quote_side.asset_mint", data).ok()?,
             quote_reserve_vault: reader.pubkey("quote_side.reserve_vault", data).ok()?,
             base_srlp_vault: reader.pubkey("base_hlp_vault.srlp_vault", data).ok()?,
@@ -117,33 +113,10 @@ impl MarketAccounts {
         if !self.hlp_active {
             return Vec::new();
         }
-        [
-            self.srlp_mint,
-            self.base_srlp_vault,
-            self.quote_srlp_vault,
-            self.base_interest_vault,
-            self.quote_interest_vault,
-        ]
-        .into_iter()
-        .map(AccountMeta::writable)
-        .collect()
-    }
-
-    /// Liquidation interest can be distributed to active hLP even when the
-    /// collateral is purchased from inventory. The pinned program expects the
-    /// five-account prefix followed by both mints and reserve vaults, before any
-    /// oracle/hook suffix. Fixed instruction accounts do not satisfy this lookup.
-    pub fn hlp_income_remaining_accounts(&self) -> Vec<AccountMeta> {
-        let mut accounts = self.hlp_remaining_accounts();
-        if self.hlp_active {
-            accounts.extend([
-                AccountMeta::readonly(self.base_mint),
-                AccountMeta::readonly(self.quote_mint),
-                AccountMeta::writable(self.base_reserve_vault),
-                AccountMeta::writable(self.quote_reserve_vault),
-            ]);
-        }
-        accounts
+        [self.srlp_mint, self.base_srlp_vault, self.quote_srlp_vault]
+            .into_iter()
+            .map(AccountMeta::writable)
+            .collect()
     }
 
     /// Oracle reports follow any positional hLP prefix and delegate hooks.
@@ -164,7 +137,6 @@ impl MarketAccounts {
                 collateral_collateral_vault: self.quote_collateral_vault,
                 collateral_mint: self.quote_mint,
                 collateral_reserve_vault: self.quote_reserve_vault,
-                debt_interest_vault: self.base_interest_vault,
                 debt_mint: self.base_mint,
                 debt_reserve_vault: self.base_reserve_vault,
             }
@@ -173,7 +145,6 @@ impl MarketAccounts {
                 collateral_collateral_vault: self.base_collateral_vault,
                 collateral_mint: self.base_mint,
                 collateral_reserve_vault: self.base_reserve_vault,
-                debt_interest_vault: self.quote_interest_vault,
                 debt_mint: self.quote_mint,
                 debt_reserve_vault: self.quote_reserve_vault,
             }
@@ -191,7 +162,6 @@ pub struct OrientedMarket {
     // so nothing reads it yet.
     #[allow(dead_code)]
     pub collateral_reserve_vault: [u8; 32],
-    pub debt_interest_vault: [u8; 32],
     pub collateral_collateral_vault: [u8; 32],
 }
 
@@ -364,11 +334,9 @@ mod tests {
             address: [0; 32],
             oracle_feeds: [None, None],
             base_collateral_vault: [3; 32],
-            base_interest_vault: [4; 32],
             base_mint: [1; 32],
             base_reserve_vault: [2; 32],
             quote_collateral_vault: [13; 32],
-            quote_interest_vault: [14; 32],
             base_srlp_vault: [6; 32],
             hlp_active: true,
             quote_mint: [11; 32],
@@ -397,37 +365,24 @@ mod tests {
             address: [0; 32],
             oracle_feeds: [None, None],
             base_collateral_vault: [3; 32],
-            base_interest_vault: [4; 32],
             base_mint: [1; 32],
             base_reserve_vault: [2; 32],
             base_srlp_vault: [6; 32],
             hlp_active: true,
             quote_collateral_vault: [13; 32],
-            quote_interest_vault: [14; 32],
             quote_mint: [11; 32],
             quote_reserve_vault: [12; 32],
             quote_srlp_vault: [16; 32],
             srlp_mint: [7; 32],
         };
         let prefix = market.hlp_remaining_accounts();
-        assert_eq!(prefix.len(), 5);
+        assert_eq!(prefix.len(), 3);
         assert_eq!(prefix[0].pubkey, market.srlp_mint);
         assert_eq!(prefix[1].pubkey, market.base_srlp_vault);
         assert_eq!(prefix[2].pubkey, market.quote_srlp_vault);
-        assert_eq!(prefix[3].pubkey, market.base_interest_vault);
-        assert_eq!(prefix[4].pubkey, market.quote_interest_vault);
         assert!(prefix.iter().all(|meta| meta.is_writable));
-
-        let income = market.hlp_income_remaining_accounts();
-        assert_eq!(income.len(), 9);
-        assert_eq!(income[..5], prefix);
-        assert_eq!(income[5], AccountMeta::readonly(market.base_mint));
-        assert_eq!(income[6], AccountMeta::readonly(market.quote_mint));
-        assert_eq!(income[7], AccountMeta::writable(market.base_reserve_vault));
-        assert_eq!(income[8], AccountMeta::writable(market.quote_reserve_vault));
 
         market.hlp_active = false;
         assert!(market.hlp_remaining_accounts().is_empty());
-        assert!(market.hlp_income_remaining_accounts().is_empty());
     }
 }

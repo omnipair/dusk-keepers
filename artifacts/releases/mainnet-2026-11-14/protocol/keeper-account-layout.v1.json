@@ -1,0 +1,447 @@
+{
+  "$schema": "./schemas/account-layout.schema.json",
+  "schemaVersion": 1,
+  "protocolRevision": "mainnet-2026-11-14",
+  "programId": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj",
+  "idlSha256": "b78cbeef3301d2ba650e66065424356d410cbee94f43f2aea6912991ab79736a",
+  "accounts": [
+    {
+      "name": "BorrowPosition",
+      "sizeWithDiscriminator": 314,
+      "fields": [
+        {
+          "path": "owner",
+          "offset": 8,
+          "size": 32
+        },
+        {
+          "path": "market",
+          "offset": 40,
+          "size": 32
+        },
+        {
+          "path": "position_id",
+          "offset": 72,
+          "size": 32
+        },
+        {
+          "path": "base_collateral",
+          "offset": 104,
+          "size": 8
+        },
+        {
+          "path": "quote_collateral",
+          "offset": 112,
+          "size": 8
+        },
+        {
+          "path": "base_referral_partner",
+          "offset": 140,
+          "size": 32
+        },
+        {
+          "path": "quote_referral_partner",
+          "offset": 172,
+          "size": 32
+        },
+        {
+          "path": "fixed_base_shares",
+          "offset": 208,
+          "size": 16
+        },
+        {
+          "path": "fixed_quote_shares",
+          "offset": 224,
+          "size": 16
+        },
+        {
+          "path": "active_liquidation_session",
+          "offset": 256,
+          "size": 32
+        }
+      ]
+    },
+    {
+      "name": "Market",
+      "expectedVersion": 17,
+      "sizeWithDiscriminator": 6922,
+      "fields": [
+        {
+          "path": "version",
+          "offset": 413,
+          "size": 1
+        },
+        {
+          "path": "oracle.policy.format",
+          "offset": 8,
+          "size": 1
+        },
+        {
+          "path": "oracle.policy.lambda_bps",
+          "offset": 169,
+          "size": 2
+        },
+        {
+          "path": "oracle.policy.base_account",
+          "offset": 41,
+          "size": 32
+        },
+        {
+          "path": "oracle.policy.quote_account",
+          "offset": 73,
+          "size": 32
+        },
+        {
+          "path": "srlp_mint",
+          "offset": 414,
+          "size": 32
+        },
+        {
+          "path": "base_side.hlp_mint",
+          "offset": 479,
+          "size": 32
+        },
+        {
+          "path": "quote_side.hlp_mint",
+          "offset": 1399,
+          "size": 32
+        },
+        {
+          "path": "base_side.asset_mint",
+          "offset": 446,
+          "size": 32
+        },
+        {
+          "path": "base_side.asset_decimals",
+          "offset": 478,
+          "size": 1
+        },
+        {
+          "path": "base_side.reserve_vault",
+          "offset": 511,
+          "size": 32
+        },
+        {
+          "path": "base_side.collateral_vault",
+          "offset": 543,
+          "size": 32
+        },
+        {
+          "path": "base_side.interest_vault",
+          "offset": 575,
+          "size": 32
+        },
+        {
+          "path": "quote_side.asset_mint",
+          "offset": 1366,
+          "size": 32
+        },
+        {
+          "path": "quote_side.asset_decimals",
+          "offset": 1398,
+          "size": 1
+        },
+        {
+          "path": "quote_side.reserve_vault",
+          "offset": 1431,
+          "size": 32
+        },
+        {
+          "path": "quote_side.collateral_vault",
+          "offset": 1463,
+          "size": 32
+        },
+        {
+          "path": "quote_side.interest_vault",
+          "offset": 1495,
+          "size": 32
+        },
+        {
+          "path": "base_side.fees.fee_swap_auction.accepted_mint",
+          "offset": 990,
+          "size": 32
+        },
+        {
+          "path": "base_side.fees.fee_interest_auction.accepted_mint",
+          "offset": 1078,
+          "size": 32
+        },
+        {
+          "path": "base_side.fees.buyback_swap_auction.accepted_mint",
+          "offset": 1166,
+          "size": 32
+        },
+        {
+          "path": "base_side.fees.buyback_interest_auction.accepted_mint",
+          "offset": 1254,
+          "size": 32
+        },
+        {
+          "path": "quote_side.fees.fee_swap_auction.accepted_mint",
+          "offset": 1910,
+          "size": 32
+        },
+        {
+          "path": "quote_side.fees.fee_interest_auction.accepted_mint",
+          "offset": 1998,
+          "size": 32
+        },
+        {
+          "path": "quote_side.fees.buyback_swap_auction.accepted_mint",
+          "offset": 2086,
+          "size": 32
+        },
+        {
+          "path": "quote_side.fees.buyback_interest_auction.accepted_mint",
+          "offset": 2174,
+          "size": 32
+        },
+        {
+          "path": "base_side.reserves.live_reserve",
+          "offset": 615,
+          "size": 16
+        },
+        {
+          "path": "quote_side.reserves.live_reserve",
+          "offset": 1535,
+          "size": 16
+        },
+        {
+          "path": "base_hlp_vault.srlp_vault",
+          "offset": 5716,
+          "size": 32
+        },
+        {
+          "path": "quote_hlp_vault.srlp_vault",
+          "offset": 6108,
+          "size": 32
+        },
+        {
+          "path": "base_hlp_vault.hlp_supply",
+          "offset": 5796,
+          "size": 8
+        },
+        {
+          "path": "base_hlp_vault.srlp_shares",
+          "offset": 5748,
+          "size": 8
+        },
+        {
+          "path": "quote_hlp_vault.srlp_shares",
+          "offset": 6140,
+          "size": 8
+        },
+        {
+          "path": "base_hlp_vault.debt_principal",
+          "offset": 5788,
+          "size": 8
+        },
+        {
+          "path": "quote_hlp_vault.debt_principal",
+          "offset": 6180,
+          "size": 8
+        },
+        {
+          "path": "base_hlp_vault.debt_shares",
+          "offset": 5772,
+          "size": 16
+        },
+        {
+          "path": "quote_hlp_vault.debt_shares",
+          "offset": 6164,
+          "size": 16
+        },
+        {
+          "path": "quote_hlp_vault.hlp_supply",
+          "offset": 6188,
+          "size": 8
+        },
+        {
+          "path": "base_hlp_vault.residual_exposure",
+          "offset": 5804,
+          "size": 16
+        },
+        {
+          "path": "quote_hlp_vault.residual_exposure",
+          "offset": 6196,
+          "size": 16
+        },
+        {
+          "path": "params_hash",
+          "offset": 6580,
+          "size": 32
+        },
+        {
+          "path": "last_update_slot",
+          "offset": 6912,
+          "size": 8
+        },
+        {
+          "path": "operator.authority",
+          "offset": 6644,
+          "size": 32
+        },
+        {
+          "path": "operator.manager",
+          "offset": 6676,
+          "size": 32
+        },
+        {
+          "path": "operator.epoch",
+          "offset": 6708,
+          "size": 8
+        },
+        {
+          "path": "operator.pending",
+          "offset": 6732,
+          "size": 32
+        },
+        {
+          "path": "operator.revenue_epoch",
+          "offset": 6716,
+          "size": 8
+        },
+        {
+          "path": "operator.revenue_recipient",
+          "offset": 6796,
+          "size": 32
+        }
+      ]
+    },
+    {
+      "name": "LeveragePosition",
+      "sizeWithDiscriminator": 362,
+      "fields": [
+        {
+          "path": "owner",
+          "offset": 8,
+          "size": 32
+        },
+        {
+          "path": "market",
+          "offset": 40,
+          "size": 32
+        },
+        {
+          "path": "position_id",
+          "offset": 104,
+          "size": 32
+        },
+        {
+          "path": "debt_asset",
+          "offset": 170,
+          "size": 1
+        },
+        {
+          "path": "namespace_authority",
+          "offset": 72,
+          "size": 32
+        },
+        {
+          "path": "referral_partner",
+          "offset": 136,
+          "size": 32
+        },
+        {
+          "path": "collateral_amount",
+          "offset": 171,
+          "size": 8
+        },
+        {
+          "path": "debt_shares",
+          "offset": 247,
+          "size": 16
+        },
+        {
+          "path": "active_liquidation_session",
+          "offset": 295,
+          "size": 32
+        }
+      ]
+    },
+    {
+      "name": "FutarchyAuthority",
+      "sizeWithDiscriminator": 355,
+      "fields": [
+        {
+          "path": "recipients.futarchy_treasury",
+          "offset": 41,
+          "size": 32
+        },
+        {
+          "path": "fee_auction.accepted_mint",
+          "offset": 153,
+          "size": 32
+        },
+        {
+          "path": "fee_auction.recipients.treasury",
+          "offset": 185,
+          "size": 32
+        },
+        {
+          "path": "fee_auction.recipients.staking_vault",
+          "offset": 217,
+          "size": 32
+        },
+        {
+          "path": "buyback_auction.accepted_mint",
+          "offset": 253,
+          "size": 32
+        },
+        {
+          "path": "buyback_auction.recipients.treasury",
+          "offset": 285,
+          "size": 32
+        },
+        {
+          "path": "buyback_auction.recipients.staking_vault",
+          "offset": 317,
+          "size": 32
+        }
+      ]
+    },
+    {
+      "name": "OperatorProposal",
+      "dynamic": {
+        "updatesOffset": 96,
+        "variantPayloadSizes": [
+          87,
+          20,
+          28,
+          32,
+          2,
+          8,
+          2
+        ]
+      },
+      "minimumSize": 96,
+      "fields": [
+        {
+          "path": "market",
+          "offset": 8,
+          "size": 32
+        },
+        {
+          "path": "operator",
+          "offset": 40,
+          "size": 32
+        },
+        {
+          "path": "epoch",
+          "offset": 72,
+          "size": 8
+        },
+        {
+          "path": "nonce",
+          "offset": 80,
+          "size": 8
+        },
+        {
+          "path": "policy_version",
+          "offset": 88,
+          "size": 8
+        }
+      ]
+    }
+  ]
+}

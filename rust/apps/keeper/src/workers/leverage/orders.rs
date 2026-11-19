@@ -232,14 +232,6 @@ pub fn build_order_plan(
                 },
             ),
             (
-                "borrowed_interest_vault".into(),
-                if side == 0 {
-                    market.quote_interest_vault
-                } else {
-                    market.base_interest_vault
-                },
-            ),
-            (
                 "base_yield_account".into(),
                 pda(
                     program,
@@ -308,7 +300,6 @@ pub fn build_order_plan(
                 "collateral_reserve_vault".into(),
                 sides.collateral_reserve_vault,
             ),
-            ("debt_interest_vault".into(), sides.debt_interest_vault),
             (
                 "leverage_collateral_vault".into(),
                 pda(
