@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "kind": "layout19-shadow-readiness-snapshot",
+  "observedClientDate": "2026-11-20",
+  "keeperTestedSourceCommit": "0dfc47e2cee6e4726ca7ce084f3e996dcca12067",
+  "protocolSourceCommit": "aa196e3423fd5f46b00630a4f161d91f95ef7b3d",
+  "protocolRevision": "mainnet-2026-11-19",
+  "lockStatus": "captured",
+  "market": "GWrmPqBcmBgX3fcE3GPA6xgCUP3Cbd4DRvXHyfwu1795",
+  "mainnetTransactionsSubmitted": 0,
+  "checks": {
+    "typescriptTestsPassed": 259,
+    "nativeTestsPassed": 92,
+    "isolatedPostgresRecoveryAndFeeBudgetTestsPassed": 2,
+    "signedLocalCommittedCasesPassed": 16,
+    "allFiveKmsPublicKeysMatchConfiguredWallets": true,
+    "kmsSignCanaryPerformed": false,
+    "completeLiveReleaseMatrix": false
+  },
+  "fundingObservations": [
+    {
+      "profile": "lending",
+      "wallet": "FuHpTy934etQ7SMerdaij8sHGScf91oCBRbbtU4D5oEd",
+      "lamports": 0,
+      "omfgRaw": "0",
+      "usdvRaw": "0",
+      "slot": 471432619,
+      "minimumReserveLamports": 50000000
+    },
+    {
+      "profile": "leverage",
+      "wallet": "5jw5Tj5FX8xm691NkKDJonUMZR1zmDng31frQ5yszRpi",
+      "lamports": 0,
+      "omfgRaw": "0",
+      "usdvRaw": "0",
+      "slot": 471432619,
+      "minimumReserveLamports": 50000000
+    },
+    {
+      "profile": "hlp-recovery",
+      "wallet": "4QGby7wF9GQLSt2JfUf3Wfs6wsECDRWA6ffnLmqtspQE",
+      "lamports": 0,
+      "omfgRaw": "0",
+      "usdvRaw": "0",
+      "slot": 471432620,
+      "minimumReserveLamports": 50000000
+    },
+    {
+      "profile": "auction-arbitrage",
+      "wallet": "J4Csj4QX9UzmVwyMEBTJctmRKQUEwX5ExpGtDtDspMm5",
+      "lamports": 0,
+      "omfgRaw": "0",
+      "usdvRaw": "0",
+      "slot": 471432620,
+      "minimumReserveLamports": 50000000
+    },
+    {
+      "profile": "lifecycle",
+      "wallet": "D7V9MGmMTUhVFkVjtVtp327iypFhuspdNU4dFdcBiFPT",
+      "lamports": 0,
+      "omfgRaw": "0",
+      "usdvRaw": "0",
+      "slot": 471432621,
+      "minimumReserveLamports": 50000000
+    }
+  ],
+  "missingLiveSettings": [
+    {
+      "profile": "auction-arbitrage",
+      "missing": [
+        "KEEPER_RISK_POLICY",
+        "KEEPER_AUCTION_MAX_SOLD",
+        "KEEPER_AUCTION_MAX_PAYMENT"
+      ]
+    },
+    {
+      "profile": "hlp-recovery",
+      "missing": [
+        "KEEPER_RISK_POLICY",
+        "KEEPER_HLP_MAX_SOCIALIZED_LOSS",
+        "KEEPER_HLP_MAX_PAYMENT_DEBIT",
+        "KEEPER_HLP_MIN_COLLATERAL_CREDIT",
+        "KEEPER_HLP_MIN_BOUNTY_OUT"
+      ]
+    },
+    {
+      "profile": "lifecycle",
+      "missing": [
+        "KEEPER_RISK_POLICY"
+      ]
+    },
+    {
+      "profile": "lending",
+      "missing": [
+        "KEEPER_RISK_POLICY",
+        "KEEPER_FLASH_MAX_REPAY",
+        "KEEPER_FLASH_MAX_PAYMENT_DEBIT"
+      ]
+    },
+    {
+      "profile": "leverage",
+      "missing": [
+        "KEEPER_RISK_POLICY",
+        "KEEPER_FLASH_MAX_REPAY",
+        "KEEPER_FLASH_MAX_PAYMENT_DEBIT"
+      ]
+    }
+  ],
+  "remainingGates": [
+    "Signed committed TP/SL, auction and lifecycle coverage plus the remaining release-matrix faults and cross-language parity",
+    "Review complete evidence before freezing the exact protocol lock; revision17 waiver is inapplicable",
+    "Explicit per-wallet fee policies, profile-specific economic bounds, SOL reserves and settlement inventory",
+    "Actual KMS signing canary and owner-approved controlled mainnet execution with durable reconciliation"
+  ]
+}
