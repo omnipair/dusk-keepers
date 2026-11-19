@@ -8,18 +8,26 @@ funding uses the three-account srLP mint/vault prefix. Oracle accounts follow it
 
 ## Current evidence
 
-The actual finalized release is captured, not frozen. The SDK is the exact
+The actual finalized release is frozen under the separate
+[2026-11-19 release-test waiver](evidence/mainnet-release-waiver.json), following
+the owner's existing instruction to skip release tests and their request to
+prepare local live execution on the new market. The full release matrix and
+mainnet canary remain incomplete. The SDK is the exact
 registry-published `3.0.1` archive (SHA-256
 `70eca34c89a1e80f64c3907e5f92c3196c3dfba01a38d8e75465a7c529b63ef6`).
 Dusk finalized at slot 471276209 and delegate at 471275760; the complete
 revision begins at 471276210. Both on-chain programs, IDLs and deployer
 upgrade/IDL authorities match the tested production bundle, and both independent
-source-verification jobs match the exact commit. Fixture and capture checks do
-not freeze this lock or authorize hosted live signing.
+source-verification jobs match the exact commit. The local release decision
+does not start any workers or activate hosted services.
 
 The former release, its receipt and scoped waiver are archived under
 `artifacts/releases/mainnet-2026-11-14`. That waiver applies only to its original
-revision. It cannot substitute for the new release matrix.
+revision. The current decision records the new revision and hashes separately.
+
+The new market is `GWrmPqBcmBgX3fcE3GPA6xgCUP3Cbd4DRvXHyfwu1795` (layout 19,
+4,478 bytes). The former `7xf68VEvMtLJ2Up5zVZdA161uH1yNkTFYgDFhNUSwkM7` is
+retired on-chain. Normal discovery includes the new market without a market filter.
 
 ## Capture the actual release
 
@@ -45,11 +53,11 @@ invents a receipt, signs, freezes the lock or inherits a waiver. Rebuild fixture
 receipts against those captured bytes. The common replay boundary follows both
 actual upgrades; the retired market's canonical payout history is separate.
 
-Run the isolated PostgreSQL recovery/fee-budget tests and the complete new
-[Surfpool release matrix](runbooks/surfpool-e2e.md). Captured liquidation/hLP
-rehearsals alone do not cover TP/SL, auctions, lifecycle and all fault scenarios.
-Keep hosted workers non-signing until the frozen release gate passes. An actual
-mainnet canary requires the owner's new market; deployment does not create one.
+The complete new [Surfpool release matrix](runbooks/surfpool-e2e.md) remains
+waived for this local release decision. Captured liquidation/hLP rehearsals alone
+do not cover TP/SL, auctions, lifecycle and all fault scenarios. Do not record
+those scenarios or a mainnet canary as passed. Hosted activation is separate;
+routine code, artifact and live dependency checks remain required.
 
 ## AWS service parity
 
@@ -111,9 +119,9 @@ evidence have been reviewed. Do not infer profitable arbitrage from the profile 
 
 ## Operator checks
 
-1. Complete the new revision's full release matrix and review its evidence before
-   freezing the lock. Run `REQUIRE_FROZEN_PROTOCOL=1 node scripts/validate-repo.mjs`
-   only after that transition; the historical revision17 waiver is inapplicable.
+1. Review the current revision's [release decision](evidence/mainnet-release-waiver.json)
+   and run `REQUIRE_FROZEN_PROTOCOL=1 node scripts/validate-repo.mjs`. The complete
+   matrix is waived, not passed. Later revisions require a new release decision.
 2. Stop signing workers, then apply every PostgreSQL migration in filename order.
    Migration `0005` makes pending-position conflicts independent of revision.
    Reconcile duplicate pending generations before proceeding; do not run old and

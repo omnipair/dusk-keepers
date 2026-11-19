@@ -7,16 +7,18 @@ The `mainnet-2026-11-19` capture matches the finalized production deployment
 from `aa196e3423fd5f46b00630a4f161d91f95ef7b3d` and registry-published SDK
 `3.0.1`. Both source verifications passed. Exact on-chain padded executables,
 IDLs, authorities and upgrade slots are recorded in the deployment receipt.
-The lock remains captured: compatible hosted services run in shadow until the
-new live-release matrix and owner-created-market canary are complete.
+The lock is frozen for local live preparation under the revision-specific
+[release-test waiver](docs/evidence/mainnet-release-waiver.json). The full new
+release matrix and mainnet canary remain incomplete. Hosted rollout is separate.
 
 Rust implements lending, leveraged liquidation and orders, hLP recovery, revenue,
 lifecycle and sentinel workers. TypeScript provides independent protocol codecs
 and reference checks. Both preserve oracle suffixes and direct account checks.
 
-The lock is **captured**, not frozen. The old `mainnet-2026-11-14` waiver does
-not authorize this revision. Production signing remains gated by the full new
-release matrix, deployed-artifact verification and durable journal/fee checks.
+The `mainnet-2026-11-19` decision records the owner's existing instruction to skip
+release tests and their request to prepare the new market for local live execution.
+Production signing still requires deployed-artifact verification, simulations
+and durable journal/fee checks.
 See [mainnet release preparation](docs/mainnet-release.md). Historical production
 artifacts and receipts are preserved under `artifacts/releases/mainnet-2026-11-14`.
 
@@ -97,10 +99,11 @@ node scripts/generate-account-layout.mjs --write
 
 ## Safety state
 
-`protocol.lock.json` is `captured` for `mainnet-2026-11-19`. It cannot enable
-live signing. Complete the actual production capture and
-[protocol upgrade process](docs/runbooks/protocol-upgrade.md), including the
-required new release evidence. The old scoped waiver is historical only.
+`protocol.lock.json` is `frozen` for `mainnet-2026-11-19` under the scoped
+[release-test waiver](docs/evidence/mainnet-release-waiver.json). This enables
+live startup after deployment, execution settings and journal checks pass;
+it does not claim the complete release matrix or a production canary passed.
+Later revisions follow the [protocol upgrade process](docs/runbooks/protocol-upgrade.md).
 
 For local mainnet execution with private key files, use the
 [local mainnet launcher](docs/runbooks/local-mainnet.md).
