@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "kind": "signed-offline-native-lifecycle-execution",
+  "genesis": "HZzSGKT3VFsK8LQDrgkDdJcePbjpniEGSb854Piuh1nf",
+  "protocolRevision": "mainnet-2026-11-19",
+  "completeLiveReleaseMatrix": false,
+  "cases": [
+    {
+      "change": "manager",
+      "withLookupTable": false,
+      "signature": "ce94xzrdM15v4vqYeMyZAvutjLDqtwWBTNxtb9PT9Wj4GtPia97twLvtkQiE4oLV1GgpuzdiL6TWvD76G34kN8F",
+      "slot": 4763015,
+      "signer": "8aMS1m7HUemFjYTgh41wHmX9x3pGnr3rYf2883YsPw1E",
+      "signatureVerified": true,
+      "postStateVerified": true,
+      "status": "passed"
+    },
+    {
+      "change": "manager",
+      "withLookupTable": true,
+      "signature": "5HV4j6CKivs66KuEuyotHiyEw3y82npp8kxBwNNNTv61CLBcF7rW95M5DD6xWZmZ5kiaK4NBubBazp1iFQCnmTcg",
+      "slot": 4763116,
+      "signer": "BArX4BMqHF5QRgDPuPb5SWxGefE5fnPitmAJuQL5XafN",
+      "signatureVerified": true,
+      "postStateVerified": true,
+      "status": "passed"
+    },
+    {
+      "change": "recipient",
+      "withLookupTable": false,
+      "signature": "2qrcm8JxLgZhMJ1unczTrnsq7bGhtmS7ai3oNjP9CxQcUeM3vSj27TA4D8o2LNgMbz9KZoLLugbaYJ6rrmCoqAmL",
+      "slot": 4763217,
+      "signer": "4wc2bFCWrNNjpSpJZEECr3gJmpaDhdK17V8Rxg9yfWKd",
+      "signatureVerified": true,
+      "postStateVerified": true,
+      "status": "passed"
+    },
+    {
+      "change": "recipient",
+      "withLookupTable": true,
+      "signature": "2hFwepKxUGJrSUs12RSN57DKit53VgvdCm78jnjSgfSBDQtvhXPW3QoRvAXgtVXQY6mw6qZSzFnkB65U1rtjgvMw",
+      "slot": 4763318,
+      "signer": "7kBRGJ4ziZbTdxazTSR3eW1cADHrJGVa9w2sUmK2iTu5",
+      "signatureVerified": true,
+      "postStateVerified": true,
+      "status": "passed"
+    },
+    {
+      "change": "handoff",
+      "withLookupTable": false,
+      "signature": "mcvtDc9MsP21tDANhBoVrMqFctLwnFzDTMfCg38Kx9BRuu4XcPpdxqi5pH83fQG913LmehYZiafRgv57qh2DrUJ",
+      "slot": 4763419,
+      "signer": "3RgtVhJ2cpgQZLAij2T9YAsZMmD31z4NiYoCG6Q8xKxa",
+      "signatureVerified": true,
+      "postStateVerified": true,
+      "status": "passed"
+    },
+    {
+      "change": "handoff",
+      "withLookupTable": true,
+      "signature": "3dVGmvrP2jnMU6U7VzXbANUcR9gQDQxN1HRvHyRUpxpZ4N7t1m6oKcyDCQB98NyYJpa6twaZscHtjFyWMmSzVp4i",
+      "slot": 4763520,
+      "signer": "GG4aDFKM49QGXe1btnnmu7JGNYKFrNoCNuW6unZaRVz1",
+      "signatureVerified": true,
+      "postStateVerified": true,
+      "status": "passed"
+    }
+  ]
+}

@@ -56,3 +56,17 @@ This is additional partial evidence. Unmet-trigger no-sign behavior, races
 with liquidation, auction/lifecycle execution, failure/restart coverage and
 complete Rust/TypeScript intent parity remain part of the live-release matrix.
 The receipt deliberately retains `completeLiveReleaseMatrix: false`.
+
+## Signed lifecycle rehearsal
+
+Run `node --experimental-strip-types scripts/rehearse-signed-lifecycle.mjs`
+against the same isolated offline Surfpool instance. The six cases execute the
+native Rust worker's exact simulated transaction with a fresh real signature:
+manager, revenue-recipient and operator-handoff changes, each with and without
+an address lookup table. They verify executed proposal state, cleared pending
+notices, successor acceptance and the sealed prior revenue recipient.
+
+The existing local bank helper creates the notice using the pinned program.
+A successor is chosen before announcement, so its notice digest is never
+rewritten after the fact. The script starts after that local setup; it does
+not claim a signed user-announcement flow or the full live-release matrix.
