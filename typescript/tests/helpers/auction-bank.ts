@@ -39,6 +39,7 @@ export function auctionFixture(
   soldProgram: PublicKey,
   paymentProgram: PublicKey,
   bidder: PublicKey,
+  transferFeeBps = 0,
 ) {
   const captured = JSON.parse(
       readFileSync(root + "/fixtures/litesvm/07-flash-LeveragePosition.json"),
@@ -74,7 +75,23 @@ export function auctionFixture(
     programs = [soldProgram, soldProgram];
   for (let i = 0; i < 2; i++) {
     const a = svm.getAccount(assets[i]);
-    svm.setAccount(assets[i], { ...a, owner: programs[i] });
+    let data = Buffer.from(a.data);
+    if (transferFeeBps > 0) {
+      if (!programs[i].equals(TOKEN_2022_PROGRAM_ID))
+        throw new Error("transfer fees require Token-2022");
+      const extended = Buffer.alloc(278);
+      data.copy(extended);
+      extended[165] = 1;
+      extended.writeUInt16LE(1, 166);
+      extended.writeUInt16LE(108, 168);
+      for (const offset of [242, 260]) {
+        extended.writeBigUInt64LE(0n, offset);
+        extended.writeBigUInt64LE(1000000n, offset + 8);
+        extended.writeUInt16LE(transferFeeBps, offset + 16);
+      }
+      data = extended;
+    }
+    svm.setAccount(assets[i], { ...a, data, owner: programs[i] });
   }
   for (const address of known) {
     const a = svm.getAccount(new PublicKey(address));
@@ -88,8 +105,22 @@ export function auctionFixture(
       continue;
     const mint = new PublicKey(Buffer.from(a.data).subarray(0, 32));
     const index = assets.findIndex((m) => m.equals(mint));
-    if (index >= 0)
-      svm.setAccount(new PublicKey(address), { ...a, owner: programs[index] });
+    if (index >= 0) {
+      let data = Buffer.from(a.data);
+      if (transferFeeBps > 0) {
+        const extended = Buffer.alloc(178);
+        data.copy(extended);
+        extended[165] = 2;
+        extended.writeUInt16LE(2, 166);
+        extended.writeUInt16LE(8, 168);
+        data = extended;
+      }
+      svm.setAccount(new PublicKey(address), {
+        ...a,
+        data,
+        owner: programs[index],
+      });
+    }
   }
   for (const side of [market.base_side, market.quote_side]) {
     for (const name of [
@@ -131,7 +162,16 @@ export function auctionFixture(
         true,
         tokenProgram,
       ),
-      raw = Buffer.alloc(165);
+      raw = Buffer.alloc(
+        transferFeeBps > 0 && assets.some((asset) => asset.equals(mint))
+          ? 178
+          : 165,
+      );
+    if (raw.length > 165) {
+      raw[165] = 2;
+      raw.writeUInt16LE(2, 166);
+      raw.writeUInt16LE(8, 168);
+    }
     AccountLayout.encode(
       {
         mint,
@@ -171,5 +211,6 @@ export function auctionFixture(
     acceptedMint,
     assets,
     signer: bidder,
+    transferFeeBps,
   };
 }

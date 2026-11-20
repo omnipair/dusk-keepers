@@ -76,7 +76,10 @@ not claim a signed user-announcement flow or the full live-release matrix.
 Run `node --experimental-strip-types scripts/rehearse-signed-auctions.mjs`
 against the same isolated offline instance. It covers all eight
 fee/buyback, swap/interest and base/quote combinations for each of the four
-classic/Token-2022 sold/payment program pairings: 32 actual signed settlements.
+classic/Token-2022 sold/payment program pairings: 32 actual signed settlements. Two further Token-2022 sold/payment cases with
+a 1% sold-token transfer fee add 16 settlements, for 48 total. These verify
+that custody/liability debits stay gross while bidder credit and auction
+payment use the net received amount.
 The public synthetic banks use a separate fee-free accepted mint.
 
 Each settlement is capped to the measured payment, rejects a smaller cap,
