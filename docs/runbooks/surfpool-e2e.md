@@ -9,7 +9,7 @@ concentrated liquidity.
 | Leverage liquidation | Unhealthy position closes atomically; fees and collateral settle; repeat becomes `already_resolved`                                                |
 | Lending liquidation  | Repay/seize bounds hold for both pool forms; competing worker loses lease or becomes an expected skip                                              |
 | TP and SL            | Unmet trigger does not sign; met trigger closes once; liquidation supersedes a simultaneous order                                                  |
-| Revenue auction      | Payment and sold-token bounds hold; inventory availability, concurrent bids and final settlement are checked; no resale-profit floor is assumed                                                     |
+| Revenue auction      | Payment and sold-token bounds hold; inventory availability, concurrent bids and final settlement are checked; no resale-profit floor is assumed    |
 | Lifecycle            | Announced operator bundle executes after notice; successor acceptance and revenue archival hold; unauthorized signer and stale epoch/revision fail |
 
 Also cover Token-2022 transfer fees, expired blockhash, WebSocket disconnect with
@@ -38,3 +38,21 @@ validator. It checks committed execution and flash-session closure. No deployer
 or KMS private key is read or exported. The receipt explicitly sets
 `completeLiveReleaseMatrix: false`; TP/SL, auction, lifecycle and outage/restart
 coverage still need their own evidence before the live-release gate passes.
+
+## Signed protection-order rehearsal
+
+With the same isolated signature-verifying Surfpool instance, run
+`node --experimental-strip-types scripts/rehearse-signed-orders.mjs`.
+`SURFPOOL_REHEARSAL_RPC` selects a local HTTP RPC and
+`SURFPOOL_REHEARSAL_PROOF` selects the receipt path.
+
+The four public layout-19 banks cover TP and SL at 50% and 100% closure.
+Each uses a fresh in-memory executor, checks actual committed order/position
+state and executor fee credit, rejects a forged signature, and verifies a
+resolved order cannot execute or pay twice. These banks start after entry
+and delegation; they do not test the user's order-placement flow.
+
+This is additional partial evidence. Unmet-trigger no-sign behavior, races
+with liquidation, auction/lifecycle execution, failure/restart coverage and
+complete Rust/TypeScript intent parity remain part of the live-release matrix.
+The receipt deliberately retains `completeLiveReleaseMatrix: false`.
