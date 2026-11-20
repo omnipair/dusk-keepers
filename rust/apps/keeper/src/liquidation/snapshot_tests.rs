@@ -174,13 +174,55 @@ fn retry_does_not_accept_a_consistent_but_older_snapshot() {
 }
 
 #[test]
-fn rpc_errors_are_not_retried_as_clock_mismatches() {
+fn non_transient_rpc_errors_are_not_retried_as_clock_mismatches() {
     let (client, server) = rpc(vec![
-        json!({"jsonrpc":"2.0","id":1,"error":{"code":-32016,"message":"minimum slot unavailable"}}),
+        json!({"jsonrpc":"2.0","id":1,"error":{"code":-32602,"message":"invalid params"}}),
     ]);
     assert!(matches!(
         Snapshot::fetch(&client, &[key(CLOCK).unwrap()], 8),
         Err(DiscoveryError::Rpc(_))
     ));
     assert_eq!(server.join().unwrap().len(), 1);
+}
+
+#[test]
+fn slot_errors_between_clock_retries_preserve_the_entire_batch_and_floor() {
+    let keys = [[1; 32], key(CLOCK).unwrap()];
+    let (client, server) = rpc(vec![
+        response(10, vec![account("owner", &[1]), clock(11, 0)]),
+        json!({"jsonrpc":"2.0","id":1,"error":{"code":-32016,"message":"minimum slot unavailable"}}),
+        response(12, vec![account("owner", &[2]), clock(12, 1)]),
+    ]);
+    let snapshot = Snapshot::fetch(&client, &keys, 8).unwrap();
+    assert_eq!(snapshot.slot, 12);
+    assert_eq!(snapshot.account(keys[0]).unwrap().data, [2]);
+    let clock = snapshot.account(keys[1]).unwrap();
+    assert_eq!(
+        decode_clock_epoch(&clock.owner, &clock.data, snapshot.slot).unwrap(),
+        1
+    );
+    let requests = server.join().unwrap();
+    assert_eq!(requests.len(), 3);
+    for (request, min_slot) in requests.iter().zip([8, 10, 10]) {
+        assert_eq!(request["params"][0], json!(keys.map(address)));
+        assert_eq!(request["params"][1]["minContextSlot"], min_slot);
+        assert_eq!(request["params"][1]["commitment"], "confirmed");
+    }
+    assert_eq!(requests[1], requests[2]);
+}
+
+#[test]
+fn slot_retry_does_not_accept_a_consistent_but_older_snapshot() {
+    let (client, server) = rpc(vec![
+        json!({"jsonrpc":"2.0","id":1,"error":{"code":-32016,"message":"minimum slot unavailable"}}),
+        response(9, vec![clock(9, 0)]),
+    ]);
+    let error = Snapshot::fetch(&client, &[key(CLOCK).unwrap()], 10).unwrap_err();
+    assert!(
+        matches!(error, DiscoveryError::Malformed(ref detail) if detail == "stale/incomplete snapshot")
+    );
+    let requests = server.join().unwrap();
+    assert_eq!(requests.len(), 2);
+    assert_eq!(requests[0], requests[1]);
+    assert_eq!(requests[1]["params"][1]["minContextSlot"], 10);
 }
