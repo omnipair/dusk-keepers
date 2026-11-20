@@ -33,8 +33,13 @@ struct RpcEnvelope<T> {
 
 #[derive(Deserialize)]
 struct RpcError {
+    code: Option<i64>,
     message: String,
 }
+
+// Solana's MinContextSlotNotReached error. Match the code, not provider wording.
+const MIN_CONTEXT_SLOT_NOT_REACHED: i64 = -32016;
+const MAX_CONTEXT_SLOT_RETRIES: u64 = 3;
 
 #[derive(Deserialize)]
 struct ProgramAccount {
@@ -128,18 +133,23 @@ impl RpcClient {
         // A provider can close a reused TLS connection before responding.
         // Retry the identical RPC request only; submitted transactions retain
         // their exact bytes/signature and still use journal reconciliation.
+        // Share the attempt budget across transport and slot errors so mixed
+        // failures cannot multiply retries. Read/simulation slot failures wait
+        // 150, 300, then 600 ms; transaction submission keeps its existing policy.
+        let can_retry_context_slot = method.starts_with("get") || method == "simulateTransaction";
         let mut attempt = 0;
-        let response = loop {
-            match self
+        loop {
+            let response = match self
                 .agent
                 .post(&self.endpoint)
                 .set("content-type", "application/json")
                 .send_json(body.clone())
             {
-                Ok(response) => break response,
+                Ok(response) => response,
                 Err(ureq::Error::Transport(_)) if attempt < 2 => {
                     attempt += 1;
                     std::thread::sleep(Duration::from_millis(100 * attempt));
+                    continue;
                 }
                 Err(ureq::Error::Transport(error)) => {
                     return Err(DiscoveryError::Transport(format!("{:?}", error.kind())));
@@ -147,17 +157,27 @@ impl RpcClient {
                 Err(ureq::Error::Status(status, _)) => {
                     return Err(DiscoveryError::Transport(format!("HTTP {status}")));
                 }
+            };
+            let envelope: RpcEnvelope<T> = response
+                .into_json()
+                .map_err(|error| DiscoveryError::Malformed(error.to_string()))?;
+            if let Some(error) = envelope.error {
+                if can_retry_context_slot
+                    && error.code == Some(MIN_CONTEXT_SLOT_NOT_REACHED)
+                    && attempt < MAX_CONTEXT_SLOT_RETRIES
+                {
+                    // Resend the entire unchanged request: never lower
+                    // minContextSlot, change commitment, or merge account reads.
+                    std::thread::sleep(Duration::from_millis(150 << attempt));
+                    attempt += 1;
+                    continue;
+                }
+                return Err(DiscoveryError::Rpc(error.message));
             }
-        };
-        let envelope: RpcEnvelope<T> = response
-            .into_json()
-            .map_err(|error| DiscoveryError::Malformed(error.to_string()))?;
-        if let Some(error) = envelope.error {
-            return Err(DiscoveryError::Rpc(error.message));
+            return envelope
+                .result
+                .ok_or_else(|| DiscoveryError::Malformed("response carried no result".into()));
         }
-        envelope
-            .result
-            .ok_or_else(|| DiscoveryError::Malformed("response carried no result".into()))
     }
 
     pub fn slot(&self) -> Result<u64, DiscoveryError> {
@@ -372,6 +392,10 @@ impl RpcClient {
         Ok(response.value)
     }
 }
+
+#[cfg(test)]
+#[path = "rpc_retry_tests.rs"]
+mod retry_tests;
 
 fn decode_base58_key(encoded: &str) -> Result<[u8; 32], DiscoveryError> {
     let bytes = bs58::decode(encoded)
