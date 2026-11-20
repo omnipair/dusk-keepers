@@ -32,6 +32,26 @@ use std::{
 };
 
 fn main() -> Result<(), Box<dyn Error>> {
+    if env::args().any(|a| a == "--check-kms-signer") {
+        // A fixed diagnostic challenge is not a transaction and never reaches a worker.
+        // It exercises the task's own remote Sign permission without loosening live gates.
+        if env::args().count() != 2 || env::var("SIGNER_PROVIDER").as_deref() != Ok("aws-kms") {
+            return Err(
+                "KMS canary requires only --check-kms-signer and SIGNER_PROVIDER=aws-kms".into(),
+            );
+        }
+        if env::var("KEEPER_MODE").as_deref() != Ok("shadow") {
+            return Err("run the KMS canary while the service is in shadow mode".into());
+        }
+        let profile = env::var("KEEPER_PROFILE")?;
+        let nonce = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)?
+            .as_nanos()
+            .to_string();
+        let proof = runtime::signer::readiness::check(load_signer()?.as_ref(), &profile, &nonce)?;
+        println!("{}", serde_json::to_string(&proof)?);
+        return Ok(());
+    }
     if env::args().any(|a| a == "--signer-public-key") {
         println!("{}", load_signer()?.public_key_base58());
         return Ok(());

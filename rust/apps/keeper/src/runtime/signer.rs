@@ -35,6 +35,8 @@ impl fmt::Display for SignerError {
 
 impl Error for SignerError {}
 
+pub mod readiness;
+
 pub trait TransactionSigner: Send + Sync {
     /// The signing public key, base58 encoded, as it appears in an account list.
     fn public_key(&self) -> [u8; 32];

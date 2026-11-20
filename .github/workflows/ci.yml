@@ -67,7 +67,7 @@ jobs:
       - name: Verify the packaged mainnet artifacts offline
         run: |
           docker run --rm --network none --env KEEPER_MODE=shadow dusk-keeper-rs:test --check
-          docker run --rm --network none --entrypoint sh dusk-keeper-rs:test -c 'test -f /app/protocol/mainnet-deployment.v1.json && sha256sum /app/artifacts/dusk.so /app/artifacts/leverage_delegate.so /app/artifacts/dusk.json /app/artifacts/leverage_delegate.json /app/artifacts/dusk-sdk.tgz' > image.sha256
+          docker run --rm --network none --entrypoint sh dusk-keeper-rs:test -c 'test -f /app/protocol/mainnet-deployment.v1.json && test -r /app/config/risk-policy.json && test "$KEEPER_RISK_POLICY" = /app/config/risk-policy.json && sha256sum /app/artifacts/dusk.so /app/artifacts/leverage_delegate.so /app/artifacts/dusk.json /app/artifacts/leverage_delegate.json /app/artifacts/dusk-sdk.tgz' > image.sha256
           node --input-type=module <<'JS'
           import assert from 'node:assert/strict';
           import fs from 'node:fs';

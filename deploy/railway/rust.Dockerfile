@@ -25,10 +25,14 @@ COPY --chown=keeper:keeper protocol/keeper-order-layout.v1.json /app/protocol/ke
 # mainnet account bank. Source-history bundles are not runtime dependencies.
 COPY --chown=keeper:keeper protocol/mainnet-deployment.v1.json /app/protocol/mainnet-deployment.v1.json
 COPY --chown=keeper:keeper artifacts/dusk.so artifacts/leverage_delegate.so artifacts/dusk.json artifacts/leverage_delegate.json artifacts/dusk-sdk.tgz /app/artifacts/
+# Owner-approved hosted fee caps: 0.0002 SOL/tx, 0.02 SOL/UTC day, 0.05 SOL reserve.
+# This file provides limits; it does not enable live mode or freeze the release.
+COPY --chown=keeper:keeper deploy/mainnet/risk-policy.json /app/config/risk-policy.json
 USER keeper
 WORKDIR /app
 ENV DUSK_PROTOCOL_LOCK=/app/protocol.lock.json
 ENV KEEPER_MODE=shadow
+ENV KEEPER_RISK_POLICY=/app/config/risk-policy.json
 EXPOSE 8080
 ENTRYPOINT ["/usr/local/bin/dusk-keeper"]
 
