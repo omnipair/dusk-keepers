@@ -1,8 +1,9 @@
 # Local mainnet keeper
 
-The current layout-19 candidate is captured, not frozen, and cannot sign on
-mainnet. The previous layout-17 waiver applies only to its archived revision.
-Complete the new [mainnet release gates](../mainnet-release.md) first.
+The layout-19 release is frozen for local live preparation under its separate
+[release-test waiver](../evidence/mainnet-release-waiver.json). The complete
+release matrix and mainnet canary remain incomplete. Deployment verification,
+simulations, fee/reserve checks and the durable journal are still required.
 
 ## Setup
 
@@ -46,8 +47,11 @@ python3 scripts/local-mainnet.py terminal leverage
 
 This starts **live mainnet execution**. Leverage handles leveraged-position
 liquidations, take-profit, stop-loss and entry/limit orders. It scans all
-supported markets, including `7xf68VEvMtLJ2Up5zVZdA161uH1yNkTFYgDFhNUSwkM7`;
-the supplied market is not an execution restriction. The interval is five seconds,
+supported markets, including the layout-19 market
+`GWrmPqBcmBgX3fcE3GPA6xgCUP3Cbd4DRvXHyfwu1795`. The former
+`7xf68VEvMtLJ2Up5zVZdA161uH1yNkTFYgDFhNUSwkM7` is a retired-market tombstone
+and is excluded by normal market discovery. No single-market restriction is set.
+The interval is five seconds,
 with one submission per pass. Ordinary liquidations pay from inventory and retain
 collateral. Zero-bounty orders are allowed. Emergency slippage defaults to 1%;
 an explicit `KEEPER_EMERGENCY_SLIPPAGE_BPS` from 0 through 10000 overrides it.

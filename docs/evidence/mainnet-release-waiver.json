@@ -1,35 +1,41 @@
 {
   "schemaVersion": 1,
   "kind": "owner-authorized-release-test-waiver",
-  "authorizedOn": "2026-11-16",
-  "protocolRevision": "mainnet-2026-11-14",
-  "sourceCommit": "0acc9057b53a0495571f1bbf8a18e5db0f2efd45",
-  "keeperBaseCommit": "79c542dc9e5f8dc6db42e12ec21a4fbe91a95b5f",
-  "ownerInstruction": "skip the release tests, make it mainnet ready",
-  "scope": "Waive the remaining release-test matrix and freeze the existing verified mainnet artifact pins. This is a release decision, not evidence that the skipped tests passed.",
+  "recordedOn": "2026-11-19",
+  "protocolRevision": "mainnet-2026-11-19",
+  "sourceCommit": "aa196e3423fd5f46b00630a4f161d91f95ef7b3d",
+  "keeperBaseCommit": "0dfc47e2cee6e4726ca7ce084f3e996dcca12067",
+  "ownerInstruction": "okay pull latest main, rebuild the keeper and make it ready to run live on the new mainnet market",
+  "priorOwnerInstruction": "skip the release tests, make it mainnet ready",
+  "authorizationBasis": "Apply the owner's earlier release-test instruction to the requested local live preparation. Record a separate decision for these exact verified artifact pins; preserve the former revision's archived waiver.",
+  "scope": "Prepare local live execution for mainnet-2026-11-19. Waive the remaining full release matrix and mainnet canary. This is a release decision, not evidence that skipped tests passed, and does not start workers or activate hosted services.",
   "completeLiveReleaseMatrix": false,
   "skippedReleaseEvidence": [
-    "signed order and entry-order scenarios",
-    "signed auction scenarios",
-    "signed lifecycle scenarios",
-    "complete failure-scenario matrix",
+    "complete signed order and entry-order release scenarios",
+    "complete signed auction release scenarios",
+    "complete signed lifecycle release scenarios",
+    "complete failure-scenario release matrix",
     "production canary"
   ],
   "programs": [
     {
       "name": "dusk",
       "programId": "DuskWhswJYrzABDn8GqQD191X9RobRi5jhgGntXEdnKj",
-      "binarySha256": "047a30c6396791c962c62a958c1b099b12e5994bc07dfffc69d5bd2a91031b0a",
-      "idlSha256": "b78cbeef3301d2ba650e66065424356d410cbee94f43f2aea6912991ab79736a"
+      "binarySha256": "bf2153cbee2c5ada9dd943d57c6fe9d23b5c696f94b4a3cb1a984c7117b48733",
+      "idlSha256": "0f39c142c1112a22bd210a2d064035e10572eab9eb6d81a92356f0387b07e8e6"
     },
     {
       "name": "leverage_delegate",
       "programId": "DeLegABhDLREbDpwwcsbkHvDS5MwqKPAw1CJKoooUXFQ",
-      "binarySha256": "0b62f3ea48dbddadf5935ec57f0de907bcf26b99793d6ce7c2155225097c5e6e",
-      "idlSha256": "a5047b952378f89c34ee94823d033ad43727b99e27615b0645a347a463ec8524"
+      "binarySha256": "571e040b3feb9580a89278a2025da21bfa62e62f7fc3a441dd7a6fb499141f68",
+      "idlSha256": "3e415c364ad78172e113f1f04b5ac8fef8713bf00083fbfb01a9b0ce3de654d0"
     }
   ],
+  "sdkSha256": "70eca34c89a1e80f64c3907e5f92c3196c3dfba01a38d8e75465a7c529b63ef6",
+  "observedMarket": "GWrmPqBcmBgX3fcE3GPA6xgCUP3Cbd4DRvXHyfwu1795",
+  "deploymentVerifiedAt": "2026-11-19T15:11:18.811237+00:00",
   "retainedChecks": [
+    "frozen protocol lock and complete artifact/fingerprint validation",
     "mainnet genesis",
     "deployed binaries, IDLs and upgrade authorities",
     "fresh account reads and transaction simulation",

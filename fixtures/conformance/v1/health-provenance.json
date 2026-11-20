@@ -12,8 +12,8 @@
   },
   "protocol": {
     "revision": "mainnet-2026-11-19",
-    "lockStatus": "captured",
-    "lockSha256": "9456ae2f1f323e26ac00488f91bde6a89568925f86e4652bb764a636e21137af",
+    "lockStatus": "frozen",
+    "lockSha256": "930d5035c20cfb4c0f81aee9d107a890860f3730c46d0c6ded3549e867c61d92",
     "sourceWorktreeFingerprintSha256": "792fd8d1d87d590f0a3409c7042ead7ee0a225f678c3f2ee2d8dfe61949ab66d"
   },
   "dependencies": {
@@ -38,7 +38,7 @@
   },
   "circuitBreaker": {
     "state": "open",
-    "reason": "captured_protocol_lock"
+    "reason": "dependencies_not_checked"
   },
   "parity": {
     "status": "unknown",
