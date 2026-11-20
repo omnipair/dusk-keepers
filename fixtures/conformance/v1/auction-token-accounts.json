@@ -1,0 +1,50 @@
+{
+  "source": "@solana/spl-token@0.4.14 getAssociatedTokenAddressSync",
+  "bidder": "gBxS1f6uyyGPuW5MzGBukidSb71jdsCb5fZaoSzULE5",
+  "soldMint": "k7FaK87WHGVXzkaoHb7CdVPgkKDQhZ29VLDeBVbDfYn",
+  "acceptedMint": "p2Yicb86aZig616Eav2VWG9vuXR5mEqhtzshZYBxzsV",
+  "treasury": "swqrv48gsrwpBFbftEwnP2vB4jckpvfGJfXkwaniLCC",
+  "stakingVault": "ws91DX9HBAAxGW77BZs5FogRDwpRtcUpiLBpKdPTfWu",
+  "cases": [
+    {
+      "soldProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "acceptedProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "expected": {
+        "bidder_payment_account": "5HUASqP39i87z4VYvSPtdQCjSbBu6QVsXJkJmkER9bcX",
+        "bidder_receive_account": "7CznmAxaqNQEbuKDSov7kxrtynmFstYx4U8aVkVkc9Co",
+        "treasury_payment_account": "DU7fpUwUHhrJqg4U8Sq1GgWcdHVP7aK1NS3mrHRHPwaQ",
+        "staking_vault_payment_account": "H9P72ntPfS66wQfbT6ARo4dDZdJ3i4UYVcvnCbximboS"
+      }
+    },
+    {
+      "soldProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "acceptedProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "expected": {
+        "bidder_payment_account": "GY5kYZ3LAsPAtZVo6jcSwZYCTD1y6c7C7PRrSGaFGvYG",
+        "bidder_receive_account": "7CznmAxaqNQEbuKDSov7kxrtynmFstYx4U8aVkVkc9Co",
+        "treasury_payment_account": "9uXiYY3r24SvzbQahif5mFBDDWt5WypHXmQQXZkd97JZ",
+        "staking_vault_payment_account": "FuiBfri17SHbpQzTEMoUbqw7sXeCRu5EXVDRbiLXkzW7"
+      }
+    },
+    {
+      "soldProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "acceptedProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "expected": {
+        "bidder_payment_account": "5HUASqP39i87z4VYvSPtdQCjSbBu6QVsXJkJmkER9bcX",
+        "bidder_receive_account": "rx8DFJarYNSs8FGVjrkNKpsUi7DUT34pQTnJbtB5KJr",
+        "treasury_payment_account": "DU7fpUwUHhrJqg4U8Sq1GgWcdHVP7aK1NS3mrHRHPwaQ",
+        "staking_vault_payment_account": "H9P72ntPfS66wQfbT6ARo4dDZdJ3i4UYVcvnCbximboS"
+      }
+    },
+    {
+      "soldProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "acceptedProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "expected": {
+        "bidder_payment_account": "GY5kYZ3LAsPAtZVo6jcSwZYCTD1y6c7C7PRrSGaFGvYG",
+        "bidder_receive_account": "rx8DFJarYNSs8FGVjrkNKpsUi7DUT34pQTnJbtB5KJr",
+        "treasury_payment_account": "9uXiYY3r24SvzbQahif5mFBDDWt5WypHXmQQXZkd97JZ",
+        "staking_vault_payment_account": "FuiBfri17SHbpQzTEMoUbqw7sXeCRu5EXVDRbiLXkzW7"
+      }
+    }
+  ]
+}

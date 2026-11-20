@@ -70,3 +70,24 @@ The existing local bank helper creates the notice using the pinned program.
 A successor is chosen before announcement, so its notice digest is never
 rewritten after the fact. The script starts after that local setup; it does
 not claim a signed user-announcement flow or the full live-release matrix.
+
+## Signed continuous-auction rehearsal
+
+Run `node --experimental-strip-types scripts/rehearse-signed-auctions.mjs`
+against the same isolated offline instance. It covers all eight
+fee/buyback, swap/interest and base/quote combinations for each of the four
+classic/Token-2022 sold/payment program pairings: 32 actual signed settlements. Two further Token-2022 sold/payment cases with
+a 1% sold-token transfer fee add 16 settlements, for 48 total. These verify
+that custody/liability debits stay gross while bidder credit and auction
+payment use the net received amount.
+The public synthetic banks use a separate fee-free accepted mint.
+
+Each settlement is capped to the measured payment, rejects a smaller cap,
+verifies sold custody and bidder credit plus treasury/staking payment, and
+rejects a competing settlement after the liability is exhausted. Each program
+pair also tests insufficient payment inventory. The normal TypeScript suite
+executes the native Rust worker's eight measuring simulations in those banks
+and independently compares its instruction bytes with the TypeScript codec.
+
+The receipt remains partial: the complete cross-worker fault/restart and
+release-gate audit must still precede a frozen lock or live activation.

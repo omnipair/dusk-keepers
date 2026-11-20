@@ -188,7 +188,12 @@ function rpcAccount(account: any) {
   };
 }
 
-async function run(f: Fixture, signer: PublicKey, table?: PublicKey) {
+async function run(
+  f: Fixture,
+  signer: PublicKey,
+  table?: PublicKey,
+  environment: Record<string, string> = {},
+) {
   const requests: any[] = [];
   const simulations: {
     transaction: VersionedTransaction;
@@ -206,6 +211,21 @@ async function run(f: Fixture, signer: PublicKey, table?: PublicKey) {
       const context = { slot: Number(f.svm.getClock().slot) };
       let answer: any;
       switch (call.method) {
+        case "getAccountInfo":
+          answer = {
+            context,
+            value: rpcAccount(f.svm.getAccount(new PublicKey(p[0]))),
+          };
+          break;
+        case "getLatestBlockhash":
+          answer = {
+            context,
+            value: {
+              blockhash: f.svm.latestBlockhash(),
+              lastValidBlockHeight: 999999999,
+            },
+          };
+          break;
         case "getSlot":
           answer = context.slot;
           break;
@@ -300,6 +320,7 @@ async function run(f: Fixture, signer: PublicKey, table?: PublicKey) {
           KEEPER_SHADOW_PUBLIC_KEY: signer.toBase58(),
           SOLANA_RPC_HTTP_URL: `http://127.0.0.1:${(server.address() as any).port}`,
           PORT: "0",
+          ...environment,
           ...(table
             ? { KEEPER_LIQUIDATION_LOOKUP_TABLE: table.toBase58() }
             : {}),
