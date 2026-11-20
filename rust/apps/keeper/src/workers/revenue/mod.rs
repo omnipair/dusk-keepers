@@ -121,6 +121,47 @@ impl FutarchyConfig {
     }
 }
 
+/// Derive each auction account with the owning token program of its mint.
+/// Both mints come from one fresh RPC bank; a Token-2022 sold mint must not
+/// inherit the classic accepted mint's ATA seeds (or vice versa).
+fn auction_token_accounts(
+    snapshot: &Snapshot,
+    bidder: [u8; 32],
+    sold_mint: [u8; 32],
+    config: LaneConfig,
+) -> Result<BTreeMap<&'static str, [u8; 32]>, ExecutionError> {
+    let program = |mint| -> Result<[u8; 32], ExecutionError> {
+        let account = snapshot.account(mint).map_err(ExecutionError::Assembly)?;
+        dusk_adapter::transfer_fees::decode_mint_fees(&account.owner, &account.data)
+            .map_err(ExecutionError::Assembly)?;
+        key(&account.owner).map_err(ExecutionError::Assembly)
+    };
+    let sold_program = program(sold_mint)?;
+    let accepted_program = program(config.accepted_mint)?;
+    let ata = |owner, mint, token_program| {
+        associated_token_account(owner, token_program, mint)
+            .ok_or_else(|| ExecutionError::Assembly("auction token account does not derive".into()))
+    };
+    Ok(BTreeMap::from([
+        (
+            "bidder_payment_account",
+            ata(bidder, config.accepted_mint, accepted_program)?,
+        ),
+        (
+            "bidder_receive_account",
+            ata(bidder, sold_mint, sold_program)?,
+        ),
+        (
+            "treasury_payment_account",
+            ata(config.treasury, config.accepted_mint, accepted_program)?,
+        ),
+        (
+            "staking_vault_payment_account",
+            ata(config.staking_vault, config.accepted_mint, accepted_program)?,
+        ),
+    ]))
+}
+
 pub struct ArbitragePolicy {
     /// Most revenue to buy in one settlement, in raw atoms of the sold asset.
     pub max_sold: u64,
@@ -191,20 +232,12 @@ impl ArbitrageurJob<'_> {
             market.quote_reserve_vault
         };
 
-        let token_program = decode_key(
-            self.resolver
-                .resolve_static(INSTRUCTION_KEY, "token_program")
-                .ok_or_else(|| {
-                    ExecutionError::Assembly("token program is not in the manifest".into())
-                })?,
-        )
-        .ok_or_else(|| ExecutionError::Assembly("token program does not decode".into()))?;
-
-        let account_for = |owner: [u8; 32], mint: [u8; 32]| {
-            associated_token_account(owner, token_program, mint)
-                .ok_or_else(|| ExecutionError::Assembly("token account does not derive".into()))
-        };
-        let bidder_payment_account = account_for(signer, config.accepted_mint)?;
+        let mut mint_keys = vec![sold_mint, config.accepted_mint];
+        mint_keys.sort();
+        mint_keys.dedup();
+        let mints = Snapshot::fetch(self.client, &mint_keys, 0)?;
+        let token_accounts = auction_token_accounts(&mints, signer, sold_mint, config)?;
+        let bidder_payment_account = token_accounts["bidder_payment_account"];
 
         let mut supplied: BTreeMap<&'static str, [u8; 32]> = BTreeMap::new();
         supplied.insert("bidder", signer);
@@ -213,16 +246,7 @@ impl ArbitrageurJob<'_> {
         supplied.insert("sold_mint", sold_mint);
         supplied.insert("accepted_mint", config.accepted_mint);
         supplied.insert("sold_vault", sold_vault);
-        supplied.insert("bidder_payment_account", bidder_payment_account);
-        supplied.insert("bidder_receive_account", account_for(signer, sold_mint)?);
-        supplied.insert(
-            "treasury_payment_account",
-            account_for(config.treasury, config.accepted_mint)?,
-        );
-        supplied.insert(
-            "staking_vault_payment_account",
-            account_for(config.staking_vault, config.accepted_mint)?,
-        );
+        supplied.extend(token_accounts);
 
         let mut pda_inputs = BTreeMap::new();
         pda_inputs.insert(
@@ -593,6 +617,68 @@ pub fn run(context: &super::WorkerContext<'_>) -> Result<Vec<AttemptReport>, Exe
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn auction_atas_match_spl_vectors_for_both_mint_programs() {
+        let vectors: serde_json::Value = serde_json::from_str(include_str!(
+            "../../../../../../fixtures/conformance/v1/auction-token-accounts.json"
+        ))
+        .unwrap();
+        let bidder = key(vectors["bidder"].as_str().unwrap()).unwrap();
+        let sold = key(vectors["soldMint"].as_str().unwrap()).unwrap();
+        let config = LaneConfig {
+            accepted_mint: key(vectors["acceptedMint"].as_str().unwrap()).unwrap(),
+            treasury: key(vectors["treasury"].as_str().unwrap()).unwrap(),
+            staking_vault: key(vectors["stakingVault"].as_str().unwrap()).unwrap(),
+        };
+        for case in vectors["cases"].as_array().unwrap() {
+            let mint = |owner: &str| {
+                let mut data = vec![0; 82];
+                data[45] = 1;
+                Some(crate::liquidation::plan::Account {
+                    owner: owner.into(),
+                    data,
+                    executable: false,
+                    lamports: None,
+                })
+            };
+            let snapshot = Snapshot {
+                slot: 1,
+                accounts: BTreeMap::from([
+                    (address(sold), mint(case["soldProgram"].as_str().unwrap())),
+                    (
+                        address(config.accepted_mint),
+                        mint(case["acceptedProgram"].as_str().unwrap()),
+                    ),
+                ]),
+            };
+            let accounts = auction_token_accounts(&snapshot, bidder, sold, config).unwrap();
+            for (name, expected) in case["expected"].as_object().unwrap() {
+                assert_eq!(address(accounts[name.as_str()]), expected.as_str().unwrap());
+            }
+            let mut invalid = snapshot.clone();
+            invalid
+                .accounts
+                .get_mut(&address(sold))
+                .unwrap()
+                .as_mut()
+                .unwrap()
+                .owner = address([0; 32]);
+            assert!(auction_token_accounts(&invalid, bidder, sold, config).is_err());
+            let mut invalid = snapshot.clone();
+            invalid
+                .accounts
+                .get_mut(&address(config.accepted_mint))
+                .unwrap()
+                .as_mut()
+                .unwrap()
+                .data[45] = 0;
+            assert!(auction_token_accounts(&invalid, bidder, sold, config).is_err());
+            let mut invalid = snapshot.clone();
+            invalid.accounts.remove(&address(sold));
+            assert!(auction_token_accounts(&invalid, bidder, sold, config).is_err());
+        }
+    }
 
     #[test]
     fn payment_bounds_round_up_and_reject_overflow() {
