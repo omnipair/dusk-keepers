@@ -39,6 +39,11 @@ These observations do not authorize activation. Complete the remaining signed
 matrix, review the frozen-lock transition, configure and fund each signer, then
 run a controlled mainnet canary before treating the workers as live protection.
 
+The later [release evidence index](evidence/layout19-release-matrix-20261120.md)
+records additional signed executions, database/RPC recovery tests, KMS readiness
+and fee funding. It preserves the distinction between completed checks and the
+remaining live activation gates; the initial snapshot above is historical.
+
 ## Capture the actual release
 
 After the core upgrade, both IDL uploads, exact on-chain verification and stable
