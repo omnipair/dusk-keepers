@@ -666,6 +666,160 @@ mod tests {
         );
     }
     #[test]
+    #[ignore = "requires isolated KEEPER_TEST_DATABASE_URL"]
+    fn losing_the_lease_database_never_broadcasts_and_recovers_unsigned_work() {
+        use std::sync::Mutex;
+        struct DisconnectingSigner {
+            admin: Mutex<Journal>,
+            backend_pid: i32,
+            signatures: Arc<AtomicUsize>,
+        }
+        impl TransactionSigner for DisconnectingSigner {
+            fn public_key(&self) -> [u8; 32] {
+                [7; 32]
+            }
+            fn sign(&self, _: &[u8]) -> Result<[u8; 64], crate::runtime::signer::SignerError> {
+                self.signatures.fetch_add(1, Ordering::SeqCst);
+                // Terminate only this test's lease connection while the remote
+                // signer is returning. Its signature must never reach the RPC.
+                let terminated: bool = self
+                    .admin
+                    .lock()
+                    .unwrap()
+                    .client
+                    .query_one("SELECT pg_terminate_backend($1)", &[&self.backend_pid])
+                    .unwrap()
+                    .get(0);
+                assert!(terminated);
+                Ok([9; 64])
+            }
+        }
+        let url = std::env::var("KEEPER_TEST_DATABASE_URL").expect("test database URL");
+        let schema = format!("outage_test_{}", std::process::id());
+        let mut admin = Journal::connect(&url).unwrap();
+        admin
+            .client
+            .batch_execute(&format!(
+                "CREATE SCHEMA {schema}; SET search_path TO {schema}"
+            ))
+            .unwrap();
+        for migration in [
+            include_str!("../../../../../deploy/postgres/migrations/0002_flash_attempts.sql"),
+            include_str!("../../../../../deploy/postgres/migrations/0004_wallet_budgets.sql"),
+            include_str!(
+                "../../../../../deploy/postgres/migrations/0005_cross_revision_conflicts.sql"
+            ),
+        ] {
+            admin.client.batch_execute(migration).unwrap();
+        }
+        let connect = || {
+            let mut journal = Journal::connect(&url).unwrap();
+            journal
+                .client
+                .batch_execute(&format!("SET search_path TO {schema}"))
+                .unwrap();
+            journal
+        };
+        // A passive listener records attempted connections without serving RPC.
+        // Even one request violates durable-before-broadcast, regardless of reply.
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        listener.set_nonblocking(true).unwrap();
+        let rpc = RpcClient::new(
+            format!("http://{}", listener.local_addr().unwrap()),
+            Duration::from_secs(1),
+        );
+        let count = Arc::new(AtomicUsize::new(0));
+        let mut before = connect();
+        let pid: i32 = before
+            .client
+            .query_one("SELECT pg_backend_pid()", &[])
+            .unwrap()
+            .get(0);
+        assert!(
+            admin
+                .client
+                .query_one("SELECT pg_terminate_backend($1)", &[&pid])
+                .unwrap()
+                .get::<_, bool>(0)
+        );
+        let attempt = before.submit(
+            &rpc,
+            &CountingSigner(count.clone()),
+            "test",
+            "before",
+            0,
+            "market",
+            "lifecycle",
+            10,
+            "state",
+            b"before",
+            "hash",
+            100,
+        );
+        assert!(attempt.is_err());
+        assert_eq!(
+            count.load(Ordering::SeqCst),
+            0,
+            "database outage before lease never signs"
+        );
+        assert_eq!(
+            listener.accept().unwrap_err().kind(),
+            std::io::ErrorKind::WouldBlock
+        );
+        let mut during = connect();
+        let backend_pid = during
+            .client
+            .query_one("SELECT pg_backend_pid()", &[])
+            .unwrap()
+            .get(0);
+        let signer = DisconnectingSigner {
+            admin: Mutex::new(admin),
+            backend_pid,
+            signatures: count.clone(),
+        };
+        let attempt = during.submit(
+            &rpc,
+            &signer,
+            "test",
+            "during",
+            0,
+            "market",
+            "lifecycle",
+            10,
+            "state",
+            b"during",
+            "hash",
+            100,
+        );
+        assert!(attempt.unwrap_err().contains("lease connection lost"));
+        assert_eq!(count.load(Ordering::SeqCst), 1);
+        assert_eq!(
+            listener.accept().unwrap_err().kind(),
+            std::io::ErrorKind::WouldBlock,
+            "lost lease cannot broadcast signed bytes"
+        );
+        let mut restarted = connect();
+        let row = restarted.client.query_one("SELECT outcome,signature,transaction_bytes FROM keeper_flash_work WHERE position='during'", &[]).unwrap();
+        assert_eq!(row.get::<_, String>(0), "reserved");
+        assert!(row.get::<_, Option<String>>(1).is_none());
+        assert!(row.get::<_, Option<Vec<u8>>>(2).is_none());
+        let recovered = restarted.recover(&rpc, "new-release").unwrap();
+        assert_eq!(recovered.len(), 1);
+        assert_eq!(recovered[0].2, "abandoned_before_submission");
+        assert!(restarted.pending_sides("new-release").unwrap().is_empty());
+        assert_eq!(count.load(Ordering::SeqCst), 1, "recovery never re-signs");
+        assert_eq!(
+            listener.accept().unwrap_err().kind(),
+            std::io::ErrorKind::WouldBlock
+        );
+        restarted
+            .client
+            .batch_execute(&format!(
+                "SET search_path TO public; DROP SCHEMA {schema} CASCADE"
+            ))
+            .unwrap();
+    }
+    #[test]
     #[ignore = "requires isolated KEEPER_TEST_DATABASE_URL and localhost RPC"]
     fn persists_before_send_reconciles_and_holds_the_distributed_lease() {
         let url = std::env::var("KEEPER_TEST_DATABASE_URL").expect("test database URL");
@@ -701,6 +855,8 @@ mod tests {
         let endpoint = format!("http://{}", listener.local_addr().unwrap());
         let phase = Arc::new(AtomicUsize::new(0));
         let mode = phase.clone();
+        let broadcasts = Arc::new(std::sync::Mutex::new(Vec::new()));
+        let observed_broadcasts = broadcasts.clone();
         let handle = std::thread::spawn(move || {
             let mut latest_transaction = String::new();
             for mut stream in listener.incoming().flatten() {
@@ -742,6 +898,10 @@ mod tests {
                 let result = match method {
                     "sendTransaction" => {
                         latest_transaction = req["params"][0].as_str().unwrap().to_string();
+                        observed_broadcasts
+                            .lock()
+                            .unwrap()
+                            .push(latest_transaction.clone());
                         serde_json::json!(bs58::encode([9u8; 64]).into_string())
                     }
                     "getTransaction" if mode.load(Ordering::SeqCst) == 3 => serde_json::Value::Null,
@@ -762,7 +922,13 @@ mod tests {
                     "getBlock" => serde_json::json!({"signatures":[]}),
                     _ => panic!("unexpected RPC {method}"),
                 };
-                let body = serde_json::json!({"jsonrpc":"2.0","id":1,"result":result}).to_string();
+                let body = if method == "sendTransaction" && mode.load(Ordering::SeqCst) == 5 {
+                    // The endpoint has seen the bytes but the client cannot know
+                    // whether they landed. Keep the generation unresolved.
+                    serde_json::json!({"jsonrpc":"2.0","id":1,"error":{"code":-32000,"message":"synthetic uncertain submission"}})
+                } else {
+                    serde_json::json!({"jsonrpc":"2.0","id":1,"result":result})
+                }.to_string();
                 write!(
                     stream,
                     "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
@@ -962,9 +1128,56 @@ mod tests {
         assert!(row.get::<_, Option<String>>(1).is_none());
         assert!(row.get::<_, Option<Vec<u8>>>(2).is_none());
         assert!(journal.pending_sides("test").unwrap().is_empty());
+        phase.store(5, Ordering::SeqCst);
+        let before_unknown = count.load(Ordering::SeqCst);
+        let unknown = submit(&mut journal, b"uncertain").unwrap_err();
+        assert!(unknown.contains("synthetic uncertain submission"));
+        assert_eq!(count.load(Ordering::SeqCst), before_unknown + 1);
+        let row = journal.client.query_one("SELECT outcome,signature,transaction_bytes FROM keeper_flash_work WHERE message=$1", &[&b"uncertain".as_slice()]).unwrap();
+        assert_eq!(row.get::<_, String>(0), "submitted_unknown");
+        let signature: String = row.get(1);
+        let recorded: Vec<u8> = row.get(2);
+        assert!(!recorded.is_empty());
+        drop(journal);
+        let mut restarted = Journal::connect(&url).unwrap();
+        restarted
+            .client
+            .batch_execute(&format!("SET search_path TO {schema}"))
+            .unwrap();
+        let unknown = submit(&mut restarted, b"must-not-sign").unwrap_err();
+        assert!(unknown.contains("pending signature"));
+        assert_eq!(
+            count.load(Ordering::SeqCst),
+            before_unknown + 1,
+            "restart cannot replace an uncertain signature"
+        );
+        let row = restarted
+            .client
+            .query_one(
+                "SELECT signature,transaction_bytes FROM keeper_flash_work WHERE message=$1",
+                &[&b"uncertain".as_slice()],
+            )
+            .unwrap();
+        assert_eq!(row.get::<_, String>(0), signature);
+        assert_eq!(row.get::<_, Vec<u8>>(1), recorded);
+        {
+            let sent = broadcasts.lock().unwrap();
+            let expected = crate::runtime::transaction::base64(&recorded);
+            assert_eq!(
+                &sent[sent.len() - 2..],
+                &[expected.clone(), expected],
+                "restart can rebroadcast only the exact persisted transaction"
+            );
+        }
+        phase.store(1, Ordering::SeqCst);
+        let recovered = restarted.recover(&rpc, "new-release").unwrap();
+        assert_eq!(recovered.len(), 1);
+        assert_eq!(recovered[0].2, "executed");
+        assert!(restarted.pending_sides("new-release").unwrap().is_empty());
+        assert_eq!(count.load(Ordering::SeqCst), before_unknown + 1);
         let _ = rpc.call::<serde_json::Value>("stop", serde_json::json!([]));
         handle.join().unwrap();
-        journal
+        restarted
             .client
             .batch_execute(&format!(
                 "SET search_path TO public; DROP SCHEMA {schema} CASCADE"
