@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "kind": "signed-offline-native-order-execution",
+  "genesis": "HZzSGKT3VFsK8LQDrgkDdJcePbjpniEGSb854Piuh1nf",
+  "protocolRevision": "mainnet-2026-11-19",
+  "completeLiveReleaseMatrix": false,
+  "cases": [
+    {
+      "case": "sl-10000.json",
+      "sourceCommit": "aa196e3423fd5f46b00630a4f161d91f95ef7b3d",
+      "signature": "4jf12Gn6Nm25n4D1QZbUgh74stJV6UHucVbC9dak3DmySa3tEzts5rBmwoPbZvkUQPUkfEkCnyofd38kscmLVeTe",
+      "slot": 44761,
+      "signer": "Dg167emiChH5nxkqHX1NzTV2VHEczGiBU5vf1zqoDQQZ",
+      "signatureVerified": true,
+      "forgedSignatureRejected": true,
+      "repeatRejected": true,
+      "executorFeeCredit": "50",
+      "orderClosed": true,
+      "positionClosed": true,
+      "status": "passed"
+    },
+    {
+      "case": "sl-5000.json",
+      "sourceCommit": "aa196e3423fd5f46b00630a4f161d91f95ef7b3d",
+      "signature": "pk52Ns2ARkmVWTiQbX27rBYNchcruHAbDZcadUA9fU4H6Zkq6jPPtxWMNGDmT8ADqabVN4tJojJfLSgCmb8TDEc",
+      "slot": 44862,
+      "signer": "6Qgt7fc1ujQpcQtZyb1uTPYBnxgmfzi6ocbBFJFd31MF",
+      "signatureVerified": true,
+      "forgedSignatureRejected": true,
+      "repeatRejected": true,
+      "executorFeeCredit": "26",
+      "orderClosed": true,
+      "positionClosed": false,
+      "status": "passed"
+    },
+    {
+      "case": "tp-10000.json",
+      "sourceCommit": "aa196e3423fd5f46b00630a4f161d91f95ef7b3d",
+      "signature": "4dtsG1Z4QS6RNCHSS6Vnq9Ww9Jg5PLZAUNHvjz7vGMDiN61aowVNVd87VRV7CRn6oLPJvemenpQW6mJe1GR35fF7",
+      "slot": 44963,
+      "signer": "H6yrEjAUZLN2KSbBnvE2MVYsaCF2B96KVXkbCKUu5jA4",
+      "signatureVerified": true,
+      "forgedSignatureRejected": true,
+      "repeatRejected": true,
+      "executorFeeCredit": "50",
+      "orderClosed": true,
+      "positionClosed": true,
+      "status": "passed"
+    },
+    {
+      "case": "tp-5000.json",
+      "sourceCommit": "aa196e3423fd5f46b00630a4f161d91f95ef7b3d",
+      "signature": "5nhDLmHd8CG1nJ3dK7grQRbv6GwHZuFs9hjkNq2DzkRkJe7WbBhT59Sr2hP9WLJ3evxTFCvYqtJXfXTivrNeAkBS",
+      "slot": 45064,
+      "signer": "HRWo1nzwScujuepqN8fY2i6GhCaMH1GRWGDhHhHinggN",
+      "signatureVerified": true,
+      "forgedSignatureRejected": true,
+      "repeatRejected": true,
+      "executorFeeCredit": "26",
+      "orderClosed": true,
+      "positionClosed": false,
+      "status": "passed"
+    }
+  ]
+}
