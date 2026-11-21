@@ -350,6 +350,12 @@ fn main() -> Result<(), Box<dyn Error>> {
         });
     }
 
+    health::spawn_reports(
+        config.profile.clone(),
+        lock.revision.clone(),
+        Arc::clone(&snapshot),
+    );
+
     serve(
         config.bind_address,
         &config.profile,

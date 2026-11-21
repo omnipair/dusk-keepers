@@ -30,6 +30,8 @@ fn rpc(responses: Vec<Value>) -> (RpcClient, thread::JoinHandle<Vec<Value>>) {
                     Err(error) => panic!("accept: {error}"),
                 }
             };
+            // macOS may inherit the nonblocking listener flag on accepted sockets.
+            socket.set_nonblocking(false).unwrap();
             socket
                 .set_read_timeout(Some(Duration::from_secs(2)))
                 .unwrap();
