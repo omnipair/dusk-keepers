@@ -54,6 +54,10 @@ const WANTED = {
     "quote_side.asset_decimals",
     "quote_side.reserve_vault",
     "quote_side.collateral_vault",
+    ...["base", "quote"].flatMap(side => [
+      ...["swap", "interest"].flatMap(source => ["protocol", "buyback"].map(lane => `${side}_side.fees.${source}_${lane}_fee_liability`)),
+      ...["fee", "buyback"].flatMap(lane => ["swap", "interest"].flatMap(source => ["virtual_sold_reserve", "virtual_payment_reserve"].map(field => `${side}_side.fees.${lane}_${source}_auction.${field}`))),
+    ]),
     "base_side.fees.fee_swap_auction.accepted_mint",
     "base_side.fees.fee_interest_auction.accepted_mint",
     "base_side.fees.buyback_swap_auction.accepted_mint",
