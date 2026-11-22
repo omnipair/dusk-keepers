@@ -4,11 +4,9 @@
 //! for the lane's accepted asset, paying the proceeds to the treasury and the
 //! staking vault. This keeper is the buyer of last resort for those sales.
 //!
-//! It cannot know in advance which lane, revenue source or market side has
-//! anything to sell — that depends on accrued fee liabilities the keeper does
-//! not model — so it offers every combination and lets the program refuse the
-//! empty ones. On a market that has not accrued revenue, which is every market
-//! until trading starts, all eight refuse, and that is the system working.
+//! Revenue sizing is bounded by the freshly read lane liability. Empty lanes
+//! are idle; accrued inventory with an unconfigured curve is an operator
+//! prerequisite, not evidence that an auction is ready to execute.
 //!
 //! Payment is measured rather than predicted, as in the bidder: simulate with
 //! a ceiling high enough not to bind, read what the sale would actually cost,
@@ -121,6 +119,68 @@ impl FutarchyConfig {
     }
 }
 
+/// Exact liability and curve fields are read through the pinned layout manifest.
+/// The policy amount is a maximum, not a minimum lot that small markets must accrue.
+fn auction_lot(
+    layout: &AccountLayoutManifest,
+    data: &[u8],
+    lane: ProtocolAuctionLane,
+    source: ProtocolRevenueSource,
+    sold_is_base: bool,
+    maximum: u64,
+) -> Result<Option<u64>, ExecutionError> {
+    let side = if sold_is_base { "base" } else { "quote" };
+    let lane_name = if matches!(lane, ProtocolAuctionLane::Fee) {
+        "fee"
+    } else {
+        "buyback"
+    };
+    let source_name = if matches!(source, ProtocolRevenueSource::Swap) {
+        "swap"
+    } else {
+        "interest"
+    };
+    let liability_lane = if matches!(lane, ProtocolAuctionLane::Fee) {
+        "protocol"
+    } else {
+        "buyback"
+    };
+    let reader = layout
+        .reader("Market")
+        .map_err(|e| ExecutionError::Assembly(e.to_string()))?;
+    let available = reader
+        .u64(
+            &format!("{side}_side.fees.{source_name}_{liability_lane}_fee_liability"),
+            data,
+        )
+        .map_err(|e| ExecutionError::Assembly(e.to_string()))?;
+    if available == 0 {
+        return Ok(None);
+    }
+    if maximum == 0 {
+        return Err(ExecutionError::Assembly(
+            "auction max sold must be positive".into(),
+        ));
+    }
+    let curve = format!("{side}_side.fees.{lane_name}_{source_name}_auction");
+    let mint = reader
+        .pubkey(&format!("{curve}.accepted_mint"), data)
+        .map_err(|e| ExecutionError::Assembly(e.to_string()))?;
+    let nonzero = |field: &str| {
+        reader
+            .bytes(&format!("{curve}.{field}"), data)
+            .map(|bytes| bytes.iter().any(|byte| *byte != 0))
+            .map_err(|e| ExecutionError::Assembly(e.to_string()))
+    };
+    if mint == [0; 32] || !nonzero("virtual_sold_reserve")? || !nonzero("virtual_payment_reserve")?
+    {
+        return Err(ExecutionError::Assembly(format!(
+            "auction {side}/{lane_name}/{source_name} has accrued revenue but its curve is unconfigured; governance configuration is required before funding can enable settlement"
+        )));
+    }
+    Ok(Some(available.min(maximum)))
+}
+
 /// Derive each auction account with the owning token program of its mint.
 /// Both mints come from one fresh RPC bank; a Token-2022 sold mint must not
 /// inherit the classic accepted mint's ATA seeds (or vice versa).
@@ -218,6 +278,17 @@ impl ArbitrageurJob<'_> {
     ) -> Result<(Instruction, [u8; 32]), ExecutionError> {
         let market_data = self.client.account_data(&address(market.address))?;
         let config = futarchy.lane(self.layout, &market_data, lane, source, sold_is_base)?;
+        let sold_amount = auction_lot(
+            self.layout,
+            &market_data,
+            lane,
+            source,
+            sold_is_base,
+            self.policy.max_sold,
+        )?
+        .ok_or_else(|| {
+            ExecutionError::Assembly("auction inventory changed before preparation".into())
+        })?;
         let signer = self.signer.public_key();
         let sold_mint = if sold_is_base {
             market.base_mint
@@ -270,7 +341,7 @@ impl ArbitrageurJob<'_> {
             &KeeperInstructionArguments::SettleProtocolAuction(SettleProtocolAuctionArgs {
                 lane,
                 max_payment_amount,
-                sold_amount: self.policy.max_sold,
+                sold_amount,
                 source,
             }),
         )
@@ -331,13 +402,34 @@ impl ArbitrageurJob<'_> {
             if sold_is_base { "base" } else { "quote" },
         );
         let market_key = bs58::encode(market.address).into_string();
+        let current = self.client.account_data(&market_key)?;
+        if auction_lot(
+            self.layout,
+            &current,
+            lane,
+            source,
+            sold_is_base,
+            self.policy.max_sold,
+        )?
+        .is_none()
+        {
+            return Ok(AttemptReport {
+                debt_mint: label,
+                detail: Some("No accrued auction inventory".into()),
+                position: market_key,
+                race: None,
+                reason: ReasonCode::AlreadyResolved,
+                signature: None,
+                status: OutcomeStatus::Skipped,
+            });
+        }
 
         // A ceiling high enough not to bind, so the measurement is of the
         // program's price rather than of this keeper's guess at it.
         let (measuring, payment_account) =
             self.settle_instruction(market, futarchy, lane, source, sold_is_base, u64::MAX)?;
         let payment_key = bs58::encode(payment_account).into_string();
-        let payment_data = self.client.account_data(&payment_key)?;
+        let payment_data = self.client.account_data(&payment_key).map_err(|_| ExecutionError::Assembly(format!("auction payment token account {payment_key} is missing or unreadable; native SOL fee funding is separate from accepted-token inventory")))?;
         let before = token_amount(&payment_data).ok_or_else(|| {
             ExecutionError::Assembly("auction payment token account unavailable".into())
         })?;
@@ -617,6 +709,81 @@ pub fn run(context: &super::WorkerContext<'_>) -> Result<Vec<AttemptReport>, Exe
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn auction_lots_follow_each_pinned_liability_and_require_governance_curves() {
+        let layout: AccountLayoutManifest = serde_json::from_str(include_str!(
+            "../../../../../../protocol/keeper-account-layout.v1.json"
+        ))
+        .unwrap();
+        let market = layout.accounts.iter().find(|a| a.name == "Market").unwrap();
+        let mut data = vec![0_u8; market.size_with_discriminator.unwrap()];
+        let write = |data: &mut [u8], path: &str, value: &[u8]| {
+            let field = market.fields.iter().find(|f| f.path == path).unwrap();
+            assert_eq!(field.size, value.len());
+            data[field.offset..field.offset + field.size].copy_from_slice(value);
+        };
+        for (is_base, side) in [(true, "base"), (false, "quote")] {
+            for (lane, name, liability) in [
+                (ProtocolAuctionLane::Fee, "fee", "protocol"),
+                (ProtocolAuctionLane::Buyback, "buyback", "buyback"),
+            ] {
+                for (source, source_name) in [
+                    (ProtocolRevenueSource::Swap, "swap"),
+                    (ProtocolRevenueSource::Interest, "interest"),
+                ] {
+                    let path = format!("{side}_side.fees.{source_name}_{liability}_fee_liability");
+                    assert_eq!(
+                        auction_lot(&layout, &data, lane, source, is_base, 1_000_000).unwrap(),
+                        None
+                    );
+                    write(&mut data, &path, &123_u64.to_le_bytes());
+                    let error = auction_lot(&layout, &data, lane, source, is_base, 1_000_000)
+                        .unwrap_err()
+                        .to_string();
+                    assert!(error.contains("unconfigured"));
+                    let curve = format!("{side}_side.fees.{name}_{source_name}_auction");
+                    write(&mut data, &format!("{curve}.accepted_mint"), &[1; 32]);
+                    write(
+                        &mut data,
+                        &format!("{curve}.virtual_sold_reserve"),
+                        &1000_u128.to_le_bytes(),
+                    );
+                    write(
+                        &mut data,
+                        &format!("{curve}.virtual_payment_reserve"),
+                        &1000_u128.to_le_bytes(),
+                    );
+                    assert_eq!(
+                        auction_lot(&layout, &data, lane, source, is_base, 1_000_000).unwrap(),
+                        Some(123)
+                    );
+                    assert_eq!(
+                        auction_lot(&layout, &data, lane, source, is_base, 50).unwrap(),
+                        Some(50)
+                    );
+                    assert!(auction_lot(&layout, &data, lane, source, is_base, 0).is_err());
+                    write(&mut data, &path, &u64::MAX.to_le_bytes());
+                    assert_eq!(
+                        auction_lot(&layout, &data, lane, source, is_base, u64::MAX).unwrap(),
+                        Some(u64::MAX)
+                    );
+                    write(&mut data, &path, &0_u64.to_le_bytes());
+                }
+            }
+        }
+        assert!(
+            auction_lot(
+                &layout,
+                &data[..10],
+                ProtocolAuctionLane::Fee,
+                ProtocolRevenueSource::Swap,
+                true,
+                1
+            )
+            .is_err()
+        );
+    }
 
     #[test]
     fn auction_atas_match_spl_vectors_for_both_mint_programs() {

@@ -147,6 +147,126 @@
           "size": 32
         },
         {
+          "path": "base_side.fees.swap_protocol_fee_liability",
+          "offset": 966,
+          "size": 8
+        },
+        {
+          "path": "base_side.fees.swap_buyback_fee_liability",
+          "offset": 974,
+          "size": 8
+        },
+        {
+          "path": "base_side.fees.interest_protocol_fee_liability",
+          "offset": 982,
+          "size": 8
+        },
+        {
+          "path": "base_side.fees.interest_buyback_fee_liability",
+          "offset": 990,
+          "size": 8
+        },
+        {
+          "path": "base_side.fees.fee_swap_auction.virtual_sold_reserve",
+          "offset": 1038,
+          "size": 16
+        },
+        {
+          "path": "base_side.fees.fee_swap_auction.virtual_payment_reserve",
+          "offset": 1054,
+          "size": 16
+        },
+        {
+          "path": "base_side.fees.fee_interest_auction.virtual_sold_reserve",
+          "offset": 1126,
+          "size": 16
+        },
+        {
+          "path": "base_side.fees.fee_interest_auction.virtual_payment_reserve",
+          "offset": 1142,
+          "size": 16
+        },
+        {
+          "path": "base_side.fees.buyback_swap_auction.virtual_sold_reserve",
+          "offset": 1214,
+          "size": 16
+        },
+        {
+          "path": "base_side.fees.buyback_swap_auction.virtual_payment_reserve",
+          "offset": 1230,
+          "size": 16
+        },
+        {
+          "path": "base_side.fees.buyback_interest_auction.virtual_sold_reserve",
+          "offset": 1302,
+          "size": 16
+        },
+        {
+          "path": "base_side.fees.buyback_interest_auction.virtual_payment_reserve",
+          "offset": 1318,
+          "size": 16
+        },
+        {
+          "path": "quote_side.fees.swap_protocol_fee_liability",
+          "offset": 1902,
+          "size": 8
+        },
+        {
+          "path": "quote_side.fees.swap_buyback_fee_liability",
+          "offset": 1910,
+          "size": 8
+        },
+        {
+          "path": "quote_side.fees.interest_protocol_fee_liability",
+          "offset": 1918,
+          "size": 8
+        },
+        {
+          "path": "quote_side.fees.interest_buyback_fee_liability",
+          "offset": 1926,
+          "size": 8
+        },
+        {
+          "path": "quote_side.fees.fee_swap_auction.virtual_sold_reserve",
+          "offset": 1974,
+          "size": 16
+        },
+        {
+          "path": "quote_side.fees.fee_swap_auction.virtual_payment_reserve",
+          "offset": 1990,
+          "size": 16
+        },
+        {
+          "path": "quote_side.fees.fee_interest_auction.virtual_sold_reserve",
+          "offset": 2062,
+          "size": 16
+        },
+        {
+          "path": "quote_side.fees.fee_interest_auction.virtual_payment_reserve",
+          "offset": 2078,
+          "size": 16
+        },
+        {
+          "path": "quote_side.fees.buyback_swap_auction.virtual_sold_reserve",
+          "offset": 2150,
+          "size": 16
+        },
+        {
+          "path": "quote_side.fees.buyback_swap_auction.virtual_payment_reserve",
+          "offset": 2166,
+          "size": 16
+        },
+        {
+          "path": "quote_side.fees.buyback_interest_auction.virtual_sold_reserve",
+          "offset": 2238,
+          "size": 16
+        },
+        {
+          "path": "quote_side.fees.buyback_interest_auction.virtual_payment_reserve",
+          "offset": 2254,
+          "size": 16
+        },
+        {
           "path": "base_side.fees.fee_swap_auction.accepted_mint",
           "offset": 1006,
           "size": 32
